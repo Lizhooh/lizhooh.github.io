@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/06/GraphQL/使用 GraphQL 取代 REST 的开始/">
+    
+    
+    <title>使用 GraphQL 取代 REST 的开始 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言REST FUL 架构是业界比较流行的 API 接口设计规范。在近几年里随着 GraphQL 的诞生，REST FUL 似乎遇到了前所未有的挑战，无法否认任何的新技术出现都是为了取代旧的技术。 GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何">
+<meta name="keywords" content="后端,Nodejs,Koa,GraphQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 GraphQL 取代 REST 的开始">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/06/GraphQL/使用 GraphQL 取代 REST 的开始/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言REST FUL 架构是业界比较流行的 API 接口设计规范。在近几年里随着 GraphQL 的诞生，REST FUL 似乎遇到了前所未有的挑战，无法否认任何的新技术出现都是为了取代旧的技术。 GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180606211912.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180606213041.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180607115757.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/16550502102913.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180606214131.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180606221628.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.820Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 GraphQL 取代 REST 的开始">
+<meta name="twitter:description" content="前言REST FUL 架构是业界比较流行的 API 接口设计规范。在近几年里随着 GraphQL 的诞生，REST FUL 似乎遇到了前所未有的挑战，无法否认任何的新技术出现都是为了取代旧的技术。 GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/6/20180606211912.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用 GraphQL 取代 REST 的开始</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">使用 GraphQL 取代 REST 的开始</h1>
+
+        <div class="meta-rest">
+            <h1>使用 GraphQL 取代 REST 的开始</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-06-07T17:03:08.000Z" itemprop="datePublished" class="page-time">
+    2018-06-08
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/GraphQL/">GraphQL</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#连接-Koa"><span class="post-toc-number">2.</span> <span class="post-toc-text">连接 Koa</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#定义模型"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">定义模型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Resolvers"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">Resolvers</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#增删改查"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">增删改查</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#用户认证"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">用户认证</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前端查询"><span class="post-toc-number">3.</span> <span class="post-toc-text">前端查询</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#日志处理"><span class="post-toc-number">4.</span> <span class="post-toc-text">日志处理</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-GraphQL/使用 GraphQL 取代 REST 的开始"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用 GraphQL 取代 REST 的开始</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 06 月 08 日 1:03" datetime="2018-06-07T17:03:08.000Z"  itemprop="datePublished">
+    2018-06-08
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/GraphQL/">GraphQL</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2205</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  22.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>REST FUL 架构是业界比较流行的 API 接口设计规范。在近几年里随着 GraphQL 的诞生，REST FUL 似乎遇到了前所未有的挑战，无法否认任何的新技术出现都是为了取代旧的技术。</p>
+<p>GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时。 GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何冗余，也让 API 更容易地随着时间推移而演进，还能用于构建强大的开发者工具。</p>
+<a id="more"></a>
+<p>下面的文章里将介绍，如何使用 GraphQL 取代 REST，重新定义你的后端 API 服务，当然是 Nodejs 后端。</p>
+<p>GraphQL IDE：<a href="https://github.com/prismagraphql/graphql-playground" target="_blank" rel="noopener">https://github.com/prismagraphql/graphql-playground</a><br>学习文档：<a href="http://graphql.cn/learn/" target="_blank" rel="noopener">http://graphql.cn/learn/</a></p>
+<h2 id="连接-Koa"><a href="#连接-Koa" class="headerlink" title="连接 Koa"></a>连接 Koa</h2><p>下面介绍如何在 Koa 里搭建 GraphQL 的服务，实际上也非常简单，因为 apollo 帮我们做了很多事情了。</p>
+<p>连接 Koa 需要使用 apollo 提供了一个库：<code>apollo-server-koa</code> 即可，非常简单。</p>
+<blockquote>
+<p>除了使用 <code>apollo-server-koa</code> 之外，还可以使用 <a href="https://www.npmjs.com/package/koa-graphql" target="_blank" rel="noopener">koa-graphql</a> 这个中间件。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; graphqlKoa, graphiqlKoa &#125; = <span class="built_in">require</span>(<span class="string">'apollo-server-koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"><span class="keyword">const</span> logger = <span class="built_in">require</span>(<span class="string">'koa-logger'</span>);</span><br><span class="line"><span class="keyword">const</span> bodyparser = <span class="built_in">require</span>(<span class="string">'koa-body'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> schema = <span class="built_in">require</span>(<span class="string">'./schema'</span>);  <span class="comment">// &lt;-- 上面的模型实例</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router.post(<span class="string">'/graphql'</span>, graphqlKoa(&#123; schema &#125;)); <span class="comment">// &lt;-- 一定要 post 请求</span></span><br><span class="line"></span><br><span class="line">app</span><br><span class="line">    .use(logger())</span><br><span class="line">    .use(bodyparser())</span><br><span class="line">    .use(router.routes())</span><br><span class="line">    ;</span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>, () =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'server run in 3000.'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>启动之后，在 GraphQL IDE 里输入 <a href="http://127.0.0.1:3000/graphql" target="_blank" rel="noopener">http://127.0.0.1:3000/graphql</a> 可以使用 GraphQL 的调试工具了。</p>
+<h3 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h3><p> GraphQL 的模型对象来定义模型有比较原始的方式，也有使用第三方工具的方式，建议是使用 <code>graphql-tools</code>。</p>
+<p>在之前定义模型，需要使用很多 API。这样特别麻烦。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123;</span><br><span class="line">    graphql,</span><br><span class="line">    GraphQLSchema,</span><br><span class="line">    GraphQLObjectType,</span><br><span class="line">    GraphQLString,</span><br><span class="line">    GraphQLID,</span><br><span class="line">    GraphQLList,</span><br><span class="line">    GraphQLNonNull,</span><br><span class="line">    isOutputType,</span><br><span class="line">&#125; = <span class="built_in">require</span>(<span class="string">'graphql'</span>);</span><br></pre></td></tr></table></figure>
+<p>而现在使用 <code>graphql-tools</code>，只需要编写 GraphQL 模型字符串即可。那么，下面来看看 graphql-tools 是怎么使用的。</p>
+<p>在根目录下，创建一个 <code>schema.gql</code> 用于编写模型代码（记得 vscode 安装 GraphQL 高亮插件）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"># schema.gql</span><br><span class="line"># 用户模型</span><br><span class="line">type User &#123;</span><br><span class="line">    id: <span class="built_in">String</span></span><br><span class="line">    name: <span class="built_in">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 作者模型</span><br><span class="line">type Author &#123;</span><br><span class="line">    id: <span class="built_in">String</span></span><br><span class="line">    name: <span class="built_in">String</span></span><br><span class="line">    posts: [Post]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 帖子模型</span><br><span class="line">type Post &#123;</span><br><span class="line">    id: <span class="built_in">String</span></span><br><span class="line">    title: <span class="built_in">String</span></span><br><span class="line">    text: <span class="built_in">String</span></span><br><span class="line">    views: Int</span><br><span class="line">    author: Author</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 查询内容模型</span><br><span class="line">type Query &#123;</span><br><span class="line">    author(name: <span class="built_in">String</span>): Author</span><br><span class="line">    getFortuneCookie: <span class="built_in">String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面的代码表明，定义了三个模型。Query 模型用于查询的时候使用，也就是查询只能是 author 和 getFortuneCookie。</p>
+<p>这是一开非常好的开始，模型代码与 js 分离。接着，加载模型代码，并且编写 <code>resolver</code>。</p>
+<h3 id="Resolvers"><a href="#Resolvers" class="headerlink" title="Resolvers"></a>Resolvers</h3><p>接下来创建一个 schema.js 文件，用于处理数据返回的逻辑。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// schema.js</span></span><br><span class="line"><span class="keyword">const</span> &#123; makeExecutableSchema &#125; = <span class="built_in">require</span>(<span class="string">'graphql-tools'</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Action</span></span><br><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        author: <span class="function">(<span class="params">root, args</span>) =&gt;</span> (&#123;</span><br><span class="line">            id: <span class="string">'1'</span>,</span><br><span class="line">            name: <span class="string">'小明'</span></span><br><span class="line">        &#125;),</span><br><span class="line">        random: <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">Math</span>.random().toString(<span class="number">32</span>),</span><br><span class="line">    &#125;,</span><br><span class="line">    Author: &#123;</span><br><span class="line">        <span class="comment">// 定义 author 中的 posts，返回的数据内容</span></span><br><span class="line">        posts: <span class="function"><span class="params">author</span> =&gt;</span> ([</span><br><span class="line">            &#123; <span class="attr">id</span>: <span class="string">'1'</span>, <span class="attr">title</span>: <span class="string">'A post'</span>, <span class="attr">text</span>: <span class="string">'Some text'</span>, <span class="attr">views</span>: <span class="number">2</span> &#125;,</span><br><span class="line">            &#123; <span class="attr">id</span>: <span class="string">'2'</span>, <span class="attr">title</span>: <span class="string">'Another post'</span>, <span class="attr">text</span>: <span class="string">'Some other text'</span>, <span class="attr">views</span>: <span class="number">200</span> &#125;</span><br><span class="line">        ]),</span><br><span class="line">    &#125;,</span><br><span class="line">    Post: &#123;</span><br><span class="line">        views: <span class="function"><span class="params">()</span> =&gt;</span> <span class="number">1</span>,</span><br><span class="line">        <span class="comment">// 定义 Post 里面的 author，返回的数据内容</span></span><br><span class="line">        author: <span class="function"><span class="params">post</span> =&gt;</span> (&#123;</span><br><span class="line">            id: <span class="string">'1'</span>,</span><br><span class="line">            name: <span class="string">'小明'</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// makeExecutableSchema 是将 Schema 结构的数据转换成 GraphQLSchema 实例。</span></span><br><span class="line"><span class="keyword">const</span> schema = makeExecutableSchema(&#123;</span><br><span class="line">    typeDefs: fs.readFileSync(<span class="string">'./schema.gql'</span>).toString(),</span><br><span class="line">    resolvers: resolvers</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = schema;</span><br></pre></td></tr></table></figure>
+<p>graphql-tools 很简单，编写好模型之后，再编写 resolvers，把 schema 与 resolvers 传给 makeExecutableSchema，即可得到 GraphQL 所需要的模型实例。</p>
+<blockquote>
+<p>上面的代码里有个 resolvers，那么 resolvers 是什么？总体而言，可以把 GraphQL 抽象成数据管道，管道的前端是 Schema，管道的后端是 Resolvers，管道的两端使用 GraphQL schema 作为通信语言，前端向后端发出数据请求，后端响应前端的请求后提供数据，前端可以对后端数据库透明地执行增删查改（CRUD）操作。那么 Resolvers，管道的两端使用 就是决定前端某个行为的，产生内容（就是返回什么数据）。</p>
+</blockquote>
+<p>大致的思路如下！</p>
+<p>首先，Query 模型决定了查询的范围。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 查询内容模型</span><br><span class="line">type Query &#123;</span><br><span class="line">    author(firstName: <span class="built_in">String</span>, <span class="attr">lastName</span>: <span class="built_in">String</span>): Author</span><br><span class="line">    random: <span class="built_in">String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其次是 resolver 决定了返回的内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        random: <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">Math</span>.random().toString(<span class="number">32</span>),</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当查询的时候，会根据 schema 中的 Query 限制查询的属性，根据 resolvers 限制查询的内容。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180606211912.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>显而易见，返回的是执行了 resolvers.Query.getFortuneCookie() 的结果。</p>
+<p>那么当查询 Author 的 post 时会怎样？</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180606213041.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>很明显返回的是 Author.post() 的部分结果。那么这到底是怎么回事呢？当查询 author.post 时，GraphQL 会去到 resolvers 对应模型的层次下寻找 post 函数，调用它并筛选数据。</p>
+<p><strong>注意：</strong>resolver 需要与 schema 结果对应。也就是 Query 模型，对应着 resolver.Query，Auther 模型对应着 resolver.Author。</p>
+<h3 id="增删改查"><a href="#增删改查" class="headerlink" title="增删改查"></a>增删改查</h3><p>既然 GraphQL 要取代 REST，那么在 GraphQL 里如何实现增删改查？<br>在 GraphQL 里，Query 是对应数据库的查询操作，Mutation 则对应数据库的更新操作。</p>
+<p>首先，在 schema.gql 里添加 Mutation。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">type Mutation &#123;</span><br><span class="line">    # 创建用户</span><br><span class="line">    createUser (name: <span class="built_in">String</span>!): Author</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着在 resolvers 里添加 Mutation 的逻辑。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Mutation: &#123;</span><br><span class="line">    createUser(root, args) &#123;</span><br><span class="line">        <span class="keyword">const</span> name = args.name;</span><br><span class="line">        <span class="keyword">const</span> id = <span class="built_in">Math</span>.random().toString(<span class="number">32</span>).slice(<span class="number">2</span>);</span><br><span class="line">        <span class="comment">// 在这里进行数据的插入操作</span></span><br><span class="line">        <span class="comment">// db.user.insert(&#123; name &#125;);</span></span><br><span class="line">        <span class="keyword">return</span> &#123; id, name &#125;;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>创建好之后，就可以对它进行操作了。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180607115757.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>在这里只是一个 create 操作，对于 query、update、remove 也同样如此。</p>
+<h3 id="用户认证"><a href="#用户认证" class="headerlink" title="用户认证"></a>用户认证</h3><p>在 GraphQL 里实现用户认证比较复杂。</p>
+<blockquote>
+<p>已经登录的用户发出 GraphQL 查询，未登录的用户不可以。认证在非 GraphQL 节点完成。<br>所有用户都可以发出 GraphQL 查询，未登录用户可以使用其中的一个子集。认证在非 GraphQL 节点完成。<br>所有用户都可以发出 GraphQL 查询，认证就由 GraphQL 节点完成。</p>
+</blockquote>
+<ul>
+<li>对于第一种方式，实现起来比较简单（也是普遍的做法），就是在 GraphQL 前添加一个认证中间件。</li>
+<li>对于第二种方式，实现起来比较复杂。① 需要一个认证中间件，② 需要切分模块。</li>
+<li>对于第三种方式，实现起来比较复杂。可以利用 Mutation 实现 Token 认证，还需要在每一个 Query 里都一个查询拦截。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">router.post(<span class="string">'/gql-api'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (ctx.request.body.query.indexOf(<span class="string">'mutation'</span>) &gt; <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> isLogin = !!ctx.session.user;</span><br><span class="line">        <span class="keyword">if</span> (isLogin) &#123;</span><br><span class="line">            <span class="keyword">return</span> graphqlKoa(&#123; schema &#125;)(ctx, next);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'未登录'</span>);</span><br><span class="line">            ctx.body = &#123; <span class="attr">status</span>: <span class="number">403</span> &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> graphqlKoa(&#123; schema &#125;)(ctx, next);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>上面的示例表明，当为 mutation 操作时就需要用户信息。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">type Token &#123;</span><br><span class="line">    status: <span class="built_in">Boolean</span></span><br><span class="line">    token: <span class="built_in">String</span></span><br><span class="line">    error: <span class="built_in">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Mutation &#123;</span><br><span class="line">    # Token 认证</span><br><span class="line"></span><br><span class="line">    createToken(account: <span class="built_in">String</span>, <span class="attr">password</span>: <span class="built_in">String</span>): Token</span><br><span class="line">    checkToken(token: <span class="built_in">String</span>): Token</span><br><span class="line">    destroyToken(token: <span class="built_in">String</span>): Token</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果，认证通过，token 就不为 null，否则就 。。。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">createToken(root, &#123; account, password &#125;) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        status: <span class="literal">null</span>,</span><br><span class="line">        token: <span class="literal">null</span>,</span><br><span class="line">        error: <span class="string">'创建失败，帐号或密码不正确。'</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br><span class="line">checkToken(root, &#123; token &#125;) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        status: <span class="literal">true</span>, <span class="comment">// 验证通过</span></span><br><span class="line">        token: <span class="literal">null</span>,</span><br><span class="line">        error: <span class="literal">null</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br><span class="line">destroyToken(root, &#123; token &#125;) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        status: <span class="literal">true</span>, <span class="comment">// 销毁成功</span></span><br><span class="line">        token: <span class="literal">null</span>,</span><br><span class="line">        error: <span class="literal">null</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/16550502102913.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>GraphQL 的类型是确定的，也就是不能出现像 Typescript 里的 Any，Number | Array 这中多类型的写法，这意味着只能通过确定的模型，返回相应数据。</p>
+<h2 id="前端查询"><a href="#前端查询" class="headerlink" title="前端查询"></a>前端查询</h2><p>后端部署了 GraphQL 之后，在前端里如何查询呢？在前端里可以使用一些现成的网络库实现功能。</p>
+<ul>
+<li><a href="https://www.npmjs.com/package/graphql-request" target="_blank" rel="noopener">graphql-request</a></li>
+<li><a href="https://www.npmjs.com/package/graphql-fetch" target="_blank" rel="noopener">graphql-fetch</a></li>
+</ul>
+<p>或者使用 fetch 请求。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> query = <span class="string">`</span></span><br><span class="line"><span class="string">&#123; getFortuneCookie &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"><span class="keyword">const</span> variables = <span class="string">``</span>;</span><br><span class="line"></span><br><span class="line">fetch(url, &#123;</span><br><span class="line">    method: <span class="string">'POST'</span>,</span><br><span class="line">    headers: &#123;</span><br><span class="line">        <span class="string">'content-type'</span>, <span class="string">'application/json'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    body: <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">        query, variables</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;).then(<span class="function"><span class="params">res</span> =&gt;</span> res,json());</span><br></pre></td></tr></table></figure>
+<h2 id="日志处理"><a href="#日志处理" class="headerlink" title="日志处理"></a>日志处理</h2><p>当用户请求 GraphQL 的接口时，在日志系统里完全分不清除请求的是哪个 API，好下面就来解决这个问题。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180606214131.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>大致的处理思路是，在 resolver 处做一个拦截，也就是钩子函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> deepForEach = <span class="built_in">require</span>(<span class="string">'deep-for-each'</span>);</span><br><span class="line"><span class="keyword">const</span> isFunction = <span class="built_in">require</span>(<span class="string">'is-function'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> createGraphQLLogger = <span class="function">(<span class="params">options = &#123;&#125;</span>) =&gt;</span> <span class="function"><span class="params">resolvers</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> logger = options.logger || <span class="built_in">console</span>.log.bind(<span class="built_in">console</span>);</span><br><span class="line">    <span class="comment">// deepForEach 是一个用于深度遍历对象的属性的函数</span></span><br><span class="line">    deepForEach(resolvers, (value, prop, subject, path) =&gt; &#123;</span><br><span class="line">        <span class="comment">// 如果是函数</span></span><br><span class="line">        <span class="keyword">if</span> (isFunction(value)) &#123;</span><br><span class="line">            <span class="comment">// 前缀</span></span><br><span class="line">            <span class="keyword">const</span> query = options.prefix ? options.prefix + path : path;</span><br><span class="line">            <span class="comment">// 对此函数包一个闭包</span></span><br><span class="line">            subject[prop] = <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">wrapped</span>(<span class="params">...args</span>) </span>&#123;</span><br><span class="line">                <span class="comment">// 计算时间等</span></span><br><span class="line">                <span class="keyword">const</span> start = <span class="built_in">Date</span>.now();</span><br><span class="line">                <span class="keyword">const</span> result = <span class="keyword">await</span> value(...args);</span><br><span class="line">                <span class="keyword">const</span> end = <span class="built_in">Date</span>.now();</span><br><span class="line"></span><br><span class="line">                logger(<span class="string">`<span class="subst">$&#123;query&#125;</span> - <span class="subst">$&#123;end - start&#125;</span> ms`</span>);</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> resolvers;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180606221628.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>这种方式，还是比较直接，那么不能获取 koa 的 ctx 对象了？</p>
+<p>在配置里是可以配置上下文对象的，这样的话，可以往 ctx 里添加信息，在下一个中间件里输出信息。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">router.post(<span class="string">'/graphql'</span>, graphqlKoa(<span class="function"><span class="params">ctx</span> =&gt;</span> (&#123; schema, <span class="attr">context</span>: &#123; ctx &#125; &#125;)));</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.820Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/06/GraphQL/使用 GraphQL 取代 REST 的开始/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/06/GraphQL/使用 GraphQL 取代 REST 的开始/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GraphQL/">GraphQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Koa/">Koa</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/06/测试/单元测试/Nodejs HTTP 测试/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Nodejs HTTP 接口测试</h4>
+        <h4 class="summary">HTTP 接口测试是非常重要的一部分，当编写完成后端接口，很多时候需要手动的去使用 REST 客户端去测试，但是这样是很...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/06/前端/Babel 使用指南/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Babel 使用指南</h4>
+        <h4 class="summary">Babel 是一个 JavaScript 编译器，可用于对未来的 JavaScript 语法进行编译，变成符合现代浏览器...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

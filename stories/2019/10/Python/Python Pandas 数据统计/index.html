@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/10/Python/Python Pandas 数据统计/">
+    
+    
+    <title>Python Pandas 数据统计 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Pandas 是基于 Numpy 的专业数据分析工具，可以灵活高效的处理各种数据集，也是我们后期分析案例的神器。它提供了两种类型的数据结构，分别是 DataFrame 和 Series，我们可以简单粗暴的把DataFrame 理解为 Excel 里面的一张表，而 Series 就是表中的某一列。">
+<meta name="keywords" content="学习笔记,Python,大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python Pandas 数据统计">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/10/Python/Python Pandas 数据统计/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Pandas 是基于 Numpy 的专业数据分析工具，可以灵活高效的处理各种数据集，也是我们后期分析案例的神器。它提供了两种类型的数据结构，分别是 DataFrame 和 Series，我们可以简单粗暴的把DataFrame 理解为 Excel 里面的一张表，而 Series 就是表中的某一列。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.850Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python Pandas 数据统计">
+<meta name="twitter:description" content="前言Pandas 是基于 Numpy 的专业数据分析工具，可以灵活高效的处理各种数据集，也是我们后期分析案例的神器。它提供了两种类型的数据结构，分别是 DataFrame 和 Series，我们可以简单粗暴的把DataFrame 理解为 Excel 里面的一张表，而 Series 就是表中的某一列。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Python Pandas 数据统计</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Python Pandas 数据统计</h1>
+
+        <div class="meta-rest">
+            <h1>Python Pandas 数据统计</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-10-27T10:14:06.000Z" itemprop="datePublished" class="page-time">
+    2019-10-27
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Python/">Python</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Pandas"><span class="post-toc-number">2.</span> <span class="post-toc-text">Pandas</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建数据"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">创建数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#查看数据"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">查看数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#列的操作"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">列的操作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#行的操作"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">行的操作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加减乘除"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">加减乘除</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#时间类型操作"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">时间类型操作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#遍历迭代"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">遍历迭代</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#统计函数"><span class="post-toc-number">2.8.</span> <span class="post-toc-text">统计函数</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#补充：Python-类型"><span class="post-toc-number">3.</span> <span class="post-toc-text">补充：Python 类型</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Python/Python Pandas 数据统计"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Python Pandas 数据统计</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 10 月 27 日 18:14" datetime="2019-10-27T10:14:06.000Z"  itemprop="datePublished">
+    2019-10-27
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Python/">Python</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1604</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Pandas 是基于 Numpy 的专业数据分析工具，可以灵活高效的处理各种数据集，也是我们后期分析案例的神器。它提供了两种类型的数据结构，分别是 DataFrame 和 Series，我们可以简单粗暴的把DataFrame 理解为 Excel 里面的一张表，而 Series 就是表中的某一列。</p>
+<a id="more"></a>
+<h2 id="Pandas"><a href="#Pandas" class="headerlink" title="Pandas"></a>Pandas</h2><h3 id="创建数据"><a href="#创建数据" class="headerlink" title="创建数据"></a>创建数据</h3><p>Pandas 有两种数据结构，一维与二维，创建数据使用 Series 或 DataFrame。</p>
+<p>下面，创建一个比较常见的员工工资信息数据。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">d = pd.DataFrame(&#123;</span><br><span class="line">    <span class="string">'姓名'</span>: [<span class="string">'老王'</span>, <span class="string">'小明'</span>, <span class="string">'小林'</span>, <span class="string">'老徐'</span>],</span><br><span class="line">    <span class="string">'评分'</span>: [<span class="string">'不及格'</span>, <span class="string">'良好'</span>, <span class="string">'优秀'</span>, <span class="string">'优秀'</span>],</span><br><span class="line">    <span class="string">'工资'</span>: [<span class="number">5000</span>, <span class="number">9000</span>, <span class="number">7000</span>, <span class="number">8500</span>],</span><br><span class="line">    <span class="string">'绩效'</span>: [<span class="number">60</span>, <span class="number">84</span>, <span class="number">98</span>, <span class="number">91</span>],</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="查看数据"><a href="#查看数据" class="headerlink" title="查看数据"></a>查看数据</h3><ol>
+<li>查看数据信息：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">d.info()</span><br><span class="line"></span><br><span class="line">&gt;</span><br><span class="line">RangeIndex: <span class="number">4</span> entries, <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">Data columns (total <span class="number">4</span> columns):</span><br><span class="line">姓名    <span class="number">4</span> non-null object</span><br><span class="line">评分    <span class="number">4</span> non-null object</span><br><span class="line">工资    <span class="number">4</span> non-null int64</span><br><span class="line">绩效    <span class="number">4</span> non-null int64</span><br><span class="line">dtypes: int64(<span class="number">2</span>), object(<span class="number">2</span>)</span><br><span class="line">memory usage: <span class="number">208.0</span>+ bytes</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>快速查看统计信息概览：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d.describe()</span><br></pre></td></tr></table></figure>
+<h3 id="列的操作"><a href="#列的操作" class="headerlink" title="列的操作"></a>列的操作</h3><ol>
+<li>新增加列：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'奖金'</span>] = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>删除某列：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># axis=1 是针对列操作， inplace=True 是覆盖源数据，而不是产生副本</span></span><br><span class="line">d.drop(<span class="string">'奖金'</span>, axis=<span class="number">1</span>, inplace=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>查看某列数据：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'姓名'</span>]</span><br><span class="line"></span><br><span class="line">&gt;</span><br><span class="line"><span class="number">0</span>    老王</span><br><span class="line"><span class="number">1</span>    小明</span><br><span class="line"><span class="number">2</span>    小林</span><br><span class="line"><span class="number">3</span>    老徐</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>查看多列数据：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d[[<span class="string">'姓名'</span>, <span class="string">'工资'</span>]]</span><br><span class="line"></span><br><span class="line">&gt;  姓名  工资</span><br><span class="line"><span class="number">0</span>  老王  <span class="number">5000</span></span><br><span class="line"><span class="number">1</span>  小明  <span class="number">9000</span></span><br><span class="line"><span class="number">2</span>  小林  <span class="number">7000</span></span><br><span class="line"><span class="number">3</span>  老徐  <span class="number">8500</span></span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>对某列进行排序：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ascending 默认是 True（升序）</span></span><br><span class="line">d.sort_values(<span class="string">'工资'</span>, ascending=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分   工资  绩效</span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span>  <span class="number">84</span></span><br><span class="line"><span class="number">3</span>  老徐   优秀  <span class="number">8500</span>  <span class="number">91</span></span><br><span class="line"><span class="number">2</span>  小林   优秀  <span class="number">7000</span>  <span class="number">98</span></span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span>  <span class="number">60</span></span><br></pre></td></tr></table></figure>
+<h3 id="行的操作"><a href="#行的操作" class="headerlink" title="行的操作"></a>行的操作</h3><ol>
+<li>查看数据，掐头看尾，或者是某行数据：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">d.head(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">&gt;  姓名   评分  工资  绩效</span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span>  <span class="number">60</span></span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span>  <span class="number">84</span></span><br><span class="line"></span><br><span class="line">d.tail(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分  工资 绩效</span><br><span class="line"><span class="number">2</span>  小林  优秀  <span class="number">7000</span>  <span class="number">98</span></span><br><span class="line"><span class="number">3</span>  老徐  优秀  <span class="number">8500</span>  <span class="number">91</span></span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>查看指定位置的数据，例如 （1，3），注意是从 0 开始算起：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">d.iloc[<span class="number">1</span>, <span class="number">3</span>]</span><br><span class="line"></span><br><span class="line">&gt; <span class="number">84</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>查看指定范围的行列：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">d.iloc[<span class="number">0</span>:<span class="number">2</span>, <span class="number">0</span>:<span class="number">3</span>]</span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分   工资</span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span></span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>查看某几行范围：</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="number">0</span>:<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分   工资  绩效</span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span>  <span class="number">60</span></span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span>  <span class="number">84</span></span><br></pre></td></tr></table></figure>
+<h3 id="加减乘除"><a href="#加减乘除" class="headerlink" title="加减乘除"></a>加减乘除</h3><p>Python 比较好的是支持重写操作符（+-*/）等。</p>
+<p>例如上面，计算出奖金：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'奖金'</span>] = d[<span class="string">'工资'</span>] * d[<span class="string">'绩效'</span>] / <span class="number">100</span></span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分   工资  绩效 奖金</span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span>  <span class="number">60</span>  <span class="number">3000.0</span></span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span>  <span class="number">84</span>  <span class="number">7560.0</span></span><br><span class="line"><span class="number">2</span>  小林   优秀  <span class="number">7000</span>  <span class="number">98</span>  <span class="number">6860.0</span></span><br><span class="line"><span class="number">3</span>  老徐   优秀  <span class="number">8500</span>  <span class="number">91</span>  <span class="number">7735.0</span></span><br></pre></td></tr></table></figure>
+<p>但只能对数字类型的行列进行操作。</p>
+<p>有时候想要加上单位，那么这样这样做，使用 <code>astype</code> 转换类型。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'奖金'</span>] = (d[<span class="string">'工资'</span>] * d[<span class="string">'绩效'</span>] / <span class="number">100</span>).astype(<span class="string">'int'</span>).astype(<span class="string">'str'</span>)+ <span class="string">'k'</span></span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分   工资  绩效 奖金</span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span>  <span class="number">60</span>  <span class="number">3000</span>k</span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span>  <span class="number">84</span>  <span class="number">7560</span>k</span><br><span class="line"><span class="number">2</span>  小林   优秀  <span class="number">7000</span>  <span class="number">98</span>  <span class="number">6860</span>k</span><br><span class="line"><span class="number">3</span>  老徐   优秀  <span class="number">8500</span>  <span class="number">91</span>  <span class="number">7735</span>k</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>astype 是强行转换，支持 bool，int，str，object，float 等，可以用 type(xxx) 来输出类型</p>
+</blockquote>
+<p>如果工资原来就带有 <code>k</code>，那么怎么办呢？</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'工资'</span>] = d[<span class="string">'工资'</span>].replace(<span class="string">'k$'</span>, <span class="string">''</span>, regex=<span class="literal">True</span>).astype(<span class="string">'int'</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="时间类型操作"><a href="#时间类型操作" class="headerlink" title="时间类型操作"></a>时间类型操作</h3><p>如果导入的数据是时间类型，默认 Pandas 会只识别为字符串类型，需要自己手动的转换一下。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'时间'</span>] = [<span class="string">'2019-01-01'</span>]</span><br><span class="line"></span><br><span class="line">d[<span class="string">'时间'</span>] = pd.to_datetime(d[<span class="string">'时间'</span>])</span><br></pre></td></tr></table></figure>
+<p>使用 pd.to_datetime 就可以转换成时间类型了。</p>
+<p>具有时间类型的数据，可以进行一些操作符运算，例如：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; pd.to_datetime(<span class="string">'2019-05-01'</span>) - pd.to_datetime(<span class="string">'2019-01-01'</span>)</span><br><span class="line"></span><br><span class="line">&gt; <span class="number">120</span> days <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br></pre></td></tr></table></figure>
+<h3 id="遍历迭代"><a href="#遍历迭代" class="headerlink" title="遍历迭代"></a>遍历迭代</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i, row <span class="keyword">in</span> dataFrame.iterrows():</span><br><span class="line">    print(row[<span class="string">'姓名'</span>])</span><br></pre></td></tr></table></figure>
+<h3 id="统计函数"><a href="#统计函数" class="headerlink" title="统计函数"></a>统计函数</h3><ol>
+<li>apply()：一般与 np 的函数或 lambda 进行使用。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 工资 - 100</span></span><br><span class="line">d[<span class="string">'工资'</span>].apply(<span class="keyword">lambda</span> v: v - <span class="number">100</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计工资总和，axis=0 是按照列来计算</span></span><br><span class="line">d.apply(np.sum, axis=<span class="number">0</span>)[<span class="string">'工资'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在工资里的最大，最小值</span></span><br><span class="line">d.apply(np.max, axis=<span class="number">0</span>)[<span class="string">'工资'</span>]</span><br><span class="line">d.apply(np.min, axis=<span class="number">0</span>)[<span class="string">'工资'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 工资最大和最小差了多少？</span></span><br><span class="line">d[[<span class="string">'工资'</span>]].apply(<span class="keyword">lambda</span> x: x.max() - x.min())</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>count()：统计非 None 的数量。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'姓名'</span>].count()</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>cumsum()：累加和，如果是字符串则按照字符串的累加。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d[[<span class="string">'姓名'</span>, <span class="string">'工资'</span>]].cumsum()</span><br><span class="line"></span><br><span class="line">         姓名     工资</span><br><span class="line"><span class="number">0</span>        老王   <span class="number">5000</span></span><br><span class="line"><span class="number">1</span>      老王小明  <span class="number">14000</span></span><br><span class="line"><span class="number">2</span>    老王小明小林  <span class="number">21000</span></span><br><span class="line"><span class="number">3</span>  老王小明小林老徐  <span class="number">29500</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>mean()，std()，max()，min()，median()，diff()，kurt()，mad()，skew()，var()，pct_change()，quantile()：平局数，标准差，最小值，最大值，中位数，差分，无偏峰度，无偏偏度，无偏方差，平均绝对偏差，百分比变化率，分位数。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'工资'</span>].mean()</span><br><span class="line">d[<span class="string">'工资'</span>].sid()</span><br><span class="line">d[<span class="string">'工资'</span>].max()</span><br><span class="line">d[<span class="string">'工资'</span>].min()</span><br><span class="line">d[<span class="string">'工资'</span>].diff()</span><br><span class="line">d[<span class="string">'工资'</span>].quantile(<span class="number">0.1</span>, <span class="number">0.5</span>) <span class="comment"># 10% ~ 50%</span></span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>rand()：给出排名。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">d[<span class="string">'工资排名'</span>] = d[<span class="string">'工资'</span>].rank(ascending=<span class="literal">False</span>).astype(<span class="string">'int'</span>)</span><br><span class="line"></span><br><span class="line">&gt;  姓名  评分   工资  绩效  工资排名</span><br><span class="line"><span class="number">0</span>  老王  不及格 <span class="number">5000</span>  <span class="number">60</span>   <span class="number">4</span></span><br><span class="line"><span class="number">1</span>  小明   良好  <span class="number">9000</span>  <span class="number">84</span>   <span class="number">1</span></span><br><span class="line"><span class="number">2</span>  小林   优秀  <span class="number">7000</span>  <span class="number">98</span>   <span class="number">3</span></span><br><span class="line"><span class="number">3</span>  老徐   优秀  <span class="number">8500</span>  <span class="number">91</span>   <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<ol start="6">
+<li>groupby()：用于分组，对分组进行统计，可以应用在多个场景。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 统计评分个数</span></span><br><span class="line">d.groupby(<span class="string">'性别'</span>).size()</span><br><span class="line"></span><br><span class="line">&gt;</span><br><span class="line">评分</span><br><span class="line">不及格    <span class="number">1</span></span><br><span class="line">优秀     <span class="number">2</span></span><br><span class="line">良好     <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 多个维度分组</span></span><br><span class="line">d[<span class="string">'性别'</span>] = [<span class="string">'男'</span>, <span class="string">'女'</span>, <span class="string">'男'</span>, <span class="string">'男'</span>]</span><br><span class="line">d.groupby([<span class="string">'评分'</span>, <span class="string">'性别'</span>]).size()</span><br><span class="line"></span><br><span class="line">&gt;</span><br><span class="line">评分    性别</span><br><span class="line">不及格  男     <span class="number">1</span></span><br><span class="line">优秀    女     <span class="number">1</span></span><br><span class="line">        男    <span class="number">1</span></span><br><span class="line">良好    男     <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取某个数</span></span><br><span class="line">d.groupby([<span class="string">'评分'</span>, <span class="string">'性别'</span>]).size()[<span class="string">'优秀'</span>, <span class="string">'男'</span>]</span><br><span class="line">&gt; <span class="number">1</span></span><br><span class="line"></span><br><span class="line">d.groupby([<span class="string">'性别'</span>]).size()[<span class="string">'男'</span>]</span><br><span class="line">&gt; <span class="number">3</span></span><br></pre></td></tr></table></figure>
+<ol start="7">
+<li>join()：类似 SQL 风格的合并。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">left = pd.DataFrame(&#123; <span class="string">'key'</span>: [<span class="string">'foo'</span>, <span class="string">'foo'</span>], <span class="string">'lval'</span>: [<span class="number">1</span>, <span class="number">2</span>]&#125;)</span><br><span class="line">right = pd.DataFrame(&#123; <span class="string">'key'</span>: [<span class="string">'foo'</span>, <span class="string">'foo'</span>], <span class="string">'rval'</span>: [<span class="number">4</span>, <span class="number">5</span>]&#125;)</span><br><span class="line"></span><br><span class="line">pd.merge(left, right, on=<span class="string">'key'</span>)</span><br></pre></td></tr></table></figure>
+<ol start="8">
+<li>find()：这不是一个内置函数，而是一个自己实现的函数。</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">d = pd.DataFrame(&#123;</span><br><span class="line">    <span class="string">'姓名'</span>: [<span class="string">'老王'</span>, <span class="string">'小明'</span>, <span class="string">'小林'</span>, <span class="string">'老徐'</span>, <span class="string">'老王'</span>],</span><br><span class="line">    <span class="string">'评分'</span>: [<span class="string">'不及格'</span>, <span class="string">'良好'</span>, <span class="string">'优秀'</span>, <span class="string">'优秀'</span>, <span class="string">'优秀'</span>],</span><br><span class="line">    <span class="string">'性别'</span>: [<span class="string">'男'</span>, <span class="string">'男'</span>, <span class="string">'女'</span>, <span class="string">'男'</span>, <span class="string">'男'</span>],</span><br><span class="line">    <span class="string">'工资'</span>: [<span class="number">5000</span>, <span class="number">9000</span>, <span class="number">7000</span>, <span class="number">8500</span>, <span class="number">5500</span>],</span><br><span class="line">    <span class="string">'绩效'</span>: [<span class="number">60</span>, <span class="number">84</span>, <span class="number">98</span>, <span class="number">91</span>, <span class="number">90</span>],</span><br><span class="line">    <span class="string">'月份'</span>: [<span class="string">'一月'</span>, <span class="string">'一月'</span>, <span class="string">'一月'</span>, <span class="string">'一月'</span>, <span class="string">'二月'</span>]</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找某人的信息</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">find</span><span class="params">(dataFrame: pd.DataFrame, name: str)</span> -&gt; pd.DataFrame:</span></span><br><span class="line">    list = []</span><br><span class="line">    index = []</span><br><span class="line">    <span class="keyword">for</span> i, row <span class="keyword">in</span> dataFrame.iterrows():</span><br><span class="line">        <span class="keyword">if</span> (row[<span class="string">'姓名'</span>] == name):</span><br><span class="line">            index.append(row[<span class="string">'月份'</span>])</span><br><span class="line">            list.append(row[[<span class="string">'姓名'</span>, <span class="string">'评分'</span>, <span class="string">'性别'</span>, <span class="string">'工资'</span>, <span class="string">'绩效'</span>]])</span><br><span class="line">    <span class="keyword">return</span> pd.DataFrame(list, index)</span><br><span class="line"></span><br><span class="line">find(d, <span class="string">'老王'</span>)</span><br><span class="line"></span><br><span class="line">&gt;</span><br><span class="line">      姓名  评分   性别  工资  绩效</span><br><span class="line">一月  老王  不及格  男   <span class="number">5000</span>  <span class="number">60</span></span><br><span class="line">二月  老王   优秀   男   <span class="number">5500</span>  <span class="number">90</span></span><br></pre></td></tr></table></figure>
+<h2 id="补充：Python-类型"><a href="#补充：Python-类型" class="headerlink" title="补充：Python 类型"></a>补充：Python 类型</h2><p>在 Python 3.5+ 可以编写一个类型提示：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">func</span><span class="params">(param: type)</span> -&gt; type:</span></span><br><span class="line">    <span class="keyword">return</span> ...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(x: int, y: int)</span> -&gt; int:</span></span><br><span class="line">    <span class="keyword">return</span> x + y</span><br><span class="line"></span><br><span class="line">userName: str = <span class="string">'小明'</span></span><br></pre></td></tr></table></figure>
+<p>写法类似 typescript，类型在变量后面。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.850Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/10/Python/Python Pandas 数据统计/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/10/Python/Python Pandas 数据统计/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/大数据/">大数据</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/10/Nodejs/Nodejs 数据分析：Pandasjs/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Nodejs 数据分析：Pandasjs</h4>
+        <h4 class="summary">Pandasjs 是一个 Nodejs 是模仿 Python pandas 库的开源（实验）库。它依赖于 Immutab...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/10/后端/小谈 RESTFUL API 设计/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">小谈 RESTFUL API 设计</h4>
+        <h4 class="summary">RESTful本身是一种风格而不是规范，本文为该风格的规范实现的最佳实践，本文档详细说明了HTTP RESTful AP...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

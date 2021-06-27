@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/">
+    
+    
+    <title>HTTP/2 综述 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言对 TCP/IP 了解越深，往往会感叹其层次设计的巧妙。各种新出现的优化并不会破坏原有的体系结构，但是对 HTTP 的了解越深，越让人觉得它的过时。HTTP/2 是下一代的 HTTP 网络协议标准，在 2015 年正式发布。">
+<meta name="keywords" content="后端,Nodejs,HTTP&#x2F;2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP&#x2F;2 综述">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言对 TCP/IP 了解越深，往往会感叹其层次设计的巧妙。各种新出现的优化并不会破坏原有的体系结构，但是对 HTTP 的了解越深，越让人觉得它的过时。HTTP/2 是下一代的 HTTP 网络协议标准，在 2015 年正式发布。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180323085838.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180322103650.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180322110253.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180322110148.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/16240212282153.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180322093403.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.833Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP&#x2F;2 综述">
+<meta name="twitter:description" content="前言对 TCP/IP 了解越深，往往会感叹其层次设计的巧妙。各种新出现的优化并不会破坏原有的体系结构，但是对 HTTP 的了解越深，越让人觉得它的过时。HTTP/2 是下一代的 HTTP 网络协议标准，在 2015 年正式发布。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/3/20180323085838.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">HTTP/2 综述</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">HTTP/2 综述</h1>
+
+        <div class="meta-rest">
+            <h1>HTTP/2 综述</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-03-22T00:49:43.000Z" itemprop="datePublished" class="page-time">
+    2018-03-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/HTTP-2/">HTTP/2</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#HTTP-1-的问题"><span class="post-toc-number">2.</span> <span class="post-toc-text">HTTP/1 的问题</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#HTTP-2-特点"><span class="post-toc-number">3.</span> <span class="post-toc-text">HTTP/2 特点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#二进制分帧"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">二进制分帧</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#多路复用"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">多路复用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#请求头压缩"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">请求头压缩</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#性能"><span class="post-toc-number">4.</span> <span class="post-toc-text">性能</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#证书"><span class="post-toc-number">5.</span> <span class="post-toc-text">证书</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#展望"><span class="post-toc-number">6.</span> <span class="post-toc-text">展望</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Nodejs-上使用"><span class="post-toc-number">7.</span> <span class="post-toc-text">Nodejs 上使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#http2-模块"><span class="post-toc-number">7.1.</span> <span class="post-toc-text">http2 模块</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#node-spdy"><span class="post-toc-number">7.2.</span> <span class="post-toc-text">node-spdy</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#nginx-代理-http2"><span class="post-toc-number">7.3.</span> <span class="post-toc-text">nginx 代理 http2</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">8.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/HTTP2/HTTP2 综述"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">HTTP/2 综述</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 03 月 22 日 8:49" datetime="2018-03-22T00:49:43.000Z"  itemprop="datePublished">
+    2018-03-22
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/HTTP-2/">HTTP/2</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2015</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对 TCP/IP 了解越深，往往会感叹其层次设计的巧妙。各种新出现的优化并不会破坏原有的体系结构，但是对 HTTP 的了解越深，越让人觉得它的过时。HTTP/2 是下一代的 HTTP 网络协议标准，在 2015 年正式发布。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180323085838.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="HTTP-1-的问题"><a href="#HTTP-1-的问题" class="headerlink" title="HTTP/1 的问题"></a>HTTP/1 的问题</h2><p>在说 HTTP/2 之前，先说一下 HTTP/1 遗留的问题。到目前为止，HTTP/1 已经走过了 20 年了，在这 20 年里 Web 的发展飞快，早就不适应现在技术的发展与需求。在 HTTP/1 里令人最关注的问题就是性能问题，就因为这样引出了很多 Web 性能优化的<strong>黑魔法</strong>。</p>
+<p>现在来看看 HTTP/1 遗留的问题：</p>
+<ul>
+<li><b>队列阻塞</b>：HTTP/1 并未提供机制来同时请求多个资源，每个请求需要等待上一个请求完成才继续，这就是队列阻塞的问题。我们大多时候看到并发请求资源是浏览器开启多线程提供的能力，并不是 HTTP 协议所提供的能力。</li>
+<li><b>抵效的 TCP 利用</b>：HTTP/1 它是基于 TCP 的，每次连接都需要三次握手，并且 TCP 有一个慢启动的过程。</li>
+<li><b>臃肿的消息首部</b>：虽然 HTTP/1 提供了压缩被请求内容的机制，但是消息的首部却无法被压缩，这意味着需要更多的流量。</li>
+<li><b>受限的优先级设置</b>：如果浏览器针对域名开启了多个 socket 开始请求资源是，这时候浏览器能指定的请求优先级是有限制的。</li>
+</ul>
+<p>为了解决这些问题，HTTP/2 因此而诞生。</p>
+<h2 id="HTTP-2-特点"><a href="#HTTP-2-特点" class="headerlink" title="HTTP/2 特点"></a>HTTP/2 特点</h2><p>在 2012 年初，HTTP 工作组在制定 HTTP/2 时，被寄予了如下期望：</p>
+<ul>
+<li>相比于使用 TCP 的 HTTP/1.1，最终用于可感知的多数延迟都有能够量化的显著改善。</li>
+<li>解决 HTTP 中队头阻塞问题。</li>
+<li>并行的实现机制不依赖与服务器建立多个连接，从而提升 TCP 连接的利用率。</li>
+<li>保留 HTTP/1.1 的语义，可以利用已有的文档资源，包括  HTTP 方法、状态码、URI 和首部资源。</li>
+<li>明确定义 HTTP/2 和 HTTP/1.1 交互方法，特别是通过中介时的方法。</li>
+<li>明确指出它们可以被合理使用的新的扩展点和策略。</li>
+</ul>
+<p>最后，在 2015 年发布的时候，HTTP/2 具有以下的特点：</p>
+<ul>
+<li><b>二进制分帧</b>：HTTP/2 在应用层跟传输层之间增加了一个二进制分帧层，突破 HTTP/1.1 的性能限制，改进传输性能。</li>
+<li><b>多路复用</b>：允许浏览器在一个 TCP 连接中包含多个请求，从而使得浏览器可以并行请求所有资源。</li>
+<li><b>请求头压缩</b>：所有的 HTTP/1.1 请求中必须要包含一些经常冗余的头信息，不过 H2 强制所有的 HTTP 报头以一种压缩的格式进行发送。</li>
+<li><b>服务器推送</b>：服务器可以在浏览器需要之前主动推送 web 资源 (CSS，JS， 图片)，这样可以减少请求数，提高页面加载速度。</li>
+<li><b>串流优先</b>：允许浏览器指定资源的优先级。比如，浏览器可以在所有样式和 JavaScript 之前优先请求 HTML 来渲染。</li>
+<li><b>强制加密</b>：与 HTTPS 一样，大多数主流浏览器需要使用 TLS。</li>
+</ul>
+<h3 id="二进制分帧"><a href="#二进制分帧" class="headerlink" title="二进制分帧"></a>二进制分帧</h3>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180322103650.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>HTTP/2 会将所有传输的信息分割为更小的消息和帧，并对它们采用二进制格式的编码，其中 HTTP/1.1 的首部信息会被封装到 Headers 帧，而 request body 被封装到 Data 帧里面。</p>
+<h3 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h3>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180322110253.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>在 HTTP/2 里允许并行的连接多个请求，从而使得浏览器可以并行请求所有资源，并且不管访问多少文件，也只建立一路连接。在这篇文章里有详细介绍 <a href="https://segmentfault.com/a/1190000011172823" target="_blank" rel="noopener">HTTP/2 多路复用</a>，这里就不再叙述。</p>
+<h3 id="请求头压缩"><a href="#请求头压缩" class="headerlink" title="请求头压缩"></a>请求头压缩</h3>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180322110148.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>HTTP/2 在 客户端 和 服务端 使用 首部表 来跟踪和存储之间发送的 键-值 对，对相同请求而言不需要再次发送请求和相应发送，通信期间几乎不会改变的通用 键-值 （如：用户代理、可接受的媒体类型）只需发送一次。</p>
+<ul>
+<li>如果请求不包含首部（如：对同一资源的轮询请求），那首部开销为零字节。</li>
+<li>如果首部发生变化，那只需发送变化的数据在 Headers 帧里面，新增或修改的首部帧会被追加到首部表。</li>
+</ul>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><p>这里有一个非常好的例子，能够很直观的看到 HTTP 与 HTTP/2 的性能差别。</p>
+<p><a href="https://www.httpvshttps.com/" target="_blank" rel="noopener">HTTP vs HTTPS</a></p>
+<p>无论如何 HTTP/2 的性能总是优于 HTTP/1 的。</p>
+<h2 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h2><p>HTTP/2 强制的要求使用 TLS，也就是说 HTTP/2 直接包括了 HTTPS 部分。</p>
+<p>获取证书的方式有很多，这里不一一论述了，主要是如何获取一个用于在开发环境时使用。<br>主要有以下几种方式：</p>
+<ul>
+<li><p>使用 openssl 自签名证书。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir ssl</span><br><span class="line">$ <span class="built_in">cd</span> ssl</span><br><span class="line">$ openssl genrsa -des3 -passout pass:x -out server.pass.key 2048</span><br><span class="line"></span><br><span class="line">$ openssl rsa -passin pass:x -<span class="keyword">in</span> server.pass.key -out server.key</span><br><span class="line"><span class="comment"># 写入 RSA 密钥</span></span><br><span class="line">$ rm server.pass.key</span><br><span class="line">$ openssl req -new -key server.key -out server.csr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 国家名 (2 个字母的代码) [AU]: US</span></span><br><span class="line"><span class="comment"># 州或省名 (全名) [Some-State]: California</span></span><br><span class="line"><span class="comment"># 一个复杂的密码 []:</span></span><br><span class="line"></span><br><span class="line">$ openssl x509 -req -sha256 -days 365 -<span class="keyword">in</span> server.csr -signkey server.key -out server.crt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在线获取签名证书。<br>  可以使用这个工具 <a href="https://www.chinassl.net/ssltools/generator-csr.html" target="_blank" rel="noopener">CSR文件在线生成工具</a>。</p>
+</li>
+<li><p>在 <a href="https://letsencrypt.org/" target="_blank" rel="noopener">Let's Encrypt</a> 上获取。</p>
+</li>
+</ul>
+<p>如果是开发环境对证书无要求，建议是：在线获取签名证书。</p>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>HTTP/2 并不是一个完美的解决 HTTP 网络传输问题的方案，它仍然遗留着一些问题（RRT 问题）。<br>那么会不会有 HTTP/3，它会怎样？这个问题是答案是无疑的，HTTP/3 一定会有，而且在性能问题上肯定是优于 HTTP/2。</p>
+<p>除了单纯的 HTTP/2 之外，还有需要值得尝试的前瞻技术，如：</p>
+<ul>
+<li>QUIC：它提供 HTTP/2 等效的多路复用与流控，TLS 等效的安全机制，以及 TCP 等效的连接语义、可靠性、拥塞控制等。</li>
+<li>TLS 1.3：TLS（传输层安全协议）是 HTTP/2 所需的加解密以及身份认证层。TLS 1.3 中最明显的改进就是新连接只需要一个往返时延（目前最少需要 3 次），如果连接恢复，并不需要往返时延。</li>
+</ul>
+<h2 id="Nodejs-上使用"><a href="#Nodejs-上使用" class="headerlink" title="Nodejs 上使用"></a>Nodejs 上使用</h2><p>目前，Nodejs v9.0 开始对 HTTP/2 模块进行实验性开发。<br>要在 Nodejs 上使用 HTTP/2 有几种方式：</p>
+<ul>
+<li>使用内置的 http2 模块。</li>
+<li>使用第三方 node-spdy 模块。</li>
+<li>使用 nginx 代理 http2，Nodejs 处理自己的事情。</li>
+</ul>
+<h3 id="http2-模块"><a href="#http2-模块" class="headerlink" title="http2 模块"></a>http2 模块</h3><p>由于现在 nodejs 的 http2 模块还是实验一阶段，暂时不考虑使用。</p>
+<h3 id="node-spdy"><a href="#node-spdy" class="headerlink" title="node-spdy"></a>node-spdy</h3><p>下面介绍使用 node-spdy 模块构建 HTTP/2 服务。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> port = <span class="number">4000</span>;</span><br><span class="line"><span class="keyword">const</span> spdy = <span class="built_in">require</span>(<span class="string">'spdy'</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> options = &#123;</span><br><span class="line">    key: fs.readFileSync(__dirname + <span class="string">'/ssl/key.pem'</span>),</span><br><span class="line">    cert: fs.readFileSync(__dirname + <span class="string">'/ssl/cert.pem'</span>),</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">'*'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">    ctx.body = &#123; <span class="attr">message</span>: <span class="number">200</span> &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.use(router.routes());</span><br><span class="line"></span><br><span class="line">spdy</span><br><span class="line">    .createServer(options, app.callback())</span><br><span class="line">    .listen(port, (error) =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'Listening on port: '</span> + port + <span class="string">'.'</span>);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>访问之后，很大可能会看到证书无效的问题，这时选择继续访问。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/16240212282153.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>之后就可以看到请求的类型变成了 <code>h2</code>（注意到了没有！size 很小）。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180322093403.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="nginx-代理-http2"><a href="#nginx-代理-http2" class="headerlink" title="nginx 代理 http2"></a>nginx 代理 http2</h3><p>nginx 在 1.9 之后的版本支持 http2 模块。</p>
+<p>具体配置 nginx/conf/nginx.conf 文件，之后就把端口代理给 Nodejs 即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       8443 ssl http2 default_server; <span class="comment"># 增加 http2 default_server</span></span><br><span class="line">    server_name  192.168.0.107;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在之前应该是先成功配置了 HTTPS，再配置 HTTP/2。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://blog.csdn.net/toontong/article/details/50787374" target="_blank" rel="noopener">nginx 的 HTTP/2 性能太逆天了，HTTPS 网站性能优化</a></li>
+<li><a href="http://www.jackieathome.net/archives/437.html" target="_blank" rel="noopener">nginx 启用 HTTP/2 特性</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.833Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTTP-2/">HTTP/2</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/03/Nginx/前端工程师的 Nginx 学习笔记/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">前端工程师的 Nginx 学习笔记</h4>
+        <h4 class="summary">Nginx（发音：engine X）是一款轻量级的 HTTP 服务器（相比于 Apache、Lighttpd 而言），同...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/03/Typescript/拥抱与使用 Typescript/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">拥抱与使用 Typescript</h4>
+        <h4 class="summary">Typescript 是微软开源的一个 Javascript 的超集，提供更超前的语法（比 ES6 还超前）。
+入门实际...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

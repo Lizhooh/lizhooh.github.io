@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/07/抓包&爬虫/基于 Nodejs 的爬虫/">
+    
+    
+    <title>基于 Nodejs，Cheerio 的爬虫 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="Cheerio在 Nodejs 里有个叫 cheerio 的模块，它的最小型的 JQuery 的实现，能够轻松的解析抓取到的 DOM 数据。">
+<meta name="keywords" content="后端,Nodejs,爬虫">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Nodejs，Cheerio 的爬虫">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/07/抓包&爬虫/基于 Nodejs 的爬虫/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="Cheerio在 Nodejs 里有个叫 cheerio 的模块，它的最小型的 JQuery 的实现，能够轻松的解析抓取到的 DOM 数据。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/pdassd.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/2/20170216122148.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/2/20170216121610.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.917Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 Nodejs，Cheerio 的爬虫">
+<meta name="twitter:description" content="Cheerio在 Nodejs 里有个叫 cheerio 的模块，它的最小型的 JQuery 的实现，能够轻松的解析抓取到的 DOM 数据。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/7/pdassd.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">基于 Nodejs，Cheerio 的爬虫</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">基于 Nodejs，Cheerio 的爬虫</h1>
+
+        <div class="meta-rest">
+            <h1>基于 Nodejs，Cheerio 的爬虫</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-07-11T01:27:39.000Z" itemprop="datePublished" class="page-time">
+    2017-07-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Cheerio"><span class="post-toc-number">1.</span> <span class="post-toc-text">Cheerio</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-JQuery-获取-DOM-节点"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">使用 JQuery 获取 DOM 节点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-Cheerio-解析-DOM-节点"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">使用 Cheerio 解析 DOM 节点</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Nodejs-抓取-html"><span class="post-toc-number">2.</span> <span class="post-toc-text">Nodejs 抓取 html</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#抓取-多玩图库·美女图片"><span class="post-toc-number">3.</span> <span class="post-toc-text">抓取-多玩图库·美女图片</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结果"><span class="post-toc-number">4.</span> <span class="post-toc-text">结果</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#动态数据"><span class="post-toc-number">5.</span> <span class="post-toc-text">动态数据</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#简单的使用"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">简单的使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">6.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-抓包&amp;爬虫/基于 Nodejs 的爬虫"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">基于 Nodejs，Cheerio 的爬虫</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 07 月 11 日 9:27" datetime="2017-07-11T01:27:39.000Z"  itemprop="datePublished">
+    2017-07-11
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 740</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="Cheerio"><a href="#Cheerio" class="headerlink" title="Cheerio"></a>Cheerio</h2><p>在 Nodejs 里有个叫 cheerio 的模块，它的最小型的 JQuery 的实现，能够轻松的解析抓取到的 DOM 数据。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/7/pdassd.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>这里就简单的说明一下使用：</p>
+<h3 id="使用-JQuery-获取-DOM-节点"><a href="#使用-JQuery-获取-DOM-节点" class="headerlink" title="使用 JQuery 获取 DOM 节点"></a>使用 JQuery 获取 DOM 节点</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取全部图片</span></span><br><span class="line">$(<span class="string">'img'</span>);</span><br><span class="line"><span class="comment">// 获取全部链接</span></span><br><span class="line">$(<span class="string">'a'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对图片 src 进行筛选，选择 .jpg 结尾的图片</span></span><br><span class="line">$(<span class="string">'img[src $= .jpg]'</span>);</span><br><span class="line"><span class="comment">// 对链接 href 进行筛选，选择 https 开头的链接</span></span><br><span class="line">$(<span class="string">'a[href ^= https]'</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="使用-Cheerio-解析-DOM-节点"><a href="#使用-Cheerio-解析-DOM-节点" class="headerlink" title="使用 Cheerio 解析 DOM 节点"></a>使用 Cheerio 解析 DOM 节点</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> cheerio = <span class="built_in">require</span>(<span class="string">'cheerio'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// $html 是爬到的 html</span></span><br><span class="line"><span class="keyword">let</span> $ = cheerio.load($html);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取全部图片，返回一个数组集合</span></span><br><span class="line">$(<span class="string">'img[src $= .jpg]'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... 后面的基本一致</span></span><br></pre></td></tr></table></figure>
+<p>如果你会 JQuery，完全可以零学习的使用 Cheerio，Cheeio 兼容了 JQuery DOM 操作的 API。<br>关于 Cheerio 的使用，参考： <a href="https://cheerio.js.org/" target="_blank" rel="noopener">https://cheerio.js.org/</a></p>
+<!-- more -->
+<h2 id="Nodejs-抓取-html"><a href="#Nodejs-抓取-html" class="headerlink" title="Nodejs 抓取 html"></a>Nodejs 抓取 html</h2><p>使用 Nodejs 抓取 html，用到了 http 模块。<br>第三方<code>superagent</code>模块，对此进行了进一步封装使它的 API 变得更加友好。<br>不过我使用的是简单易懂的<code>fetch</code>。</p>
+<h2 id="抓取-多玩图库·美女图片"><a href="#抓取-多玩图库·美女图片" class="headerlink" title="抓取-多玩图库·美女图片"></a>抓取-多玩图库·美女图片</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 抓取-多玩图库·美女图片</span></span><br><span class="line">fetch(<span class="string">'http://tu.duowan.com/m/meinv'</span>)</span><br><span class="line">    .then(<span class="function"><span class="params">res</span> =&gt;</span> res.text())</span><br><span class="line">    <span class="comment">// 解析 html</span></span><br><span class="line">    .then(<span class="function"><span class="params">html</span> =&gt;</span> cheerio.load(html))</span><br><span class="line">    <span class="comment">// 提取 image</span></span><br><span class="line">    .then(<span class="function"><span class="params">$</span> =&gt;</span> $(<span class="string">'a &gt; img[src *= M00]'</span>).toArray().map(<span class="function"><span class="params">img</span> =&gt;</span> img.attribs))</span><br><span class="line">    <span class="comment">// 下载 image</span></span><br><span class="line">    .then(<span class="function"><span class="params">imgList</span> =&gt;</span> downloadImg(<span class="string">'./public/download/image'</span>, imgList))</span><br><span class="line">    <span class="comment">// 错误 处理</span></span><br><span class="line">    .catch(<span class="function"><span class="params">err</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'Error:'</span>, <span class="built_in">JSON</span>.stringify(err, <span class="literal">null</span>, <span class="number">4</span>)));</span><br></pre></td></tr></table></figure>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/2/20170216122148.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/2/20170216121610.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="动态数据"><a href="#动态数据" class="headerlink" title="动态数据"></a>动态数据</h2><p>如果，某个页面的数据是通过动态数据（Javascript）生成的，比如勾拉网的招聘列表。<br>那么，我比较建议的使用<code>JSDOM</code>，因为它提供的 DOM 的容器模拟浏览器来运行 Javascript。JSDOM 与 Cheerio 不同，Cheerio 是解析 DOM，而 JSDOM 是运行 DOM。</p>
+<blockquote>
+<p>jsdom<br>jsdom 是许多 Web 标准的纯 JavaScript 实现，特别是与 Node.js 一起使用的 WHATWG DOM 和 HTML 标准。一般而言，该项目的目标是模拟足够的一部分网页浏览器，用于测试和刮刮真实世界的 Web 应用程序。（jsdom 的最新版本需要 Node.js v6+ 或更新版本）</p>
+</blockquote>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save jsdom@latest</span><br></pre></td></tr></table></figure>
+<h3 id="简单的使用"><a href="#简单的使用" class="headerlink" title="简单的使用"></a>简单的使用</h3><p>下面是最简单的使用方式：<br>（请注意，JSDOM 的构造函数的参数数据不应该包括<code>&lt;html&gt;，&lt;head&gt;，&lt;body&gt;</code>标签）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> jsdom = <span class="built_in">require</span>(<span class="string">"jsdom"</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; JSDOM &#125; = jsdom;</span><br><span class="line"><span class="comment">//  解析，运行 dom</span></span><br><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(<span class="string">`&lt;!DOCTYPE html&gt;&lt;p&gt;Hello world&lt;/p&gt;`</span>);</span><br><span class="line"><span class="built_in">console</span>.log(dom.window.document.querySelector(<span class="string">"p"</span>).textContent); <span class="comment">// "Hello world"</span></span><br></pre></td></tr></table></figure>
+<p>生成的对象是 JSDOM 类的一个实例，其中包含许多有用的属性和方法 window。</p>
+<p>还可以运行目标页面：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fetch = <span class="built_in">require</span>(<span class="string">'node-fetch'</span>);</span><br><span class="line"><span class="keyword">const</span> jsdom = <span class="built_in">require</span>(<span class="string">"jsdom"</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; JSDOM &#125; = jsdom;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">get</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> html = <span class="keyword">await</span> fetch(<span class="string">'http://127.0.0.1:3000'</span>).then(<span class="function"><span class="params">res</span> =&gt;</span> res.text());</span><br><span class="line">    <span class="comment">//  解析，运行 dom</span></span><br><span class="line">    <span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(html);</span><br><span class="line">    <span class="comment">// ... some think</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>更多的参考 JSDOM API。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>除了 Cheerio，JSDOM，另外还有 <a href="http://nodecrawler.org/" target="_blank" rel="noopener">node-crawler</a>，<a href="http://phantomjs.org/" target="_blank" rel="noopener">phantomjs</a>，<a href="https://github.com/GoogleChrome/puppeteer" target="_blank" rel="noopener">puppeteer</a> 这些库都很值得尝试哦。<br>还可以使用 <a href="http://caolan.github.io/async/" target="_blank" rel="noopener">async</a> 来控制并发队列数量，让爬虫爬得更稳。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/cheeriojs/cheerio" target="_blank" rel="noopener">https://github.com/cheeriojs/cheerio</a></li>
+<li><a href="https://github.com/tmpvar/jsdom" target="_blank" rel="noopener">https://github.com/tmpvar/jsdom</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.917Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/07/抓包&amp;爬虫/基于 Nodejs 的爬虫/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/07/抓包&amp;爬虫/基于 Nodejs 的爬虫/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/07/React/Style/Styled-Components 最佳使用方式/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">💅 Styled-Components 最佳使用方式</h4>
+        <h4 class="summary">现在基本都是使用 Sass 来编写 React 组件的样式。使用的结构是类名作用域控制的方式，比如有一个 model 组...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/Nodejs/Nodejs 多核 CPU 分布式集群/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs 多核 CPU 分布式集群</h4>
+        <h4 class="summary">集群Nodejs运行在 Chrome 的 JavaScript 运行时平台上，我们把该平台优雅地称之为 V8 引擎。不论...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

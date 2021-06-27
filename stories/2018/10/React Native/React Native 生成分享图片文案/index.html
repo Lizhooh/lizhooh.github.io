@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/10/React Native/React Native 生成分享图片文案/">
+    
+    
+    <title>React Native 生成分享图片文案 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 React Native 里如何实现类似知乎哪样的图片分享文案呢？">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 生成分享图片文案">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/10/React Native/React Native 生成分享图片文案/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 React Native 里如何实现类似知乎哪样的图片分享文案呢？">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181013190302.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/165504215411296.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/1660083094110113.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.864Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 生成分享图片文案">
+<meta name="twitter:description" content="前言在 React Native 里如何实现类似知乎哪样的图片分享文案呢？">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/10/20181013190302.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 生成分享图片文案</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 生成分享图片文案</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 生成分享图片文案</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-10-13T11:06:25.000Z" itemprop="datePublished" class="page-time">
+    2018-10-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#微信分享"><span class="post-toc-number">2.</span> <span class="post-toc-text">微信分享</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#二维码生成"><span class="post-toc-number">3.</span> <span class="post-toc-text">二维码生成</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#截图功能"><span class="post-toc-number">4.</span> <span class="post-toc-text">截图功能</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/React Native 生成分享图片文案"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 生成分享图片文案</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 10 月 13 日 19:06" datetime="2018-10-13T11:06:25.000Z"  itemprop="datePublished">
+    2018-10-13
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 553</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React Native 里如何实现类似知乎哪样的图片分享文案呢？</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181013190302.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="微信分享"><a href="#微信分享" class="headerlink" title="微信分享"></a>微信分享</h2><p>微信分享跟着这篇文章走一遍即可：<a href="https://www.jianshu.com/p/6a792118fae4" target="_blank" rel="noopener">react-native-wechat（react-native 微信分享、支付)</a></p>
+<p>需要注意的是，这篇文章的 API 参数，有点旧，具体根据 <a href="https://github.com/yorkie/react-native-wechat" target="_blank" rel="noopener">react-native-wechat</a> 的文档为主。</p>
+<p>另外有一个值得一提的地方，就是 react-native-wechat 与 react-native-fast-image 编译冲突的问题。如下图，查了很久大概是某些库直接存在重复依赖的问题。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/165504215411296.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>最的解决方法是，去到 react-native-fast-image 的 build.gradle 里（在 node_module 里），把下面的 56 行注释掉。下图的版本是 v5.0.4。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/1660083094110113.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>具体，可能是一些 android.support 重复依赖问题。</p>
+<h2 id="二维码生成"><a href="#二维码生成" class="headerlink" title="二维码生成"></a>二维码生成</h2><p>二维码生成，使用 <a href="https://github.com/cssivision/react-native-qrcode" target="_blank" rel="noopener">react-native-qrcode</a>，这是一个使用纯 Javascript 实现的二维码库，不需要链接原生的 Java 库。看了一下代码，二维码是使用 canvas 画出来的，而 canvas 是使用 WebView 的（哈哈）。</p>
+<p>使用也非常简单，</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> QRCode <span class="keyword">from</span> <span class="string">'react-native-qrcode'</span>;</span><br><span class="line"></span><br><span class="line">&lt;QRCode</span><br><span class="line">    value=<span class="string">'http://facebook.github.io/react-native/'</span></span><br><span class="line">    size=&#123;<span class="number">120</span>&#125;</span><br><span class="line">    bgColor=<span class="string">'purple'</span></span><br><span class="line">    fgColor=<span class="string">'white'</span></span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="截图功能"><a href="#截图功能" class="headerlink" title="截图功能"></a>截图功能</h2><p>实际上像这种图片在 HTML5 里实现的方案是，使用 canvas 把效果画出来，在使用 canvas api 导出一张图片。而在 react-native 里则需要使用到一个截图库：<a href="https://github.com/gre/react-native-view-shot" target="_blank" rel="noopener">react-native-view-shot</a></p>
+<p>react-native-view-shot 是一个原生的截图库，可以截取界面绘制的任何内容，也就是界面是什么样的，生成的图片也是什么样的。</p>
+<p>使用也非常简单，只需要用一个 ViewShot 包裹你的界面组件代码即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ViewShot <span class="keyword">from</span> <span class="string">'react-native-view-shot'</span>;</span><br><span class="line"></span><br><span class="line">&lt;ViewShot</span><br><span class="line">    ref=&#123;r =&gt; <span class="keyword">this</span>.viewshot = r&#125;</span><br><span class="line">    options=&#123;&#123; <span class="attr">format</span>: <span class="string">'jpg'</span>, <span class="attr">quality</span>: <span class="number">0.9</span> &#125;&#125;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;Text&gt;...Something to rasterize...&lt;<span class="regexp">/Text&gt;</span></span><br><span class="line"><span class="regexp">    &lt;Image soucre=&#123;&#123; uri: 'xxx' &#125;&#125; /</span>&gt;</span><br><span class="line"></span><br><span class="line">&lt;<span class="regexp">/ViewShot&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在点击分享的时候进行截图，并且分享到朋友对话里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.viewshot.capture().then(<span class="function"><span class="params">uri</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 分享到朋友对话里，分享图片</span></span><br><span class="line">    <span class="keyword">return</span> WeChat.shareToSession(&#123;</span><br><span class="line">        type: <span class="string">'imageFile'</span>,        <span class="comment">// &lt;-- 本地的图片</span></span><br><span class="line">        title: <span class="string">'分享标题'</span>,</span><br><span class="line">        description: <span class="literal">null</span>,</span><br><span class="line">        mediaTagName: <span class="literal">null</span>,</span><br><span class="line">        messageAction: <span class="literal">null</span>,</span><br><span class="line">        messageExt: <span class="literal">null</span>,</span><br><span class="line">        imageUrl: uri,            <span class="comment">// file://xxxxx</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">    Alert.alert(<span class="string">'错误'</span>, err.message);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.864Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/10/React Native/React Native 生成分享图片文案/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/10/React Native/React Native 生成分享图片文案/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/10/小程序/各大小程序之间的框架差异性分析/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">各大小程序之间的框架差异性分析</h4>
+        <h4 class="summary">自从微信小程序推出之后，其他厂商也陆续的跟风推出自己的小程序框架，目前有微信小程序、支付宝小程序、百度小程序、今日头条小...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/10/React/React/React Apollo（GraphQL）使用指南/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Apollo（GraphQL）使用指南</h4>
+        <h4 class="summary">React Apollo 是一个 Apollo 开源的一个 React + GraphQL 集成方案库，主要提供便利的 ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

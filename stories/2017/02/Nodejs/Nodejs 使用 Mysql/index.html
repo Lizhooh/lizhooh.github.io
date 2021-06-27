@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/02/Nodejs/Nodejs 使用 Mysql/">
+    
+    
+    <title>Nodejs 使用 MySQL | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="db-mysqlMySQL 成为最火的开源关系式数据库是有原因的：它免费提供了与大型商用数据库一样的众多功能。在 Nodejs 上连接 MySQL 使用到了一个官方模块 db-mysql 安装： 1npm install --save db-mysql">
+<meta name="keywords" content="Nodejs,数据库,学习笔记,MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs 使用 MySQL">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/02/Nodejs/Nodejs 使用 Mysql/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="db-mysqlMySQL 成为最火的开源关系式数据库是有原因的：它免费提供了与大型商用数据库一样的众多功能。在 Nodejs 上连接 MySQL 使用到了一个官方模块 db-mysql 安装： 1npm install --save db-mysql">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/2/mysql.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.838Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs 使用 MySQL">
+<meta name="twitter:description" content="db-mysqlMySQL 成为最火的开源关系式数据库是有原因的：它免费提供了与大型商用数据库一样的众多功能。在 Nodejs 上连接 MySQL 使用到了一个官方模块 db-mysql 安装： 1npm install --save db-mysql">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/2/mysql.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs 使用 MySQL</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs 使用 MySQL</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs 使用 MySQL</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-02-25T01:36:37.000Z" itemprop="datePublished" class="page-time">
+    2017-02-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#db-mysql"><span class="post-toc-number">1.</span> <span class="post-toc-text">db-mysql</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#连接-MySQL"><span class="post-toc-number">2.</span> <span class="post-toc-text">连接 MySQL</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#MySQL-查询"><span class="post-toc-number">3.</span> <span class="post-toc-text">MySQL 查询</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#SQL-查询"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">SQL 查询</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#db-mysql-API-查询"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">db-mysql API 查询</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#mysqljs-mysql"><span class="post-toc-number">4.</span> <span class="post-toc-text">mysqljs/mysql</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Nodejs 使用 Mysql"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs 使用 MySQL</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 02 月 25 日 9:36" datetime="2017-02-25T01:36:37.000Z"  itemprop="datePublished">
+    2017-02-25
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 807</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="db-mysql"><a href="#db-mysql" class="headerlink" title="db-mysql"></a>db-mysql</h2><p>MySQL 成为最火的开源关系式数据库是有原因的：它免费提供了与大型商用数据库一样的众多功能。<br>在 Nodejs 上连接 MySQL 使用到了一个官方模块 <code>db-mysql</code></p>
+<p><strong>安装：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save db-mysql</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/2/mysql.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="连接-MySQL"><a href="#连接-MySQL" class="headerlink" title="连接 MySQL"></a>连接 MySQL</h2><p>连接 MySQL 使用到的一些 <code>db-mysql</code> 提供的接口。</p>
+<p>配置连接 MySQL 的信息：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> db = <span class="keyword">new</span> mysql.Database(&#123;</span><br><span class="line">    <span class="string">'hostname'</span>: <span class="string">'127.0.0.1'</span>,     <span class="comment">// mysql 连接地址</span></span><br><span class="line">    <span class="string">'user'</span>    : <span class="string">'dev'</span>,           <span class="comment">// 用户名</span></span><br><span class="line">    <span class="string">'password'</span>: <span class="string">'123456'</span>,        <span class="comment">// 密码</span></span><br><span class="line">    <span class="string">'database'</span>: <span class="string">'test'</span>,          <span class="comment">// 数据库名</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">db.connect(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span>(err) <span class="keyword">return</span> <span class="built_in">console</span>.dir(err);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'你已经连接了数据库'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="MySQL-查询"><a href="#MySQL-查询" class="headerlink" title="MySQL 查询"></a>MySQL 查询</h2><p><code>db-mysql</code> 提供原生的 SQL 语句进行查询，也提供了类似 MongoDB 的查询接口。</p>
+<h3 id="SQL-查询"><a href="#SQL-查询" class="headerlink" title="SQL 查询"></a>SQL 查询</h3><p>下面示例，使用 SQL 进行查询。其中 <code>?</code> 代表的是占位符的意思。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建表</span></span><br><span class="line">db.query(<span class="string">''</span></span><br><span class="line">    + <span class="string">'Create Table Student(                    '</span></span><br><span class="line">    + <span class="string">'     id smallint not null primary key,   '</span></span><br><span class="line">    + <span class="string">'     name varchar(20) not null,          '</span></span><br><span class="line">    + <span class="string">'     age tinyint not null,               '</span></span><br><span class="line">    + <span class="string">'     sex char(4) not null                '</span></span><br><span class="line">    + <span class="string">') Engine=Innodb Default Charset=utf8;    '</span>,</span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, packet</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 创建表成功</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'1. 创建表成功'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 插入</span></span><br><span class="line">db.query(</span><br><span class="line">    <span class="string">'Insert into Student Values(?, ?, ?, ?)'</span>,</span><br><span class="line">    [<span class="number">1</span>, <span class="string">'小东'</span>, <span class="number">20</span>, <span class="string">'男'</span>], <span class="comment">// 自动会防 sql 注入处理</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, packet</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 插入成功</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'2. 插入数据成功'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询</span></span><br><span class="line">db.query(</span><br><span class="line">    <span class="string">'Select * From Student Where id = '</span> + number,</span><br><span class="line">    <span class="comment">// 字符串拼接不会防 sql 注入处理</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, rows</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 处理查询结果 rows is Array</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'3. 查询成功'</span>)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">JSON</span>.stringify(rows, <span class="literal">null</span>, <span class="number">4</span>));</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新</span></span><br><span class="line">db.query(</span><br><span class="line">    <span class="string">'Update Student Set name = ? Where id = ?'</span>,</span><br><span class="line">    [<span class="string">'小明'</span>, <span class="number">1</span>],</span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, packet</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 更新成功</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'4. 更新成功'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除</span></span><br><span class="line">db.query(</span><br><span class="line">    <span class="string">'Delete From Student Where id = ?'</span>,</span><br><span class="line">    [<span class="number">1</span>],</span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, packet</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 删除成功</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'5. 删除成功'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建存储过程</span></span><br><span class="line">db.query(<span class="string">''</span></span><br><span class="line">    + <span class="string">'Create Procedure getStudentAllName() '</span></span><br><span class="line">    + <span class="string">'Begin                                '</span></span><br><span class="line">    + <span class="string">'     Select s.name From Student As s;'</span></span><br><span class="line">    + <span class="string">'End                                  '</span>,</span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, packet</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 存储过程创建成功</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'6. 存储过程创建成功'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用存储过程</span></span><br><span class="line">db.query(</span><br><span class="line">    <span class="string">'Call getStudentAllName()'</span>,</span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">error, rows</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">throw</span> error;</span><br><span class="line">        <span class="comment">// 存储过程输出的内容</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'7. 存储过程调用成功'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>上面查询输出的结果：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[nodemon] starting <span class="string">`node server.js`</span></span><br><span class="line"><span class="number">1.</span> 创建表成功</span><br><span class="line"><span class="number">2.</span> 插入数据成功</span><br><span class="line"><span class="number">3.</span> 查询成功</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"id"</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="string">"name"</span>: <span class="string">"小东"</span>,</span><br><span class="line">        <span class="string">"age"</span>: <span class="number">20</span>,</span><br><span class="line">        <span class="string">"sex"</span>: <span class="string">"男"</span></span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"><span class="number">4.</span> 更新成功</span><br><span class="line"><span class="number">5.</span> 删除成功</span><br><span class="line"><span class="number">6.</span> 存储过程创建成功</span><br><span class="line"><span class="number">7.</span> 存储过程调用成功</span><br></pre></td></tr></table></figure>
+<p>pakcet 参数返回的信息，主要是操作了SQL语句后的一些信息</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">OkPacket &#123;</span><br><span class="line">    fieldCount: <span class="number">0</span>,</span><br><span class="line">    affectedRows: <span class="number">0</span>,</span><br><span class="line">    insertId: <span class="number">0</span>,</span><br><span class="line">    serverStatus: <span class="number">2</span>,</span><br><span class="line">    warningCount: <span class="number">0</span>,</span><br><span class="line">    message: <span class="string">''</span>,</span><br><span class="line">    protocol41: <span class="literal">true</span>,</span><br><span class="line">    changedRows: <span class="number">0</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<h3 id="db-mysql-API-查询"><a href="#db-mysql-API-查询" class="headerlink" title="db-mysql API 查询"></a>db-mysql API 查询</h3><p><code>db-mysql</code> API 为我们做好了字符串转义，所以不用担心 SQL 注入。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查询</span></span><br><span class="line">db.query().select([<span class="string">'id'</span>, <span class="string">'user_login'</span>]).from(<span class="string">'user'</span>)</span><br><span class="line">    .where(<span class="string">'user_login = ? And user_password = ?'</span>, [<span class="string">'abcde'</span>, <span class="string">'12345'</span>])</span><br><span class="line">    .execute(<span class="function">(<span class="params">err, rows, columus</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(err) <span class="keyword">return</span> <span class="built_in">console</span>.dir(err);</span><br><span class="line">        <span class="built_in">console</span>.dir(rows);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 插入</span></span><br><span class="line">db.query().insert(<span class="string">'user'</span>, [<span class="string">'user_login'</span>, <span class="string">'user_password'</span>], [<span class="string">'newbie'</span>, <span class="string">'123456'</span>])</span><br><span class="line">    .execute(<span class="function">(<span class="params">err, row, columus</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(err) <span class="keyword">return</span> <span class="built_in">console</span>.dir(err);</span><br><span class="line">        <span class="built_in">console</span>.dir(rows);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新</span></span><br><span class="line">db.query().update(<span class="string">'user'</span>).set(&#123;</span><br><span class="line">        <span class="string">'user_name'</span>: <span class="string">'new name'</span>,</span><br><span class="line">        <span class="string">'user_age'</span>: <span class="string">'new age'</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">    .where(<span class="string">'user_login = ?'</span>, [<span class="string">'newbie'</span>])</span><br><span class="line">    .execute(<span class="function">(<span class="params">err, rows, columus</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(err) <span class="keyword">return</span> <span class="built_in">console</span>.dir(err);</span><br><span class="line">        <span class="built_in">console</span>.dir(rows);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除</span></span><br><span class="line">db.query().delete().from(<span class="string">'user'</span>)</span><br><span class="line">    .where(<span class="string">'user_login = ?'</span>, [<span class="string">'newbie'</span>])</span><br><span class="line">    .execute(<span class="function">(<span class="params">err, rows, columus</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(err) <span class="keyword">return</span> <span class="built_in">console</span>.dir(err);</span><br><span class="line">        <span class="built_in">console</span>.dir(rows);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="mysqljs-mysql"><a href="#mysqljs-mysql" class="headerlink" title="mysqljs/mysql"></a>mysqljs/mysql</h2><p>除了 db-mysql 外，还有一个 mysqljs/mysql，使用基本差不多。<br>具体参考：<a href="https://github.com/mysqljs/mysql" target="_blank" rel="noopener">https://github.com/mysqljs/mysql</a></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.npmjs.com/package/db-mysql" target="_blank" rel="noopener">https://www.npmjs.com/package/db-mysql</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.838Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/02/Nodejs/Nodejs 使用 Mysql/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/02/Nodejs/Nodejs 使用 Mysql/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/02/Electron/使用 Electron 开发桌面应用/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">使用 Electron 开发桌面应用</h4>
+        <h4 class="summary">ElectronElectron 提供了一个实时构建桌面应用的纯 JavaScript 环境。Electron 可以获取...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/02/React Native/React Native Modal 的使用/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native Modal 的使用</h4>
+        <h4 class="summary">Modal
+Modal组件可以用来覆盖包含React Native根视图的原生视图（如 UIViewController...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/03/React Native/Media/React Native Video 视频播放/">
+    
+    
+    <title>React Native Video 视频播放 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="Video如果你想要嵌入一个视频播放，那么使用react-native-video就没错了。react-native-video是一个非常优秀的视频播放组件，当然你还可以使用 HTML5 的&amp;lt;video&amp;gt;来解决视频播放的问题。">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native Video 视频播放">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/03/React Native/Media/React Native Video 视频播放/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="Video如果你想要嵌入一个视频播放，那么使用react-native-video就没错了。react-native-video是一个非常优秀的视频播放组件，当然你还可以使用 HTML5 的&amp;lt;video&amp;gt;来解决视频播放的问题。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/1467654608663225.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.856Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native Video 视频播放">
+<meta name="twitter:description" content="Video如果你想要嵌入一个视频播放，那么使用react-native-video就没错了。react-native-video是一个非常优秀的视频播放组件，当然你还可以使用 HTML5 的&amp;lt;video&amp;gt;来解决视频播放的问题。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/3/1467654608663225.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native Video 视频播放</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native Video 视频播放</h1>
+
+        <div class="meta-rest">
+            <h1>React Native Video 视频播放</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-03-06T14:54:30.000Z" itemprop="datePublished" class="page-time">
+    2017-03-06
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Video"><span class="post-toc-number">1.</span> <span class="post-toc-text">Video</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#配置"><span class="post-toc-number">3.</span> <span class="post-toc-text">配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#IOS"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">IOS</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Android"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">Android</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用"><span class="post-toc-number">4.</span> <span class="post-toc-text">使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#静态方法"><span class="post-toc-number">5.</span> <span class="post-toc-text">静态方法</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#全屏播放"><span class="post-toc-number">6.</span> <span class="post-toc-text">全屏播放</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#爬坑"><span class="post-toc-number">7.</span> <span class="post-toc-text">爬坑</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">8.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Media/React Native Video 视频播放"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native Video 视频播放</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 03 月 06 日 22:54" datetime="2017-03-06T14:54:30.000Z"  itemprop="datePublished">
+    2017-03-06
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 755</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="Video"><a href="#Video" class="headerlink" title="Video"></a>Video</h2><p>如果你想要嵌入一个视频播放，那么使用<code>react-native-video</code>就没错了。<br><code>react-native-video</code>是一个非常优秀的视频播放组件，当然你还可以使用 HTML5 的<code>&lt;video&gt;</code>来解决视频播放的问题。</p>
+<p><img src="/assets/image/2017/3/1467654608663225.jpg" width="300"></p>
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save react-native-video</span><br></pre></td></tr></table></figure>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>在配置前输入以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">react-native link react-native-video</span><br></pre></td></tr></table></figure>
+<h3 id="IOS"><a href="#IOS" class="headerlink" title="IOS"></a>IOS</h3><blockquote>
+<p>在 AppDelegate.m 里添加</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#<span class="keyword">import</span> &lt;AVFoundation/AVFoundation.h&gt;  <span class="comment">// import</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">BOOL</span>)application:(<span class="type">UIApplication</span> *)application didFinishLaunchingWithOptions:(<span class="type">NSDictionary</span> *)launchOptions</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">  [[<span class="type">AVAudioSession</span> sharedInstance] setCategory:<span class="type">AVAudioSessionCategoryAmbient</span> error:<span class="literal">nil</span>];  <span class="comment">// allow</span></span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><blockquote>
+<p>在 android/settings.gradle 里添加</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">include <span class="string">':react-native-video'</span></span><br><span class="line">project(<span class="string">':react-native-video'</span>).projectDir = <span class="keyword">new</span> File(rootProject.projectDir, <span class="string">'../node_modules/react-native-video/android'</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在 android/app/build.gradle 里添加</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">   compile project(<span class="string">':react-native-video'</span>)       <span class="comment">// &lt;---- add</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在 MainActivity.java 里添加</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.brentvatne.react.ReactVideoPackage;  <span class="comment">// &lt;---- add</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">@Override</span><br><span class="line">protected List&lt;ReactPackage&gt; getPackages() &#123;</span><br><span class="line">    <span class="keyword">return</span> Arrays.&lt;ReactPackage&gt;asList(</span><br><span class="line">        <span class="keyword">new</span> MainReactPackage(),</span><br><span class="line">        <span class="keyword">new</span> ReactVideoPackage()                 <span class="comment">// &lt;---- add</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>使用非常简单：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;Video</span><br><span class="line">    <span class="comment">// require('../assets/video/turntable.mp4')</span></span><br><span class="line">    source=&#123;&#123; <span class="attr">uri</span>: <span class="string">""</span> &#125;&#125;                    <span class="comment">// Can be a URL or a local file.</span></span><br><span class="line">    ref=&#123;(ref) =&gt; &#123;</span><br><span class="line">        <span class="keyword">this</span>.player = ref;                  <span class="comment">// 组件引用</span></span><br><span class="line">    &#125;&#125;</span><br><span class="line">    rate=&#123;<span class="number">1.0</span>&#125;                              <span class="comment">// 0是暂停，1是正常</span></span><br><span class="line">    volume=&#123;<span class="number">1.0</span>&#125;                            <span class="comment">// 0是静音，1是正常，2,3,4,...n 是声音放大倍数 (1+0.1*n)</span></span><br><span class="line">    muted=&#123;<span class="literal">false</span>&#125;                           <span class="comment">// 完全静音。</span></span><br><span class="line">    paused=&#123;<span class="literal">false</span>&#125;                          <span class="comment">// 暂停播放完全。</span></span><br><span class="line">    resizeMode=<span class="string">"cover"</span>                      <span class="comment">// 填充整个屏幕的纵横比。</span></span><br><span class="line">    repeat=&#123;<span class="literal">true</span>&#125;                           <span class="comment">// 重复播放。</span></span><br><span class="line">    playInBackground=&#123;<span class="literal">false</span>&#125;                <span class="comment">// 当应用程序进入后台时，音频继续播放。</span></span><br><span class="line">    playWhenInactive=&#123;<span class="literal">false</span>&#125;                <span class="comment">// [iOS] 视频继续播放时，控制或通知中心显示。</span></span><br><span class="line">    progressUpdateInterval=&#123;<span class="number">250.0</span>&#125;          <span class="comment">// [iOS] Interval to fire onProgress (default to ~250ms)</span></span><br><span class="line">    onLoadStart=&#123;<span class="keyword">this</span>.loadStart&#125;            <span class="comment">// 当视频开始加载时回调函数。</span></span><br><span class="line">    onLoad=&#123;<span class="keyword">this</span>.setDuration&#125;               <span class="comment">// 视频加载时回调函数。</span></span><br><span class="line">    onProgress=&#123;<span class="keyword">this</span>.setTime&#125;               <span class="comment">// Callback every ~250ms with currentTime [每250ms调用回调函数]</span></span><br><span class="line">    onEnd=&#123;<span class="keyword">this</span>.onEnd&#125;                      <span class="comment">// 回放结束时回调函数。</span></span><br><span class="line">    onError=&#123;<span class="keyword">this</span>.videoError&#125;               <span class="comment">// 当视频无法加载时回调函数。</span></span><br><span class="line">    onBuffer=&#123;<span class="keyword">this</span>.onBuffer&#125;                <span class="comment">// 当远程视频缓冲时回调函数。</span></span><br><span class="line">    onTimedMetadata=&#123;<span class="keyword">this</span>.onTimedMetadata&#125;  <span class="comment">// 当视频流接收一些元数据时回调函数。</span></span><br><span class="line">    style=&#123;styles.backgroundVideo&#125;</span><br><span class="line">    /&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="静态方法"><a href="#静态方法" class="headerlink" title="静态方法"></a>静态方法</h2><p>目前只有 2 个静态方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 全屏播放</span></span><br><span class="line"><span class="keyword">this</span>.player.presentFullscreenPlayer()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置视频播放的位置，单位秒</span></span><br><span class="line"><span class="keyword">this</span>.player.seek(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="全屏播放"><a href="#全屏播放" class="headerlink" title="全屏播放"></a>全屏播放</h2><p>全屏播放 react-native-video 没有提供，但是 <a href="https://github.com/itsnubix/react-native-video-controls" target="_blank" rel="noopener">react-native-video-controls</a> 提供了一个全屏的控制栏。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// At the top where our imports are...</span></span><br><span class="line"><span class="keyword">import</span> VideoPlayer <span class="keyword">from</span> <span class="string">'react-native-video-controls'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// in the component's render() function</span></span><br><span class="line">&lt;VideoPlayer</span><br><span class="line">    source=&#123;&#123; <span class="attr">uri</span>: <span class="string">'https://vjs.zencdn.net/v/oceans.mp4'</span> &#125;&#125;</span><br><span class="line">    navigator=&#123; <span class="keyword">this</span>.props.navigator &#125;</span><br><span class="line">    /&gt;</span><br></pre></td></tr></table></figure>
+<p>不过，这种是定义好的 UI，自定义还是需要自己造轮子。</p>
+<h2 id="爬坑"><a href="#爬坑" class="headerlink" title="爬坑"></a>爬坑</h2><p>注意，不要在 Android 模拟器上测试，要在真机上测试。</p>
+<p>在 Android AVD 4.4 上测试的时候一直报错：<code>error(1, -2147483648)</code></p>
+<p>然后，换成了 Android AVD 5.0 没有报错，而只能听到声音，没有图像。</p>
+<p>最后，我在自己的手机 Android 4.4 上测试，声音图像什么都有了。</p>
+<p>造成这种原因是 Android 模拟器的视频解码器的问题。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/react-native-community/react-native-video" target="_blank" rel="noopener">https://github.com/react-native-community/react-native-video</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.856Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/03/React Native/Media/React Native Video 视频播放/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/03/React Native/Media/React Native Video 视频播放/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/03/React Native/React Native Android 配置启动图/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native Android 配置启动图</h4>
+        <h4 class="summary"></h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/03/React Native/Animated/React Native 超简单的布局动画/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 超简单的布局动画</h4>
+        <h4 class="summary">LayoutAnimationLayoutAnimation 是一个用于在下一个绘制或者布局周期 （render/lay...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

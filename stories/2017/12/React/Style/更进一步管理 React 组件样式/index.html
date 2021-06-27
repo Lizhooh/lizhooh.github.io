@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/12/React/Style/更进一步管理 React 组件样式/">
+    
+    
+    <title>💅 更进一步管理 React 组件样式 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言styled-components 是一个 CSS in Javascript 的框架，可用于 React/React Native 上，在 Gzip 只有 18k 大小。它可以让你抛去在编写 React 组件时，每个组件都需要携带一个 CSS/Sass/Less 文件的烦恼。基于 Javascript 的灵活性，因此可以更方便的编写独立的组件，这意味着往往只需要一个 js 文件就可以稳稳的进">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="💅 更进一步管理 React 组件样式">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/12/React/Style/更进一步管理 React 组件样式/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言styled-components 是一个 CSS in Javascript 的框架，可用于 React/React Native 上，在 Gzip 只有 18k 大小。它可以让你抛去在编写 React 组件时，每个组件都需要携带一个 CSS/Sass/Less 文件的烦恼。基于 Javascript 的灵活性，因此可以更方便的编写独立的组件，这意味着往往只需要一个 js 文件就可以稳稳的进">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/12/20171209124747.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/12/20171209131530.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/12/20171209154118.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.886Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="💅 更进一步管理 React 组件样式">
+<meta name="twitter:description" content="前言styled-components 是一个 CSS in Javascript 的框架，可用于 React/React Native 上，在 Gzip 只有 18k 大小。它可以让你抛去在编写 React 组件时，每个组件都需要携带一个 CSS/Sass/Less 文件的烦恼。基于 Javascript 的灵活性，因此可以更方便的编写独立的组件，这意味着往往只需要一个 js 文件就可以稳稳的进">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/12/20171209124747.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">💅 更进一步管理 React 组件样式</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">💅 更进一步管理 React 组件样式</h1>
+
+        <div class="meta-rest">
+            <h1>💅 更进一步管理 React 组件样式</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-12-09T02:59:10.000Z" itemprop="datePublished" class="page-time">
+    2017-12-09
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实践-自定义-Button-组件"><span class="post-toc-number">2.</span> <span class="post-toc-text">实践 - 自定义 Button 组件</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#size-大小"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">size 大小</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#color-颜色"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">color 颜色</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#hover-伪类效果"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">hover 伪类效果</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#active-伪类效果"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">active 伪类效果</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#type-类型"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">type 类型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#click-点击事件"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">click 点击事件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">3.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Style/更进一步管理 React 组件样式"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">💅 更进一步管理 React 组件样式</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 12 月 09 日 10:59" datetime="2017-12-09T02:59:10.000Z"  itemprop="datePublished">
+    2017-12-09
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1181</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>styled-components 是一个 <code>CSS in Javascript</code> 的框架，可用于 React/React Native 上，在 Gzip 只有 18k 大小。它可以让你抛去在编写 React 组件时，每个组件都需要携带一个 CSS/Sass/Less 文件的烦恼。基于 Javascript 的灵活性，因此可以更方便的编写独立的组件，这意味着往往只需要一个 js 文件就可以稳稳的进行组件化编程。</p>
+<blockquote>
+<p>本文不会介绍基础内容，更多的参考相关文章：<a href="stories/2017/07/React/Style/Styled-Components%20最佳使用方式/" target="_blank">💅 Styled-Components 最佳使用方式</a></p>
+</blockquote>
+<a id="more"></a>
+<p>下面以一个自定义 <code>Button</code> 组件为示例，讲述如何使用 styled-components 封装自己的组件。</p>
+<h2 id="实践-自定义-Button-组件"><a href="#实践-自定义-Button-组件" class="headerlink" title="实践 - 自定义 Button 组件"></a>实践 - 自定义 Button 组件</h2><p>借鉴 <code>ant design</code> 的 Button 组件设计，结合 styled-components 定义自己的 Button 组件。</p>
+<p>预定的 Props：</p>
+<ul>
+<li><em><code>size</code> 按钮大小</em></li>
+<li><em><code>color</code> 按钮颜色</em></li>
+<li><em><code>type</code> 按钮类型</em></li>
+<li><em><code>onClick</code> 点击事件</em></li>
+</ul>
+<h3 id="size-大小"><a href="#size-大小" class="headerlink" title="size 大小"></a>size 大小</h3><p>按钮大小设置为 <code>large</code>, <code>default</code>, <code>small</code> 三种。而大小是根据 padding 和 font-size 来控制的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> styled, &#123; css &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sizes = &#123;</span><br><span class="line">    large: <span class="string">`</span></span><br><span class="line"><span class="string">        font-size: 17px;</span></span><br><span class="line"><span class="string">    `</span>,</span><br><span class="line">    <span class="keyword">default</span>: <span class="string">`</span></span><br><span class="line"><span class="string">        font-size: 15px;</span></span><br><span class="line"><span class="string">    `</span>,</span><br><span class="line">    small: <span class="string">`</span></span><br><span class="line"><span class="string">        font-size: 13px;</span></span><br><span class="line"><span class="string">    `</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Button = styled.button<span class="string">`</span></span><br><span class="line"><span class="string">    font-family: inherit;</span></span><br><span class="line"><span class="string">    margin: 10px;</span></span><br><span class="line"><span class="string">    border: 1px solid rgba(1, 1, 1, 0.1);</span></span><br><span class="line"><span class="string">    line-height: 1.6;</span></span><br><span class="line"><span class="string">    color: #333;</span></span><br><span class="line"><span class="string">    background-color: #fff;</span></span><br><span class="line"><span class="string">    outline: none;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string">    padding: 0.3em 1.2em;</span></span><br><span class="line"><span class="string">    cursor: pointer;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;props =&gt; sizes[props.size]&#125;</span></span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">Button.defaultProps = &#123;</span><br><span class="line">    size: sizes.default,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;Button size=<span class="string">"large"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button&gt;按钮&lt;/</span>Button&gt;</span><br><span class="line">        &lt;Button size=<span class="string">"small"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这时候看到的应该是这样的效果：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/12/20171209124747.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="color-颜色"><a href="#color-颜色" class="headerlink" title="color 颜色"></a>color 颜色</h3><p>按钮的颜色设置为以下几种：</p>
+<ul>
+<li><code>Red</code>、<code>Green</code>、<code>Blue</code></li>
+<li><code>Pink</code>、<code>Orange</code>、<code>Purple</code></li>
+<li><code>Yellow</code>、<code>Cyan</code>、<code>Grey</code></li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> colors = [</span><br><span class="line">    [<span class="string">'red'</span>, <span class="string">'#f04134'</span>],</span><br><span class="line">    [<span class="string">'green'</span>, <span class="string">'#00a854'</span>],</span><br><span class="line">    [<span class="string">'blue'</span>, <span class="string">'#108ee9'</span>],</span><br><span class="line">    [<span class="string">'pink'</span>, <span class="string">'#f5317f'</span>],</span><br><span class="line">    [<span class="string">'orange'</span>, <span class="string">'#f56a00'</span>],</span><br><span class="line">    [<span class="string">'purple'</span>, <span class="string">'#7265e6'</span>],</span><br><span class="line">    [<span class="string">'yellow'</span>, <span class="string">'#ffbf00'</span>],</span><br><span class="line">    [<span class="string">'cyan'</span>, <span class="string">'#00a2ae'</span>],</span><br><span class="line">    [<span class="string">'grey'</span>, <span class="string">'#bfbfbf'</span>],</span><br><span class="line">].reduce(<span class="function">(<span class="params">obj, val</span>) =&gt;</span> (&#123;</span><br><span class="line">    ...obj,</span><br><span class="line">    [val[<span class="number">0</span>]]: <span class="string">`</span></span><br><span class="line"><span class="string">        border-color: <span class="subst">$&#123;val[<span class="number">1</span>]&#125;</span>;</span></span><br><span class="line"><span class="string">        background-color: <span class="subst">$&#123;val[<span class="number">1</span>]&#125;</span>;</span></span><br><span class="line"><span class="string">    `</span></span><br><span class="line">&#125;), &#123;</span><br><span class="line">    white: <span class="string">`</span></span><br><span class="line"><span class="string">        color: #333;</span></span><br><span class="line"><span class="string">        border-color: rgba(1, 1, 1, 0.1);</span></span><br><span class="line"><span class="string">        background-color: #fff;</span></span><br><span class="line"><span class="string">    `</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Button = styled.button<span class="string">`</span></span><br><span class="line"><span class="string">    font-family: inherit;</span></span><br><span class="line"><span class="string">    margin: 10px;</span></span><br><span class="line"><span class="string">    padding: 0.3em 1.2em;</span></span><br><span class="line"><span class="string">    border: 1px solid rgba(1, 1, 1, 0.1);</span></span><br><span class="line"><span class="string">    line-height: 1.6;</span></span><br><span class="line"><span class="string">    background-color: #fff;</span></span><br><span class="line"><span class="string">    outline: none;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string">    color: #fff;</span></span><br><span class="line"><span class="string">    cursor: pointer;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;props =&gt; sizes[props.size]&#125;</span></span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;props =&gt; colors[props.color]&#125;</span></span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">Button.defaultProps = &#123;</span><br><span class="line">    size: sizes.default,</span><br><span class="line">    color: colors.white,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;Button color=<span class="string">"white"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button color="red"&gt;按钮&lt;/</span>Button&gt;</span><br><span class="line">        &lt;Button color=<span class="string">"blue"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button color="green"&gt;按钮&lt;/</span>Button&gt;</span><br><span class="line">        &lt;Button color=<span class="string">"orange"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button color="pink"&gt;按钮&lt;/</span>Button&gt;</span><br><span class="line">        &lt;Button color=<span class="string">"purple"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button color="yellow"&gt;按钮&lt;/</span>Button&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">)</span></span><br></pre></td></tr></table></figure>
+<p>这时候看到的应该是这样的效果：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/12/20171209131530.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="hover-伪类效果"><a href="#hover-伪类效果" class="headerlink" title="hover 伪类效果"></a>hover 伪类效果</h3><p>添加 :hover 伪类，给用户一种反馈效果。</p>
+<p>使用 <a href="https://github.com/Qix-/color" target="_blank" rel="noopener">Color</a> 颜色工具库，调整其颜色的明暗度。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">border-color: $&#123;val[<span class="number">1</span>]&#125;;</span><br><span class="line">background-color: $&#123;val[<span class="number">1</span>]&#125;;</span><br><span class="line"></span><br><span class="line">&amp;:hover &#123;</span><br><span class="line">    border-color: $&#123;Color(val[<span class="number">1</span>]).darken(<span class="number">0.18</span>)&#125;;</span><br><span class="line">    background-color: $&#123;Color(val[<span class="number">1</span>]).darken(<span class="number">0.18</span>)&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在触发 :hover 时背景颜色变深，这样看起来就更加真实了。</p>
+<h3 id="active-伪类效果"><a href="#active-伪类效果" class="headerlink" title="active 伪类效果"></a>active 伪类效果</h3><p>当点击按钮时，应该有一个反馈效果，那么就需要用到 :active 伪类。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&amp;:active &#123;</span><br><span class="line">    box-shadow: <span class="number">1</span>px <span class="number">2</span>px <span class="number">8</span>px $&#123;val[<span class="number">1</span>]&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在触发 :active 时多出一个阴影效果。</p>
+<h3 id="type-类型"><a href="#type-类型" class="headerlink" title="type 类型"></a>type 类型</h3><p>目前为止，Button 的类型是字体白色，背景彩色的。现在添加一种类型是字体彩色，背景白色的按钮。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[val[<span class="number">0</span>]]: <span class="function"><span class="params">type</span> =&gt;</span> <span class="string">`</span></span><br><span class="line"><span class="string">    border-color: <span class="subst">$&#123;val[<span class="number">1</span>]&#125;</span>;</span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;type === <span class="string">'line'</span> ? <span class="string">''</span> : <span class="string">'background-'</span>&#125;</span>color: <span class="subst">$&#123;val[<span class="number">1</span>]&#125;</span>;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &amp;:hover &#123;</span></span><br><span class="line"><span class="string">        border-color: <span class="subst">$&#123;Color(val[<span class="number">1</span>]).darken(<span class="number">0.18</span>)&#125;</span>;</span></span><br><span class="line"><span class="string">        <span class="subst">$&#123;type === <span class="string">'line'</span> ? <span class="string">''</span> : <span class="string">'background-'</span>&#125;</span>color: <span class="subst">$&#123;Color(val[<span class="number">1</span>]).darken(<span class="number">0.18</span>)&#125;</span>;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &amp;:active &#123;</span></span><br><span class="line"><span class="string">        box-shadow: 1px 2px 8px <span class="subst">$&#123;val[<span class="number">1</span>]&#125;</span>, 0 0 2px <span class="subst">$&#123;val[<span class="number">1</span>]&#125;</span> inset;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">`</span></span><br><span class="line"><span class="comment">// ....</span></span><br><span class="line">$&#123;props =&gt; colors[props.color](props.type)&#125;</span><br><span class="line"></span><br><span class="line">Button.defaultProps = &#123;</span><br><span class="line">    size: sizes.default,</span><br><span class="line">    color: colors.white(props.type),</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;Button color=<span class="string">"red"</span> type=<span class="string">"line"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button color="blue" type="line"&gt;按钮&lt;/</span>Button&gt;</span><br><span class="line">        &lt;Button color=<span class="string">"green"</span>&gt;按钮&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这时候看到的应该是这样的效果：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/12/20171209154118.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="click-点击事件"><a href="#click-点击事件" class="headerlink" title="click 点击事件"></a>click 点击事件</h3><p>因为 styled.button 是基于 button 的。所以点击事件直接添加上去即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;Button onClick=&#123;e =&gt; <span class="built_in">console</span>.log(e)&#125; /&gt;</span><br></pre></td></tr></table></figure>
+<p>同理，style、className 等属性都是直接添加进去即可。</p>
+<p>如果有 className，它会优先把 className 的值放在前面，例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;Button className=<span class="string">"red"</span> /&gt;  <span class="comment">// red sc-bdVaJa kAEtbq</span></span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>无论从哪个方面看，使用 styled-components 来管理 React 组件样式都是一个不错的选择。</p>
+<p>但是有一些地方需要注意的：</p>
+<ul>
+<li>styled-components 内集成了 autoprefixer。</li>
+<li>编译后，没有看到有生成 CSS 文件。也就是说它的样式是是通过 js 动态计算，然后反映在 <code>html &gt; head</code> 上的。</li>
+<li>因为 css 样式是通过动态计算的，所有首屏可能在这里需要一点计算时间。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.styled-components.com/" target="_blank" rel="noopener">https://www.styled-components.com/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.886Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/12/React/Style/更进一步管理 React 组件样式/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/12/React/Style/更进一步管理 React 组件样式/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/12/React/React/React 定义一个 Model 组件/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React 定义一个 Model 组件</h4>
+        <h4 class="summary">Model（弹窗）组件是一个比较常用的组件，在 React 里要设计一个 Model 组件可以不是一件简单的事情。因为 ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/12/Style/Flex + Scss 自定义弹性布局方式/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Flex + Scss 自定义弹性布局方式</h4>
+        <h4 class="summary">Flexbox 是一个很好的伸缩性弹性布局方案，到目前为止几乎可以忽略对老的浏览器（没人爱的 IE）的支持，放心使用 F...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

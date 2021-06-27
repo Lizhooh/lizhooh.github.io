@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/12/Redux/Redux 自定义异步操作/">
+    
+    
+    <title>Redux 自定义异步操作 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Redux 是一个全局的状态数据管理框架，在大多数情况下，我们都会有多多少少的异步请求，也就是所谓的“异步流程控制”。 在 Redux 里，你可以使用 redux-thunk，redux-saga，redux-actions 等中间件来管理你的异步流程。这些库其核心原理都是对 Redux 的数据改变流程进行了修饰使用的异步 dispatch 的可能。 今天就来聊聊，如何不使用第三方库，在 Re">
+<meta name="keywords" content="前端,学习笔记,Redux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redux 自定义异步操作">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/12/Redux/Redux 自定义异步操作/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Redux 是一个全局的状态数据管理框架，在大多数情况下，我们都会有多多少少的异步请求，也就是所谓的“异步流程控制”。 在 Redux 里，你可以使用 redux-thunk，redux-saga，redux-actions 等中间件来管理你的异步流程。这些库其核心原理都是对 Redux 的数据改变流程进行了修饰使用的异步 dispatch 的可能。 今天就来聊聊，如何不使用第三方库，在 Re">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.891Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redux 自定义异步操作">
+<meta name="twitter:description" content="前言Redux 是一个全局的状态数据管理框架，在大多数情况下，我们都会有多多少少的异步请求，也就是所谓的“异步流程控制”。 在 Redux 里，你可以使用 redux-thunk，redux-saga，redux-actions 等中间件来管理你的异步流程。这些库其核心原理都是对 Redux 的数据改变流程进行了修饰使用的异步 dispatch 的可能。 今天就来聊聊，如何不使用第三方库，在 Re">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Redux 自定义异步操作</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Redux 自定义异步操作</h1>
+
+        <div class="meta-rest">
+            <h1>Redux 自定义异步操作</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-12-05T16:22:15.000Z" itemprop="datePublished" class="page-time">
+    2018-12-06
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#规划目录"><span class="post-toc-number">2.</span> <span class="post-toc-text">规划目录</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#创建-Store"><span class="post-toc-number">3.</span> <span class="post-toc-text">创建 Store</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#工具函数"><span class="post-toc-number">4.</span> <span class="post-toc-text">工具函数</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#创建-Reducer"><span class="post-toc-number">5.</span> <span class="post-toc-text">创建 Reducer</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#异步操作"><span class="post-toc-number">6.</span> <span class="post-toc-text">异步操作</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">7.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Redux/Redux 自定义异步操作"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Redux 自定义异步操作</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 12 月 06 日 0:22" datetime="2018-12-05T16:22:15.000Z"  itemprop="datePublished">
+    2018-12-06
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1477</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Redux 是一个全局的状态数据管理框架，在大多数情况下，我们都会有多多少少的异步请求，也就是所谓的<strong>“异步流程控制”</strong>。</p>
+<p>在 Redux 里，你可以使用 redux-thunk，redux-saga，redux-actions 等中间件来管理你的异步流程。这些库其核心原理都是对 Redux 的数据改变流程进行了修饰使用的异步 dispatch 的可能。</p>
+<p>今天就来聊聊，如何不使用第三方库，在 Redux 里进行异步的操作。</p>
+<blockquote>
+<p>在阅读前，默认认为你已经具备了 Redux 基础的知识。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="规划目录"><a href="#规划目录" class="headerlink" title="规划目录"></a>规划目录</h2><p>在开始之后，先来讲讲开发的目录。<br>把 redux 相关的代码都放在 redux 目录里，redux/index.js 就是初始化 store 的代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">redux</span><br><span class="line">    - index.js</span><br><span class="line">    - reducers.js    <span class="comment">// store 切分</span></span><br><span class="line">    - util.js</span><br><span class="line">    - actions        <span class="comment">// action 分支</span></span><br><span class="line">        - index.js</span><br><span class="line">        - user.js</span><br><span class="line">        - theme.js</span><br></pre></td></tr></table></figure>
+<h2 id="创建-Store"><a href="#创建-Store" class="headerlink" title="创建 Store"></a>创建 Store</h2><p>在 redux/index.js 里就是创建 store 的代码。这里使用了笔者写的 <a href="https://www.npmjs.com/package/redux-store-init" target="_blank" rel="noopener">redux-store-init</a> 一键创建 store，它需要一个 reducers 对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redux/index.js</span></span><br><span class="line"><span class="keyword">import</span> Store <span class="keyword">from</span> <span class="string">'redux-store-init'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">new</span> Store(&#123;</span><br><span class="line">    reducers,</span><br><span class="line">    devtool: <span class="literal">true</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>创建完 store 后，就可以给 Provider 。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; (</span><br><span class="line">    &lt;Provider store=&#123;store&#125;&gt;</span><br><span class="line">        &lt;App /&gt;</span><br><span class="line">    &lt;<span class="regexp">/Provider&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h2 id="工具函数"><a href="#工具函数" class="headerlink" title="工具函数"></a>工具函数</h2><p>在 redux/util.js 里提供，一些工具函数，例如获取全局的数据，获取 dispatch 等。</p>
+<p>此外，还定义了一个非常重要的函数：<code>commit</code>，它接收 name 和回调函数，用于改变 store 的 state。</p>
+<p>通过调用 dispatch，发出改变状态的指令，注意到这里的 action 对象只有两个属性：<code>type, newState</code>。</p>
+<p>type 用于指定归属的 reducers，而 newState 是一个函数，用于说明改变的 state。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redux/util.js</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">'./index'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> keys = <span class="built_in">Object</span>.keys(store.getState());</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> getState = <span class="function">(<span class="params">...arg</span>) =&gt;</span> store.getState(...arg);</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> dispatch = <span class="function">(<span class="params">...arg</span>) =&gt;</span> store.dispatch(...arg);</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 提交一个数据的变化</span></span><br><span class="line"><span class="comment"> * commit('index', (state, initState) =&gt; newState)</span></span><br><span class="line"><span class="comment"> * commit('index', newState)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param<span class="type">&#123;String&#125;</span> <span class="variable">name</span></span> - 模块名称</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param<span class="type">&#123;Function|Object&#125;</span> </span>callback/newState - 返回新数据的回调函数或新的数据</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return<span class="type">&#123;Object&#125;</span> <span class="variable">newState</span></span> - 改变后的数据</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> commit = <span class="function">(<span class="params">name, oper</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> _newState = <span class="literal">null</span>;</span><br><span class="line">    <span class="comment">// 参数匹配已经指定的模块需要存在</span></span><br><span class="line">    <span class="keyword">if</span> (isStr(name) &amp;&amp; (isFun(oper) || isObj(oper)) &amp;&amp; keys.includes(name)) &#123;</span><br><span class="line">        dispatch(&#123;</span><br><span class="line">            type: name || <span class="string">'$$root'</span>,</span><br><span class="line">            newState: <span class="function">(<span class="params">state, initState</span>) =&gt;</span> &#123;</span><br><span class="line">                _newState = isFun(oper) ? &#123;</span><br><span class="line">                    ...state,</span><br><span class="line">                    ...oper(state, initState)</span><br><span class="line">                &#125; : &#123; ...state, ...oper &#125;;</span><br><span class="line">                <span class="keyword">return</span> _newState;</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">return</span> _newState;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">console</span>.warn(<span class="string">'parameter error'</span>);</span><br><span class="line">    <span class="keyword">return</span> _newState;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在 redux-thunk 里提供 dispatch, getState 参数，实际上这些都是从 store 里获取的</p>
+</blockquote>
+<h2 id="创建-Reducer"><a href="#创建-Reducer" class="headerlink" title="创建 Reducer"></a>创建 Reducer</h2><p>基于上面的 <code>commit</code> 函数，这里使用统一的 Reducer 创建方式。与传统的 <strong>switch - case</strong> 的写法相比，其特点就是简单不累赘，减少了很多代码（50% 以上），缺点就是不好测试，不太好调试。</p>
+<p>下面是典型的传统方式，也是官方的写法。在 reducer 里很多 switch - case。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">counter</span>(<span class="params">state = <span class="number">0</span>, action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'INCREMENT'</span>:</span><br><span class="line">            <span class="keyword">return</span> state + <span class="number">1</span></span><br><span class="line">        <span class="keyword">case</span> <span class="string">'DECREMENT'</span>:</span><br><span class="line">            <span class="keyword">return</span> state - <span class="number">1</span></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> state</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面是通过判断 type 与 name 是否匹配，如果匹配则调用 newState，返回新的数据。<strong>也就是数据的改变发生在 dispatch 的 newState 里，reducer 里至少做匹配并返回。</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redux/reducers.js</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createReducer</span>(<span class="params">name, initState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function">(<span class="params">state = initState, action</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (action.newState &amp;&amp; !isFunction(action.newState)) &#123;</span><br><span class="line">            <span class="built_in">console</span>.warn(<span class="string">`[<span class="subst">$&#123;name&#125;</span>] action.newState is not a function`</span>);</span><br><span class="line">            <span class="keyword">return</span> state;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (action.type === name) &#123;</span><br><span class="line">            <span class="keyword">return</span> action.newState(state, initState) || state;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> state;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建了一个用于管理主题的 reducer</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> theme = createReducer(<span class="string">'theme'</span>, &#123;</span><br><span class="line">    color: <span class="string">'#39f'</span>,</span><br><span class="line">    navBarHeight: <span class="number">55</span>,</span><br><span class="line">    tabsViewHeight: <span class="number">55</span>,</span><br><span class="line">    mainMaxWidth: <span class="number">640</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建了一个用户信息相关的 reducer</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> user = createReducer(<span class="string">'user'</span>, &#123;</span><br><span class="line">    id: <span class="number">1</span>,</span><br><span class="line">    name: <span class="string">''</span>,</span><br><span class="line">    email: <span class="string">''</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在 redux/index.js 导出的 reducers 实际上是：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    theme: <span class="function"><span class="params">()</span> =&gt;</span> (),</span><br><span class="line">    user: <span class="function"><span class="params">()</span> =&gt;</span> (),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>那么，如何改变 store 的 state 呢？</strong>通常直接调用 dispatch 即可，但是在这里调用 commit 会更方便（实际上也是调用 dispatch）。</p>
+<p>下面来试一下，使用 commit 改变 theme 的 color。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; commit &#125; <span class="keyword">from</span> <span class="string">'../util'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// redux/actions/theme.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> updateThemeColor = <span class="function"><span class="params">color</span> =&gt;</span> &#123;</span><br><span class="line">    commit(<span class="string">'theme'</span>, state =&gt; (&#123; color &#125;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>commit</code> 的第一个参数为 action.type 匹配的值，第二个参数为改变数据状态的函数，此函数第一个参数匹配的 reducer state，第二个参数是匹配的 reducer initState。（听起来挺复杂的，不如再看看 commit 和 createReducer 的代码）。</p>
+<h2 id="异步操作"><a href="#异步操作" class="headerlink" title="异步操作"></a>异步操作</h2><p>上面演示了如何通过 commit 来改变 store 的 state，那么在有异步的时候会怎样呢？</p>
+<p><strong>因为 commit 只是一个普通的函数，所以，可以轻松的把它应用在异步里。</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; commit &#125; <span class="keyword">from</span> <span class="string">'../util'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> api <span class="keyword">from</span> <span class="string">'../../api'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// redux/actions/theme.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> updateThemeColor = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> res = <span class="keyword">await</span> api.getThemeColorConfig();</span><br><span class="line">    commit(<span class="string">'theme'</span>, state =&gt; (&#123; <span class="attr">color</span>: res &#125;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你可以在异步完成之后，再调用 commit，完全没问题。</p>
+<p>但是有一个要求是不能在 <code>connect</code> 注入此 action，不然会受到 async action 的警告。因为 connect 的第二个参数里的函数必须是返回 action 对象的函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> actions <span class="keyword">from</span> <span class="string">'../redux/actions/theme'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; state,</span><br><span class="line">    actions,                <span class="comment">// 这是错误的做法</span></span><br><span class="line">)(App);</span><br></pre></td></tr></table></figure>
+<p>你应该单独的使用 actions，而不是把它注入到 props 里再使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 错误做法</span></span><br><span class="line">&lt;button onClick=&#123;e =&gt; <span class="keyword">this</span>.props.actions.updateThemeColor(<span class="string">'#f34'</span>)&#125;&gt;</span><br><span class="line">    更新 color</span><br><span class="line">&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 正确做法</span></span><br><span class="line"><span class="regexp">&lt;button onClick=&#123;e =&gt; actions.updateThemeColor('#f34')&#125;&gt;</span></span><br><span class="line"><span class="regexp">    更新 color</span></span><br><span class="line"><span class="regexp">&lt;/</span>button&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>纵观整个过程，可以发现，代码非常少，并且很简洁，非常接近 this.setState 的操作方式，正是如此，说明了 redux 是可以非常灵活的自定义的。</p>
+<p>实际是 redux 是一个函数式编程框架，reducer 只是一个函数，它接收 state 和 action 返回新的 state。action 也是一个函数，它接收预定义的参数，返回告诉 reducer 如何做变化的关键量。</p>
+<p>我们完全可以站在这两个概念的基础和要求下，定义出一套新的 store 操作方式，就像 redux-saga、redux-actions 一样。<strong>这一切都取决于你的想法以及设计思想。</strong></p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.891Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/12/Redux/Redux 自定义异步操作/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/12/Redux/Redux 自定义异步操作/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/12/React Native/Socket/如何在 React Native 里优雅的使用 Socket.io？/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">如何在 React Native 里优雅的使用 Socket.io？</h4>
+        <h4 class="summary">Socket.io 是纯的 Javascript 库，理论上是可以在 React Native 上使用的，React N...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/11/React Native/React Native 编译失败集合/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 编译失败集合</h4>
+        <h4 class="summary">在编译 React Native 应用时多多少少会遇到编译失败的问题，红屏不可怕，编译失败才可怕。下面总结的常见的编译失...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

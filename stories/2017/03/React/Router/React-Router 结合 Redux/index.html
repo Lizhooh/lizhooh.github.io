@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/03/React/Router/React-Router 结合 Redux/">
+    
+    
+    <title>React-Router 结合 Redux | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言React单独使用，并不难。React 与 React-Router 结合使用，可能会有点难度。React 与 React-Redux 结合使用，可能会有点难度。 但它们三者都结合在一起React, React-Router, Redux使用的时候，会感觉让人眼花缭乱。 (这里的 React-Router 指的是 4.0 版本)">
+<meta name="keywords" content="React,学习笔记,Redux,React-Router">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React-Router 结合 Redux">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/03/React/Router/React-Router 结合 Redux/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言React单独使用，并不难。React 与 React-Router 结合使用，可能会有点难度。React 与 React-Redux 结合使用，可能会有点难度。 但它们三者都结合在一起React, React-Router, Redux使用的时候，会感觉让人眼花缭乱。 (这里的 React-Router 指的是 4.0 版本)">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/20170313165950.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.883Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React-Router 结合 Redux">
+<meta name="twitter:description" content="前言React单独使用，并不难。React 与 React-Router 结合使用，可能会有点难度。React 与 React-Redux 结合使用，可能会有点难度。 但它们三者都结合在一起React, React-Router, Redux使用的时候，会感觉让人眼花缭乱。 (这里的 React-Router 指的是 4.0 版本)">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/3/20170313165950.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React-Router 结合 Redux</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React-Router 结合 Redux</h1>
+
+        <div class="meta-rest">
+            <h1>React-Router 结合 Redux</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-03-13T08:34:32.000Z" itemprop="datePublished" class="page-time">
+    2017-03-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#步骤"><span class="post-toc-number">3.</span> <span class="post-toc-text">步骤</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#编写-React-组件"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">编写 React 组件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置-React-Router-路由"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">配置 React-Router 路由</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#连接-Redux"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">连接 Redux</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#把-lt-Router-gt-嵌套在-lt-Provider-gt-里"><span class="post-toc-number">3.3.1.</span> <span class="post-toc-text">把&lt;Router&gt;嵌套在&lt;Provider&gt;里</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#编写reducer-action"><span class="post-toc-number">3.3.2.</span> <span class="post-toc-text">编写reducer, action</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#创建Store"><span class="post-toc-number">3.3.3.</span> <span class="post-toc-text">创建Store</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#使用connent连接组件"><span class="post-toc-number">3.3.4.</span> <span class="post-toc-text">使用connent连接组件</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#最后"><span class="post-toc-number">3.3.5.</span> <span class="post-toc-text">最后</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Router/React-Router 结合 Redux"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React-Router 结合 Redux</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 03 月 13 日 16:34" datetime="2017-03-13T08:34:32.000Z"  itemprop="datePublished">
+    2017-03-13
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 854</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>React</code>单独使用，并不难。<br><code>React 与 React-Router</code> 结合使用，可能会有点难度。<br><code>React 与 React-Redux</code> 结合使用，可能会有点难度。</p>
+<p>但它们三者都结合在一起<code>React, React-Router, Redux</code>使用的时候，会感觉让人眼花缭乱。</p>
+<p>(这里的 <code>React-Router</code> 指的是 4.0 版本)</p>
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>安装的东西可能有点多。(npm install)</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"axios"</span>: <span class="string">"^0.15.3"</span>,</span><br><span class="line">    <span class="attr">"react"</span>: <span class="string">"^15.4.2"</span>,</span><br><span class="line">    <span class="attr">"react-dom"</span>: <span class="string">"^15.4.2"</span>,</span><br><span class="line">    <span class="attr">"react-redux"</span>: <span class="string">"^5.0.3"</span>,</span><br><span class="line">    <span class="attr">"react-router"</span>: <span class="string">"^4.0.0"</span>,</span><br><span class="line">    <span class="attr">"react-router-dom"</span>: <span class="string">"^4.0.0"</span>,</span><br><span class="line">    <span class="attr">"react-router-redux"</span>: <span class="string">"^4.0.8"</span>,</span><br><span class="line">    <span class="attr">"redux"</span>: <span class="string">"^3.6.0"</span>,</span><br><span class="line">    <span class="attr">"redux-thunk"</span>: <span class="string">"^2.2.0"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>这肯定有一些步骤，主要是<code>react -&gt; react-router -&gt; redux</code></p>
+<p>先是写好 React 的组件，再是配置 React-Router 路由，最后在连接 Redux。</p>
+<h3 id="编写-React-组件"><a href="#编写-React-组件" class="headerlink" title="编写 React 组件"></a>编写 React 组件</h3><p>假设写了这几个组件：<br><code>Latest, Category, Search</code></p>
+<p>这几个组件的结构都只是输出一些简单的文字。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (props) =&gt; (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;h1&gt;Search&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="配置-React-Router-路由"><a href="#配置-React-Router-路由" class="headerlink" title="配置 React-Router 路由"></a>配置 React-Router 路由</h3><p>再就是配置路由，这里只是简单的类似<code>tabs</code>的路由结构。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    BrowserRouter <span class="keyword">as</span> Router,</span><br><span class="line">    Route,</span><br><span class="line">    Redirect,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    Banner,</span><br><span class="line">    Latest,</span><br><span class="line">    Category,</span><br><span class="line">    Search,</span><br><span class="line">    Main</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'./comp'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (porps) =&gt; (</span><br><span class="line">    &lt;Router&gt;</span><br><span class="line">        &lt;section&gt;</span><br><span class="line">            &lt;Banner /&gt;</span><br><span class="line"></span><br><span class="line">            &lt;Main&gt;</span><br><span class="line">                &lt;Redirect path=<span class="string">'/'</span> to=<span class="string">"/latest"</span> /&gt;</span><br><span class="line">                &lt;Route path=<span class="string">'/latest'</span> component=&#123;Latest&#125; /&gt;</span><br><span class="line">                &lt;Route path=<span class="string">'/category'</span> component=&#123;Category&#125; /&gt;</span><br><span class="line">                &lt;Route path=<span class="string">'/search'</span> component=&#123;Search&#125; /&gt;</span><br><span class="line">            &lt;<span class="regexp">/Main&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>section&gt;</span><br><span class="line">    &lt;<span class="regexp">/Router&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="连接-Redux"><a href="#连接-Redux" class="headerlink" title="连接 Redux"></a>连接 Redux</h3><p>连接 Redux 要做几样事情。</p>
+<ol>
+<li>把<code>&lt;Router&gt;</code>嵌套在<code>&lt;Provider&gt;</code>里</li>
+<li>编写<code>reducer, action</code></li>
+<li>创建<code>Store</code></li>
+<li>使用<code>connent</code>连接组件</li>
+</ol>
+<h4 id="把-lt-Router-gt-嵌套在-lt-Provider-gt-里"><a href="#把-lt-Router-gt-嵌套在-lt-Provider-gt-里" class="headerlink" title="把&lt;Router&gt;嵌套在&lt;Provider&gt;里"></a>把<code>&lt;Router&gt;</code>嵌套在<code>&lt;Provider&gt;</code>里</h4><p>Store 来自于后面创建的 Store</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Provider</span> <span class="attr">store</span>=<span class="string">&#123;Store&#125;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Router</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">section</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Banner</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">Main</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Redirect</span> <span class="attr">path</span>=<span class="string">'/'</span> <span class="attr">to</span>=<span class="string">"/latest"</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/latest'</span> <span class="attr">component</span>=<span class="string">&#123;Latest&#125;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/category'</span> <span class="attr">component</span>=<span class="string">&#123;Category&#125;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/search'</span> <span class="attr">component</span>=<span class="string">&#123;Search&#125;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Main</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">section</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="编写reducer-action"><a href="#编写reducer-action" class="headerlink" title="编写reducer, action"></a>编写<code>reducer, action</code></h4><p>这里只是做简单的演示：</p>
+<blockquote>
+<p>reducer.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始值</span></span><br><span class="line"><span class="keyword">const</span> initialLatest = &#123;</span><br><span class="line">    page: <span class="number">0</span>,</span><br><span class="line">    source: <span class="number">1</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = initialLatest, action) =&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'initAsync'</span>: &#123;</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                ...state,</span><br><span class="line">                source: action.data,</span><br><span class="line">                page: action.page,</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">default</span>: &#123;</span><br><span class="line">            <span class="keyword">return</span> state;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>action.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Api <span class="keyword">from</span> <span class="string">'../../server/api'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 异步 action, 需要使用 react-thunk</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> initAsync = <span class="function">(<span class="params">page</span>) =&gt;</span> <span class="function">(<span class="params">dispatch, getState</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Api.lastest(page).then(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">        dispatch(&#123;</span><br><span class="line">            type: <span class="string">'initAsync'</span>,</span><br><span class="line">            data: result,</span><br><span class="line">            page: page + <span class="number">1</span>,</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="创建Store"><a href="#创建Store" class="headerlink" title="创建Store"></a>创建<code>Store</code></h4><p>创建 Store 非常麻烦。</p>
+<blockquote>
+<p>store.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redux 相关</span></span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    createStore,</span><br><span class="line">    combineReducers,</span><br><span class="line">    applyMiddleware,</span><br><span class="line">    compose,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// react-router-redux 相关</span></span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    routerReducer,</span><br><span class="line">    routerMiddleware,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-router-redux'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> createHistory <span class="keyword">from</span> <span class="string">'history/createBrowserHistory'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// react-router 相关的中间件</span></span><br><span class="line"><span class="keyword">const</span> history = createHistory();</span><br><span class="line"><span class="keyword">const</span> middleware = routerMiddleware(history);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 异步中间件</span></span><br><span class="line"><span class="keyword">import</span> thunk <span class="keyword">from</span> <span class="string">'redux-thunk'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引用 reducers</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> store = createStore(</span><br><span class="line">    <span class="comment">// 让每个 reducer 处理一个 store 的只节点</span></span><br><span class="line">    combineReducers(&#123;</span><br><span class="line">        ...reducers,</span><br><span class="line">        router: routerReducer,</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="comment">// 使用中间件, 需要使用 compose 来包裹</span></span><br><span class="line">    compose(</span><br><span class="line">        applyMiddleware(middleware, thunk),</span><br><span class="line">        <span class="comment">// 开启 redux devtool</span></span><br><span class="line">        <span class="built_in">window</span>.__REDUX_DEVTOOLS_EXTENSION__ &amp;&amp;</span><br><span class="line">        <span class="built_in">window</span>.__REDUX_DEVTOOLS_EXTENSION__()</span><br><span class="line">    ),</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> store;</span><br></pre></td></tr></table></figure>
+<h4 id="使用connent连接组件"><a href="#使用connent连接组件" class="headerlink" title="使用connent连接组件"></a>使用<code>connent</code>连接组件</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; connect &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> action <span class="keyword">from</span> <span class="string">'./action'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Latest</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="comment">// this.props.initAsync 来自于 action.js 中的 initAsync</span></span><br><span class="line">        <span class="keyword">this</span>.props.initAsync(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;p&gt;result&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 连接 redux 中的 store</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123; <span class="attr">latest</span>: state.latest &#125;),</span><br><span class="line">    action,</span><br><span class="line">)(Latest);</span><br></pre></td></tr></table></figure>
+<h4 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h4><p>最后，成功连接后，在<code>redux-devtool</code>里会看到：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/3/20170313165950.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>可以看到，在这条语句里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">combineReducers(&#123;</span><br><span class="line">    ...reducers,</span><br><span class="line">    router: routerReducer,</span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+<p><code>state.router</code> 对应着 <code>router: routerReducer</code></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://reacttraining.com/react-router/web/guides/redux-integration" target="_blank" rel="noopener">https://reacttraining.com/react-router/web/guides/redux-integration</a></li>
+<li><a href="https://github.com/reacttraining/react-router/tree/master/packages/react-router-redux" target="_blank" rel="noopener">https://github.com/reacttraining/react-router/tree/master/packages/react-router-redux</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.883Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/03/React/Router/React-Router 结合 Redux/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/03/React/Router/React-Router 结合 Redux/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Router/">React-Router</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/03/MongoDB/MongoDB 更新文档（Update）/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">MongoDB 更新文档（Update）</h4>
+        <h4 class="summary">更新文档在 MongoDB 中更新文档的操作还是挺灵活的。
+updateupdate 是最常用的更新文档操作，它的 AP...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/03/Vue/Vue 低配模式开发/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Vue 低配模式开发</h4>
+        <h4 class="summary">Vue 低配模式开发，实际上是为了解决，又想使用 MVVM，因为一些历史原因，又不能完全的使用单页面应用开发模式，这时候...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

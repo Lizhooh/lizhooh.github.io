@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/11/React/React/React 16 新特性 Portal 与错误边界的用法/">
+    
+    
+    <title>React 16 新特性 Portal 与错误边界的用法 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 React 16 里添加了一个 Portal 的 API，它挂载在 ReactDOM 里。Portal 的作用是可以直接脱离当前的 DOM 结构，在任意的地方渲染 DOM 节点。这意味着以往在 React 实现全局消息通知，Modal，对话框，悬浮卡片等组件时非常棘手，而现在可以轻易的使用 Portal 的特性来实现。 除了 Portal 外，还有一个比较值得关注的新特性，那就是错误边界。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 16 新特性 Portal 与错误边界的用法">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/11/React/React/React 16 新特性 Portal 与错误边界的用法/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 React 16 里添加了一个 Portal 的 API，它挂载在 ReactDOM 里。Portal 的作用是可以直接脱离当前的 DOM 结构，在任意的地方渲染 DOM 节点。这意味着以往在 React 实现全局消息通知，Modal，对话框，悬浮卡片等组件时非常棘手，而现在可以轻易的使用 Portal 的特性来实现。 除了 Portal 外，还有一个比较值得关注的新特性，那就是错误边界。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/t018f65066cec96e17e.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.875Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 16 新特性 Portal 与错误边界的用法">
+<meta name="twitter:description" content="前言在 React 16 里添加了一个 Portal 的 API，它挂载在 ReactDOM 里。Portal 的作用是可以直接脱离当前的 DOM 结构，在任意的地方渲染 DOM 节点。这意味着以往在 React 实现全局消息通知，Modal，对话框，悬浮卡片等组件时非常棘手，而现在可以轻易的使用 Portal 的特性来实现。 除了 Portal 外，还有一个比较值得关注的新特性，那就是错误边界。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/11/t018f65066cec96e17e.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 16 新特性 Portal 与错误边界的用法</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 16 新特性 Portal 与错误边界的用法</h1>
+
+        <div class="meta-rest">
+            <h1>React 16 新特性 Portal 与错误边界的用法</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-11-16T08:20:24.000Z" itemprop="datePublished" class="page-time">
+    2017-11-16
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Portal"><span class="post-toc-number">2.</span> <span class="post-toc-text">Portal</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#错误边界"><span class="post-toc-number">3.</span> <span class="post-toc-text">错误边界</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/React 16 新特性 Portal 与错误边界的用法"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 16 新特性 Portal 与错误边界的用法</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 11 月 16 日 16:20" datetime="2017-11-16T08:20:24.000Z"  itemprop="datePublished">
+    2017-11-16
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 969</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React 16 里添加了一个 <code>Portal</code> 的 API，它挂载在 ReactDOM 里。Portal 的作用是可以直接脱离当前的 DOM 结构，在任意的地方渲染 DOM 节点。这意味着以往在 React 实现全局消息通知，Modal，对话框，悬浮卡片等组件时非常棘手，而现在可以轻易的使用 Portal 的特性来实现。</p>
+<p>除了 Portal 外，还有一个比较值得关注的新特性，那就是<strong>错误边界</strong>。在 React 16 里添加了一个周期函数：<code>componentDidCatch</code>，但组件内部发送错误时就会把错误信息交给 componentDidCatch 去处理。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/t018f65066cec96e17e.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="Portal"><a href="#Portal" class="headerlink" title="Portal"></a>Portal</h2><p><code>Portal</code> 的创建使用 ReactDOM.createPortal：</p>
+<blockquote>
+<p>ReactDOM.createPortal(child, container)</p>
+</blockquote>
+<p><strong>第一个参数</strong>（child）是任何可渲染的 React 子元素，如元素，字符串或片段。<br><strong>第二个参数</strong>（container）是一个 DOM 元素。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">render() &#123;</span><br><span class="line">    <span class="keyword">return</span> ReactDOM.createPortal(</span><br><span class="line">        <span class="keyword">this</span>.props.children,</span><br><span class="line">        domNode,</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面来介绍如何使用它。</p>
+<p>假设有以下 HTML 结构：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"app-root"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"modal-root"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>很明显，model-root 是用来渲染对话框的。</p>
+<p>当在 render 函数里渲染时：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">render() &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;header&gt;&lt;<span class="regexp">/header&gt;</span></span><br><span class="line"><span class="regexp">            &lt;section&gt;&lt;/</span>section&gt;</span><br><span class="line">            &lt;footer&gt;&lt;<span class="regexp">/footer&gt;</span></span><br><span class="line"><span class="regexp">            &lt;div&gt;&#123;</span></span><br><span class="line"><span class="regexp">                ReactDOM.createPortal(</span></span><br><span class="line"><span class="regexp">                    &lt;div&gt;</span></span><br><span class="line"><span class="regexp">                        &lt;h1&gt;Model&lt;/</span>h1&gt;</span><br><span class="line">                    &lt;<span class="regexp">/div&gt;,</span></span><br><span class="line"><span class="regexp">                    document.getElementById("modal-root"),</span></span><br><span class="line"><span class="regexp">                )</span></span><br><span class="line"><span class="regexp">            &#125;&lt;/</span>div&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><code>&lt;h1&gt;Model&lt;/h1&gt;</code> 并不会挂载在 app-root 内部，而挂载在 model-root 内部。</p>
+<p>接下来把它抽象起来，定义一个 Model 类。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> appRoot = <span class="built_in">document</span>.getElementById(<span class="string">'app-root'</span>);</span><br><span class="line"><span class="keyword">const</span> modalRoot = <span class="built_in">document</span>.getElementById(<span class="string">'modal-root'</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Modal</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.el = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        modalRoot.appendChild(<span class="keyword">this</span>.el);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentWillUnmount() &#123;</span><br><span class="line">        modalRoot.removeChild(<span class="keyword">this</span>.el);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> ReactDOM.createPortal(</span><br><span class="line">            <span class="keyword">this</span>.props.children,</span><br><span class="line">            <span class="keyword">this</span>.el,</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用的时候，可以这样去使用它：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            showModal: <span class="literal">false</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    openModal = <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123; <span class="attr">showModal</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    closeModal = <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (event.currentTarget === event.target) &#123;</span><br><span class="line">            <span class="keyword">this</span>.setState(&#123; <span class="attr">showModal</span>: <span class="literal">false</span> &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; showModal &#125; = <span class="keyword">this</span>.state;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div onClick=&#123;<span class="keyword">this</span>.handleClick&#125;&gt;</span><br><span class="line">                &lt;button onClick=&#123;<span class="keyword">this</span>.openModal&#125;&gt;open Modal&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">                &#123;showModal &amp;&amp;</span></span><br><span class="line"><span class="regexp">                    &lt;Modal onClick=&#123;this.closeModal&#125;&gt;</span></span><br><span class="line"><span class="regexp">                        &lt;h1&gt;Hello Modal&lt;/</span>h1&gt;</span><br><span class="line">                    &lt;<span class="regexp">/Modal&gt;</span></span><br><span class="line"><span class="regexp">                &#125;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样添加相应样式后，就实现了一个 Modal 组件。</p>
+<h2 id="错误边界"><a href="#错误边界" class="headerlink" title="错误边界"></a>错误边界</h2><p>错误边界就是 componentDidCatch，它的参数如下：</p>
+<blockquote>
+<p>componentDidCatch(error, info)</p>
+</blockquote>
+<p><strong>第一个参数</strong>为错误信息，<br><strong>第二个参数</strong>为错误栈信息。</p>
+<p>与以往不同的是，错误边界可以很灵活的处理错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ErrorBoundary</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.state = &#123; <span class="attr">hasError</span>: <span class="literal">false</span> &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidCatch(error, info) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123; <span class="attr">hasError</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">        <span class="comment">// 把错误信息上报</span></span><br><span class="line">        logErrorToMyService(error, info);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="comment">// 在出错误的时候，显示出错误了</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.state.hasError) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Something went wrong.<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.props.children;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么，到底什么时候会出错呢？比如，有一个组件，它接收 data props，它使用了 data.name。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> User = <span class="function">(<span class="params">&#123; data &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;span&gt;&#123;data.name&#125;&lt;<span class="regexp">/span&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">class App extends React.Component &#123;</span></span><br><span class="line"><span class="regexp">    constructor(props) &#123;</span></span><br><span class="line"><span class="regexp">        super(props);</span></span><br><span class="line"><span class="regexp">        this.state = &#123; hasError: false &#125;;</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    componentDidCatch(error, info) &#123;</span></span><br><span class="line"><span class="regexp">        this.setState(&#123; hasError: true &#125;);</span></span><br><span class="line"><span class="regexp">        /</span><span class="regexp">/ 把错误信息上报</span></span><br><span class="line"><span class="regexp">        logErrorToMyService(error, info);</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    async componentDidMount() &#123;</span></span><br><span class="line"><span class="regexp">       this.setState(&#123;</span></span><br><span class="line"><span class="regexp">           data: await api.get(),</span></span><br><span class="line"><span class="regexp">       &#125;);</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    render() &#123;</span></span><br><span class="line"><span class="regexp">        /</span><span class="regexp">/ 在出错误的时候，显示出错误了</span></span><br><span class="line"><span class="regexp">        if (this.state.hasError) &#123;</span></span><br><span class="line"><span class="regexp">            return &lt;h1&gt;Something went wrong.&lt;/</span>h1&gt;;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">User</span> <span class="attr">data</span>=<span class="string">&#123;this.state.data&#125;</span> /&gt;</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据是从服务器获取的，如果服务器抽风了，返回的数据是 <code>null</code> 而不是 <code>object</code>，这是在 User 组件里使用 data.name 则会报错。此时，错误信息将抛给 componentDidCatch。在以往这种错误发生了，它会导致整个组件挂死。而现在，整个组件并不会挂死，它会运行良好。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://reactjs.org/docs/portals.html#event-bubbling-through-portals" target="_blank" rel="noopener">https://reactjs.org/docs/portals.html#event-bubbling-through-portals</a></li>
+<li><a href="https://reactjs.org/docs/error-boundaries.html" target="_blank" rel="noopener">https://reactjs.org/docs/error-boundaries.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.875Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/11/React/React/React 16 新特性 Portal 与错误边界的用法/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/11/React/React/React 16 新特性 Portal 与错误边界的用法/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/11/MobX/浅谈 Mobx 的设计思想/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">浅谈 Mobx 的设计思想</h4>
+        <h4 class="summary">状态是每个应用程序的核心，维护好一个复杂应用的数据状态可不是一件简单的事情。
+对于前端状态管理，有 Redux，Mobx...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/11/HTML5/HTML5 Audio API 详解/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">HTML5 Audio API 详解</h4>
+        <h4 class="summary"> 标签是 HTML5 用于播放音乐的标签，现在基本与音乐相关的都由它来制作。audio 提供了一个默认的控制栏，不过这个...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/menu/book.html">
+    
+    
+    <title>创作 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content=".book-view {     width: 100%;     max-width: 640px;     background-color: #fff;     box-shadow: 1px 2px 8px rgba(1, 1, 1, 0.08);     margin: 50px auto 0;     padding: 30px;     display: flex; } .book">
+<meta property="og:type" content="website">
+<meta property="og:title" content="创作">
+<meta property="og:url" content="http://me.lizhooh.com/menu/book.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content=".book-view {     width: 100%;     max-width: 640px;     background-color: #fff;     box-shadow: 1px 2px 8px rgba(1, 1, 1, 0.08);     margin: 50px auto 0;     padding: 30px;     display: flex; } .book">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://img1.doubanio.com/view/photo/l/public/p2317457307.webp">
+<meta property="og:image" content="https://img1.doubanio.com/view/photo/l/public/p2317457318.webp">
+<meta property="og:updated_time" content="2021-06-15T06:10:53.403Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="创作">
+<meta name="twitter:description" content=".book-view {     width: 100%;     max-width: 640px;     background-color: #fff;     box-shadow: 1px 2px 8px rgba(1, 1, 1, 0.08);     margin: 50px auto 0;     padding: 30px;     display: flex; } .book">
+<meta name="twitter:image" content="https://img1.doubanio.com/view/photo/l/public/p2317457307.webp">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect active">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">创作</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header page-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">创作</h1>
+
+        <div class="meta-rest">
+            <h1>创作</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    <article class="page-article fade" itemprop="blogPage">
+        <div class="post-content page-content" id="page-content" itemprop="pageContent">
+            <style>
+.book-view {
+    width: 100%;
+    max-width: 640px;
+    background-color: #fff;
+    box-shadow: 1px 2px 8px rgba(1, 1, 1, 0.08);
+    margin: 50px auto 0;
+    padding: 30px;
+    display: flex;
+}
+.book-view:first-of-type {
+    margin-top: 10px;
+}
+.book-view:hover {
+    box-shadow: 1px 2px 15px rgba(1, 1, 1, 0.22);
+    background-color: #fff;
+}
+.book-view br {
+    display: none;
+}
+.book-view .left {
+    text-align: center;
+    padding: 0;
+}
+.book-view .right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: flex-start;
+    padding-left: 25px;
+}
+.book-view .medio {
+    width: 100%;
+    display: flex;
+}
+.book-view .meta {
+    line-height: 1.6;
+    margin-left: 5px;
+    font-size: 14px;
+    flex: 1;
+    color: #444;
+}
+.book-view .meta span, .book-view .meta b {
+    color: #444 !important;
+}
+.book-view .medio .start {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.book-view .medio .start button {
+    border-radius: 2px;
+    border: none;
+    background-color: #33cf88;
+    padding: 0.4em 1.2em;
+    color: #fff;
+    text-shadow: 1px 2px 2px rgba(1, 1, 1, 0.12);
+    cursor: pointer;
+    transition: all 0.24s ease-in-out;
+}
+.book-view .medio .start button:hover {
+    background-color: #33cf66;
+}
+.book-view .medio .start button.disable {
+    cursor: default;
+    background-color: #999;
+}
+.book-view .info {
+    padding-top: 10px;
+    text-indent: 2em;
+    color: #525354;
+    line-height: 1.6;
+}
+.book-view .image {
+    box-shadow: none;
+    max-width: 220px;
+}
+.book-view .image.rev {
+    transform: scale(-1, 1);
+}
+.book-view .title {
+    color: #383838 !important;
+    margin: 0;
+    padding: 0;
+}
+.book-view .entitle {
+    color: #525354 !important;
+    font-size: 14px;
+    padding-left: 1px;
+    transform: translateY(-6px);
+    padding-bottom: 1px;
+}
+.book-view .p {
+    text-indent: 2em;
+    margin: 0 0 8px;
+    text-align: justify;
+    text-justify: inter-ideograph;
+}
+@media screen and (max-width: 580px) {
+    .container {
+        padding-top: 0;
+    }
+    .book-view {
+        margin: 0;
+        padding: 20px 25px;
+        flex-direction: column;
+    }
+    .book-view .left, .book-view .right {
+        padding: 0 !important;
+    }
+    .book-view .image {
+        padding: 10px;
+    }
+}
+</style>
+
+
+<div class="book-view"><br>    <div class="left"><img src="https://img1.doubanio.com/view/photo/l/public/p2317457307.webp" class="image"></div><br>    <div class="right"><br>        <h2 class="title">Koa2 学习笔记</h2><br>        <h5 class="entitle">Koa2 Learning Notes</h5><br>        <div class="medio"><br>            <div class="meta"><br>                <div><b>作者：</b><span>Lizhooh</span></div><br>                <div><b>类别：</b><span>软件开发/后端技术</span></div><br>                <div><b>时间：</b><span>2017 年 6 月</span></div><br>            </div><br>            <div class="start"><br>                <a href="https://koa2-learning-notes.netlify.com/" target="_blank"><br>                    <button class="tippy" title="本书状态：<b>已完结</b>">开始阅读</button><br>                </a><br>            </div><br>        </div><br>        <div class="info"><br>            <div class="p">《 Koa2 学习笔记 》是我学习 Koa2 中记录的学习笔记，以 Express 的开发经验，来快速学习 Koa2。</div><br>            <div class="p">这并不是入门级的书籍，而是需要你具有一定的 Nodejs 基础，ES6 &amp; 7 语法基础，后端开发基础等，才能领会其中的奥义。里面覆盖了常见的 Nodejs Web 开发解决方案。</div><br>        </div><br>    </div><br></div>
+
+<div class="book-view"><br>    <div class="right" style="padding: 0; padding-right: 25px;"><br>        <h2 class="title">React 服务端渲染实战</h2><br>        <h5 class="entitle">React Server Render In Action</h5><br>        <div class="medio"><br>            <div class="meta"><br>                <div><b>作者：</b><span>Lizhooh</span></div><br>                <div><b>类别：</b><span>软件开发/前端技术</span></div><br>                <div><b>时间：</b><span>2018 年 5 月</span></div><br>            </div><br>            <div class="start"><br>                <a target="_blank" href="https://react-server-render-in-action.netlify.com/"><br>                    <button class="tippy" title="本书状态：<b>已完结</b>">开始阅读</button><br>                </a><br>            </div><br>        </div><br>        <div class="info"><br>            <div class="p">在本书里，你将了解到 React 服务端渲染的基础知识、前端与 Nodejs 技术融合以及一些 React 服务端渲染框架的使用，还将学习到了如何对现有的服务端渲染应用进行性能优化，不同方式实现的服务端渲染应用示例。</div><br>            <div class="p">本书并不会介绍太多的基础知识点，在阅读本书前，希望你了解并熟悉 ES6、React、Koa 等基本知识，并且具有 Node.js 相当不错的使用经验。</div><br>        </div><br>    </div><br>    <div class="left"><img src="https://img1.doubanio.com/view/photo/l/public/p2317457318.webp" class="image rev"></div><br></div>
+
+<!-- <div class="book-view">
+    <div class="left"><img src="https://img3.doubanio.com/view/photo/l/public/p2317457243.webp" class="image" /></div>
+    <div class="right">
+        <h2 class="title">Flutter 跨平台移动应用开发实战</h2>
+        <h5 class="entitle">Flutter App In Action</h5>
+        <div class="medio">
+            <div class="meta">
+                <div><b>作者：</b><span>Lizhooh</span></div>
+                <div><b>类别：</b><span>软件开发/移动应用</span></div>
+                <div><b>时间：</b><span>2018 年 8 月</span></div>
+            </div>
+            <div class="start">
+                <a target="_blank" href="https://flutter-app-in-action.netlify.com">
+                    <button class="tippy" title="本书状态：<b>正在进行中</b>">开始阅读</button>
+                </a>
+            </div>
+        </div>
+        <div class="info">
+            <p>跨平台移动应用开发一直都是一个热火朝天的话题，从最开始的 Hybrid App 到后来的 React-Native、Weex、微信小程序等架构的出现，再次引爆了跨平台移动应用开发的潮流。Flutter 的出现更是从编译成原生代码的角度去开发应用。</p>
+            <p>在本书里，主要讲述 Flutter 跨平台移动应用开发从入门到实践的知识。其中介绍到了 Flutter 基本知识以及组件的使用，还有如何从零开始构建开发一款移动应用。</p>
+        </div>
+    </div>
+</div> -->
+<!-- <div class="book-view">
+    <div class="right" style="padding: 0; padding-right: 25px;">
+        <h2 class="title">Nodejs 爬虫指南</h2>
+        <h5 class="entitle">Nodejs Crawler Guide</h5>
+        <div class="medio">
+            <div class="meta">
+                <div><b>作者：</b><span>Lizhooh</span></div>
+                <div><b>类别：</b><span>软件开发/后端技术</span></div>
+                <div><b>时间：</b><span>2018 年 12 月</span></div>
+            </div>
+            <div class="start">
+                <a target="_blank">
+                    <button class="disable tippy" title="本书状态：<b>预热</b>">开始阅读</button>
+                </a>
+            </div>
+        </div>
+        <div class="info">
+            <div class="p">《 Nodejs 爬虫指南 》是我准备想写的一本 Nodejs 方面的爬虫指南书籍。</div>
+            <div class="p">在本书里介绍了爬虫的基本知识以及 Nodejs 爬虫工具库的使用，并且讲解了爬虫动态数据解析、维护 IP 代理池、异步并发流程控制、多进程爬虫等知识，另外还通过多个真实的新鲜示例来详细深入爬虫抓取过程。</div>
+        </div>
+    </div>
+    <div class="left"><img src="https://img3.doubanio.com/view/photo/l/public/p2317457275.nwebp" class="image" /></div>
+</div> -->
+<!-- <div class="book-view">
+    <div class="right" style="padding: 0; padding-right: 25px;">
+        <h2 class="title">React 组件化编程与设计</h2>
+        <h5 class="entitle">React Componentized Programming and Design</h5>
+        <div class="medio">
+            <div class="meta">
+                <div><b>作者：</b><span>Lizhooh</span></div>
+                <div><b>类别：</b><span>软件开发/前端技术</span></div>
+                <div><b>时间：</b><span>2018 年 </span></div>
+            </div>
+            <div class="start">
+                <a target="_blank">
+                    <button class="disable tippy" title="本书状态：<b>预热</b>">开始阅读</button>
+                </a>
+            </div>
+        </div>
+        <div class="info">
+            <div class="p">《 React 组件化编程与设计 》 讲述的是我在多次『失败与重构』徘徊中总结的开发经验。</div>
+            <div class="p">在本书里主要介绍了 React 组件化编程要领和 React 组件设计原则。本书大多数的内容偏向于设计的本身与技术实现，通过分析优秀的 React 组件库，提出了多个有效的组件设计建议与方法。</div>
+        </div>
+    </div>
+    <div class="left"><img src="https://img3.doubanio.com/view/photo/l/public/p2317457221.webp" class="image rev" /></div>
+</div> -->
+<script>
+    window.addEventListener('load', function() {
+        new tippy('.tippy', {
+            theme: 'light',
+            arrow: true,
+        });
+    })
+</script>
+
+        </div>
+
+        
+        <div class="card page-about-me flex-row">
+            <a href="/" class="avatar waves-effect waves-circle waves-light"><img src="/img/my.png"></a>
+            <div class="content flex-col">
+                <p><strong>Lizhooh - 以后是全栈工程师</strong></p>
+                <p><span><div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</span></p>
+                <p>温故而知新，可以为师矣。</p>
+            </div>
+
+            
+
+
+        </div>
+        
+
+        
+
+
+        
+    </article>
+    
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

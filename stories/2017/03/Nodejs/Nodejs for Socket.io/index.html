@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/03/Nodejs/Nodejs for Socket.io/">
+    
+    
+    <title>Nodejs for Socket.io | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="Socket.ioSocket.io是一个非常出名的框架，可能有的人它先是知道了Socket.io才了解Nodejs。 Socket.Io 实现了实时双向的基于事件的通讯机制。旨在让各种浏览器与移动设备上实现实时 App 功能，模糊化各种传输机制。Socket.Io 是跨平台，多种连接方式自动切换，做即时通讯方面的开发很方便，而且能和 express 提供的传统请求方式很好的结合，即可以 在同一个">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs for Socket.io">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/03/Nodejs/Nodejs for Socket.io/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="Socket.ioSocket.io是一个非常出名的框架，可能有的人它先是知道了Socket.io才了解Nodejs。 Socket.Io 实现了实时双向的基于事件的通讯机制。旨在让各种浏览器与移动设备上实现实时 App 功能，模糊化各种传输机制。Socket.Io 是跨平台，多种连接方式自动切换，做即时通讯方面的开发很方便，而且能和 express 提供的传统请求方式很好的结合，即可以 在同一个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/20170325215548.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.837Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs for Socket.io">
+<meta name="twitter:description" content="Socket.ioSocket.io是一个非常出名的框架，可能有的人它先是知道了Socket.io才了解Nodejs。 Socket.Io 实现了实时双向的基于事件的通讯机制。旨在让各种浏览器与移动设备上实现实时 App 功能，模糊化各种传输机制。Socket.Io 是跨平台，多种连接方式自动切换，做即时通讯方面的开发很方便，而且能和 express 提供的传统请求方式很好的结合，即可以 在同一个">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/3/20170325215548.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs for Socket.io</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs for Socket.io</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs for Socket.io</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-03-25T13:51:33.000Z" itemprop="datePublished" class="page-time">
+    2017-03-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Socket-io"><span class="post-toc-number">1.</span> <span class="post-toc-text">Socket.io</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Client-API"><span class="post-toc-number">3.</span> <span class="post-toc-text">Client API</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#连接-socket-服务器"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">连接 socket 服务器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#监听服务器的事件（接收服务器发来的数据）"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">监听服务器的事件（接收服务器发来的数据）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对服务器触发事件（发送数据到服务器）"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">对服务器触发事件（发送数据到服务器）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#断开服务器的连接"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">断开服务器的连接</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Server-API"><span class="post-toc-number">4.</span> <span class="post-toc-text">Server API</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建-socket-实例"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">创建 socket 实例</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#监听用户连接"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">监听用户连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#向客户端发送消息"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">向客户端发送消息</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#向所有连接的用户进行广播消息"><span class="post-toc-number">4.4.</span> <span class="post-toc-text">向所有连接的用户进行广播消息</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#给除了自己以外的客户端广播消息"><span class="post-toc-number">4.5.</span> <span class="post-toc-text">给除了自己以外的客户端广播消息</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分组-分房间"><span class="post-toc-number">4.6.</span> <span class="post-toc-text">分组 - 分房间</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#监听客户端断开连接"><span class="post-toc-number">4.7.</span> <span class="post-toc-text">监听客户端断开连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#获取连接的客户端-socket"><span class="post-toc-number">4.8.</span> <span class="post-toc-text">获取连接的客户端 socket</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#关闭-socket-io-服务"><span class="post-toc-number">4.9.</span> <span class="post-toc-text">关闭 socket.io 服务</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Server-中的-socket-对象"><span class="post-toc-number">5.</span> <span class="post-toc-text">Server 中的 socket 对象</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#socket-API"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">socket API</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#相关一些操作"><span class="post-toc-number">6.</span> <span class="post-toc-text">相关一些操作</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Nodejs for Socket.io"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs for Socket.io</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 03 月 25 日 21:51" datetime="2017-03-25T13:51:33.000Z"  itemprop="datePublished">
+    2017-03-25
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1793</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="Socket-io"><a href="#Socket-io" class="headerlink" title="Socket.io"></a>Socket.io</h2><p><code>Socket.io</code>是一个非常出名的框架，可能有的人它先是知道了<code>Socket.io</code>才了解<code>Nodejs</code>。</p>
+<p>Socket.Io 实现了实时双向的基于事件的通讯机制。旨在让各种浏览器与移动设备上实现实时 App 功能，模糊化各种传输机制。<br>Socket.Io 是跨平台，多种连接方式自动切换，做即时通讯方面的开发很方便，而且能和 express 提供的传统请求方式很好的结合，即可以 在同一个域名，同一个端口提供两种连接方式：request/response, websocket(flashsocket,ajax…).</p>
+<p>下面主要讲述<code>Socket.io</code>的使用，更多的还是去参考官方的文档吧，文档都写得很清楚的。<br>注意：<code>Socket.io</code>的 API 是<code>Client</code>与<code>Server</code>对称性的，后面会讲到为什么是对称性的。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/3/20170325215548.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save socket.io</span><br></pre></td></tr></table></figure>
+<h2 id="Client-API"><a href="#Client-API" class="headerlink" title="Client API"></a>Client API</h2><p>客户端主要是指<code>Web 前端</code><br>前端引入：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="连接-socket-服务器"><a href="#连接-socket-服务器" class="headerlink" title="连接 socket 服务器"></a>连接 socket 服务器</h3><blockquote>
+<p>let socket = io.connect(url, [options]);</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> socket = io.connect(<span class="string">'http://127.0.0.1:3000'</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="监听服务器的事件（接收服务器发来的数据）"><a href="#监听服务器的事件（接收服务器发来的数据）" class="headerlink" title="监听服务器的事件（接收服务器发来的数据）"></a>监听服务器的事件（接收服务器发来的数据）</h3><blockquote>
+<p>socket.on(type, callback);</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">"login"</span>, (data) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data); <span class="comment">// &#123; user: xiao ming &#125;</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果在 Nodejs 中使用了触发事件，上面就会收到：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">socket.emit(<span class="string">"login"</span>, &#123;</span><br><span class="line">    user: <span class="string">'xiao ming'</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="对服务器触发事件（发送数据到服务器）"><a href="#对服务器触发事件（发送数据到服务器）" class="headerlink" title="对服务器触发事件（发送数据到服务器）"></a>对服务器触发事件（发送数据到服务器）</h3><blockquote>
+<p>socket.emit(type, data1, [data2, …]);</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 触发 Nodejs 中 socket 的 update 事件</span></span><br><span class="line">socket.emit(<span class="string">"update"</span>, &#123;</span><br><span class="line">    title: <span class="string">'Hello'</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>此时 Nodejs 中应该有这样一个事件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">"update"</span>, (data) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data); <span class="comment">// &#123; title: Hello &#125;</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="断开服务器的连接"><a href="#断开服务器的连接" class="headerlink" title="断开服务器的连接"></a>断开服务器的连接</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socket.disconnect();</span><br></pre></td></tr></table></figure>
+<h2 id="Server-API"><a href="#Server-API" class="headerlink" title="Server API"></a>Server API</h2><p>在 NodeJS 上创建 socket 需要依赖于 HTTP 服务器，所有首先就是要创建 HTTP 服务器。</p>
+<h3 id="创建-socket-实例"><a href="#创建-socket-实例" class="headerlink" title="创建 socket 实例"></a>创建 socket 实例</h3><p>不使用 Express：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> app = <span class="built_in">require</span>(<span class="string">'http'</span>).createServer(handler),</span><br><span class="line">    io  = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(app);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... some think</span></span><br><span class="line">app.listen(<span class="number">3000</span>);</span><br></pre></td></tr></table></figure>
+<p>使用 Express：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>),</span><br><span class="line">    app     = express(),</span><br><span class="line">    server  = <span class="built_in">require</span>(<span class="string">'http'</span>).createServer(app),</span><br><span class="line">    io      = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(server);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... some think</span></span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="监听用户连接"><a href="#监听用户连接" class="headerlink" title="监听用户连接"></a>监听用户连接</h3><p>当前端使用 io.connect(url); 时就会触发服务器的 connection 事件</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 每一个新的用户连接时，都会向控制台输出 Welcome</span></span><br><span class="line">io.on(<span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">socket</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// socket 是连接客户端的示例，后面所有对客户端的操作都通过 socket</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"Welcome"</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="向客户端发送消息"><a href="#向客户端发送消息" class="headerlink" title="向客户端发送消息"></a>向客户端发送消息</h3><p>加入客户端，监控了一个 login 事件。<br>那么，可以在服务端使用 emit 的触发事件，实际上客户端与服务端的 API 是对称的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">io.on(<span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">socket</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"Welcome"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 触发客户端的 login 事件</span></span><br><span class="line">    socket.emit(<span class="string">"login"</span>, &#123;</span><br><span class="line">        title: <span class="string">'Welcome'</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>此时客户端的代码应该是这样的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">"login"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data); <span class="comment">// &#123; title: 'Wecome' &#125;</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="向所有连接的用户进行广播消息"><a href="#向所有连接的用户进行广播消息" class="headerlink" title="向所有连接的用户进行广播消息"></a>向所有连接的用户进行广播消息</h3><p>这个功能类似群发消息的功能。<br>使用 io.sockets 对象， 对所有连接的用户进行广播。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// io = require('socket.io')(server);</span></span><br><span class="line">io.sockets.emit(<span class="string">"login"</span>, &#123;</span><br><span class="line">    title: <span class="string">'sockets'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="给除了自己以外的客户端广播消息"><a href="#给除了自己以外的客户端广播消息" class="headerlink" title="给除了自己以外的客户端广播消息"></a>给除了自己以外的客户端广播消息</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socket.broadcast.emit(<span class="string">"msg"</span>, &#123; <span class="attr">data</span>: <span class="string">"hello,everyone"</span> &#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="分组-分房间"><a href="#分组-分房间" class="headerlink" title="分组 - 分房间"></a>分组 - 分房间</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">'group1'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    socket.join(<span class="string">'group1'</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(<span class="string">'group2'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">    socket.join(<span class="string">'group2'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="监听客户端断开连接"><a href="#监听客户端断开连接" class="headerlink" title="监听客户端断开连接"></a>监听客户端断开连接</h3><p>监听 disconnect 事件, 在 socket 对象里有一个 唯一的属性 socket.id ，这是每个客户端的唯一标识，可以使用它来判断是那个客户端端口连接。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">io.sockets.on(<span class="string">'disconnect'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">socket</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// id 是唯一标识</span></span><br><span class="line">    <span class="built_in">console</span>.log(socket.id);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="获取连接的客户端-socket"><a href="#获取连接的客户端-socket" class="headerlink" title="获取连接的客户端 socket"></a>获取连接的客户端 socket</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">io.sockets.clients().forEach(<span class="function"><span class="keyword">function</span> (<span class="params">socket</span>) </span>&#123;</span><br><span class="line">    <span class="comment">//.....</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="关闭-socket-io-服务"><a href="#关闭-socket-io-服务" class="headerlink" title="关闭 socket.io 服务"></a>关闭 socket.io 服务</h3><blockquote>
+<p>io.close();</p>
+</blockquote>
+<h2 id="Server-中的-socket-对象"><a href="#Server-中的-socket-对象" class="headerlink" title="Server 中的 socket 对象"></a>Server 中的 socket 对象</h2><p><code>socket</code> 是与浏览器客户端进行交互的基础类。<br>应该注意的 socket 不直接与实际的底层 TCP / IP 有关 socket，它只是该类的名称。</p>
+<h3 id="socket-API"><a href="#socket-API" class="headerlink" title="socket API"></a>socket API</h3><ul>
+<li><p><code>socket.id</code> (String) 会话的唯一标识符，来自底层 Client。</p>
+</li>
+<li><p><code>socket.rooms</code> (Object) 一个字符串的哈希标识房间的客户端，房间名称索引。</p>
+</li>
+<li><p><code>socket.client</code> (Client) 对基础客户端对象的引用。</p>
+</li>
+<li><p><code>socket.conn</code> (engine.Socket) 参照客户端底层传输连接（engine.io Socket对象）。这允许访问 IO 传输层，它仍然（主要是）抽象实际的TCP/IP套接字。</p>
+</li>
+<li><p><code>socket.request</code> (Request)</p>
+</li>
+<li><p><code>socket.use(fn)</code> (Function) 注册一个中间件，它是一个函数，为每个传入的数据包执行和接收作为参数的数据包。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)();</span><br><span class="line"></span><br><span class="line">io.on(<span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">socket</span>)</span>&#123;</span><br><span class="line">    socket.use(<span class="function"><span class="keyword">function</span>(<span class="params">packet, next</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (packet.doge === <span class="literal">true</span>) <span class="keyword">return</span> next();</span><br><span class="line">        next(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Not a doge error'</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>socket.send([...args][, ack])</code> (Socket) 发送消息事件。</p>
+</li>
+<li><p><code>socket.emit(eventName[, ...args][, ack])</code> (Socket) 将事件发送到由字符串名称标识的套接字。可以包含任何其他参数。所有可序列化的数据结构的支持，包括缓冲区。</p>
+<p>  <code>ack</code> 是可选的，它用于将被调用与客户端的答应。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">socket.emit(<span class="string">'hello'</span>, <span class="string">'world'</span>);</span><br><span class="line">socket.emit(<span class="string">'with-binary'</span>, <span class="number">1</span>, <span class="string">'2'</span>, &#123; <span class="number">3</span>: <span class="string">'4'</span>, <span class="number">5</span>: <span class="keyword">new</span> Buffer(<span class="number">6</span>) &#125;);</span><br><span class="line"></span><br><span class="line">client.emit(<span class="string">'ferret'</span>, <span class="string">'tobi'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);      <span class="comment">// data will be 'woot'</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// the client code</span></span><br><span class="line"><span class="comment">// client.on('ferret', function (name, fn) &#123;</span></span><br><span class="line">/       <span class="built_in">console</span>.log(name);  <span class="comment">// name is tobi</span></span><br><span class="line"><span class="comment">//      fn('woot');         // woot 会被传到上面的 data 里</span></span><br><span class="line"><span class="comment">// &#125;);</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>socket.on(eventName, callback)</code> (Socket) 为给定事件注册新的处理程序。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">'news'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>socket.join(room[, callback])</code> (Socket) 与房间相关的，可以把客户端放置在某个房间里。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">io.on(<span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">socket</span>)</span>&#123;</span><br><span class="line">    socket.join(<span class="string">'room 237'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(socket.rooms); <span class="comment">// [ &lt;socket.id&gt;, 'room 237' ]</span></span><br><span class="line"></span><br><span class="line">        io.to(<span class="string">'room 237'</span>, <span class="string">'a new user has joined the room'</span>);</span><br><span class="line">        <span class="comment">// broadcast to everyone in the room</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>socket.leave(room[, callback])</code> (Socket) 踢出分组。</p>
+</li>
+<li><p><code>socket.to(room)</code> (Socket) 为随后的事件设置一个修饰符，该事件只会被广播到已加入给定房间的客户端。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这种功能的实现，相当于你在多个 QQ 群里面发布消息</span></span><br><span class="line"><span class="keyword">let</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)();</span><br><span class="line"></span><br><span class="line">io.on(<span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">client</span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// to one room 去到一个房间，然后触发一个事件</span></span><br><span class="line">    client.to(<span class="string">'others'</span>).emit(<span class="string">'an event'</span>, &#123; <span class="attr">some</span>: <span class="string">'data'</span> &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// to multiple rooms 去到多个房间，然后触发一个事件</span></span><br><span class="line">    client.to(<span class="string">'room1'</span>).to(<span class="string">'room2'</span>).emit(<span class="string">'hello'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>socket.in(room)</code> (Socket) 和 socket.to(room). 相同功能。</p>
+</li>
+<li><p><code>socket.compress(bool)</code> (Socket) 数据是否压缩，如果值为真，事件数据会被压缩。当你不调用方法时，默认为 true。</p>
+</li>
+<li><p><code>socket.disconnect(close)</code> (Socket) 断开该客户端。如果关闭值为 true，则关闭基础连接。否则，它只是退出命名空间。</p>
+</li>
+</ul>
+<h2 id="相关一些操作"><a href="#相关一些操作" class="headerlink" title="相关一些操作"></a>相关一些操作</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">io.on(<span class="string">'connect'</span>, onConnect);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">onConnect</span>(<span class="params">socket</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to the client</span></span><br><span class="line">    socket.emit(<span class="string">'hello'</span>, <span class="string">'can you hear me?'</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="string">'abc'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to all clients except sender</span></span><br><span class="line">    socket.broadcast.emit(<span class="string">'broadcast'</span>, <span class="string">'hello friends!'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to all clients in 'game' room except sender</span></span><br><span class="line">    socket.to(<span class="string">'game'</span>).emit(<span class="string">'nice game'</span>, <span class="string">"let's play a game"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to all clients in 'game1' and/or in 'game2' room, except sender</span></span><br><span class="line">    socket.to(<span class="string">'game1'</span>).to(<span class="string">'game2'</span>).emit(<span class="string">'nice game'</span>, <span class="string">"let's play a game (too)"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to all clients in 'game' room, including sender</span></span><br><span class="line">    io.in(<span class="string">'game'</span>).emit(<span class="string">'big-announcement'</span>, <span class="string">'the game will start soon'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to all clients in namespace 'myNamespace', including sender</span></span><br><span class="line">    io.of(<span class="string">'myNamespace'</span>).emit(<span class="string">'bigger-announcement'</span>, <span class="string">'the tournament will start soon'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to individual socketid (private message)</span></span><br><span class="line">    socket.to(socketid).emit(<span class="string">'hey'</span>, <span class="string">'I just met you'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending with acknowledgement</span></span><br><span class="line">    socket.emit(<span class="string">'question'</span>, <span class="string">'do you think so?'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">answer</span>) </span>&#123;&#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending without compression</span></span><br><span class="line">    socket.compress(<span class="literal">false</span>).emit(<span class="string">'uncompressed'</span>, <span class="string">"that's rough"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending a message that might be dropped if the client is not ready to receive messages</span></span><br><span class="line">    socket.volatile.emit(<span class="string">'maybe'</span>, <span class="string">'do you really need it?'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sending to all clients on this node (when using multiple nodes)</span></span><br><span class="line">    io.local.emit(<span class="string">'hi'</span>, <span class="string">'my lovely babies'</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://socket.io/docs/" target="_blank" rel="noopener">https://socket.io/docs/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.837Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/03/Nodejs/Nodejs for Socket.io/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/03/Nodejs/Nodejs for Socket.io/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/03/React/React/React 动画 CSSTransitionGroup/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React 动画 CSSTransitionGroup</h4>
+        <h4 class="summary">AnimatedReact 官方提供了两个插件用于处理动画效果：一个是偏底层的react-addons-transiti...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/03/Electron/Electron dialog（对话框）的使用/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Electron dialog（对话框）的使用</h4>
+        <h4 class="summary">dialogdialog模块提供了 api 来展示原生的系统对话框，例如打开文件框，alert 框等。注意：dialog...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

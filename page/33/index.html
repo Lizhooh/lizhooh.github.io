@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/page/33/">
+    
+    
+    <title>Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lizhooh 的技术博客">
+<meta property="og:url" content="http://me.lizhooh.com/page/33/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:locale" content="zh-Hans">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lizhooh 的技术博客">
+<meta name="twitter:description" content="数据就像冰山一样，栩栩如生！">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Lizhooh 的技术博客</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header index-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Lizhooh 的技术博客</h1>
+
+        <div class="meta-rest">
+            <h1></h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+<div class="container body-wrap index">
+
+    <ul class="post-list">
+    
+        <li class="post-list-item fade">
+            <article id="post-抓包&amp;爬虫/Charles 抓取 HTTPS 数据包"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 02 月 07 日 21:17" datetime="2017-02-07T13:17:47.000Z"  itemprop="datePublished">
+    2017-02-07
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/抓包/">抓包</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：470
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/02/抓包&爬虫/Charles 抓取 HTTPS 数据包/">Charles 抓取 HTTPS 数据包</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/1/Charles/1009000.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="Charles"><a href="#Charles" class="headerlink" title="Charles"></a>Charles</h2><p>Charles 是在 Windows/Mac 下常用的截取网络封包的工具，在做 android/iOS 开发时，我们为了调试与服务器端的网络通讯协议，常常需要截取网络封包来分析。<br>Charles 通过将自己设置成系统的网络访问代理服务器，使得所有的网络访问请求都通过它来完成，从而实现了网络封包的截取和分析。</p>
+<p>下载：<a href="https://www.charlesproxy.com/download/" target="_blank" rel="noopener">https://www.charlesproxy.com/download/</a></p>
+<p><code>Charles4</code> 主要的功能包括：</p>
+<ul>
+<li>截取 Http 和 Https 网络封包。</li>
+<li>支持重发网络请求，方便后端调试。</li>
+<li>支持修改网络请求参数。</li>
+<li>支持网络请求的截获并动态修改。</li>
+<li>支持模拟慢速网络。</li>
+<li>支持 Http 2。</li>
+<li>支持 IPv6。</li>
+</ul>
+    
+
+        <a href="/stories/2017/02/抓包&爬虫/Charles 抓取 HTTPS 数据包/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/抓包/">抓包</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/02/抓包&爬虫/Charles 抓取 HTTPS 数据包/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/React/React 非直接关系组件传递数据"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 02 月 01 日 8:58" datetime="2017-02-01T00:58:46.000Z"  itemprop="datePublished">
+    2017-02-01
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：382
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/02/React/React/React 非直接关系组件传递数据/">React 非直接关系组件传递数据</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="单向数据流"><a href="#单向数据流" class="headerlink" title="单向数据流"></a>单向数据流</h2><p>在 React 中，数据是沿着组件树从上到下单向流动的。<br>拥有数据的组件并不一定负责显示该数据，它经常把自己拥有的数据作为一个子组件的属性传递给子组件，由子组件来显示它。</p>
+    
+
+        <a href="/stories/2017/02/React/React/React 非直接关系组件传递数据/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/02/React/React/React 非直接关系组件传递数据/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-ECMAScript/ES6 let，const，块级作用域"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 29 日 17:49" datetime="2017-01-29T09:49:39.000Z"  itemprop="datePublished">
+    2017-01-29
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/ES6/">ES6</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：583
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/ECMAScript/ES6 let，const，块级作用域/">ES6 let，const，块级作用域</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="let-与-块级作用域"><a href="#let-与-块级作用域" class="headerlink" title="let 与 块级作用域"></a>let 与 块级作用域</h2><p><strong>作用域</strong>是编程中的一个非常重要的概念。</p>
+    
+
+        <a href="/stories/2017/01/ECMAScript/ES6 let，const，块级作用域/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6-ES2015/">ES6(ES2015)</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/ECMAScript/ES6 let，const，块级作用域/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-ECMAScript/ES6 理解 Promise 对象"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 21 日 13:25" datetime="2017-01-21T05:25:39.000Z"  itemprop="datePublished">
+    2017-01-21
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/ES6/">ES6</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：969
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/ECMAScript/ES6 理解 Promise 对象/">ES6 理解 Promise 对象</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="Promise-对象"><a href="#Promise-对象" class="headerlink" title="Promise 对象"></a>Promise 对象</h2><p><code>Promise 对象</code>是 CommonJS 工作组提出的一种规范，目的是为异步操作提供统一接口。</p>
+<p>那么，什么是 Promises？</p>
+<p>首先，它是一个对象，也就是说与其他 JavaScript 对象的用法，没有什么两样；其次，它起到代理作用（proxy），充当异步操作与回调函数之间的中介。它使得异步操作具备同步操作的接口，使得程序具备正常的同步运行的流程，回调函数不必再一层层嵌套。</p>
+<p>简单说，它的思想是，每一个异步任务立刻返回一个 Promise 对象，由于是立刻返回，所以可以采用同步操作的流程。这个 Promises 对象有一个 then 方法，允许指定回调函数，在异步任务完成后调用。</p>
+<p><strong>Promise 的目标是使用正常的程序流程（同步），来处理异步操作。</strong></p>
+    
+
+        <a href="/stories/2017/01/ECMAScript/ES6 理解 Promise 对象/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6-ES2015/">ES6(ES2015)</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/ECMAScript/ES6 理解 Promise 对象/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/React Native 本地数据存储（一）"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 19 日 11:39" datetime="2017-01-19T03:39:41.000Z"  itemprop="datePublished">
+    2017-01-19
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：650
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/React Native/React Native 本地数据存储（一）/">React Native 本地数据存储（一）</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="数据持久化"><a href="#数据持久化" class="headerlink" title="数据持久化"></a>数据持久化</h2><p>数据持久化是指应用将某些数据存储在手机存储空间里。</p>
+<p>React Native 提供一种本地存储的 API：<code>AsyncStorage</code>，它的使用方式非常类似 HTML5 的 localStorage。<br>AsyncStorage 是以“字符串键值对”保存到存储空间中。</p>
+<p>AsyncStorage不提供索引，排序等数据库中经常使用的功能。它只是一个简单的、异步的“键值对”存储系统。</p>
+<p>AsyncStorage API提供的方法都会返回一个 Javascript 的 Promise 对象。</p>
+<p>处理数据在回调函数里处理，因为它是异步机制的。</p>
+    
+
+        <a href="/stories/2017/01/React Native/React Native 本地数据存储（一）/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据持久化/">数据持久化</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/React Native/React Native 本地数据存储（一）/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/React Native Vector-icons 的使用"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 15 日 9:34" datetime="2017-01-15T01:34:17.000Z"  itemprop="datePublished">
+    2017-01-15
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：961
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/React Native/React Native Vector-icons 的使用/">React Native Vector-icons（图标库）的使用</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <p><span class="tager blue">● 学习笔记</span></p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/1/33f4ae1c-ac8d-11e5-8666-7a87458753ee.png" alt="图标库" title>
+            </div>
+            <div class="image-caption">图标库</div>
+        </figure>
+    
+<h2 id="Vector-icons（图标库）"><a href="#Vector-icons（图标库）" class="headerlink" title="Vector-icons（图标库）"></a>Vector-icons（图标库）</h2><p>React Native Vector-icons 是一个出色的图标库。<br>一个“图标”库，官方描述为 “3000 Customizable Icons for React Native with support for NavBar/TabBar/ToolbarAndroid, image source and full stying.”<br>可见，这个库为我们提供了很多图标，如果你不想花费时间去设计一些图标，不妨使用这个库来替代。</p>
+    
+
+        <a href="/stories/2017/01/React Native/React Native Vector-icons 的使用/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/React Native/React Native Vector-icons 的使用/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-CSS/应用 @media 来自适应"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 14 日 18:18" datetime="2017-01-14T10:18:43.000Z"  itemprop="datePublished">
+    2017-01-14
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/CSS/">CSS</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：561
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/CSS/应用 @media 来自适应/">应用 @media 来自适应</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <p>@media 可以针对不同的屏幕尺寸设置不同的样式，特别是如果你需要设置设计响应式的页面，@media 是非常有用的。</p>
+<h2 id="兼容性"><a href="#兼容性" class="headerlink" title="兼容性"></a>兼容性</h2>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/1/21405068.jpg" alt="兼容性" title>
+            </div>
+            <div class="image-caption">兼容性</div>
+        </figure>
+    
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@media</span> mediatype <span class="keyword">and</span>|<span class="keyword">not</span>|(media feature) &#123;</span><br><span class="line">    // CSS-Code;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+
+        <a href="/stories/2017/01/CSS/应用 @media 来自适应/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CSS/">CSS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/CSS/应用 @media 来自适应/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Webpack/Webpack 使用 ES6"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 11 日 9:34" datetime="2017-01-11T01:34:29.000Z"  itemprop="datePublished">
+    2017-01-11
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Webpack/">Webpack</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：771
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/Webpack/Webpack 使用 ES6/">Webpack 使用 ES6</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>ES6</code> 的语法真的是太好用了，所以现在很多时候都是写 ES6 进行开发，下面介绍 Webpack 上配置使用 ES6。</p>
+<h2 id="创建目录"><a href="#创建目录" class="headerlink" title="创建目录"></a>创建目录</h2><p>简单创建目录结构如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/app</span><br><span class="line">----<span class="regexp">/es6</span></span><br><span class="line"><span class="regexp">----|————main.js</span></span><br><span class="line"><span class="regexp">----|————Person.js</span></span><br><span class="line"><span class="regexp">----bundle.js</span></span><br><span class="line"><span class="regexp">----index.html</span></span><br><span class="line"><span class="regexp">----webpack.config.js</span></span><br><span class="line"><span class="regexp">----package.json</span></span><br></pre></td></tr></table></figure></p>
+<p>es6 里面存放的是 ES6 风格的代码， main.js 是入口文件，bundle.js 是编译后生成的文件，这里假设它存在的，index.html 是首页， webpack.config.js 是 webpack 的配置文件，package.json 是 npm 的文件，可以使用 npm init 生成。</p>
+    
+
+        <a href="/stories/2017/01/Webpack/Webpack 使用 ES6/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Webpack/">Webpack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端自动化/">前端自动化</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/Webpack/Webpack 使用 ES6/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-HTML5/学习笔记/HTML5 本地存储"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 01 月 06 日 13:01" datetime="2017-01-06T05:01:11.000Z"  itemprop="datePublished">
+    2017-01-06
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/HTML5/">HTML5</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：852
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/01/HTML5/学习笔记/HTML5 本地存储/">HTML5 本地数据存储</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>使用 HTML5 可以在本地存储用户的浏览数据。<br>数据以 键/值 对存在, web网页的数据只允许该网页访问使用。</p>
+<h2 id="浏览器支持"><a href="#浏览器支持" class="headerlink" title="浏览器支持"></a>浏览器支持</h2><p>Internet Explorer 8+，Firefox，Opera，Chrome，和 Safari支持Web 存储<br>注意: Internet Explorer 7 及更早IE版本不支持web 存储。<br>
+    
+
+        <a href="/stories/2017/01/HTML5/学习笔记/HTML5 本地存储/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTML5/">HTML5</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据持久化/">数据持久化</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/01/HTML5/学习笔记/HTML5 本地存储/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/React/React 子组件传参，父组件调用"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2016 年 12 月 11 日 22:11" datetime="2016-12-11T14:11:12.000Z"  itemprop="datePublished">
+    2016-12-11
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：232
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2016/12/React/React/React 子组件传参，父组件调用/">React 子组件传参，父组件调用</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <p>有些参数值必须在子组件中才能用。</p>
+<p>但是我们想在父组件里去调用这些参数，这样的话，可以利用 props 的特点与 javascript  函数的特点。<br>
+    
+
+        <a href="/stories/2016/12/React/React/React 子组件传参，父组件调用/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2016/12/React/React/React 子组件传参，父组件调用/">阅读更多</a>            </div>
+        </li>
+    
+    </ul>
+
+    
+<nav id="page-nav">
+    <div class="inner">
+    <a class="extend prev" rel="prev" href="/page/32/">上一页</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="page-number" href="/page/32/">32</a><span class="page-number current">33</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/34/">下一页</a>
+    </div>
+</nav>
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/08/后端/代码审查（Code Review）的建议/">
+    
+    
+    <title>代码审查（Code Review）的建议 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言代码审查是一个可缺有不可缺的东西。代码评审也称代码复查，是指通过阅读代码来检查源代码与编码标准的符合性以及代码质量的活动。 对于自己写的代码，会潜在地产生一种信任和依赖，所以自己有时候是很难发现其中的明显的错误以及规范问题的。然而，对于其他人来说，一开始是不会进入这种 “自我信任” 状态的，所以较容易发现问题。Code Review 就创造了这个机会，以第二双眼睛再次检查代码，帮助我们及时地发">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审查（Code Review）的建议">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/08/后端/代码审查（Code Review）的建议/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言代码审查是一个可缺有不可缺的东西。代码评审也称代码复查，是指通过阅读代码来检查源代码与编码标准的符合性以及代码质量的活动。 对于自己写的代码，会潜在地产生一种信任和依赖，所以自己有时候是很难发现其中的明显的错误以及规范问题的。然而，对于其他人来说，一开始是不会进入这种 “自我信任” 状态的，所以较容易发现问题。Code Review 就创造了这个机会，以第二双眼睛再次检查代码，帮助我们及时地发">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.910Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="代码审查（Code Review）的建议">
+<meta name="twitter:description" content="前言代码审查是一个可缺有不可缺的东西。代码评审也称代码复查，是指通过阅读代码来检查源代码与编码标准的符合性以及代码质量的活动。 对于自己写的代码，会潜在地产生一种信任和依赖，所以自己有时候是很难发现其中的明显的错误以及规范问题的。然而，对于其他人来说，一开始是不会进入这种 “自我信任” 状态的，所以较容易发现问题。Code Review 就创造了这个机会，以第二双眼睛再次检查代码，帮助我们及时地发">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">代码审查（Code Review）的建议</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">代码审查（Code Review）的建议</h1>
+
+        <div class="meta-rest">
+            <h1>代码审查（Code Review）的建议</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-08-18T13:25:11.000Z" itemprop="datePublished" class="page-time">
+    2018-08-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#目标"><span class="post-toc-number">2.</span> <span class="post-toc-text">目标</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#常规项"><span class="post-toc-number">3.</span> <span class="post-toc-text">常规项</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安全项"><span class="post-toc-number">4.</span> <span class="post-toc-text">安全项</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#关键点"><span class="post-toc-number">5.</span> <span class="post-toc-text">关键点</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-后端/代码审查（Code Review）的建议"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">代码审查（Code Review）的建议</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 08 月 18 日 21:25" datetime="2018-08-18T13:25:11.000Z"  itemprop="datePublished">
+    2018-08-18
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 954</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>代码审查是一个可缺有不可缺的东西。代码评审也称代码复查，是指通过阅读代码来检查源代码与编码标准的符合性以及代码质量的活动。</p>
+<p>对于自己写的代码，会潜在地产生一种信任和依赖，所以自己有时候是很难发现其中的明显的错误以及规范问题的。然而，对于其他人来说，一开始是不会进入这种 “自我信任” 状态的，所以较容易发现问题。Code Review 就创造了这个机会，以第二双眼睛再次检查代码，帮助我们及时地发现潜在的问题。</p>
+<a id="more"></a>
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>代码评审不是批斗会，不能以缺陷和错误来打击开发人员的积极性，评审的最终目标是提高系统质量及团队成员整体水平。</p>
+<p><strong>评审标准：</strong>代码编写是否规范、高效、简洁、健壮、可读性强。</p>
+<p>总的来说，就是：</p>
+<ul>
+<li>提高软件整体质量，提升系统的可维护性。</li>
+<li>及早发现潜在缺陷与 BUG，降低事故成本。</li>
+<li>促进团队内部知识共享，提高团队整体水平。</li>
+<li>评审过程对于评审人员来说，也是一种思路重构的过程，可以帮助更多的人理解系统。</li>
+<li>交叉审查代码，类似于结对编程，彼此都能熟悉对方模块业务，降低因人员流失的运营成本及风险。</li>
+</ul>
+<p>不过，代码审查并不是强制性的：</p>
+<ul>
+<li>代码审查建议每半月一次或一月一次，审查追求的是质量而不是数量。</li>
+<li>不要过分要求程序员做代码审查。如果你强迫他们每天做一小时的代码审查，他们很快就会痛恨它。</li>
+<li>不要把它当成一种无趣的任务。代码审查是针对代码，不是针对人。代码审查是一种学习，是表扬，是获得反馈。</li>
+<li>是一种十分社交性的活动。代码审查应该是有趣的，不要让它变的无聊。</li>
+</ul>
+<h2 id="常规项"><a href="#常规项" class="headerlink" title="常规项"></a>常规项</h2><p>代码审查的常规项，包括了以下几个方面。</p>
+<ul>
+<li>代码能否正常工作？有没有实现预期的功能，逻辑是否正确？</li>
+<li>所有的代码是否简洁易懂？</li>
+<li>代码是否遵循既定的编码规范？包括但不局限于大括号的位置，变量名和函数名，行的长度，缩进，格式和注释。</li>
+<li>是否存在多余的或是多次重复的代码？</li>
+<li>代码是否尽可能的模块化了？</li>
+<li>是否有可以被替换的全局变量？</li>
+<li>是否有同一变量多次被赋予不同含义的值，容易使人理解错误？</li>
+<li>是否有被注释掉的代码？僵尸代码？</li>
+<li>循环是否设置了长度和正确的终止条件？</li>
+<li>是否有可以被库函数替代的代码？</li>
+<li>是否有可以删除的日志或调试代码？</li>
+</ul>
+<h2 id="安全项"><a href="#安全项" class="headerlink" title="安全项"></a>安全项</h2><p>安全的审查事关重要，以下是推荐的审查项。</p>
+<ul>
+<li>所有的数据输入是否都进行了安全检查（检测正确的类型，长度，格式和范围）并且进行了编码？</li>
+<li>在哪里使用了第三方依赖或服务，返回的错误是否被捕获？</li>
+<li>输出的值是否进行了检查并且编码？</li>
+<li>无效的参数值是否能够处理？</li>
+<li>防止未授权的访问。</li>
+<li>防止漏洞注入。</li>
+<li>避免硬编码敏感数据。</li>
+<li>去掉注释中的死代码。</li>
+<li>防止 CSRF、XSS 恶意攻击。</li>
+</ul>
+<h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><ul>
+<li>最近一次迭代开发的代码。</li>
+<li>系统关键模块。</li>
+<li>业务较复杂的模块。</li>
+<li>缺陷率较高的模块。</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.910Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/08/后端/代码审查（Code Review）的建议/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/08/后端/代码审查（Code Review）的建议/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/08/React/Router/解决 React Router 4 不支持监听路由功能/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">解决 React Router 4 不支持监听路由功能</h4>
+        <h4 class="summary">使用 React Router 4 都知道，在 4 版本里没有事件系统，想要在路由里监听路由的改变也是一件非常困难的事情...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/08/后端/谈谈 Router、Controller、Service/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">谈谈 Router、Controller、Service</h4>
+        <h4 class="summary">在传统的后端开发里，有典型的架构，那就是 MVC 结构。MVC 讲究的是视图与逻辑分离，由控制器控制视图的结果。而到了现...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

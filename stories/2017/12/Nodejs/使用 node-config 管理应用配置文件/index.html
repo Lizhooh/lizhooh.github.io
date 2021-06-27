@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/12/Nodejs/使用 node-config 管理应用配置文件/">
+    
+    
+    <title>使用 node-config 管理应用配置文件 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在编写 Nodejs 应用时，几乎都需要写一些配置文件，以应付万变的情况，其中最大的好处就是可以根据配置项快速的修改一些配置。比如一些数据库的配置项，development、production、test 不同开发环境的配置项。 在以往，可能自己去写一个配置文件：config.js，在不同的层级的文件里去引用，可是这样可能会遇到引用层级很深的路径，还不方便维护。 好，为了解决这些问题，引入 n">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 node-config 管理应用配置文件">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/12/Nodejs/使用 node-config 管理应用配置文件/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在编写 Nodejs 应用时，几乎都需要写一些配置文件，以应付万变的情况，其中最大的好处就是可以根据配置项快速的修改一些配置。比如一些数据库的配置项，development、production、test 不同开发环境的配置项。 在以往，可能自己去写一个配置文件：config.js，在不同的层级的文件里去引用，可是这样可能会遇到引用层级很深的路径，还不方便维护。 好，为了解决这些问题，引入 n">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.843Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 node-config 管理应用配置文件">
+<meta name="twitter:description" content="前言在编写 Nodejs 应用时，几乎都需要写一些配置文件，以应付万变的情况，其中最大的好处就是可以根据配置项快速的修改一些配置。比如一些数据库的配置项，development、production、test 不同开发环境的配置项。 在以往，可能自己去写一个配置文件：config.js，在不同的层级的文件里去引用，可是这样可能会遇到引用层级很深的路径，还不方便维护。 好，为了解决这些问题，引入 n">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用 node-config 管理应用配置文件</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">使用 node-config 管理应用配置文件</h1>
+
+        <div class="meta-rest">
+            <h1>使用 node-config 管理应用配置文件</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-12-02T03:01:01.000Z" itemprop="datePublished" class="page-time">
+    2017-12-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#node-config"><span class="post-toc-number">2.</span> <span class="post-toc-text">node-config</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加载顺序"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">加载顺序</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JavaScript-配置文件"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">JavaScript 配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#多个节点实例"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">多个节点实例</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#API"><span class="post-toc-number">3.</span> <span class="post-toc-text">API</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#get-方法"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">get 方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#has-方法"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">has 方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#util-对象"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">util 对象</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#在-Webpack-中使用"><span class="post-toc-number">4.</span> <span class="post-toc-text">在 Webpack 中使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/使用 node-config 管理应用配置文件"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用 node-config 管理应用配置文件</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 12 月 02 日 11:01" datetime="2017-12-02T03:01:01.000Z"  itemprop="datePublished">
+    2017-12-02
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1934</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在编写 Nodejs 应用时，几乎都需要写一些配置文件，以应付万变的情况，其中最大的好处就是可以根据配置项快速的修改一些配置。比如一些数据库的配置项，development、production、test 不同开发环境的配置项。</p>
+<p>在以往，可能自己去写一个配置文件：<code>config.js</code>，在不同的层级的文件里去引用，可是这样可能会遇到引用层级很深的路径，还不方便维护。</p>
+<p>好，为了解决这些问题，引入 <code>node-config</code> 模块的使用。<br><a id="more"></a></p>
+<h2 id="node-config"><a href="#node-config" class="headerlink" title="node-config"></a>node-config</h2><p><a href="https://github.com/lorenwest/node-config" target="_blank" rel="noopener">node-config</a> 就是一个为您的应用程序部署组织分层配置。<br>它允许您定义一组默认参数，并将其扩展到不同的部署环境（development, qa, staging, production 等），并且还支持多 Nodejs 部署。</p>
+<p><b>安装：</b></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save config</span><br></pre></td></tr></table></figure>
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>node-config 支持多种环境的配置文件，它会自动根据当前的 process.env.NODE_DEV 进行环境判断从而去加载对应的配置文件。</p>
+<p>默认情况下，node-config 会去读取应用跟目录下的 <code>config</code> 文件夹，再从 config 文件夹里读取对应的配置文件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">app</span><br><span class="line">├── config                      <span class="comment">// Nodejs 应用配置文件夹</span></span><br><span class="line">│   ├── <span class="keyword">default</span>.json            <span class="comment">// 默认配置文件</span></span><br><span class="line">│   ├── development.json        <span class="comment">// 开发环境配置文件</span></span><br><span class="line">│   ├── production.json         <span class="comment">// 生成环境配置文件</span></span><br><span class="line">│   ├── test.json               <span class="comment">// 测试环境配置文件</span></span><br><span class="line">│   └── mydev.json              <span class="comment">// 自定义环境配置文件</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建完成后在 default.json 文件里编写：</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"name"</span>: <span class="string">"app"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 development.json 文件里编写：</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"name"</span>: <span class="string">"app dev"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 production.json 文件里编写：</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"name"</span>: <span class="string">"app pro"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好了，编写配置文件完成后，就可以在应用中引用了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in app.js</span></span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">'config'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(config);  <span class="comment">// Config &#123; name: 'app dev' &#125;</span></span><br></pre></td></tr></table></figure>
+<p>如果你使用 <code>node app.js</code> 启动，就会看到输出 app dev，因为默认启动是 development 模式。</p>
+<p>为了统一各平台的环境设置，将使用 <code>cross-env</code> 来设置 NODE_ENV。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"scripts"</span>: &#123;</span><br><span class="line">    <span class="string">"start"</span>: <span class="string">"cross-env NODE_ENV=production node index"</span>,</span><br><span class="line">    <span class="string">"dev"</span>: <span class="string">"cross-env NODE_ENV=development node index"</span>,</span><br><span class="line">    <span class="string">"jest"</span>: <span class="string">"cross-env NODE_ENV=test jest"</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>为什么这样做？因为 <code>NODE_DEV</code> 在不同平台上的设置是不同的，为了统一设置，把这些坑爹的兼容性交给 cross-env 就对了。</p>
+<h3 id="加载顺序"><a href="#加载顺序" class="headerlink" title="加载顺序"></a>加载顺序</h3><p>NODE_ENV=production 时 node-config 会自动加载 default.json、production.json 配置文件。</p>
+<p>也就是说 node-config 先会加载 default.json 文件，接着去加载 production.json 文件。</p>
+<p>如果 production.json 文件里的属性名称与 default.json 里重名了会怎样处理？<code>node-config</code> 的做法是后者覆盖前者。</p>
+<p>最后的配置对象是：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">    ...default,</span><br><span class="line">    ...production</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>其次是，配置的覆盖是进行深度覆盖的，也就是说在 default 进行了如下配置：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"app"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"0.1.0"</span>,</span><br><span class="line">    <span class="attr">"mongodb"</span>: &#123;</span><br><span class="line">        <span class="attr">"host"</span>: <span class="string">"localhost"</span>,</span><br><span class="line">        <span class="attr">"port"</span>: <span class="number">27017</span>,</span><br><span class="line">        <span class="attr">"db"</span>: <span class="string">"test"</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 development.json 进行如下配置：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"mongodb"</span>: &#123;</span><br><span class="line">        <span class="attr">"db"</span>: <span class="string">"dev"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后输出的配置项是：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"app"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"0.1.0"</span>,</span><br><span class="line">    <span class="attr">"mongodb"</span>: &#123;</span><br><span class="line">        <span class="attr">"host"</span>: <span class="string">"localhost"</span>,</span><br><span class="line">        <span class="attr">"port"</span>: <span class="number">27017</span>,</span><br><span class="line">        <span class="attr">"db"</span>: <span class="string">"dev"</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="JavaScript-配置文件"><a href="#JavaScript-配置文件" class="headerlink" title="JavaScript 配置文件"></a>JavaScript 配置文件</h3><p>有时候，一些配置项是需要动态的计算的，比如配置一个 appRoot 路径，那么就需要使用 <code>__dirname</code> 来配置。<code>node-config</code> 对 <code>.js</code> 配置文件同样有效。</p>
+<p>像动态计算的配置项，最好放在 default.js 里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    root: path.join(__dirname, <span class="string">'../'</span>),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其他环境的配置文件仍然是 <code>.json</code> 这样还是会生效的，无论如何它们都会被转化为 Object 来统一处理。</p>
+<p>那么 config 文件夹里包含了：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">app</span><br><span class="line">├── config                      <span class="comment">// Nodejs 应用配置文件夹</span></span><br><span class="line">│   ├── <span class="keyword">default</span>.js              <span class="comment">// 默认配置文件</span></span><br><span class="line">│   ├── development.json        <span class="comment">// 开发环境配置文件</span></span><br><span class="line">│   ├── production.json         <span class="comment">// 生成环境配置文件</span></span><br><span class="line">│   ├── test.json               <span class="comment">// 测试环境配置文件</span></span><br><span class="line">│   └── mydev.json              <span class="comment">// 自定义环境配置文件</span></span><br></pre></td></tr></table></figure>
+<p>此外还提供延迟功能，让你根据配置对象的上下文进行计算。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// In default.js</span></span><br><span class="line"><span class="comment">// using defer functions is optional. See example and docs below.</span></span><br><span class="line"><span class="keyword">const</span> defer = <span class="built_in">require</span>(<span class="string">'config/defer'</span>).deferConfig;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    firstName: <span class="literal">undefined</span>,</span><br><span class="line">    lastname: <span class="literal">undefined</span>;</span><br><span class="line">    fullName: defer(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.firstName + <span class="string">' '</span> + <span class="keyword">this</span>.lastName;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Then in config/production.js:</span></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">   firstName: <span class="string">"Jane"</span>,</span><br><span class="line">   lastName: <span class="string">"Doe"</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后在 production 环境下，得出 fullName 的值为 <code>Jane Doe</code>。</p>
+<h3 id="多个节点实例"><a href="#多个节点实例" class="headerlink" title="多个节点实例"></a>多个节点实例</h3><p>如果你的后端服务需要多个 Nodejs 节点，那么也意味着需要多个配置文件。</p>
+<p>为了支持在机器上运行的每个应用程序实例的不同配置，<code>NODE_APP_INSTANCE</code> 环境变量将被检查，并用于加载实例特定的文件。</p>
+<p>如果 <code>NODE_APP_INSTANCE = 3</code> 这时候会先加载 default.json 文件，接着加载 default-3.json 文件。<br>如果 <code>NODE_APP_INSTANCE = node1</code> 这时候会先加载 default.json 文件，接着加载 default-node1.json 文件。</p>
+<p>也就是说，加载的顺序最先的还是 default，接着加载对应的实例配置项：<code>default-{NODE_APP_INSTANCE}.json</code>。</p>
+<p>如果 <code>NODE_APP_INSTANCE = node1</code> 并且 <code>NODE_ENV = test</code> 这时候会先加载 default.json 文件，接着加载 default-node1.json，再去加载 test.json 文件，最后还会加载 test-node1.json。</p>
+<p>这里有一个前提是：如果这些文件存在。不存在也没关系，它不会报错，只会默默的忽视。</p>
+<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><p>node-config 只有 3 个 api：<code>get</code>、<code>has</code>、<code>util</code>。</p>
+<h3 id="get-方法"><a href="#get-方法" class="headerlink" title="get 方法"></a>get 方法</h3><p>无论在那个文件 <code>node-config</code> 返回的是一个配置对象。node-config 提供的 get 方法让你获取某个属性值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">'config'</span>);</span><br><span class="line">config.get(<span class="string">'name'</span>); <span class="comment">// app dev</span></span><br></pre></td></tr></table></figure>
+<p>如果 get 一个不存在的属性值，那么就会抛出错误。</p>
+<p>如果不想抛出错误，也可以直接使用对象的方式：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">'config'</span>);</span><br><span class="line">config.name; <span class="comment">// app dev</span></span><br></pre></td></tr></table></figure>
+<p>值得幸运的是 node-config 对属性值进行 setter 无效化，所以 <code>config.name = &#39;new app&#39;</code> 是不会修改 name 的值的，在其他模块里输出时还是 <code>app dev</code>。</p>
+<h3 id="has-方法"><a href="#has-方法" class="headerlink" title="has 方法"></a>has 方法</h3><p>如果您想查看是否存在配置值，请使用 has() 方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (config.has(<span class="string">'dbConfig'</span>)) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这可以作为 <code>get()</code> 绕过 try / catch 块的替代方法。</p>
+<p><code>has()</code> 不会抛出异常，并且当且仅当配置文件为所提供的键定义了一个值时才返回 true。请注意 null 也是一个定义的值。<br><code>has()</code> 如果传递的参数是 null 或者 undefined 只是简单地返回，则不会抛出异常或 false，也就是只要有值，has 就会返回 true。</p>
+<h3 id="util-对象"><a href="#util-对象" class="headerlink" title="util 对象"></a>util 对象</h3><p>node-config 提供了 util 工具对象，它有以下 API：</p>
+<ul>
+<li><code>util.cloneDeep</code> 对象深拷贝。</li>
+<li><code>util.diffDeep</code> 返回包含两个对象之间不同的所有元素的对象。</li>
+<li><code>util.equalsDeep</code> 两个对象进行深对比。</li>
+<li><code>util.extendDeep</code> 用一个或多个对象扩展另一个对象（深度）。</li>
+<li><code>util.getConfigSources</code> 返回 config 文件夹的文件描述对象。</li>
+<li><code>util.getEnv</code> 获取配置环境变量的当前值。</li>
+<li><code>util.loadFileConfigs</code> 使用与主配置目录相同的约定来读取给定的目录。</li>
+<li><code>util.makeHidden</code> 使对象属性隐藏，因此枚举对象的元素时不会出现。</li>
+<li><code>util.makeImmutable</code> 使一个 js 对象属性不可变。</li>
+<li><code>util.toObject</code> 返回当前配置文件的 Object 深副本。</li>
+</ul>
+<p>上面的 api 都是以函数的形式使用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bfObject = config.util.cloneDeep(fromObject);</span><br></pre></td></tr></table></figure>
+<p>详细说明参考：<a href="https://github.com/lorenwest/node-config/wiki/Using-Config-Utilities" target="_blank" rel="noopener">Using Config Utilities</a></p>
+<h2 id="在-Webpack-中使用"><a href="#在-Webpack-中使用" class="headerlink" title="在 Webpack 中使用"></a>在 Webpack 中使用</h2><p><code>node-config</code> 不仅仅可以用于后端 Nodejs 应用，同时也可以用于前端构建开发环境。</p>
+<p>因为 Webpack 需要读取 client.js 文件，那么在运行时把 default.json 文件写进 client.js 文件里，再让 Webpack 去读取 client.js 文件的配置项。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// webpack-config.js</span></span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">'config'</span>)</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>)</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// This will take the config based on the current NODE_ENV and save it to 'build/client.json'</span></span><br><span class="line"><span class="comment">// Note: If '/build' does not exist, this command will error; alternatively, write to '/config'.</span></span><br><span class="line"><span class="comment">// The webpack alias below will then build that file into the client build.</span></span><br><span class="line">fs.writeFileSync(path.resolve(__dirname, <span class="string">'build/client.json'</span>), <span class="built_in">JSON</span>.stringify(config))</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="comment">// ... other webpack config</span></span><br><span class="line">    resolve: &#123;</span><br><span class="line">        alias: &#123;</span><br><span class="line">            config: path.resolve(__dirname, <span class="string">'build/client.json'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/lorenwest/node-config" target="_blank" rel="noopener">https://github.com/lorenwest/node-config</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.843Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/12/Nodejs/使用 node-config 管理应用配置文件/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/12/Nodejs/使用 node-config 管理应用配置文件/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/12/Style/Flex + Scss 自定义弹性布局方式/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Flex + Scss 自定义弹性布局方式</h4>
+        <h4 class="summary">Flexbox 是一个很好的伸缩性弹性布局方案，到目前为止几乎可以忽略对老的浏览器（没人爱的 IE）的支持，放心使用 F...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/11/Nodejs/Koa/Koa2 基于 Redis 的 Token 验证设计/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Koa2 基于 Redis 的 Token 验证设计</h4>
+        <h4 class="summary">会话管理基本是每个应用的必须功能。会话管理主要有 Session 和 Token 两种方式，它们的关注点是不同的。
+所谓...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

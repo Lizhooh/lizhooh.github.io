@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/05/Nodejs/使用『Async』进行异步并发流程控制/">
+    
+    
+    <title>使用『Async』进行异步并发流程控制 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Javascript 是一门单线程的编程语言，在 Javascript 里异步几乎是一个随处可见的场景，异步并发流程的控制似乎比想象中要困难。 Async.js 就像它的名字一样，是一个用于控制、管理异步并发的库，提供了大量有助于控制异步并发流程的工具函数。Async 能运行在所有 Javascript 运行环境里（浏览器、Nodejs、React Native、微信小程序等），它的实现是纯">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用『Async』进行异步并发流程控制">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/05/Nodejs/使用『Async』进行异步并发流程控制/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Javascript 是一门单线程的编程语言，在 Javascript 里异步几乎是一个随处可见的场景，异步并发流程的控制似乎比想象中要困难。 Async.js 就像它的名字一样，是一个用于控制、管理异步并发的库，提供了大量有助于控制异步并发流程的工具函数。Async 能运行在所有 Javascript 运行环境里（浏览器、Nodejs、React Native、微信小程序等），它的实现是纯">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/5/16501115928897.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/5/16421029444927.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/5/1666011383102102.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/5/20180521181359.gif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.843Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用『Async』进行异步并发流程控制">
+<meta name="twitter:description" content="前言Javascript 是一门单线程的编程语言，在 Javascript 里异步几乎是一个随处可见的场景，异步并发流程的控制似乎比想象中要困难。 Async.js 就像它的名字一样，是一个用于控制、管理异步并发的库，提供了大量有助于控制异步并发流程的工具函数。Async 能运行在所有 Javascript 运行环境里（浏览器、Nodejs、React Native、微信小程序等），它的实现是纯">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/5/16501115928897.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用『Async』进行异步并发流程控制</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">使用『Async』进行异步并发流程控制</h1>
+
+        <div class="meta-rest">
+            <h1>使用『Async』进行异步并发流程控制</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-05-22T03:14:42.000Z" itemprop="datePublished" class="page-time">
+    2018-05-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#异步模型"><span class="post-toc-number">2.</span> <span class="post-toc-text">异步模型</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用-Async"><span class="post-toc-number">3.</span> <span class="post-toc-text">使用 Async</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#集合"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">集合</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#控制流"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">控制流</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#工具函数"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">工具函数</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#爬虫实战示例"><span class="post-toc-number">4.</span> <span class="post-toc-text">爬虫实战示例</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/使用『Async』进行异步并发流程控制"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用『Async』进行异步并发流程控制</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 05 月 22 日 11:14" datetime="2018-05-22T03:14:42.000Z"  itemprop="datePublished">
+    2018-05-22
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2414</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  27.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Javascript 是一门单线程的编程语言，在 Javascript 里异步几乎是一个随处可见的场景，异步并发流程的控制似乎比想象中要困难。</p>
+<p><a href="https://caolan.github.io/async/" target="_blank" rel="noopener">Async.js</a> 就像它的名字一样，是一个用于控制、管理异步并发的库，提供了大量有助于控制异步并发流程的工具函数。Async 能运行在所有 Javascript 运行环境里（浏览器、Nodejs、React Native、微信小程序等），它的实现是纯 Javascript 实现。Async.js 非常火，在 npm 已经到达了千万下载量，几乎在复杂的业务场景里都会使用到 Async.js（还有一个类似的库：<a href="https://www.npmjs.com/package/neo-async" target="_blank" rel="noopener">neo-async</a>）。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/5/16501115928897.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="异步模型"><a href="#异步模型" class="headerlink" title="异步模型"></a>异步模型</h2><p>异步它不同于“同步”，不常规的理解它好比飞起来的蒲公英。常见的异步并发流程模型就像电路一样：<code>单一的串联</code>、<code>单一的并联</code>、<code>单并联混合</code>。</p>
+<p><strong>单一的串联：</strong>当进行有依赖性的数据库操作时，比如先到 redis 里读取用户 id，再从 mongodb 里读取用户详细数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> id = <span class="keyword">await</span> redis.get(cookie);</span><br><span class="line">    <span class="keyword">const</span> data = <span class="keyword">await</span> User.find(&#123; <span class="attr">_id</span>: id &#125;);</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p><strong>单一的并联：</strong>两个数据库操作不产生依赖性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> id1 = <span class="number">1</span>, id2 = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">const</span> [data1, data2] = <span class="keyword">await</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">        User.find(&#123; <span class="attr">_id</span>: id1 &#125;),</span><br><span class="line">        User.find(&#123; <span class="attr">_id</span>: id2 &#125;),</span><br><span class="line">    ]);</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p><strong>单并联混合：</strong>几个数据库操作，又有依赖性，又有无依赖性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> id1 = <span class="keyword">await</span> redis.get(cookie1);</span><br><span class="line">    <span class="keyword">const</span> id2 = <span class="keyword">await</span> redis.get(cookie2);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> [data1, data2] = <span class="keyword">await</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">        User.find(&#123; <span class="attr">_id</span>: id1 &#125;),</span><br><span class="line">        User.find(&#123; <span class="attr">_id</span>: id2 &#125;),</span><br><span class="line">    ]);</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p>实际上当流程比较小时，是可以使用 Promise 来控制的，当流程复杂并且大的时候，使用 Promise 就会显得非常的无力（当然能做到很好）。</p>
+<h2 id="使用-Async"><a href="#使用-Async" class="headerlink" title="使用 Async"></a>使用 Async</h2><p><code>Async</code> 它为 Javascript 异步编程提供了强有力的支持。</p>
+<p>下面先来看一下一个异步并发控制的示例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Async = <span class="built_in">require</span>(<span class="string">'async'</span>);</span><br><span class="line"><span class="keyword">const</span> colors = <span class="built_in">require</span>(<span class="string">'colors'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetchUrl</span>(<span class="params">url, done</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> delay = <span class="built_in">Math</span>.random() * <span class="number">1200</span> | <span class="number">0</span>;</span><br><span class="line">    count++;</span><br><span class="line">    <span class="built_in">console</span>.log(</span><br><span class="line">        <span class="string">`现在并发数 <span class="subst">$&#123;(count + <span class="string">''</span>).yellow&#125;</span>`</span>,</span><br><span class="line">        <span class="string">`正在抓取的是 <span class="subst">$&#123;url.yellow&#125;</span>，耗时 <span class="subst">$&#123;(delay + <span class="string">''</span>).yellow&#125;</span> 毫秒`</span></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    + <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">rs</span> =&gt;</span> setTimeout(rs, delay));</span><br><span class="line">        count--;</span><br><span class="line">        done(<span class="literal">null</span>, url);</span><br><span class="line">    &#125;();</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> urls = [...new <span class="built_in">Array</span>(<span class="number">20</span>)].map(<span class="function">(<span class="params">_, i</span>) =&gt;</span> <span class="string">'http://www.abc.com/list/'</span> + i);</span><br><span class="line"></span><br><span class="line">Async.mapLimit(urls, <span class="number">5</span>, fetchUrl, (err, result) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'final:'</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(result);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/5/16421029444927.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p><b>说明：</b><code>Async.mapLimit</code> 是一个并发控制的函数，第一个参数为数据源，第二个参数为执行任务函数，第三个参数为处理结果，Async 的回调函数都是接受普通的函数，done 就是一个处理完成后的回调函数。</p>
+<p>在默认情况下，为了获得最好的性能 Async 使用的回调函数的处理方式，同时它也支持 Promise。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Async.mapLimit(urls, <span class="number">5</span>, <span class="keyword">async</span> url =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> delay = <span class="built_in">Math</span>.random() * <span class="number">1200</span> | <span class="number">0</span>;</span><br><span class="line">    count++;</span><br><span class="line">    <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">rs</span> =&gt;</span> setTimeout(rs, delay));</span><br><span class="line">    <span class="built_in">console</span>.log(</span><br><span class="line">        <span class="string">`现在并发数 <span class="subst">$&#123;(count + <span class="string">''</span>).yellow&#125;</span>`</span>,</span><br><span class="line">        <span class="string">`正在抓取的是 <span class="subst">$&#123;url.yellow&#125;</span>，耗时 <span class="subst">$&#123;(delay + <span class="string">''</span>).yellow&#125;</span> 毫秒`</span></span><br><span class="line">    );</span><br><span class="line">    count--;</span><br><span class="line">    <span class="keyword">return</span> url;</span><br><span class="line">&#125;, (err, result) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'final:'</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(result);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h3><p>Async 提供了大量的集合操作方法。总体来说，有三个基本的命名方式即：<code>each</code>、<code>eachSeries</code>、<code>eachLimit</code>。</p>
+<p>each 与 eachSeries 的区别是，Series 会因为错误而中断，就像 Promise.all 一样，而 Limit 是一个并发操作。</p>
+<ul>
+<li>each(arr, iterator, callback): 遍历集合并做相同操作，不会因为错误而中断。</li>
+<li>eachSeries(arr, iterator, callback): 遍历集合并做相同操作，会因为错误而中断。</li>
+<li>eachLimit(arr, limit, iterator, callback): 并发遍历操作，limit 是最大并发量，会因为错误而中断。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Async.each([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>], (item, cb) =&gt; &#123;</span><br><span class="line">    item === <span class="number">4</span> ? cb(<span class="string">'is '</span> + item) : cb();</span><br><span class="line">    <span class="built_in">console</span>.log(item);</span><br><span class="line">&#125;, err =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.info(<span class="string">'error==&gt;'</span> + err);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>同理，还有 map、filter、reject（filter 的反操作）、reduce、reduceRight、detect（与 filter 类型，只取第一个结果）、some、every、concat 等集合函数。</p>
+<p><strong>注意：</strong>callback 的参数为 (err, result)。如果 callback 第一个参数布尔值不为 false，则会触发错误。</p>
+<h3 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h3><p><code>Async.series</code> 是顺序执行（串联）多个函数的，会按照队列的元素顺序执行，并且发生错误时，不回调后面的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Async.series([</span><br><span class="line">    done =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'A'</span>);   <span class="comment">// =&gt; A</span></span><br><span class="line">        done(<span class="literal">null</span>, <span class="number">1</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    done =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'B'</span>);   <span class="comment">// =&gt; B</span></span><br><span class="line">        done(&#123; <span class="attr">message</span>: <span class="string">"some error"</span> &#125;, <span class="number">2</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    done =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'C'</span>);   <span class="comment">// =&gt; C</span></span><br><span class="line">        done(<span class="literal">null</span>, <span class="number">3</span>);</span><br><span class="line">    &#125;</span><br><span class="line">], (err, results) =&gt; &#123;</span><br><span class="line">    err &amp;&amp; <span class="built_in">console</span>.error(<span class="string">"error happend: "</span>, err);</span><br><span class="line">    <span class="built_in">console</span>.log(results);   <span class="comment">// [1, 2]</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>Async.parallel</code> 是并行执行（并联）多个函数的，每个函数都是立即执行，不需要等待其它函数先执行，同样发生错误时，不回调后面的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Async.parallel([</span><br><span class="line">    done =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'A'</span>);   <span class="comment">// =&gt; A</span></span><br><span class="line">        done(<span class="literal">null</span>, <span class="number">1</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    done =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'B'</span>);   <span class="comment">// =&gt; B</span></span><br><span class="line">        done(&#123; <span class="attr">message</span>: <span class="string">"some error"</span> &#125;, <span class="number">2</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    done =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'C'</span>);   <span class="comment">// =&gt; C</span></span><br><span class="line">        done(<span class="literal">null</span>, <span class="number">3</span>);</span><br><span class="line">    &#125;</span><br><span class="line">], (err, results) =&gt; &#123;</span><br><span class="line">    err &amp;&amp; <span class="built_in">console</span>.error(<span class="string">"error happend: "</span>, err);</span><br><span class="line">    <span class="built_in">console</span>.log(results);   <span class="comment">// [1, 2]</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>Async.queue</code> 是一个任务队列，异步执行，可以设置统一时刻允许异步执行任务的并发数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建一个异步队列，并且并发限制为 2</span></span><br><span class="line"><span class="keyword">const</span> q = Async.queue(<span class="function">(<span class="params">task, done</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(task.name);</span><br><span class="line">    done();</span><br><span class="line">&#125;, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 全部完成</span></span><br><span class="line">q.drain = <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'全部完成'</span>);</span><br><span class="line"></span><br><span class="line">q.push(&#123; <span class="attr">name</span>: <span class="string">'foo'</span> &#125;, err =&gt; <span class="built_in">console</span>.log(<span class="string">'这里是 done'</span>));</span><br><span class="line">q.push(&#123; <span class="attr">name</span>: <span class="string">'bar'</span> &#125;);</span><br><span class="line"><span class="comment">// 可以一次性添加多个</span></span><br><span class="line">q.push([&#123; <span class="attr">name</span>: <span class="string">'baz'</span> &#125;, &#123; <span class="attr">name</span>: <span class="string">'bay'</span> &#125;, &#123; <span class="attr">name</span>: <span class="string">'bax'</span> &#125;]);</span><br><span class="line"><span class="comment">// 最先被执行</span></span><br><span class="line">q.unshift(&#123; <span class="attr">name</span>: <span class="string">'bat'</span> &#125;, err =&gt; <span class="built_in">console</span>.log(<span class="string">'unshift'</span>));</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">    bat</span></span><br><span class="line"><span class="comment">    unshift</span></span><br><span class="line"><span class="comment">    foo</span></span><br><span class="line"><span class="comment">    这里是 done</span></span><br><span class="line"><span class="comment">    bar</span></span><br><span class="line"><span class="comment">    baz</span></span><br><span class="line"><span class="comment">    bay</span></span><br><span class="line"><span class="comment">    bax</span></span><br><span class="line"><span class="comment">    全部完成</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>用来处理有依赖关系的多个任务的执行。比如某些任务之间彼此独立，可以并行执行；但某些任务依赖于其它某些任务，只能等那些任务完成后才能执行。</p>
+<p>例如一系列的操作：A、B、C、D、E。A 与 B 无依赖，可以并行，而 C、E 则需要等 A、B 完成后，E 则需要等 C、D 完成后。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/5/1666011383102102.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">Async.auto(&#123;</span><br><span class="line">    A: <span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'A'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    B: <span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'B'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    C: [<span class="string">'A'</span>, <span class="string">'B'</span>, (res, done) =&gt; &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'A + B =&gt; C'</span>);</span><br><span class="line">    &#125;],</span><br><span class="line">    D: <span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'D'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    E: [<span class="string">'C'</span>, <span class="string">'D'</span>, (res, done) =&gt; &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'C + D =&gt; E'</span>);</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;, (err, res) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'err = '</span>, err);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'result = '</span>, res);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// err =  null</span></span><br><span class="line"><span class="comment">// result =  &#123; A: 'A', B: 'B', D: 'D', C: 'A + B =&gt; C', E: 'C + D =&gt; E' &#125;</span></span><br></pre></td></tr></table></figure>
+<p><code>Async.whilst</code> 类似于 while，当 callback 返回 false 或者发生错误时停止。第一个参数就是 while 的条件，第二个参数是 while 的执行内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line">Async.whilst(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.info(<span class="string">'111 ==&gt; '</span> + count);</span><br><span class="line">    <span class="keyword">return</span> count &lt; <span class="number">2</span>;</span><br><span class="line">&#125;, done =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.info(<span class="string">'222 ==&gt; '</span> + count);</span><br><span class="line">    count++;</span><br><span class="line">    setTimeout(done, <span class="number">1000</span>);</span><br><span class="line">&#125;, err =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(err);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">   111 ==&gt; 0</span></span><br><span class="line"><span class="comment">   222 ==&gt; 0</span></span><br><span class="line"><span class="comment">   111 ==&gt; 1</span></span><br><span class="line"><span class="comment">   222 ==&gt; 1</span></span><br><span class="line"><span class="comment">   111 ==&gt; 2</span></span><br><span class="line"><span class="comment">   null</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>类似的：</p>
+<ul>
+<li>whilst -&gt; doWhilst（do while）</li>
+<li>until -&gt; doUntil</li>
+</ul>
+<p>whilst 与 until 是相反关系。</p>
+<p><code>Async.forever</code> 循环执行一个函数，直到抛出错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Async.forever(<span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        flag++ &gt; <span class="number">5</span> ? done(&#123; <span class="attr">message</span>: <span class="string">"hello"</span> &#125;) : done();</span><br><span class="line">    &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;, err =&gt; &#123;</span><br><span class="line">    err &amp;&amp; <span class="built_in">console</span>.error(<span class="string">"there is an error"</span>, err);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>Async.compose</code> 将几个函数组合成一个函数。例如：a(b(c()))。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Async.compose(a, b, c); <span class="comment">// a(b(c()))</span></span><br></pre></td></tr></table></figure>
+<p><code>Async.times</code> 与 Async.map 类似，不同的是 Async.times 有一个累计的数值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Async.times(<span class="number">5</span>, (n, next) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(n);</span><br><span class="line">    next(<span class="literal">null</span>, n);</span><br><span class="line">&#125;, (err, results) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(results);  <span class="comment">// [1, 2, 3, 4, 5];</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>还是 Async.timesLimit、Async.timesSeries。</p>
+<p><code>Async.retry</code> 会在错误时，重新执行任务，如果没有错误，则只执行一次。重试次数默认为 5。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Async.retry(<span class="number">3</span>, (cb, result) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">new</span> <span class="built_in">Date</span>());</span><br><span class="line">    cb(<span class="literal">true</span>);</span><br><span class="line">&#125;, (err, result) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="工具函数"><a href="#工具函数" class="headerlink" title="工具函数"></a>工具函数</h3><p>列出常用的工具函数：</p>
+<ul>
+<li><code>Async.memoize</code> 会让某一个函数在内存中缓存它的计算结果。</li>
+<li><code>Async.reflect</code> 将一个函数封装在里面，该函数保持成功的状态。在 value 里保存完成的值，在 error 里保存错误信息。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Async.parallel([</span><br><span class="line">    Async.reflect(<span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'one'</span>);</span><br><span class="line">    &#125;),</span><br><span class="line">    Async.reflect(<span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">        done(<span class="string">'bad stuff happened'</span>); <span class="comment">// 抛一个错误，parallel 并没有打断。</span></span><br><span class="line">    &#125;),</span><br><span class="line">    Async.reflect(<span class="function"><span class="params">done</span> =&gt;</span> &#123;</span><br><span class="line">        done(<span class="literal">null</span>, <span class="string">'two'</span>);</span><br><span class="line">    &#125;)</span><br><span class="line">], (err, results) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(err);       <span class="comment">// null</span></span><br><span class="line">    <span class="built_in">console</span>.log(results);</span><br><span class="line">    <span class="comment">// values</span></span><br><span class="line">    <span class="comment">// results[0].value = 'one'</span></span><br><span class="line">    <span class="comment">// results[1].error = 'bad stuff happened'</span></span><br><span class="line">    <span class="comment">// results[2].value = 'two'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>Async.race</code> 类似于 Promise.race，第一个完成的会立即触发结束。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Async.race([</span><br><span class="line">    done =&gt; setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> done(<span class="literal">null</span>, <span class="string">'one'</span>), <span class="number">200</span>),</span><br><span class="line">    done =&gt; setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> done(<span class="literal">null</span>, <span class="string">'two'</span>), <span class="number">100</span>),</span><br><span class="line">], (err, result) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="爬虫实战示例"><a href="#爬虫实战示例" class="headerlink" title="爬虫实战示例"></a>爬虫实战示例</h2><p>下面是使用 Async.js 来控制爬虫的异步并发流程示例，效果非常好。抓取的是小说阅读网的小说列表信息。其中使用到了我写的一个 <a href="https://www.npmjs.com/package/auto-query" target="_blank" rel="noopener">auto-query</a> 库，用于解析与获取 html 数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Async = <span class="built_in">require</span>(<span class="string">'async'</span>);</span><br><span class="line"><span class="keyword">const</span> autoQuery = <span class="built_in">require</span>(<span class="string">'auto-query'</span>);</span><br><span class="line"><span class="keyword">const</span> got = <span class="built_in">require</span>(<span class="string">'got'</span>);</span><br><span class="line"><span class="keyword">const</span> colors = <span class="built_in">require</span>(<span class="string">'colors'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> nextUrl = <span class="function"><span class="params">n</span> =&gt;</span> <span class="string">'https://www.readnovel.com/all?pageNum='</span> + n;</span><br><span class="line"><span class="keyword">const</span> point = <span class="function">(<span class="params">n, m</span>) =&gt;</span> (n * (<span class="number">10</span> ** m) | <span class="number">0</span>) / (<span class="number">10</span> ** m);</span><br><span class="line"><span class="keyword">const</span> yellow = <span class="function"><span class="params">str</span> =&gt;</span> str.toString().yellow;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> max = <span class="number">100</span>;</span><br><span class="line"><span class="keyword">const</span> M = <span class="number">30</span>;</span><br><span class="line"><span class="keyword">let</span> list = [];     <span class="comment">// 数据列表</span></span><br><span class="line"><span class="keyword">let</span> alltime = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">Async.timesLimit(max, M, (n, next) =&gt; &#123;</span><br><span class="line">    count++;</span><br><span class="line">    + <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">const</span> start = <span class="built_in">Date</span>.now();</span><br><span class="line">            <span class="keyword">const</span> html = (<span class="keyword">await</span> got(nextUrl(n + <span class="number">1</span>))).body;</span><br><span class="line">            list = list.concat(autoQuery(html, &#123;</span><br><span class="line">                select: <span class="string">'.right-book-list &gt; ul &gt; li'</span>,</span><br><span class="line">                data: [&#123;</span><br><span class="line">                    title: <span class="string">'$ .book-info &gt; h3 &gt; a'</span>,</span><br><span class="line">                    author: <span class="string">'$ .book-info .default'</span>,</span><br><span class="line">                    image: &#123;</span><br><span class="line">                        select: <span class="string">'.book-img img'</span>,</span><br><span class="line">                        data: <span class="string">'@src'</span>,</span><br><span class="line">                    &#125;,</span><br><span class="line">                    summary: &#123;</span><br><span class="line">                        select: <span class="string">'.book-info .intro'</span>,</span><br><span class="line">                        trim: <span class="literal">true</span>,</span><br><span class="line">                    &#125;,</span><br><span class="line">                &#125;]</span><br><span class="line">            &#125;));</span><br><span class="line"></span><br><span class="line">            <span class="keyword">const</span> end = <span class="built_in">Date</span>.now();</span><br><span class="line">            <span class="keyword">const</span> time = end - start;</span><br><span class="line">            alltime += time;</span><br><span class="line">            <span class="comment">// ... 完成当前任务</span></span><br><span class="line">            <span class="built_in">console</span>.log(</span><br><span class="line">                <span class="string">'当前并发量是：'</span> + count--,</span><br><span class="line">                <span class="string">'还剩余：'</span> + yellow(max - n),</span><br><span class="line">                <span class="string">'抓取到的数据量：'</span> + yellow(list.length),</span><br><span class="line">                <span class="string">'用时：'</span> + yellow(point(time / M, <span class="number">2</span>)) + <span class="string">' ms'</span>,</span><br><span class="line">                <span class="string">'平均用时：'</span> + yellow(point(alltime / M / n, <span class="number">2</span>)) + <span class="string">' ms/page'</span>,</span><br><span class="line">            );</span><br><span class="line">            <span class="comment">// 执行下一个任务</span></span><br><span class="line">            next(<span class="literal">null</span>, n);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">`page = <span class="subst">$&#123;n&#125;</span> 抓取失败：<span class="subst">$&#123;err.message&#125;</span>`</span>.red);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>运行效果：<br>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/5/20180521181359.gif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    </p>
+<p>那么，如如果出现错误如何处理？实际上可以把错误的 url 添加到 Set（集合）里面，再整个结束之后，再使用 Async.retry（重试）函数就像抓取，多次失败，那就不爬它了。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://caolan.github.io/async/" target="_blank" rel="noopener">https://caolan.github.io/async/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.843Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/05/Nodejs/使用『Async』进行异步并发流程控制/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/05/Nodejs/使用『Async』进行异步并发流程控制/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/05/Flutter/Dart 从『未听说过』到『听说过』/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Dart 从『未听说过』到『听说过』</h4>
+        <h4 class="summary">在大一的时候，买了一本《xxx 从入门到精通》的书看，等我看完之后发现根本连门都没找到，各种坑，大量的示例与抄文档无异，...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/05/前端/Stencil：一个 Web Component 实现框架/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Stencil：一个 Web Component 编译器</h4>
+        <h4 class="summary">Stencil 是一个神器可重用的 Web 组件编译器，由 Ionic Framework 团队创建，旨在帮助构建能够在...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

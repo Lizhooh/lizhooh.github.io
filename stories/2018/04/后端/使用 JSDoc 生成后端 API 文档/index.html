@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/04/后端/使用 JSDoc 生成后端 API 文档/">
+    
+    
+    <title>使用 JSDoc 生成后端 API 文档 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言JSDoc 是一个可以根据规范化的注释、自动生成接口文档。包括参数说明、示例等。可以使用 JSDoc 记录如：命名空间，类，方法，方法参数等。 中文教程：JSDoc 介绍 基本使用新键一个 index.js 文件。 123npm install -g jsdocjsdoc index.js         # outserve out              # 5000">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 JSDoc 生成后端 API 文档">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/04/后端/使用 JSDoc 生成后端 API 文档/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言JSDoc 是一个可以根据规范化的注释、自动生成接口文档。包括参数说明、示例等。可以使用 JSDoc 记录如：命名空间，类，方法，方法参数等。 中文教程：JSDoc 介绍 基本使用新键一个 index.js 文件。 123npm install -g jsdocjsdoc index.js         # outserve out              # 5000">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/4/20180413085804.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.911Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 JSDoc 生成后端 API 文档">
+<meta name="twitter:description" content="前言JSDoc 是一个可以根据规范化的注释、自动生成接口文档。包括参数说明、示例等。可以使用 JSDoc 记录如：命名空间，类，方法，方法参数等。 中文教程：JSDoc 介绍 基本使用新键一个 index.js 文件。 123npm install -g jsdocjsdoc index.js         # outserve out              # 5000">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/4/20180413085804.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用 JSDoc 生成后端 API 文档</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">使用 JSDoc 生成后端 API 文档</h1>
+
+        <div class="meta-rest">
+            <h1>使用 JSDoc 生成后端 API 文档</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-04-13T00:22:32.000Z" itemprop="datePublished" class="page-time">
+    2018-04-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#配置"><span class="post-toc-number">3.</span> <span class="post-toc-text">配置</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#注释语法"><span class="post-toc-number">4.</span> <span class="post-toc-text">注释语法</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-后端/使用 JSDoc 生成后端 API 文档"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用 JSDoc 生成后端 API 文档</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 04 月 13 日 8:22" datetime="2018-04-13T00:22:32.000Z"  itemprop="datePublished">
+    2018-04-13
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1408</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>JSDoc 是一个可以根据规范化的注释、自动生成接口文档。包括参数说明、示例等。可以使用 JSDoc 记录如：命名空间，类，方法，方法参数等。</p>
+<p>中文教程：<a href="http://www.css88.com/doc/jsdoc/index.html" target="_blank" rel="noopener">JSDoc 介绍</a></p>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>新键一个 index.js 文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm install -g jsdoc</span><br><span class="line">jsdoc index.js         <span class="comment"># out</span></span><br><span class="line">serve out              <span class="comment"># 5000</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>在 index.js 里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Book类，代表一个书本.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@constructor</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;String&#125;</span> <span class="variable">title</span></span> - 书本的标题.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;String&#125;</span> <span class="variable">author</span></span> - 书本的作者.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Book</span>(<span class="params">title, author</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.title = title;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行后生成的文档：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/4/20180413085804.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p><b>说明：</b></p>
+<ul>
+<li>@constructor 指定为构造函数</li>
+<li>@param 是参数，{String} 是参数类型</li>
+</ul>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>在根目录里创建一个 jsdoc.json 用于配置生成规则。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"tags"</span>: &#123;</span><br><span class="line">        <span class="string">"allowUnknownTags"</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">"dictionaries"</span>: [<span class="string">"jsdoc"</span>]</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"source"</span>: &#123;</span><br><span class="line">        <span class="comment">// 代码目录</span></span><br><span class="line">        <span class="string">"include"</span>: [<span class="string">"lib"</span>, <span class="string">"package.json"</span>, <span class="string">"README.md"</span>],</span><br><span class="line">        <span class="string">"includePattern"</span>: <span class="string">".js$"</span>,</span><br><span class="line">        <span class="string">"excludePattern"</span>: <span class="string">"(node_modules/|docs)"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"plugins"</span>: [</span><br><span class="line">        <span class="string">"plugins/markdown"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="string">"templates"</span>: &#123;</span><br><span class="line">        <span class="string">"cleverLinks"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"monospaceLinks"</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">"useLongnameInNav"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"showInheritedInNav"</span>: <span class="literal">true</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"opts"</span>: &#123;</span><br><span class="line">        <span class="string">"destination"</span>: <span class="string">"./docs/"</span>,</span><br><span class="line">        <span class="string">"encoding"</span>: <span class="string">"utf8"</span>,</span><br><span class="line">        <span class="string">"private"</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">"recurse"</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">"template"</span>: <span class="string">"./node_modules/minami"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>配置你的 script：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"start"</span>: <span class="string">"jsdoc --configure jsdoc.json --verbose"</span>,</span><br><span class="line"><span class="string">"serve"</span>: <span class="string">"serve docs"</span></span><br></pre></td></tr></table></figure>
+<p>具体参考参考：<a href="https://github.com/nijikokun/minami" target="_blank" rel="noopener">https://github.com/nijikokun/minami</a></p>
+<p>推荐主题：</p>
+<ul>
+<li><a href="https://github.com/Nijikokun/minami" target="_blank" rel="noopener">minami</a></li>
+<li><a href="https://github.com/clenemt/docdash" target="_blank" rel="noopener">docdash</a></li>
+<li><a href="https://github.com/postmanlabs/postman-jsdoc-theme" target="_blank" rel="noopener">postman-jsdoc-theme</a></li>
+</ul>
+<h2 id="注释语法"><a href="#注释语法" class="headerlink" title="注释语法"></a>注释语法</h2><p>@file<br>对文件的描述，用于文件的头部。</p>
+<p>@author <code>&lt;name&gt; [&lt;emailAddress&gt;]</code><br>代码的作者，在姓名后面用尖括号加上邮箱会被自动转成 mailto: 的链接。</p>
+<p>@copyright <code>&lt;some copyright text&gt;</code><br>与 @file 结合使用，说明版权相关的信息。</p>
+<p>@license <code>&lt;identifier&gt;</code><br>说明许可证相关的信息。</p>
+<p>@type <code>{typeName}</code></p>
+<ul>
+<li><code>*</code> 表示任何类型。</li>
+<li><code>?</code> 表示可以为 null。</li>
+<li><code>!</code> 表示不能为 null。</li>
+<li>数组用 [] 表示。</li>
+<li>类型有多种情况需用 | 进行分隔，并加上 ()。</li>
+<li>可以使用 @callback 或 @typedef 定义的类型。</li>
+</ul>
+<p>@property <code>[&lt;type&gt;] [&lt;name&gt;] [some description]</code><br>描述对象的属性。</p>
+<p>@func <code>[&lt;FunctionName&gt;]</code><br>标识一个函数。</p>
+<p>@param <code>{&lt;type&gt;} name - some description</code></p>
+<ul>
+<li>非必传参数需给参数名加上 []。</li>
+<li>参数如有默认值需用 = 表示。</li>
+<li>如果参数是 object，可继续用 @param 对其属性进行详细说明。</li>
+<li>若干个参数用 …表示。</li>
+</ul>
+<p>@returns <code>{&lt;type&gt;} some description</code><br>描述一个函数的返回值。</p>
+<p>@namespace <code>[{&lt;type&gt;}] &lt;SomeName&gt;]</code><br>标识一个命名空间。</p>
+<p>@desc <code>&lt;some description&gt;</code><br>对某个部分的详细描述和说明。</p>
+<p>@summary <code>&lt;some description&gt;</code><br>对某个部分的简短描述和说明。</p>
+<p>@constant <code>[&lt;type&gt; &lt;name&gt;]</code><br>标识常量。</p>
+<p>@readonly<br>仅仅是注释，JSDoc 不会去检查究竟是不是 readonly。</p>
+<p>@default <code>[&lt;some value&gt;]</code><br>变量的初始值。</p>
+<p>@enum <code>[&lt;type&gt;]</code><br>相同类型的集合。</p>
+<p>@example<br>使用示例，示例代码在文档中会被高亮显示。</p>
+<p>@throws <code>[{&lt;type&gt;} free-form description]</code><br>表明这部分代码会抛出某个异常。</p>
+<p>@todo todo<br>后续需要做的事。</p>
+<p>@borrows <code>&lt;that namepath&gt; as &lt;this namepath&gt;</code><br>可理解为复制注释，当有多个地方引用了同一个函数，只需在一处写好注释，然后用 @borrows 即可。</p>
+<p>@callback <code>&lt;namepath&gt;</code><br>定义一个回调函数，和 @typedef 一样，是一种自定义类型。</p>
+<p>@typedef <code>[&lt;type&gt;] &lt;namepath&gt;</code><br>定义一个自定义类型，定义后可以在 @type @param 等标签中使用。</p>
+<p>@this<br>说明此处 this 所指代的内容。</p>
+<p>@global<br>全局标识。</p>
+<p>@inner<br>内部属性或方法的标识，使用后可以通过 Parent~Child 的方式来引用。</p>
+<p>@ignore<br>告诉 JSDoc 忽略这部分代码。</p>
+<p>@version <code>[1.0.0]</code><br>版本号。</p>
+<p>@since<br>表明该内容出现在一个特定的版本之后。</p>
+<p>@class <code>[&lt;type&gt; &lt;name&gt;]</code><br>标识一个函数为构造函数，可以用 new 的方式实例化。</p>
+<p>@classdesc <code>&lt;some description&gt;</code><br>与 @class 结合使用，与 @desc 不同，@classdesc 是对类的描述，而 @desc 是对类的构造函数的描述。</p>
+<p>@member <code>[&lt;type&gt;] [&lt;name&gt;]</code><br>标识类的属性。</p>
+<p>@method <code>[&lt;FunctionName&gt;]</code><br>标识类的方法。</p>
+<p>@public<br>标识类的属性或方法的访问范围是 public。</p>
+<p>@private<br>标识类的属性或方法的访问范围是 private。</p>
+<p>@protected<br>标识类的属性或方法的访问范围是 protected。</p>
+<p>@instance<br>实例属性或方法的标识。</p>
+<p>@static<br>静态属性或方法的标识。</p>
+<p>@constructs <code>&lt;name&gt;</code><br>当使用对象直接量去定义类时，可以通过 @constructs 标识某个函数为类的构造函数，不要和 @class 同时使用，否则会在文档中出现两个同名的类。</p>
+<p>@lends <code>&lt;namepath&gt;</code><br>把对象直接量的属性和方法指定为某个类的属性和方法。</p>
+<p>@extends <code>&lt;namepath&gt;</code><br>用来表明继承关系。</p>
+<p>@abstract<br>标识子类必须实现或重写父类的此方法。</p>
+<p>@override<br>表明此方法是重写了父类的同名方法。</p>
+<p>@interface <code>[&lt;name&gt;]</code><br>定义接口。</p>
+<p>@implements <code>{typeExpression}</code><br>实现了某个接口。</p>
+<p>@module <code>[[{&lt;type&gt;}] &lt;moduleName&gt;]</code><br>定义一个模块。</p>
+<p>@exports <code>&lt;moduleName&gt;</code><br>当不是用 exports 或者 module.exports 对外提供模块接口时，需要使用 @exports 而不是 @module。</p>
+<p>@requires <code>&lt;someModuleName&gt;</code><br>需要某个模块。</p>
+<p>@alias <code>&lt;aliasNamepath&gt;</code><br>告诉 JSDoc 在生成文档时用另一个 namepath 去处理当前的内容。@alias 不同于 @name，@name 会告诉 JSDoc 忽略这部分代码。</p>
+<p>@name <code>&lt;namepath&gt;</code><br>使用 @name 时，需要提供很多其他的注释，如 @type 等，因为 JSDoc 会忽略这部分代码，适用于在运行时才生成的函数等。</p>
+<p>@inheritdoc<br>继承父类的注释。</p>
+<p>@mixin <code>[&lt;MixinName&gt;]</code><br>表明当前对象的属性和方法可以被添加到另一个对象中。</p>
+<p>@mixes <code>&lt;OtherObjectPath&gt;</code><br>将带有 @mixin 标签的对象的属性和方法添加进来。</p>
+<p>@see <code>&lt;namepath&gt;</code><br>页面里超链接的作用。</p>
+<p>@link or @url <code>{namepath}</code><br>可以理解为注释中内联的 @see。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/jsdoc3/jsdoc" target="_blank" rel="noopener">https://github.com/jsdoc3/jsdoc</a></li>
+<li><a href="https://blog.fundebug.com/2017/10/18/generate-docs-with-jsdoc/" target="_blank" rel="noopener">https://blog.fundebug.com/2017/10/18/generate-docs-with-jsdoc/</a></li>
+<li><a href="http://ask.dcloud.net.cn/article/129" target="_blank" rel="noopener">http://ask.dcloud.net.cn/article/129</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.911Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/04/后端/使用 JSDoc 生成后端 API 文档/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/04/后端/使用 JSDoc 生成后端 API 文档/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/04/Redis/对基于 Redis 分布式计算的研究/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">对基于 Redis 分布式计算的研究</h4>
+        <h4 class="summary">所谓分布式计算是一门计算科学，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分。 前言所谓分布式计算...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/04/TensorFlow/TensorFlow.js 拟合曲线回归.1/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">TensorFlow.js 拟合曲线回归</h4>
+        <h4 class="summary">在本文中，使用 TensorFlow.js 将使用现有的数据来拟合一个曲线回归方程。
+数据现在有一个数据集，把它可视化绘...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

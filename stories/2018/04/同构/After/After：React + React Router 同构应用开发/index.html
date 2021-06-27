@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/04/同构/After/After：React + React Router 同构应用开发/">
+    
+    
+    <title>After：React + React Router 同构应用开发 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言同构即未来！就像 Next.js 一样，After.js 是一个使用 React 和 React Router 的一个同构应用开发框架。After 大量借鉴了 Next 的思想，相比 Next 而言却比较轻量级与灵活，可以基于 After 的基础上打造自己的同构框架。">
+<meta name="keywords" content="React,服务端渲染,Next,同构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="After：React + React Router 同构应用开发">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/04/同构/After/After：React + React Router 同构应用开发/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言同构即未来！就像 Next.js 一样，After.js 是一个使用 React 和 React Router 的一个同构应用开发框架。After 大量借鉴了 Next 的思想，相比 Next 而言却比较轻量级与灵活，可以基于 After 的基础上打造自己的同构框架。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.908Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="After：React + React Router 同构应用开发">
+<meta name="twitter:description" content="前言同构即未来！就像 Next.js 一样，After.js 是一个使用 React 和 React Router 的一个同构应用开发框架。After 大量借鉴了 Next 的思想，相比 Next 而言却比较轻量级与灵活，可以基于 After 的基础上打造自己的同构框架。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">After：React + React Router 同构应用开发</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">After：React + React Router 同构应用开发</h1>
+
+        <div class="meta-rest">
+            <h1>After：React + React Router 同构应用开发</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-04-22T05:50:14.000Z" itemprop="datePublished" class="page-time">
+    2018-04-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/同构/">同构</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开始使用-After"><span class="post-toc-number">2.</span> <span class="post-toc-text">开始使用 After</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#数据提取"><span class="post-toc-number">3.</span> <span class="post-toc-text">数据提取</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#路由"><span class="post-toc-number">4.</span> <span class="post-toc-text">路由</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#代码拆分"><span class="post-toc-number">5.</span> <span class="post-toc-text">代码拆分</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义-Head"><span class="post-toc-number">6.</span> <span class="post-toc-text">自定义 Head</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-同构/After/After：React + React Router 同构应用开发"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">After：React + React Router 同构应用开发</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 04 月 22 日 13:50" datetime="2018-04-22T05:50:14.000Z"  itemprop="datePublished">
+    2018-04-22
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/同构/">同构</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 679</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><strong>同构即未来！</strong>就像 Next.js 一样，After.js 是一个使用 React 和 React Router 的一个同构应用开发框架。After 大量借鉴了 Next 的思想，相比 Next 而言却比较轻量级与灵活，可以基于 After 的基础上打造自己的同构框架。<br><a id="more"></a></p>
+<h2 id="开始使用-After"><a href="#开始使用-After" class="headerlink" title="开始使用 After"></a>开始使用 After</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npm install -g create-razzle-app</span><br><span class="line">create-razzle-app --example with-afterjs myapp</span><br><span class="line"><span class="built_in">cd</span> myapp</span><br><span class="line">npm install</span><br><span class="line">npm start <span class="comment"># http://127.0.0.1:3000</span></span><br></pre></td></tr></table></figure>
+<h2 id="数据提取"><a href="#数据提取" class="headerlink" title="数据提取"></a>数据提取</h2><p>在 After 里有很多东西是参考 Next 的，同样提供了一个 <code>getInitialProps</code> 函数用于数据的初始化。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">About</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">async</span> getInitialProps(&#123; req, res, match &#125;) &#123;</span><br><span class="line">        <span class="keyword">const</span> stuff = <span class="keyword">await</span> CallMyApi();</span><br><span class="line">        <span class="keyword">return</span> &#123; stuff &#125;; <span class="comment">// this.props.stuff</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所有在 getInitialProps 里返回的数据都会合并到组件的 props 里面。</p>
+<p>同样的 getInitialProps 是一个同构 API，并不能在 getInitialProps 里面进行数据库操作和使用 DOM、Nodejs API 等。那么如何精确的获取数据？一般来说需要调用本机的 REST API 服务。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">CallMyApi</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> fetch(<span class="string">'http://127.0.0.1/api/user'</span>).then(<span class="function"><span class="params">res</span> =&gt;</span> res.json());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>应该设置一个微服务：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">router.get(<span class="string">'/api/user'</span>, ctx =&gt; &#123;</span><br><span class="line">    ctx.body = <span class="string">'xxx'</span>;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>getInitialProps 的参数如下：</p>
+<ul>
+<li><code>req?</code>： 仅限于服务端，request 对象。</li>
+<li><code>res?</code>： 仅限于服务端，response 对象。</li>
+<li><code>match</code>： React Router 4 的 match 对象。</li>
+<li><code>history</code>： React Router 4 的 history 对象。</li>
+<li><code>location</code>： 仅限于客户端，React Router 4 的 location 对象。</li>
+</ul>
+<h2 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h2><p>因为 After 是把 React 和 React-Router 4 结合到一起的，所以路由部分和 React-Router 4 一样。</p>
+<h2 id="代码拆分"><a href="#代码拆分" class="headerlink" title="代码拆分"></a>代码拆分</h2><p>After 内置了 <code>import()</code> 的语法（也就是配置了 Webpack）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> Home <span class="keyword">from</span> <span class="string">'./Home'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; asyncComponent &#125; <span class="keyword">from</span> <span class="string">'@jaredpalmer/after'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> [</span><br><span class="line">    <span class="comment">// normal route</span></span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/'</span>,</span><br><span class="line">        exact: <span class="literal">true</span>,</span><br><span class="line">        component: Home,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// codesplit route</span></span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/about'</span>,</span><br><span class="line">        exact: <span class="literal">true</span>,</span><br><span class="line">        component: asyncComponent(&#123;</span><br><span class="line">            loader: <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">import</span>(<span class="string">'./About'</span>),</span><br><span class="line">            Placeholder: <span class="function"><span class="params">()</span> =&gt;</span> <span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>...LOADING...<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>,</span><br><span class="line">        &#125;),</span><br><span class="line">    &#125;,</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<h2 id="自定义-Head"><a href="#自定义-Head" class="headerlink" title="自定义 Head"></a>自定义 Head</h2><p>创建一个 <code>./src/Document.js</code> 可以用于自定义 Document。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; ServerStyleSheet &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; AfterRoot, AfterData &#125; <span class="keyword">from</span> <span class="string">'@jaredpalmer/after'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">Document</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">async</span> getInitialProps(&#123; assets, data, renderPage &#125;) &#123;</span><br><span class="line">        <span class="keyword">const</span> sheet = <span class="keyword">new</span> ServerStyleSheet();</span><br><span class="line">        <span class="keyword">const</span> page = <span class="keyword">await</span> renderPage(<span class="function"><span class="params">App</span> =&gt;</span> <span class="function"><span class="params">props</span> =&gt;</span> sheet.collectStyles(<span class="xml"><span class="tag">&lt;<span class="name">App</span> &#123;<span class="attr">...props</span>&#125; /&gt;</span></span>));</span><br><span class="line">        <span class="keyword">const</span> styleTags = sheet.getStyleElement();</span><br><span class="line">        <span class="keyword">return</span> &#123; assets, data, ...page, styleTags&#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; helmet, assets, data, styleTags &#125; = <span class="keyword">this</span>.props;</span><br><span class="line">        <span class="comment">// get attributes from React Helmet</span></span><br><span class="line">        <span class="keyword">const</span> htmlAttrs = helmet.htmlAttributes.toComponent();</span><br><span class="line">        <span class="keyword">const</span> bodyAttrs = helmet.bodyAttributes.toComponent();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;html &#123;...htmlAttrs&#125;&gt;</span><br><span class="line">                &lt;head&gt;</span><br><span class="line">                    &lt;meta httpEquiv=<span class="string">"X-UA-Compatible"</span> content=<span class="string">"IE=edge"</span> /&gt;</span><br><span class="line">                    &lt;meta charSet=<span class="string">"utf-8"</span> /&gt;</span><br><span class="line">                    &lt;title&gt;Welcome to the Afterparty&lt;<span class="regexp">/title&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /</span>&gt;</span><br><span class="line">                    &#123;helmet.title.toComponent()&#125;</span><br><span class="line">                    &#123;helmet.meta.toComponent()&#125;</span><br><span class="line">                    &#123;helmet.link.toComponent()&#125;</span><br><span class="line">                    &#123;<span class="comment">/** here is where we put our Styled Components styleTags... */</span>&#125;</span><br><span class="line">                    &#123;styleTags&#125;</span><br><span class="line">                &lt;<span class="regexp">/head&gt;</span></span><br><span class="line"><span class="regexp">                &lt;body &#123;...bodyAttrs&#125;&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;AfterRoot /</span>&gt;</span><br><span class="line">                    &lt;AfterData data=&#123;data&#125;/&gt;</span><br><span class="line">                    &lt;script</span><br><span class="line">                        type=<span class="string">"text/javascript"</span></span><br><span class="line">                        src=&#123;assets.client.js&#125;</span><br><span class="line">                        defer</span><br><span class="line">                        crossOrigin=<span class="string">"anonymous"</span></span><br><span class="line">                    /&gt;</span><br><span class="line">                &lt;<span class="regexp">/body&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>html&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/jaredpalmer/after.js" target="_blank" rel="noopener">https://github.com/jaredpalmer/after.js</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.908Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/04/同构/After/After：React + React Router 同构应用开发/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/04/同构/After/After：React + React Router 同构应用开发/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Next/">Next</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/同构/">同构</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/服务端渲染/">服务端渲染</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/04/抓包&爬虫/Puppeteer 使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Puppeteer 使用指南</h4>
+        <h4 class="summary">前端自动化测试是一个很复杂以及涉及面广阔的知识点，同时也是前端工程化重要的分支，讲究的是自动化与智能模拟测试。Puppe...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/04/Redis/对基于 Redis 分布式计算的研究/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">对基于 Redis 分布式计算的研究</h4>
+        <h4 class="summary">所谓分布式计算是一门计算科学，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分。 前言所谓分布式计算...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

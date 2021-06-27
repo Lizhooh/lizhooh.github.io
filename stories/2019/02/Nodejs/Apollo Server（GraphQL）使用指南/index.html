@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/02/Nodejs/Apollo Server（GraphQL）使用指南/">
+    
+    
+    <title>Apollo Server（GraphQL）使用指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Apollo Server 是一个 Apollo 开源的一个基于 Nodejs 的 GraphQL 后端服务集成方案。主要提供 GraphQL 后端的数据解析，查询，突变等解析功能，可以提供给任何的 GraphQL 客户端查询。 关联文章：  React Apollo（GraphQL）使用指南 使用 GraphQL 取代 REST 的开始">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apollo Server（GraphQL）使用指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/02/Nodejs/Apollo Server（GraphQL）使用指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Apollo Server 是一个 Apollo 开源的一个基于 Nodejs 的 GraphQL 后端服务集成方案。主要提供 GraphQL 后端的数据解析，查询，突变等解析功能，可以提供给任何的 GraphQL 客户端查询。 关联文章：  React Apollo（GraphQL）使用指南 使用 GraphQL 取代 REST 的开始">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215120904.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215114136.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215121614.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215123021.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215124644.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215125126.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215130208.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215135838.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215140823.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215131010.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215150903.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.831Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apollo Server（GraphQL）使用指南">
+<meta name="twitter:description" content="前言Apollo Server 是一个 Apollo 开源的一个基于 Nodejs 的 GraphQL 后端服务集成方案。主要提供 GraphQL 后端的数据解析，查询，突变等解析功能，可以提供给任何的 GraphQL 客户端查询。 关联文章：  React Apollo（GraphQL）使用指南 使用 GraphQL 取代 REST 的开始">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2019/2/20190215120904.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Apollo Server（GraphQL）使用指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Apollo Server（GraphQL）使用指南</h1>
+
+        <div class="meta-rest">
+            <h1>Apollo Server（GraphQL）使用指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-02-15T03:21:32.000Z" itemprop="datePublished" class="page-time">
+    2019-02-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">3.</span> <span class="post-toc-text">基本使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#与-Express-Koa-服务集成"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">与 Express/Koa 服务集成</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据分页"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">数据分页</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#模拟数据"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">模拟数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#错误处理"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">错误处理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#REST-数据源"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">REST 数据源</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义类型标量"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">自定义类型标量</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#访问认证"><span class="post-toc-number">3.7.</span> <span class="post-toc-text">访问认证</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#集成测试"><span class="post-toc-number">3.8.</span> <span class="post-toc-text">集成测试</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#服务配置项"><span class="post-toc-number">4.</span> <span class="post-toc-text">服务配置项</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Apollo Server（GraphQL）使用指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Apollo Server（GraphQL）使用指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 02 月 15 日 11:21" datetime="2019-02-15T03:21:32.000Z"  itemprop="datePublished">
+    2019-02-15
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2019</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  22.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Apollo Server 是一个 Apollo 开源的一个基于 Nodejs 的 GraphQL 后端服务集成方案。主要提供 GraphQL 后端的数据解析，查询，突变等解析功能，可以提供给任何的 GraphQL 客户端查询。</p>
+<p>关联文章：</p>
+<ul>
+<li><a href="/stories/2018/10/React/React/React%20Apollo（GraphQL）使用指南/">React Apollo（GraphQL）使用指南</a></li>
+<li><a href="/stories/2018/06/GraphQL/使用%20GraphQL%20取代%20REST%20的开始/">使用 GraphQL 取代 REST 的开始</a></li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215120904.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>安装 GraphQL 相关的依赖，并且安装 koa 来展示使用效果。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add apollo-server graphql</span><br></pre></td></tr></table></figure>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>下面的代码示例，如何编写一个简单的 GraphQL 服务器。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; ApolloServer, gql &#125; = <span class="built_in">require</span>(<span class="string">'apollo-server'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模拟的数据</span></span><br><span class="line"><span class="keyword">const</span> books = [&#123;</span><br><span class="line">    title: <span class="string">'Harry Potter and the Chamber of Secrets'</span>,</span><br><span class="line">    author: <span class="string">'J.K. Rowling'</span>,</span><br><span class="line">&#125;, &#123;</span><br><span class="line">    title: <span class="string">'Jurassic Park'</span>,</span><br><span class="line">    author: <span class="string">'Michael Crichton'</span>,</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> typeDefs = gql<span class="string">`</span></span><br><span class="line"><span class="string">  # 模型</span></span><br><span class="line"><span class="string">  type Book &#123;</span></span><br><span class="line"><span class="string">    title: String</span></span><br><span class="line"><span class="string">    author: String</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  # 查询</span></span><br><span class="line"><span class="string">  type Query &#123;</span></span><br><span class="line"><span class="string">    books: [Book]</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 解析器（决定查询，突变）返回什么数据</span></span><br><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        books: <span class="function"><span class="params">()</span> =&gt;</span> books,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> server = <span class="keyword">new</span> ApolloServer(&#123; typeDefs, resolvers &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 可以使用 listen，也可以作为中间件与 express/koa 结合</span></span><br><span class="line">server.listen().then(<span class="function">(<span class="params">&#123; url &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`🚀  Server ready at <span class="subst">$&#123;url&#125;</span>`</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>好了，当我们在 GraphQL 客户端（GraphQL Background）输入查询语句，可以到处相应的数据返回。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215114136.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="与-Express-Koa-服务集成"><a href="#与-Express-Koa-服务集成" class="headerlink" title="与 Express/Koa 服务集成"></a>与 Express/Koa 服务集成</h3><p>Apollo Server 可以不单独的启动服务，而是与 Express/Koa 一起集成，对于 Express 使用 <code>apollo-server-express</code>，对于 Koa 使用 <code>apollo-server-koa</code>。</p>
+<p>下面是 Koa 的示例。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yarn add apollo-server-koa@rc</span><br><span class="line">yarn add koa koa-router koa-body</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; ApolloServer, gql &#125; = <span class="built_in">require</span>(<span class="string">'apollo-server-koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"><span class="keyword">const</span> body = <span class="built_in">require</span>(<span class="string">'koa-body'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 忽略了 typeDefs，resolvers</span></span><br><span class="line"><span class="keyword">const</span> server = <span class="keyword">new</span> ApolloServer(&#123; typeDefs, resolvers &#125;);</span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">'/'</span>, ctx =&gt; &#123;</span><br><span class="line">    ctx.body = <span class="string">'hello'</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里把 server 绑定到 koa 路由里</span></span><br><span class="line">server.applyMiddleware(&#123; app &#125;);</span><br><span class="line"></span><br><span class="line">app.use(body()).use(router.routes());</span><br><span class="line">app.listen(<span class="number">3010</span>, () =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`🚀 Server ready at http://localhost:3010<span class="subst">$&#123;server.graphqlPath&#125;</span>`</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="数据分页"><a href="#数据分页" class="headerlink" title="数据分页"></a>数据分页</h3><p>在很多时候，对于列表的数据查询都需要做分页的，那么在 Apollo Server 里怎么做数据分页？实际上非常简单，可以为查询添加参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 查询</span><br><span class="line">type Query &#123;</span><br><span class="line">    books(offset: Int, limit: Int): [Book]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>添加两个用于分页查询的参数 offset 和 limit，之后就可以在 resolvers 里获取用户输入的参数值，利用这两个参数在数据库查询时构造分页。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        books: <span class="function">(<span class="params">root, &#123; offset = <span class="number">0</span>, limit = <span class="number">10</span> &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="comment">// db.books.find().skip(offset).limit(limit);</span></span><br><span class="line">            <span class="keyword">return</span> books;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="模拟数据"><a href="#模拟数据" class="headerlink" title="模拟数据"></a>模拟数据</h3><p>GraphQL API 的强类型特性非常适合模拟数据。在 server 的配置项里使用 mocks 属性就可以启动自动的模拟数据，在前期前端 UI 开发的时候非常有利。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> server = <span class="keyword">new</span> ApolloServer(&#123; typeDefs, <span class="attr">mocks</span>: <span class="literal">true</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>接下来查询的数据，它会按照数据的类型返回模拟数据。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215121614.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>还可以指定对应类型的模拟数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> mocks = &#123;</span><br><span class="line">    <span class="comment">// 对于类型的数据</span></span><br><span class="line">    Int: <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">Math</span>.random() * <span class="number">1000</span> | <span class="number">0</span>,</span><br><span class="line">    Float: <span class="function"><span class="params">()</span> =&gt;</span> (<span class="built_in">Math</span>.random() * <span class="number">100</span> | <span class="number">0</span>) / <span class="number">100</span>,</span><br><span class="line">    <span class="built_in">String</span>: <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">Math</span>.random().toString(<span class="number">32</span>),</span><br><span class="line">    <span class="comment">// 对于模型的数据</span></span><br><span class="line">    Person: <span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">        name: casual.name,</span><br><span class="line">        age: <span class="function"><span class="params">()</span> =&gt;</span> casual.integer(<span class="number">0</span>, <span class="number">120</span>),</span><br><span class="line">    &#125;),</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> server = <span class="keyword">new</span> ApolloServer(&#123; typeDefs, mocks &#125;);</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215123021.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><p>Apollo Server 提供了一些预定义的错误，包括 AuthenticationError，ForbiddenError，UserInputError 和通用 ApolloError，这些错误旨在增强 GraphQL 执行之前和期间抛出的错误。</p>
+<p>当解析器内部和外部的 Apollo Server 发生错误时，errors 数组内部的每个错误都将包含一个 extensions 包含 Apollo 服务器添加的信息的对象。在默认的情况下 Apollo Server 会把当前服务器的栈堆信息显示出来，要想关闭使用 <code>debug: false</code> 即可。</p>
+<p>Apollo Server 构造函数接受 formatError 在传递回客户端的每个错误上运行的函数，库用于集中式的错误日志采集，或做统一的错误处理。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215124644.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> server = <span class="keyword">new</span> ApolloServer(&#123;</span><br><span class="line">    typeDefs,</span><br><span class="line">    resolvers,</span><br><span class="line">    debug: <span class="literal">false</span>,</span><br><span class="line">    formatError: <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(error);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Internal server error'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>当发生错误时，您可能希望返回其他信息，下面使用 UserInputError 来返回自定义的错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        books: <span class="keyword">async</span> (root, &#123; offset = <span class="number">0</span>, limit = <span class="number">10</span> &#125;) =&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (offset &lt; <span class="number">0</span> || limit &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> UserInputError(<span class="string">'Incorrect parameter range'</span>, &#123;</span><br><span class="line">                    offset: offset,</span><br><span class="line">                    limit: limit,</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> books;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215125126.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>可以看到，当 offset 或 limit 的值小于 0 时，就抛出了相关的错误。</p>
+<p>如果需要定义特定于应用程序的其他错误代码，则可以使用通用的 ApolloError 类。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        books: <span class="keyword">async</span> (root, &#123; offset = <span class="number">0</span>, limit = <span class="number">10</span> &#125;) =&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (offset &lt; <span class="number">0</span> || limit &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ApolloError(<span class="string">'参数范围错误'</span>, <span class="number">404</span>, &#123;</span><br><span class="line">                    offset: offset,</span><br><span class="line">                    limit: limit,</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> books;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215130208.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="REST-数据源"><a href="#REST-数据源" class="headerlink" title="REST 数据源"></a>REST 数据源</h3><p>有时候，想要现有的 REST API 系统保持不变，并扩充一个 GraphQL 服务，可以在 resolvers 里获取相应的数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    Query: &#123;</span><br><span class="line">        books: <span class="keyword">async</span> (root, &#123; offset = <span class="number">0</span>, limit = <span class="number">10</span> &#125;) =&gt; &#123;</span><br><span class="line">            <span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">'https://movies-api.example.com/'</span>)</span><br><span class="line">            <span class="keyword">return</span> res.json();</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="自定义类型标量"><a href="#自定义类型标量" class="headerlink" title="自定义类型标量"></a>自定义类型标量</h3><p>GraphQL 提供了几种基本的数据类型，有时候需要一些复合的数据类型，例如 Date，这时候可以参数自定义类型标量。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; GraphQLScalarType &#125; = <span class="built_in">require</span>(<span class="string">'graphql'</span>);</span><br><span class="line"><span class="keyword">const</span> moment = <span class="built_in">require</span>(<span class="string">'moment'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> books = [&#123;</span><br><span class="line">    title: <span class="string">'Harry Potter and the Chamber of Secrets'</span>,</span><br><span class="line">    author: <span class="string">'J.K. Rowling'</span>,</span><br><span class="line">    time: <span class="string">'2019-02-15 13:48:50'</span>,    <span class="comment">// &lt;-- Here</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">    title: <span class="string">'Jurassic Park'</span>,</span><br><span class="line">    author: <span class="string">'Michael Crichton'</span>,</span><br><span class="line">    time: <span class="number">1550209975481</span>,            <span class="comment">// &lt;-- Here</span></span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> MyDate = <span class="keyword">new</span> GraphQLScalarType(&#123;</span><br><span class="line">    name: <span class="string">'MyDate'</span>,</span><br><span class="line">    description: <span class="string">'自定义的 Date 类型'</span>,</span><br><span class="line">    <span class="comment">// 返回的数据</span></span><br><span class="line">    serialize(value) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> value === <span class="string">'number'</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> moment(value).format(<span class="string">'YYYY-MM-DD HH:mm:ss'</span>);;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;,</span><br><span class="line">    parseValue(value) &#123;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;,</span><br><span class="line">    parseLiteral(ast) &#123;</span><br><span class="line">        <span class="keyword">return</span> ast.value;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> typeDefs = gql<span class="string">`</span></span><br><span class="line"><span class="string">  scalar Date       # &lt;-- Here</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  # 模型</span></span><br><span class="line"><span class="string">  type Book &#123;</span></span><br><span class="line"><span class="string">    title: String</span></span><br><span class="line"><span class="string">    author: String</span></span><br><span class="line"><span class="string">    time: Date      # &lt;-- Here</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  # 查询</span></span><br><span class="line"><span class="string">  type Query &#123;</span></span><br><span class="line"><span class="string">    books(offset: Int, limit: Int): [Book]</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> resolvers = &#123;</span><br><span class="line">    <span class="built_in">Date</span>: MyDate,    <span class="comment">// &lt;-- Here</span></span><br><span class="line">    Query,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215135838.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>GraphQL 的数据类型是强类型，这意味着一个字段必须只属于一个类型，但是在实际的开发里，前端需要的数据类型可能会有多种类型，这时候可以利用自定义类型标量解决这个问题。</p>
+<p>例如有一个字段 Data，它有时候是 Array，有时候是 Object。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> books = [&#123;</span><br><span class="line">    title: <span class="string">'Harry Potter and the Chamber of Secrets'</span>,</span><br><span class="line">    author: <span class="string">'J.K. Rowling'</span>,</span><br><span class="line">    time: <span class="string">'2019-02-15 13:48:50'</span>,</span><br><span class="line">    data: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">&#125;, &#123;</span><br><span class="line">    title: <span class="string">'Jurassic Park'</span>,</span><br><span class="line">    author: <span class="string">'Michael Crichton'</span>,</span><br><span class="line">    time: <span class="number">1550209975481</span>,</span><br><span class="line">    data: &#123;</span><br><span class="line">        title: <span class="string">'斯柯达'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> MyData = <span class="keyword">new</span> GraphQLScalarType(&#123;</span><br><span class="line">    name: <span class="string">'MyData'</span>,</span><br><span class="line">    description: <span class="string">'自定义的 Data 类型'</span>,</span><br><span class="line">    serialize(value) &#123;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;,</span><br><span class="line">    parseValue(value) &#123;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;,</span><br><span class="line">    parseLiteral(ast) &#123;</span><br><span class="line">        <span class="keyword">return</span> ast.value;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215140823.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="访问认证"><a href="#访问认证" class="headerlink" title="访问认证"></a>访问认证</h3><p>在配置项里提供了，提供了请求上下文的属性，可以在上下文里根据请求头判断认证的信息，如果认证失败，则抛出错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> server = <span class="keyword">new</span> ApolloServer(&#123;</span><br><span class="line">    typeDefs,</span><br><span class="line">    resolvers,</span><br><span class="line">    context: <span class="function"><span class="params">ctx</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 获取用户令牌</span></span><br><span class="line">        <span class="keyword">const</span> token = ctx.ctx.req.header.token || <span class="string">''</span>;</span><br><span class="line">        <span class="comment">// 根据 token 获取用户信息</span></span><br><span class="line">        <span class="keyword">const</span> user = getUser(token);</span><br><span class="line">        <span class="keyword">if</span> (!user) &#123;</span><br><span class="line">            <span class="comment">// 认证失败，抛出错误</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ApolloError(<span class="string">'用户认证失败'</span>, <span class="number">502</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215131010.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190215150903.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h3><p>结合 Jest 可以在 Apollo Server 上做集成测试。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; createTestClient &#125; = <span class="built_in">require</span>(<span class="string">'apollo-server-testing'</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; query, mutate &#125; = createTestClient(server);</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'Apollo Server 测试'</span>, () =&gt; &#123;</span><br><span class="line">    test(<span class="string">'查询测试'</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">        <span class="keyword">const</span> res = <span class="keyword">await</span> query(&#123;</span><br><span class="line">            query: GET_USER,</span><br><span class="line">            variables: &#123; <span class="attr">id</span>: <span class="number">1</span> &#125;,</span><br><span class="line">        &#125;);</span><br><span class="line">        expect(res).toEqual(&#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    test(<span class="string">'突变测试'</span>, () =&gt; &#123;</span><br><span class="line">        <span class="keyword">const</span> res = <span class="keyword">await</span> mutate(&#123;</span><br><span class="line">            mutation: UPDATE_USER,</span><br><span class="line">            variables: &#123; <span class="attr">id</span>: <span class="number">1</span>, <span class="attr">email</span>: <span class="string">'nancy@foo.co'</span> &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        expect(res).toEqual(&#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="服务配置项"><a href="#服务配置项" class="headerlink" title="服务配置项"></a>服务配置项</h2><p>ApolloServer 的配置项有以下几项：</p>
+<ul>
+<li><code>typeDefs</code> - GraphQL 代码。</li>
+<li><code>resolvers</code> - 解析器中定义的类型与解析行为。</li>
+<li><code>context</code> - 当前请求的上下文。</li>
+<li><code>rootValue</code> - 创建传递给 graphql 执行程序的根值。</li>
+<li><code>mocks</code> - 是否开启模拟数据。</li>
+<li><code>mockEntireSchema</code> - 控制现有的解析器是否被模拟数据覆盖。</li>
+<li><code>schemaDirectives</code> - 引用 typeDefs。</li>
+<li><code>engine</code> - 代理密钥。</li>
+<li><code>subscriptions</code> - 定义订阅路径的字符串或定义订阅服务器的对象。</li>
+<li><code>schema</code> - 它将覆盖 typeDefs、resolvers。</li>
+<li><code>formatError</code> - 全局的错误处理。</li>
+<li><code>tracing</code> - 将跟踪或 cacheControl 元数据添加到 GraphQL 响应中。</li>
+<li><code>validationRules</code> - 架构验证规则。</li>
+<li><code>debug</code> - 是否开启 debug 模式。</li>
+<li><code>playground</code> - 是否开启 playground 调试器。</li>
+<li><code>introspection</code> - 启用和禁用模式内省。默认情况下生产环境禁用。</li>
+<li><code>persistedQueries</code> - 用于存储散列和查询字符串之间的映射。</li>
+<li><code>cors</code> - 是否支持跨域请求。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.apollographql.com/docs/apollo-server/" target="_blank" rel="noopener">https://www.apollographql.com/docs/apollo-server/</a></li>
+<li><a href="https://www.apollographql.com/docs/apollo-server/api/apollo-server.html" target="_blank" rel="noopener">https://www.apollographql.com/docs/apollo-server/api/apollo-server.html</a></li>
+<li><a href="http://graphql.cn/" target="_blank" rel="noopener">http://graphql.cn/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.831Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/02/Nodejs/Apollo Server（GraphQL）使用指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/02/Nodejs/Apollo Server（GraphQL）使用指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/02/Redux/redux-starter-kit 使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">redux-starter-kit 使用指南</h4>
+        <h4 class="summary">众所周知，Redux 的核心从一开始就很小，最初的意图始终是保持核心小，使 API 可扩展，发展生态系统。这使得使用 R...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/02/React/Style/Linaria 使用指南/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">💅 Linaria 使用指南</h4>
+        <h4 class="summary">相对于 JavaScript 的突飞猛进，CSS 的发展缓慢，相对止步不前。随着前端职能扩大化成为常态，前端工程化日趋成...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

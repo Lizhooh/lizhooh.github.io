@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/12/Style/Flex + Scss 自定义弹性布局方式/">
+    
+    
+    <title>Flex + Scss 自定义弹性布局方式 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Flexbox 是一个很好的伸缩性弹性布局方案，到目前为止几乎可以忽略对老的浏览器（没人爱的 IE）的支持，放心使用 Flexbox 布局了。 本文介绍，如何使用 Scss 自定义 Flexbox 布局样式。">
+<meta name="keywords" content="前端,学习笔记,Sass">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flex + Scss 自定义弹性布局方式">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/12/Style/Flex + Scss 自定义弹性布局方式/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Flexbox 是一个很好的伸缩性弹性布局方案，到目前为止几乎可以忽略对老的浏览器（没人爱的 IE）的支持，放心使用 Flexbox 布局了。 本文介绍，如何使用 Scss 自定义 Flexbox 布局样式。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.895Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flex + Scss 自定义弹性布局方式">
+<meta name="twitter:description" content="前言Flexbox 是一个很好的伸缩性弹性布局方案，到目前为止几乎可以忽略对老的浏览器（没人爱的 IE）的支持，放心使用 Flexbox 布局了。 本文介绍，如何使用 Scss 自定义 Flexbox 布局样式。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Flex + Scss 自定义弹性布局方式</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Flex + Scss 自定义弹性布局方式</h1>
+
+        <div class="meta-rest">
+            <h1>Flex + Scss 自定义弹性布局方式</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-12-07T03:14:15.000Z" itemprop="datePublished" class="page-time">
+    2017-12-07
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Sass/">Sass</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义-Flex-样式"><span class="post-toc-number">2.</span> <span class="post-toc-text">自定义 Flex 样式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#水平布局"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">水平布局</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#垂直布局"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">垂直布局</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自动换行"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">自动换行</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#主轴方向"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">主轴方向</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#侧轴方向"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">侧轴方向</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#垂直水平居中"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">垂直水平居中</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#伸缩比例"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">伸缩比例</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实践"><span class="post-toc-number">3.</span> <span class="post-toc-text">实践</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Style/Flex + Scss 自定义弹性布局方式"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Flex + Scss 自定义弹性布局方式</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 12 月 07 日 11:14" datetime="2017-12-07T03:14:15.000Z"  itemprop="datePublished">
+    2017-12-07
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Sass/">Sass</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 816</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Flexbox</code> 是一个很好的伸缩性弹性布局方案，到目前为止几乎可以忽略对老的浏览器（没人爱的 IE）的支持，放心使用 Flexbox 布局了。</p>
+<p>本文介绍，如何使用 Scss 自定义 Flexbox 布局样式。</p>
+<a id="more"></a>
+<h2 id="自定义-Flex-样式"><a href="#自定义-Flex-样式" class="headerlink" title="自定义 Flex 样式"></a>自定义 Flex 样式</h2><p>对 Flexbox 布局样式进行预定义，这样可以减少多余的编码，提高工作效率。</p>
+<p>整个 Flex 布局样式都是以 <code>.flex</code> 开头。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.flex</span> &#123;</span><br><span class="line">    &amp; &#123; <span class="attribute">display</span>: flex; &#125;</span><br><span class="line">    <span class="comment">// 子全为 flex</span></span><br><span class="line">    &amp;-<span class="attribute">flex</span> &gt; * &#123;</span><br><span class="line">        <span class="attribute">display</span>: flex;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="水平布局"><a href="#水平布局" class="headerlink" title="水平布局"></a>水平布局</h3><p>定义了基本的水平布局方式。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 水平布局</span></span><br><span class="line">&amp;-row &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    <span class="attribute">flex-direction</span>: row;</span><br><span class="line">    <span class="comment">// 子元素默认平均分布</span></span><br><span class="line">    &gt; * &#123; <span class="attribute">display</span>: block; &#125;</span><br><span class="line">    <span class="comment">// 反向</span></span><br><span class="line">    &amp;-rev &#123; <span class="attribute">flex-direction</span>: row-reverse; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="垂直布局"><a href="#垂直布局" class="headerlink" title="垂直布局"></a>垂直布局</h3><p>定义了基本的垂直布局方式。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 垂直布局</span></span><br><span class="line">&amp;-column &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    <span class="attribute">flex-wrap</span>: wrap;</span><br><span class="line">    <span class="attribute">flex-direction</span>: column;</span><br><span class="line"></span><br><span class="line">    &amp;-rev &#123; <span class="attribute">flex-direction</span>: column-reverse; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="自动换行"><a href="#自动换行" class="headerlink" title="自动换行"></a>自动换行</h3><p>当元素过多时，如果是水平布局，所有元素就会挤在一行里，可以这时为其设置自动换行。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&amp;-wrap &#123;</span><br><span class="line">    <span class="attribute">flex-wrap</span>: wrap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="主轴方向"><a href="#主轴方向" class="headerlink" title="主轴方向"></a>主轴方向</h3><p>如果是水平布局，那么主轴方向就是水平方向；如果是垂直布局，那么主轴方向就是垂直方向。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 主轴方向对齐方式</span></span><br><span class="line">&amp;-jc &#123;</span><br><span class="line">    &amp;-center &#123; <span class="attribute">justify-content</span>: center; &#125;</span><br><span class="line">    &amp;-start &#123; <span class="attribute">justify-content</span>: flex-start; &#125;</span><br><span class="line">    &amp;-end &#123; <span class="attribute">justify-content</span>: flex-end; &#125;</span><br><span class="line">    &amp;-between &#123; <span class="attribute">justify-content</span>: space-between; &#125;</span><br><span class="line">    &amp;-around &#123; <span class="attribute">justify-content</span>: space-around; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="侧轴方向"><a href="#侧轴方向" class="headerlink" title="侧轴方向"></a>侧轴方向</h3><p>主轴与侧轴的关系是互相垂直的。侧轴方向有 align-center 可以用来进行多行布局。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 侧轴方向对齐方式</span></span><br><span class="line">&amp;-ai &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    &amp;-center &#123; <span class="attribute">align-items</span>: center; &#125;</span><br><span class="line">    &amp;-start &#123; <span class="attribute">align-items</span>: flex-start; &#125;</span><br><span class="line">    &amp;-end &#123; <span class="attribute">align-items</span>: flex-end; &#125;</span><br><span class="line">    &amp;-baseline &#123; <span class="attribute">align-items</span>: baseline; &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 多行布局对齐方式</span></span><br><span class="line">&amp;-ac &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    &amp;-center &#123; <span class="attribute">align-content</span>: center; &#125;</span><br><span class="line">    &amp;-start &#123; <span class="attribute">align-content</span>: flex-start; &#125;</span><br><span class="line">    &amp;-end &#123; <span class="attribute">align-content</span>: flex-end; &#125;</span><br><span class="line">    &amp;-between &#123; <span class="attribute">align-content</span>: space-between; &#125;</span><br><span class="line">    &amp;-around &#123; <span class="attribute">align-content</span>: space-around; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="垂直水平居中"><a href="#垂直水平居中" class="headerlink" title="垂直水平居中"></a>垂直水平居中</h3><p>垂直水平居中是一个典型的前端问题，但是在 Flexbox 布局里几乎显得非常容易实现。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 垂直水平居中</span></span><br><span class="line">&amp;-center &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    <span class="attribute">justify-content</span>: center;</span><br><span class="line">    <span class="attribute">align-items</span>: center;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="伸缩比例"><a href="#伸缩比例" class="headerlink" title="伸缩比例"></a>伸缩比例</h3><p>Flexbox 的弹性布局是基于伸缩比例的。编写一个 @mixin 来定义伸缩比例。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 伸缩值 .flex-比例，比如 flex-1, flex-2</span></span><br><span class="line"><span class="keyword">@mixin</span> Flex-Number(<span class="variable">$num</span>: <span class="number">24</span>) &#123;</span><br><span class="line">    <span class="keyword">@for</span> <span class="variable">$i</span> from <span class="number">0</span> through <span class="variable">$num</span> &#123;</span><br><span class="line">        &amp;-#&#123;<span class="variable">$i</span>&#125; &#123;</span><br><span class="line">            <span class="attribute">flex</span>: #&#123;<span class="variable">$i</span>&#125;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 伸缩值</span></span><br><span class="line"><span class="keyword">@include</span> Flex-Number();</span><br></pre></td></tr></table></figure>
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>这样就把 flex + scss 定义好了，那么就开始使用它。</p>
+<p>进行一个典型的布局。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"flex flex-column"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">header</span> <span class="attr">class</span>=<span class="string">"flex flex-column"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">nav</span> <span class="attr">style</span>=<span class="string">"height: 50px"</span> <span class="attr">class</span>=<span class="string">"flex flex-row flex-ai-center"</span>&gt;</span><span class="tag">&lt;/<span class="name">nav</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"flex flex-1 flex-center"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">header</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">section</span> <span class="attr">class</span>=<span class="string">"flex flex-row"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"width: 300px"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"flex flex-1"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"width: 300px"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">section</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">footer</span> <span class="attr">class</span>=<span class="string">"flex flex-ai-center"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">footer</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这个布局是：</p>
+<ul>
+<li>整个页面分为 header，content，footer 三个基本布局。</li>
+<li>header 内容居中。</li>
+<li>nav 内容垂直居中。</li>
+<li>content 分为三列，中间弹性，两边固定。</li>
+<li>footer 内容垂直居中。</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.895Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/12/Style/Flex + Scss 自定义弹性布局方式/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/12/Style/Flex + Scss 自定义弹性布局方式/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Sass/">Sass</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/12/React/Style/更进一步管理 React 组件样式/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">💅 更进一步管理 React 组件样式</h4>
+        <h4 class="summary">styled-components 是一个 CSS in Javascript 的框架，可用于 React/React ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/12/Nodejs/使用 node-config 管理应用配置文件/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">使用 node-config 管理应用配置文件</h4>
+        <h4 class="summary">在编写 Nodejs 应用时，几乎都需要写一些配置文件，以应付万变的情况，其中最大的好处就是可以根据配置项快速的修改一些...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

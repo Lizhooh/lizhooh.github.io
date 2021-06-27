@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/12/WebVR/A-Frame 构建我的虚拟世界（WebVR）- 介绍/">
+    
+    
+    <title>A-Frame 构建我的虚拟世界（WebVR）- 介绍 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="A-FrameA-Frame 是一个用来构建虚拟现实（VR）应用的 Web 开发框架。由 WebVR 的发起人 Mozilla VR 团队所开发，是当下用来开发 WebVR 内容最强大最易用的技术方案。虚拟现实（VR）是一种技术，使用头显设备产生逼真的图像，声音和其他感觉，使得用户进入身临其境的虚拟环境。 这里有几个有趣的示例：  https://paperplanes.world/ https:">
+<meta name="keywords" content="前端,A-Frame,WebVR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A-Frame 构建我的虚拟世界（WebVR）- 介绍">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/12/WebVR/A-Frame 构建我的虚拟世界（WebVR）- 介绍/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="A-FrameA-Frame 是一个用来构建虚拟现实（VR）应用的 Web 开发框架。由 WebVR 的发起人 Mozilla VR 团队所开发，是当下用来开发 WebVR 内容最强大最易用的技术方案。虚拟现实（VR）是一种技术，使用头显设备产生逼真的图像，声音和其他感觉，使得用户进入身临其境的虚拟环境。 这里有几个有趣的示例：  https://paperplanes.world/ https:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/aframe.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/578005784796052207.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.902Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A-Frame 构建我的虚拟世界（WebVR）- 介绍">
+<meta name="twitter:description" content="A-FrameA-Frame 是一个用来构建虚拟现实（VR）应用的 Web 开发框架。由 WebVR 的发起人 Mozilla VR 团队所开发，是当下用来开发 WebVR 内容最强大最易用的技术方案。虚拟现实（VR）是一种技术，使用头显设备产生逼真的图像，声音和其他感觉，使得用户进入身临其境的虚拟环境。 这里有几个有趣的示例：  https://paperplanes.world/ https:">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/10/aframe.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">A-Frame 构建我的虚拟世界（WebVR）- 介绍</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">A-Frame 构建我的虚拟世界（WebVR）- 介绍</h1>
+
+        <div class="meta-rest">
+            <h1>A-Frame 构建我的虚拟世界（WebVR）- 介绍</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-12-31T04:37:02.000Z" itemprop="datePublished" class="page-time">
+    2018-12-31
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/WebVR/">WebVR</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#A-Frame"><span class="post-toc-number">1.</span> <span class="post-toc-text">A-Frame</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#声明式结构"><span class="post-toc-number">2.</span> <span class="post-toc-text">声明式结构</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#快速开始"><span class="post-toc-number">3.</span> <span class="post-toc-text">快速开始</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原语组件"><span class="post-toc-number">4.</span> <span class="post-toc-text">原语组件</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义原语组件"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">自定义原语组件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实体，组件，系统"><span class="post-toc-number">5.</span> <span class="post-toc-text">实体，组件，系统</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#扩展"><span class="post-toc-number">6.</span> <span class="post-toc-text">扩展</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-WebVR/A-Frame 构建我的虚拟世界（WebVR）- 介绍"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">A-Frame 构建我的虚拟世界（WebVR）- 介绍</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 12 月 31 日 12:37" datetime="2018-12-31T04:37:02.000Z"  itemprop="datePublished">
+    2018-12-31
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/WebVR/">WebVR</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1165</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="A-Frame"><a href="#A-Frame" class="headerlink" title="A-Frame"></a>A-Frame</h2><p><a href="https://aframe.io/" target="_blank" rel="noopener">A-Frame</a> 是一个用来构建虚拟现实（VR）应用的 Web 开发框架。由 WebVR 的发起人 Mozilla VR 团队所开发，是当下用来开发 WebVR 内容最强大最易用的技术方案。<br>虚拟现实（VR）是一种技术，使用头显设备产生逼真的图像，声音和其他感觉，使得用户进入身临其境的虚拟环境。</p>
+<p>这里有几个有趣的示例：</p>
+<ul>
+<li><a href="https://paperplanes.world/" target="_blank" rel="noopener">https://paperplanes.world/</a></li>
+<li><a href="https://tympanus.net/Tutorials/TheAviator/" target="_blank" rel="noopener">https://tympanus.net/Tutorials/TheAviator/</a></li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/aframe.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>A-Frame 支持非常多的平台，包括了：</p>
+<ul>
+<li>桌面电脑上的虚拟现实和头戴设备</li>
+<li>移动设备上的虚拟现实和头戴设备</li>
+<li>平面桌面设备（也就是普通电脑显示器、鼠标和键盘）</li>
+</ul>
+<a id="more"></a>
+<h2 id="声明式结构"><a href="#声明式结构" class="headerlink" title="声明式结构"></a>声明式结构</h2><p>A-Frame 是基于 HTML <strong>声明</strong>的，在运行阶段是使用 WebGL，Three.js 来执行的。<br>由于 A-Frame 基于 HTML，因此大多数现有的工具和库的工作框架，包括 React，Vue.js，Angular，d3.js，jQuery 都能够和 A-Frame 一起工作。</p>
+<h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><p>通过使用一个通用的入门套件，来快速开始吧。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/aframevr/aframe-boilerplate.git</span><br><span class="line">npm install</span><br><span class="line">npm start</span><br></pre></td></tr></table></figure>
+<p>运行相关命令之后，在浏览器里就可以看到示例。之后把代码修改一下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Hello, World! - A-Frame<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"Hello, World! - A-Frame"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.bootcss.com/aframe/0.7.0/aframe-master.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--场景--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a-scene</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--正方形--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a-sphere</span> <span class="attr">position</span>=<span class="string">"0 1.25 -5"</span> <span class="attr">radius</span>=<span class="string">"0.5"</span> <span class="attr">color</span>=<span class="string">"#66ffcc"</span>&gt;</span><span class="tag">&lt;/<span class="name">a-sphere</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--圆形--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a-box</span> <span class="attr">position</span>=<span class="string">"-3 1.5 -5"</span> <span class="attr">rotation</span>=<span class="string">"30 40 30"</span> <span class="attr">color</span>=<span class="string">"#4CC3D9"</span> <span class="attr">id</span>=<span class="string">'box'</span>&gt;</span><span class="tag">&lt;/<span class="name">a-box</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--柱形--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a-cylinder</span> <span class="attr">position</span>=<span class="string">"2 0.75 -3"</span> <span class="attr">radius</span>=<span class="string">"0.25"</span> <span class="attr">height</span>=<span class="string">"2.5"</span> <span class="attr">color</span>=<span class="string">"#FFC65D"</span>&gt;</span><span class="tag">&lt;/<span class="name">a-cylinder</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--平面--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a-plane</span> <span class="attr">position</span>=<span class="string">"0 -1 -4"</span> <span class="attr">rotation</span>=<span class="string">"-90 0 0"</span> <span class="attr">width</span>=<span class="string">"8"</span> <span class="attr">height</span>=<span class="string">"3"</span> <span class="attr">color</span>=<span class="string">"#7BC8A4"</span>&gt;</span><span class="tag">&lt;/<span class="name">a-plane</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!--天空--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a-sky</span> <span class="attr">color</span>=<span class="string">"#ECECEC"</span>&gt;</span><span class="tag">&lt;/<span class="name">a-sky</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a-scene</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在这里，通过 A-Frame 提供的组件创建了几个物体。</p>
+<p>在手机上，看到这样的情景：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/578005784796052207.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>由于<code>A-Frame</code>在<code>HTML</code>部分仅做声明，因此可以结合其他框架来改变这种声明。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">    $(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span></span><br><span class="line"><span class="actionscript">        <span class="comment">// 2 秒后，改变旋转和空间位置</span></span></span><br><span class="line"><span class="javascript">        setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span></span><br><span class="line"><span class="javascript">            $(<span class="string">"#box"</span>).attr(&#123;</span></span><br><span class="line"><span class="actionscript">                rotation: <span class="string">'0 0 0'</span>,</span></span><br><span class="line"><span class="actionscript">                position: <span class="string">'-3 0.5 -5'</span>,</span></span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;, 2000);</span><br><span class="line">    &#125;)</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>加上这段代码后，会发现在指定时间后，正方形的空间位置以及角度发生了变化。因此可以看出，在 DOM 发生改变时，直接会引发 A-Frame 的内核引擎<strong>重新渲染</strong>。</p>
+<h2 id="原语组件"><a href="#原语组件" class="headerlink" title="原语组件"></a>原语组件</h2><p>尽管 HTML 层看起来很基础，HTML 和 DOM 只是 A-Frame 的表面抽象层。在底层上，A-Frame 实现了一个<strong>实体 - 组件</strong>（entity-component）框架。<br>例如 <code>&lt;a-box&gt;</code> 和 <code>&lt;a-sky&gt;</code> 这些，被称为“原语”组件，它和 React 的组件有些类似。</p>
+<p>对于 <code>&lt;a-box&gt;</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a-box</span> <span class="attr">color</span>=<span class="string">"red"</span> <span class="attr">width</span>=<span class="string">"3"</span>&gt;</span><span class="tag">&lt;/<span class="name">a-box</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>实际上它的基本结构是：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a-entity</span> <span class="attr">geometry</span>=<span class="string">"primitive: box; width: 3"</span> <span class="attr">material</span>=<span class="string">"color: red"</span>&gt;</span><span class="tag">&lt;/<span class="name">a-entity</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>原语（Primitive）本质上就是一个 <code>&lt;a-entity&gt;</code>，所有的组件都是通过 <code>&lt;a-entity&gt;</code> 集成而来。</p>
+<h3 id="自定义原语组件"><a href="#自定义原语组件" class="headerlink" title="自定义原语组件"></a>自定义原语组件</h3><p>下面是 A-Frame 中<code>&lt;a-box&gt;</code>原语的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> extendDeep = AFRAME.utils.extendDeep;</span><br><span class="line"><span class="keyword">const</span> meshMixin = AFRAME.primitives.getMeshMixin();</span><br><span class="line"><span class="comment">// 组件名，继承的属性，迷信</span></span><br><span class="line">AFRAME.registerPrimitive(<span class="string">'a-box'</span>, extendDeep(&#123;&#125;, meshMixin, &#123;</span><br><span class="line">    <span class="comment">// 一些默认值</span></span><br><span class="line">    defaultComponents: &#123;</span><br><span class="line">        <span class="comment">// rotation: &#123;x: -90, y: 0, z: 0&#125;</span></span><br><span class="line">        geometry: &#123; <span class="attr">primitive</span>: <span class="string">'box'</span> &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// 从 HTML 定义的映射属性的组件属性（使用点分隔符）</span></span><br><span class="line">    <span class="comment">// 比如 &lt;a-box height='10'/&gt; =&gt; geometry.height = 10</span></span><br><span class="line">    mappings: &#123;</span><br><span class="line">        depth: <span class="string">'geometry.depth'</span>,</span><br><span class="line">        height: <span class="string">'geometry.height'</span>,</span><br><span class="line">        width: <span class="string">'geometry.width'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+<h2 id="实体，组件，系统"><a href="#实体，组件，系统" class="headerlink" title="实体，组件，系统"></a>实体，组件，系统</h2><p>A-Frame 基于 Three.js 框架，并且使用了实体 - 组件 - 系统（entity-component-system）。</p>
+<!--ECS 的基本定义包括了：
+- `实体（Entities）` 是容器对象，用来包含组件。实体是场景中所有对象的基础。没有附加组件的实体不会渲染任何东西，类似于空的 div。
+- `组件（Components）` 是可重用的模块或数据容器，可以依附于实体以提供外观、行为和/或 功能。组件就像即插即用的对象。所有的逻辑都是通过组件实现，并通过混合、匹配和配置组件来定义不同类型的对象。像炼金术那样！
+- `系统（Systems）` 为组件类提供全局范围、管理和服务。系统通常是可选的，但我们可以使用它们 来分离逻辑和数据；系统处理逻辑，组件充当数据，容器。-->
+<p><strong>A-Frame 中的 ECS 包括了：</strong></p>
+<ul>
+<li><code>实体（Entities）</code> 对应的是 <code>&lt;a-entity&gt;</code> 元素和原型。</li>
+<li><code>组件（Components）</code> 通过 <code>&lt;a-entity&gt;</code> 的 HTML 属性来表示。底层实现上， 组件是包含模式（schema）、生命周期处理器和方法的对象。组件通过 AFRAME.registerComponent (name, definition) API 来注册。</li>
+<li><code>系统（Systems）</code> 通过 <code>&lt;a-scene&gt;</code> 的 HTML 属性来表示。系统在定义上和组件类似，系统通过 AFRAME.registerSystem (name, definition) API来注册。</li>
+</ul>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>如果你像笔者一样的喜欢 React 那种组件化编程，那么你可以使用 A-Frame 的 React 版本：<a href="https://github.com/ngokevin/aframe-react" target="_blank" rel="noopener">aframe-react</a>。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://aframe.io/" target="_blank" rel="noopener">https://aframe.io/</a></li>
+<li><a href="https://github.com/aframevr/aframe" target="_blank" rel="noopener">https://github.com/aframevr/aframe</a></li>
+<li><a href="http://www.techbrood.com/aframe/guides?p=building-a-basic-scene" target="_blank" rel="noopener">http://www.techbrood.com/aframe/guides?p=building-a-basic-scene</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.902Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/12/WebVR/A-Frame 构建我的虚拟世界（WebVR）- 介绍/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/12/WebVR/A-Frame 构建我的虚拟世界（WebVR）- 介绍/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/A-Frame/">A-Frame</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WebVR/">WebVR</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/01/React Native/React Native 嵌入并转跳到原生页面/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 嵌入并转跳到原生页面</h4>
+        <h4 class="summary">React Native 是一个混合式移动应用开发框架，在默认的情况下会有两个 activity ，一个是 facebo...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/12/React Native/React Native 解决 Modal 不完全全屏问题/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">🎉 React Native 解决 Modal 不完全全屏问题</h4>
+        <h4 class="summary">众所周知，React Native 在 0.40 之前 Modal 组件是完全全屏的（Android），在之后不知为什么...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

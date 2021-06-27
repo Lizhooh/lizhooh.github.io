@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/06/测试/单元测试/Nodejs HTTP 测试/">
+    
+    
+    <title>Nodejs HTTP 接口测试 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言HTTP 接口测试是非常重要的一部分，当编写完成后端接口，很多时候需要手动的去使用 REST 客户端去测试，但是这样是很浪费时间的。为此，使用一些测试库来完成这件事情。 那么，到底该怎么做？百度？还是。。。不！对于学习一个未知的东西，最好的方法就是去看一些开源库，看一下他们使用的是什么大概就知道了。 看看 Koa 与 Express 的 HTTP 接口测试，可以发现它们都是使用 Jest、su">
+<meta name="keywords" content="后端,测试">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs HTTP 接口测试">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/06/测试/单元测试/Nodejs HTTP 测试/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言HTTP 接口测试是非常重要的一部分，当编写完成后端接口，很多时候需要手动的去使用 REST 客户端去测试，但是这样是很浪费时间的。为此，使用一些测试库来完成这件事情。 那么，到底该怎么做？百度？还是。。。不！对于学习一个未知的东西，最好的方法就是去看一些开源库，看一下他们使用的是什么大概就知道了。 看看 Koa 与 Express 的 HTTP 接口测试，可以发现它们都是使用 Jest、su">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.919Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs HTTP 接口测试">
+<meta name="twitter:description" content="前言HTTP 接口测试是非常重要的一部分，当编写完成后端接口，很多时候需要手动的去使用 REST 客户端去测试，但是这样是很浪费时间的。为此，使用一些测试库来完成这件事情。 那么，到底该怎么做？百度？还是。。。不！对于学习一个未知的东西，最好的方法就是去看一些开源库，看一下他们使用的是什么大概就知道了。 看看 Koa 与 Express 的 HTTP 接口测试，可以发现它们都是使用 Jest、su">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs HTTP 接口测试</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs HTTP 接口测试</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs HTTP 接口测试</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-06-16T01:00:46.000Z" itemprop="datePublished" class="page-time">
+    2018-06-16
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/测试/">测试</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#supertest"><span class="post-toc-number">2.</span> <span class="post-toc-text">supertest</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#HTTP-Method"><span class="post-toc-number">3.</span> <span class="post-toc-text">HTTP Method</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#文件上传"><span class="post-toc-number">4.</span> <span class="post-toc-text">文件上传</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Cookies"><span class="post-toc-number">5.</span> <span class="post-toc-text">Cookies</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结合-Jest"><span class="post-toc-number">6.</span> <span class="post-toc-text">结合 Jest</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-测试/单元测试/Nodejs HTTP 测试"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs HTTP 接口测试</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 06 月 16 日 9:00" datetime="2018-06-16T01:00:46.000Z"  itemprop="datePublished">
+    2018-06-16
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/测试/">测试</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 815</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>HTTP 接口测试是非常重要的一部分，当编写完成后端接口，很多时候需要手动的去使用 REST 客户端去测试，但是这样是很浪费时间的。为此，使用一些测试库来完成这件事情。</p>
+<p>那么，到底该怎么做？百度？还是。。。不！对于学习一个未知的东西，最好的方法就是去看一些开源库，看一下他们使用的是什么大概就知道了。</p>
+<p>看看 Koa 与 Express 的 <a href="https://github.com/koajs/koa/blob/master/test/application/index.js" target="_blank" rel="noopener">HTTP 接口测试</a>，可以发现它们都是使用 <code>Jest</code>、<code>supertest</code>、<code>assert</code>。</p>
+<a id="more"></a>
+<p>好了，下面就讲讲这么使用这些库来做 HTTP 接口测试。</p>
+<h2 id="supertest"><a href="#supertest" class="headerlink" title="supertest"></a>supertest</h2><p><a href="https://github.com/visionmedia/supertest" target="_blank" rel="noopener">supertest</a> 是一个 HTTP 的测试工具库，它的行为类似于 fetch 等网络库。不同的是 supertest 是更注重于 HTTP 测试方面。</p>
+<p>下面的一个示例，使用 supertest 测试 Koa 路由接口。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'supertest'</span>);</span><br><span class="line"><span class="keyword">const</span> assert = <span class="built_in">require</span>(<span class="string">'assert'</span>);</span><br><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">'/user'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">    ctx.body = &#123; <span class="attr">name</span>: <span class="string">'john'</span> &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.use(router.routes());</span><br><span class="line"></span><br><span class="line">request(app)</span><br><span class="line">    .get(<span class="string">'/user'</span>)</span><br><span class="line">    .expect(<span class="string">'Content-Type'</span>, /json/)</span><br><span class="line">    .expect(<span class="string">'Content-Length'</span>, <span class="string">'15'</span>)</span><br><span class="line">    .expect(<span class="number">200</span>)</span><br><span class="line">    .end(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (err) <span class="keyword">throw</span> err;</span><br><span class="line">        assert.equal(res.body, &#123; <span class="attr">name</span>: <span class="string">'john'</span> &#125;);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>上面就完成了一个很漂亮的 HTTP 测试过程，对 /user 路径进行测试。</p>
+<p>supertest 在每次使用 url 并不是必须的，可以先设置 url，在后面使用的时候，只需要指定路由即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">request = request(<span class="string">'http://127.0.0.1:3000'</span>);</span><br><span class="line"></span><br><span class="line">request.get(<span class="string">'/'</span>).expect(<span class="number">200</span>, err =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(err);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">request.get(<span class="string">'/'</span>).expect(<span class="string">'heya'</span>, err =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(err);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="HTTP-Method"><a href="#HTTP-Method" class="headerlink" title="HTTP Method"></a>HTTP Method</h2><p>在测试时，更多关注的是 HTTP 不同的请求方法测试。supertest 的请求方法直接 <code>request.xxx</code> 即可，跟其他网络就是一样的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">request(app)</span><br><span class="line">    .post(<span class="string">'/user'</span>)</span><br><span class="line">    .send(<span class="string">'name=john'</span>)                 <span class="comment">// x-www-form-urlencoded upload</span></span><br><span class="line">    .set(<span class="string">'Accept'</span>, <span class="string">'application/json'</span>) <span class="comment">// accept</span></span><br><span class="line">    .expect(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>) </span>&#123;</span><br><span class="line">        res.body.id = <span class="string">'some fixed id'</span>;</span><br><span class="line">        res.body.name = res.body.name.toUpperCase();</span><br><span class="line">    &#125;)</span><br><span class="line">    .expect(<span class="number">200</span>, &#123;</span><br><span class="line">        id: <span class="string">'some fixed id'</span>,</span><br><span class="line">        name: <span class="string">'john'</span></span><br><span class="line">    &#125;, done);</span><br></pre></td></tr></table></figure>
+<p>在默认情况下，post 等请求的内容是字符串，那么 supertest 会判定为 <code>x-www-form-urlencoded upload</code>。如果请求的内容是对象，那么 supertest 会判定为 <code>application/json</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">request(app)</span><br><span class="line">    .post(<span class="string">'/user'</span>)</span><br><span class="line">    .send(&#123;</span><br><span class="line">        name: <span class="string">'a'</span>,</span><br><span class="line">    &#125;)  <span class="comment">// application/json</span></span><br></pre></td></tr></table></figure>
+<h2 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h2><p>supertest 还支持文件上传测试。恐怖。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">request(app)</span><br><span class="line">    .post(<span class="string">'/'</span>)</span><br><span class="line">    .field(<span class="string">'name'</span>, <span class="string">'my awesome avatar'</span>)             <span class="comment">// file 字段</span></span><br><span class="line">    .attach(<span class="string">'avatar'</span>, <span class="string">'test/fixtures/avatar.jpg'</span>);  <span class="comment">// 文件</span></span><br></pre></td></tr></table></figure>
+<h2 id="Cookies"><a href="#Cookies" class="headerlink" title="Cookies"></a>Cookies</h2><p>cookie 常被用于用户认证里，supertest 里也可以对 cookie 进行测试。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'supertest'</span>);</span><br><span class="line"><span class="keyword">const</span> should = <span class="built_in">require</span>(<span class="string">'should'</span>);</span><br><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'request.agent(app)'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line">    <span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">    router.get(<span class="string">'/user'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">        ctx.cookies.set(<span class="string">'cookie'</span>, <span class="string">'hey'</span>);</span><br><span class="line">        ctx.body = &#123; <span class="attr">name</span>: <span class="string">'john'</span> &#125;;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    router.get(<span class="string">'/return'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">        ctx.body = ctx.cookies.get(<span class="string">'cookie'</span>) || <span class="string">':('</span>;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    app.use(router.routes());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> agent = request.agent(app);</span><br><span class="line"></span><br><span class="line">    it(<span class="string">'should save cookies'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">done</span>) </span>&#123;</span><br><span class="line">        agent.get(<span class="string">'/'</span>).expect(<span class="string">'set-cookie'</span>, <span class="string">'cookie=hey; Path=/'</span>, done);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    it(<span class="string">'should send cookies'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">done</span>) </span>&#123;</span><br><span class="line">        agent.get(<span class="string">'/return'</span>).expect(<span class="string">'hey'</span>, done);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="结合-Jest"><a href="#结合-Jest" class="headerlink" title="结合 Jest"></a>结合 Jest</h2><p>先说明，在这里 supertest 是充当网络库的角色，而 Jest 充当的是断言库的角色，如果不使用 Jest 可以使用 Nodejs 自带的 assert。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> app = request(<span class="string">'../'</span>);</span><br><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'supertest'</span>);</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'REST API 测试'</span>, () =&gt; &#123;</span><br><span class="line">    test(<span class="string">'GET /users'</span>, () =&gt; &#123;</span><br><span class="line">        request(app)</span><br><span class="line">            .get(<span class="string">'/users'</span>)</span><br><span class="line">            .expect(<span class="string">'Content-Type'</span>, /json/)</span><br><span class="line">            .expect(<span class="number">200</span>)</span><br><span class="line">            .end(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">                expect(res.body).toEqual(&#123;</span><br><span class="line">                    name: <span class="string">'abc'</span>,</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/koajs/koa/blob/master/test/application/index.js" target="_blank" rel="noopener">https://github.com/koajs/koa/blob/master/test/application/index.js</a></li>
+<li><a href="https://github.com/visionmedia/supertest" target="_blank" rel="noopener">https://github.com/visionmedia/supertest</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.919Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/06/测试/单元测试/Nodejs HTTP 测试/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/06/测试/单元测试/Nodejs HTTP 测试/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/测试/">测试</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/06/React Native/Media/谈谈 React Native 音乐应用实现思路/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">📱 谈谈 React Native 音乐应用实现思路</h4>
+        <h4 class="summary">前端React Native 可以做很多类型的应用，但是一般很少人用 React Native 做直播应用、视频应用、音...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/06/GraphQL/使用 GraphQL 取代 REST 的开始/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">使用 GraphQL 取代 REST 的开始</h4>
+        <h4 class="summary">REST FUL 架构是业界比较流行的 API 接口设计规范。在近几年里随着 GraphQL 的诞生，REST FUL ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

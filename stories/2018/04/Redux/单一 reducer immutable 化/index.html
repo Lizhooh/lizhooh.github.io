@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/04/Redux/单一 reducer immutable 化/">
+    
+    
+    <title>单一 reducer immutable 化 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言往往在使用 React + Redux 开发大型单页面 Javascript 应用时，多多少少会使用 combindReducers 切分很多个 reducer，每一个 reducer 都独自处理着不同的 view。有些时候某个 view 需要很健壮的性能要求，而某些 view 对性能要求并不高，这时候应该考虑使用 “单一 reducer immutable 化 ” 的方案。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="单一 reducer immutable 化">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/04/Redux/单一 reducer immutable 化/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言往往在使用 React + Redux 开发大型单页面 Javascript 应用时，多多少少会使用 combindReducers 切分很多个 reducer，每一个 reducer 都独自处理着不同的 view。有些时候某个 view 需要很健壮的性能要求，而某些 view 对性能要求并不高，这时候应该考虑使用 “单一 reducer immutable 化 ” 的方案。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180329114640.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.893Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="单一 reducer immutable 化">
+<meta name="twitter:description" content="前言往往在使用 React + Redux 开发大型单页面 Javascript 应用时，多多少少会使用 combindReducers 切分很多个 reducer，每一个 reducer 都独自处理着不同的 view。有些时候某个 view 需要很健壮的性能要求，而某些 view 对性能要求并不高，这时候应该考虑使用 “单一 reducer immutable 化 ” 的方案。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/3/20180329114640.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">单一 reducer immutable 化</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">单一 reducer immutable 化</h1>
+
+        <div class="meta-rest">
+            <h1>单一 reducer immutable 化</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-04-03T02:08:35.000Z" itemprop="datePublished" class="page-time">
+    2018-04-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#切分-reducer"><span class="post-toc-number">2.</span> <span class="post-toc-text">切分 reducer</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#immutable-化"><span class="post-toc-number">3.</span> <span class="post-toc-text">immutable 化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Action"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">Action</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#组件"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">组件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">4.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Redux/单一 reducer immutable 化"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">单一 reducer immutable 化</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 04 月 03 日 10:08" datetime="2018-04-03T02:08:35.000Z"  itemprop="datePublished">
+    2018-04-03
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1102</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>往往在使用 <code>React + Redux</code> 开发大型单页面 Javascript 应用时，多多少少会使用 combindReducers 切分很多个 reducer，每一个 reducer 都独自处理着不同的 view。有些时候某个 view 需要很健壮的性能要求，而某些 view 对性能要求并不高，这时候应该考虑使用 <strong><em>“单一 reducer immutable 化 ”</em></strong> 的方案。</p>
+<a id="more"></a>
+<p>单一 reducer immutable 化针对的是：只对个别的 reducer 进行 immutable 化，而不是全局的 redux state 都被 immutable 化，从小的一方面优化 React 的渲染性能。</p>
+<p>immutable 化使用到了 immutable.js 这个库，具体参考：</p>
+<ul>
+<li><a href="/2017/08/27/React/immutable/使用%20immutable%20进一步优化%20React%20性能/">使用 immutable 进一步优化 React 性能</a></li>
+<li><a href="/2017/08/28/React/immutable/精通%20immutable%20Map%20与%20List/">精通 immutable Map 与 List</a></li>
+</ul>
+<h2 id="切分-reducer"><a href="#切分-reducer" class="headerlink" title="切分 reducer"></a>切分 reducer</h2><p>在 Redux 里使用 combindReducers 函数可以将单个庞大的 reducer 切分为多个小的 reducer，这样做不仅有利于模块化，并且还能提升性能。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; createStore, combineReducers &#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注意每个 reducer 都是一个函数 (state, action) =&gt; new State</span></span><br><span class="line"><span class="keyword">const</span> reducers = &#123;</span><br><span class="line">    root: <span class="function">(<span class="params">state, action</span>) =&gt;</span> state,</span><br><span class="line">    home: <span class="function">(<span class="params">state, action</span>) =&gt;</span> state,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> createStore(</span><br><span class="line">    combineReducers(reducers),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>引申一点，每个 reducer 有一个文件去管理。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reducers = &#123;</span><br><span class="line">    root: <span class="built_in">require</span>(<span class="string">'./root'</span>),</span><br><span class="line">    home: <span class="built_in">require</span>(<span class="string">'./home'</span>),</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在切分之后，约定 <code>home</code> 的分支需要做 immutable 化，其他分支不需要。</p>
+<h2 id="immutable-化"><a href="#immutable-化" class="headerlink" title="immutable 化"></a>immutable 化</h2><p>immutable 化就意味着 state 是 immutable 对象，具体有以下表现：</p>
+<ul>
+<li>在组件里 Object 与 Array 使用的是 immutable 里的 Map 与 List。</li>
+<li>State 有 immutable 对象结构组成。</li>
+</ul>
+<p>使用 immutable 时，需要注意对象与数组对应使用 Map 与 List。在 reducer 里可以直接返回 immutable 对象，这样 Store 里存储的是 immutable 对象，而不是普通的 Javascript 对象。</p>
+<p>那么这样会不会影响使用 Redux-DevTool 调试？</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> isFunction <span class="keyword">from</span> <span class="string">'is-function'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="built_in">Map</span>, List &#125; <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> init_state = <span class="built_in">Map</span>(&#123;</span><br><span class="line">    list: List([</span><br><span class="line">        <span class="built_in">Map</span>(&#123;</span><br><span class="line">            id: <span class="number">1</span>,</span><br><span class="line">            title: <span class="string">'AAA'</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">        <span class="built_in">Map</span>(&#123;</span><br><span class="line">            id: <span class="number">2</span>,</span><br><span class="line">            title: <span class="string">'BBB'</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">        <span class="built_in">Map</span>(&#123;</span><br><span class="line">            id: <span class="number">3</span>,</span><br><span class="line">            title: <span class="string">'CCC'</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">    ]),</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = init_state, &#123; type, newState &#125;) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (type === <span class="string">'HOME'</span> &amp;&amp; isFunction(newState)) &#123;</span><br><span class="line">        <span class="keyword">return</span> newState(state, init_state) || state;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然而幸运的是，Redux DevTool 自动会帮你转化为 Object 来显示，这并不会影响调试。</p>
+<p><code>State Tree</code> 结构如下：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180329114640.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="Action"><a href="#Action" class="headerlink" title="Action"></a>Action</h3><p>在 action 里（特别是异步操作里），需要把数据转为 immutable 对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="built_in">Map</span>, List, fromJS &#125; <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> init = <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">async</span> dispatch =&gt; &#123;</span><br><span class="line">    <span class="comment">// 从后端获取数据后，迅速转为 immutable 对象</span></span><br><span class="line">    <span class="keyword">const</span> res = fromJS(<span class="keyword">await</span> api.init());</span><br><span class="line">    dispatch(&#123;</span><br><span class="line">        type: <span class="string">'HOME'</span>,</span><br><span class="line">        newState: <span class="function"><span class="params">state</span> =&gt;</span> state.update(<span class="string">'list'</span>, list =&gt; list.push(res)),</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><b>备注：</b>数据更新使用 set，深度更新使用 setIn，深度更新操作大多都需要一个属性的递归路径如 <code>state.setIn(&#39;list.0.title&#39;.split(&#39;.&#39;), &#39;DDD&#39;)</code> 等价于 <code>state.list[0].title = &#39;DDD&#39;</code>。immutable 的更新操作是无副作用的，不会修改原来的对象，而是返回一个新的 immutable 对象。</p>
+<h3 id="组件"><a href="#组件" class="headerlink" title="组件"></a>组件</h3><p>在不用 immutable 时，组件里可以直接使用点的方式获取对象的属性，而使用了 immutable 后并不能这样做，因为 immutable 不是一个普通的对象，你需要使用 <code>get</code> 函数去获取 immutable 对象的属<br>性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123; <span class="attr">state</span>: state.home &#125;),</span><br><span class="line">)(<span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> state = <span class="keyword">this</span>.props.state;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &#123;state.get(<span class="string">'list'</span>).map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> (</span><br><span class="line">                    &lt;p key=&#123;index&#125;&gt;&#123;item.get(<span class="string">'id'</span>)&#125; - &#123;item.get(<span class="string">'title'</span>)&#125;&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                ))&#125;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>在 React 里，组件分为两种类型：一种是容器组件，一种是展示组件。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">说明</th>
+<th style="text-align:left">展示组件</th>
+<th style="text-align:left">容器组件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">作用</td>
+<td style="text-align:left">描述如何展现（骨架、样式）</td>
+<td style="text-align:left">描述如何运行（数据获取、状态更新）</td>
+</tr>
+<tr>
+<td style="text-align:left">直接使用 Redux</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">数据来源</td>
+<td style="text-align:left">props</td>
+<td style="text-align:left">监听 Redux state</td>
+</tr>
+<tr>
+<td style="text-align:left">数据修改</td>
+<td style="text-align:left">从 props 调用回调函数</td>
+<td style="text-align:left">向 Redux 派发 actions</td>
+</tr>
+<tr>
+<td style="text-align:left">调用方式</td>
+<td style="text-align:left">手动</td>
+<td style="text-align:left">通常由 React Redux 生成</td>
+</tr>
+</tbody>
+</table>
+<p>容器组件里，需要在 shouldComponentUpdate 做优化，因为容器组件是需要与 Redux 连接的，一般我会把连接的数据挂载到 props.state 里，因此比较 props.state 即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; is &#125; <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ContainerBaseComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    shouldComponentUpdate(nextProps, nextState) &#123;</span><br><span class="line">        <span class="keyword">return</span> !is(<span class="keyword">this</span>.props.state, nextProps.state);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>展示组件里则需要比较 state 和 props。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; is &#125; <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ViewBaseComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    shouldComponentUpdate(nextProps, nextState) &#123;</span><br><span class="line">        <span class="keyword">return</span> !is(<span class="keyword">this</span>.state, nextState) &amp;&amp; !is(<span class="keyword">this</span>.props, nextProps);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样就可以让 React 以最优的时机去渲染虚拟 DOM 节点。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文讲述的是如何在 Redux 里进行部分 reducer immutable 化。当某个 view 的性能要求很高时，使用 immutable 可以优化 React 性能。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.893Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/04/Redux/单一 reducer immutable 化/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/04/Redux/单一 reducer immutable 化/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/04/React Native/使用 Reactotron 来调试 React Native/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">使用 Reactotron 来调试 React Native</h4>
+        <h4 class="summary">众所周知，在 React Native 里可以使用 Chrome Dev 工具来进行调试 React Native 应用...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/03/前端/前后端分离，使用 Mock 提升效率/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">前后端分离，使用 Mock 提升效率</h4>
+        <h4 class="summary">往往在进行前后端分离的开发里，如果不使用 Mock 的话，估计前端需要等后端完成部分 API，才能工作。这样一来，就不利...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

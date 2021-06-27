@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/08/React Native/Animated/React Native 动画详解/">
+    
+    
+    <title>React Native 动画详解 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 React Native 里动画是一个比较重要的 API，往往一个 App 是否好，很多取决于有没有良好的交互性动画。 AnimatedAnimated 是用于创建更精细的交互控制的动画 API。它的特点有：  容易实现各种动画和交互 具备极高的性能 仅关注动画的输入和输出声明 配置是声明式的，序列化好配置，可在高优先级的线程执行动画 动画的顺序执行由 start/stop 方法来控制">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 动画详解">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/08/React Native/Animated/React Native 动画详解/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 React Native 里动画是一个比较重要的 API，往往一个 App 是否好，很多取决于有没有良好的交互性动画。 AnimatedAnimated 是用于创建更精细的交互控制的动画 API。它的特点有：  容易实现各种动画和交互 具备极高的性能 仅关注动画的输入和输出声明 配置是声明式的，序列化好配置，可在高优先级的线程执行动画 动画的顺序执行由 start/stop 方法来控制">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/8/animated-demo3.gif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.853Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 动画详解">
+<meta name="twitter:description" content="前言在 React Native 里动画是一个比较重要的 API，往往一个 App 是否好，很多取决于有没有良好的交互性动画。 AnimatedAnimated 是用于创建更精细的交互控制的动画 API。它的特点有：  容易实现各种动画和交互 具备极高的性能 仅关注动画的输入和输出声明 配置是声明式的，序列化好配置，可在高优先级的线程执行动画 动画的顺序执行由 start/stop 方法来控制">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/8/animated-demo3.gif">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 动画详解</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 动画详解</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 动画详解</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-08-18T02:26:30.000Z" itemprop="datePublished" class="page-time">
+    2017-08-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Animated"><span class="post-toc-number">2.</span> <span class="post-toc-text">Animated</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建动画组件"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">创建动画组件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#核心-API"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">核心 API</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#值类型"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">值类型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#动画类型"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">动画类型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#动画过程"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">动画过程</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#组合动画"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">组合动画</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#动画事件"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">动画事件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Animated-结合-PanResponder"><span class="post-toc-number">3.</span> <span class="post-toc-text">Animated 结合 PanResponder</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#LayoutAnimation"><span class="post-toc-number">4.</span> <span class="post-toc-text">LayoutAnimation</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Animated/React Native 动画详解"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 动画详解</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 08 月 18 日 10:26" datetime="2017-08-18T02:26:30.000Z"  itemprop="datePublished">
+    2017-08-18
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1684</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React Native 里动画是一个比较重要的 API，往往一个 App 是否好，很多取决于有没有良好的交互性动画。</p>
+<h2 id="Animated"><a href="#Animated" class="headerlink" title="Animated"></a>Animated</h2><p><code>Animated</code> 是用于创建更精细的交互控制的动画 API。它的特点有：</p>
+<ul>
+<li>容易实现各种动画和交互</li>
+<li>具备极高的性能</li>
+<li>仅关注动画的输入和输出声明</li>
+<li>配置是声明式的，序列化好配置，可在高优先级的线程执行动画</li>
+<li>动画的顺序执行由 start/stop 方法来控制</li>
+</ul>
+<a id="more"></a>
+<h3 id="创建动画组件"><a href="#创建动画组件" class="headerlink" title="创建动画组件"></a>创建动画组件</h3><p>原生支持的组件类型：View，Text，Image，将其他组件转换为 Animated 组件：createAnimatedComponent</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);</span><br></pre></td></tr></table></figure>
+<h3 id="核心-API"><a href="#核心-API" class="headerlink" title="核心 API"></a>核心 API</h3><p>Animated 提供了三个动画组件，分别是 Animated.View，Animated.Text，Animated.Image</p>
+<p>而对于动画类型又分为 2 个：</p>
+<ul>
+<li>值类型</li>
+<li>动画类型</li>
+</ul>
+<h3 id="值类型"><a href="#值类型" class="headerlink" title="值类型"></a>值类型</h3><p>值类型分为 2 个：</p>
+<ul>
+<li><p>Value：用于单个值</p>
+<ul>
+<li>new Animated.Value(0): 可以作为属性传递给动画组件，但属性只能收取基本类型的值</li>
+<li>setVAlue: new Animated.Value() 实例上的方法，允许外部代码控制实例内部的值并且不触发中间状态的动画，如果中间使用了插值计算则会得到正确的值但依然不会触发动画</li>
+<li><p>interpolate: 插值计算时使用（注意其中的 inputRange 必须是升序）</p>
+<ul>
+<li>clamp: 不会超过边界值</li>
+<li>identity: 超过边界值后直接变为input的值</li>
+<li>extend(default): 会超过边界值</li>
+<li>注意用插值进行颜色转换时对 hex 没用，只对rgb, rgba, hsl 和其他数字格式。</li>
+<li>插值还可以进行角度转换比如 outputRange [<code>0deg</code>, <code>15deg</code>]，也可运用outputRange: [<code>0rad</code>, <code>0.0872665rad</code>]，1 弧度大概等于 57.2958 度。<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.opacityAnimation = <span class="keyword">this</span>.animatedValue.x.interpolate(&#123;</span><br><span class="line">    inputRange: [<span class="number">0</span>, <span class="number">150</span>],</span><br><span class="line">    outputRange: [<span class="number">1</span>, <span class="number">.2</span>],</span><br><span class="line">    extrapolate: <span class="string">'clamp'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>addListener: 动画是异步的，但可以通过此方法监听动画值的改变，但记得不使用时 remove</p>
+</li>
+<li>removeListener: 取消监听，传入的参数是 addListener 返回的 string</li>
+<li>removeAllListeners: 取消所有监听</li>
+<li>stopAnimation: 终止动画，回调里面有当前动画停止时的值</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>ValueXY：用于向量值，一般要处理位置或者手势时使用<ul>
+<li>new Animated.ValueXY(): 初始值是 <code>{x: 0, y: 0}</code></li>
+<li>getLayout: 将<code>{x, y}</code>转换为<code>{left, top}</code>以便用于 style，当使用这个方法时，组件的 position 必须为 absolute</li>
+<li>getTranslateTransform: 将一个<code>{x, y}</code>组合转换为一个可用的位移变换<code>(translation transform)</code>, 不必关心其现在的布局</li>
+<li>setOffset: 在设定的值上的偏移</li>
+<li>flattenOffset: 获取 offset 内的值并将它加到 animated value 的 base 上然后重置 offset 为 0</li>
+</ul>
+</li>
+</ul>
+<h3 id="动画类型"><a href="#动画类型" class="headerlink" title="动画类型"></a>动画类型</h3><p>动画类型主要针对的是一些自带的动画效果。</p>
+<ul>
+<li>spring(friction: 摩擦力{7}, tension: 张力{40}): 基础的单次弹跳物理模型</li>
+<li><p>decay(velocity: 起始速度, deceleration: 速度衰减比例{0.997}): 以一个初始速度开始并且逐渐减慢停止，此部分与 PanResponder 很好结合</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.animatedValue = <span class="keyword">new</span> Animated.ValueXY();</span><br><span class="line">Animated.decay(<span class="keyword">this</span>.animatedValue, &#123;                   <span class="comment">// 逐渐停止</span></span><br><span class="line">    velocity: &#123;<span class="attr">x</span>: gestureState.vx, <span class="attr">y</span>: gestureState.vy&#125;, <span class="comment">// 手势释放速度</span></span><br><span class="line">    deceleration: <span class="number">0.997</span>,                                <span class="comment">// 速度衰减比例</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>timing(duration: 动画持续时间{500毫秒}, easing: 渐变函数，delay: 延迟开始动画{0}): 时间范围映射到渐变的值 easing 可以选择的值</p>
+</li>
+</ul>
+<h3 id="动画过程"><a href="#动画过程" class="headerlink" title="动画过程"></a>动画过程</h3><ul>
+<li><p>动画开始: 调用 start 方法(里面允许回调，因此可以实现循环动画，这里使用了 interpolate 实际只有一个变量)</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">rotateTime = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">this</span>.animatedValue.setValue(&#123;<span class="attr">x</span>:<span class="number">0</span>, <span class="attr">y</span>:<span class="number">0</span>&#125;);</span><br><span class="line">    <span class="keyword">this</span>.ani = Animated.timing(<span class="keyword">this</span>.animatedValue, &#123;</span><br><span class="line">    toValue: <span class="number">360</span>,</span><br><span class="line">    duration: <span class="number">1500</span>,</span><br><span class="line">    easing: Easing.linear</span><br><span class="line">    &#125;).start(<span class="function"><span class="params">event</span> =&gt;</span> <span class="keyword">this</span>.rotateTime());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">settimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">this</span>.ani.stop(), <span class="number">3000</span>); <span class="comment">// 停止</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>动画正常结束: 回调函数调用时的参数为 {finished: true}</p>
+</li>
+<li>动画正常结束之前调用 stop 结束: 回调函数调用时的参数为 {finished: false}</li>
+</ul>
+<h3 id="组合动画"><a href="#组合动画" class="headerlink" title="组合动画"></a>组合动画</h3><p>组合动画分为几个类型：</p>
+<ul>
+<li>parallel （同时执行）</li>
+<li>sequence （顺序执行）</li>
+<li>stagger  （错峰执行）</li>
+<li>delay    （延迟执行）</li>
+</ul>
+<p><strong>注意：</strong>默认情况下，如果任何一个动画被停止或中断了，组内所有其它的动画也会被停止。Parallel 有一个 stopTogether 属性，如果设置为 false，可以禁用自动停止。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.opacityAnimationValue = <span class="keyword">new</span> Animated.Value(<span class="number">1</span>);</span><br><span class="line"><span class="keyword">this</span>.moveAnimationValue = <span class="keyword">new</span> Animated.ValueXY(); <span class="comment">// 默认 &#123;x: 0, y: 0&#125;</span></span><br><span class="line"><span class="comment">// 顺序执行，先移动再逐渐变透明</span></span><br><span class="line">Animated.sequence([</span><br><span class="line">    Animated.timing(<span class="keyword">this</span>.moveAnimationValue, &#123;</span><br><span class="line">        toValue: <span class="number">100</span>,</span><br><span class="line">        duration: <span class="number">500</span></span><br><span class="line">    &#125;),</span><br><span class="line">    Animated.timing(<span class="keyword">this</span>.opacityAnimationValue, &#123;</span><br><span class="line">        toValue: <span class="number">0</span>,</span><br><span class="line">        duration: <span class="number">200</span></span><br><span class="line">    &#125;)</span><br><span class="line">]).start()</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&lt;Animated.View style=&#123;&#123;</span><br><span class="line">    opacity: <span class="keyword">this</span>.opacityAnimationValue,</span><br><span class="line">    transform: <span class="keyword">this</span>.moveAnimationValue.getTranslateTransform()</span><br><span class="line">&#125;&#125;/&gt;</span><br></pre></td></tr></table></figure>
+<p>更复杂的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Animated.sequence([                    <span class="comment">// 首先执行 decay 动画，结束后同时执行 spring 和 twirl 动画</span></span><br><span class="line">    Animated.decay(position, &#123;         <span class="comment">// 滑行一段距离后停止</span></span><br><span class="line">                                       <span class="comment">// 根据用户的手势设置速度</span></span><br><span class="line">        velocity: &#123;<span class="attr">x</span>: gestureState.vx, <span class="attr">y</span>: gestureState.vy&#125;,</span><br><span class="line">        deceleration: <span class="number">0.997</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    Animated.parallel([                <span class="comment">// 在 decay 之后并行执行：</span></span><br><span class="line">        Animated.spring(position, &#123;</span><br><span class="line">            toValue: &#123;<span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span>&#125;          <span class="comment">// 返回到起始点开始</span></span><br><span class="line">        &#125;),</span><br><span class="line">        Animated.timing(twirl, &#123;       <span class="comment">// 同时开始旋转</span></span><br><span class="line">            toValue: <span class="number">360</span>,</span><br><span class="line">        &#125;),</span><br><span class="line">    ]),</span><br><span class="line">]).start();                            <span class="comment">// 执行这一整套动画序列</span></span><br></pre></td></tr></table></figure>
+<h3 id="动画事件"><a href="#动画事件" class="headerlink" title="动画事件"></a>动画事件</h3><ul>
+<li>允许手势或其他事件直接绑定到动态值上</li>
+<li>结构化的映射语法，使得复杂事件对象中的值被正确的解开</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">onScroll = &#123;Animated.event(             <span class="comment">// scrollX = e.nativeEvent.contentOffset.x</span></span><br><span class="line">    [&#123; <span class="attr">nativeEvent</span>: &#123; <span class="attr">contentOffset</span>: &#123; <span class="attr">x</span>: scrollX &#125; &#125; &#125;]</span><br><span class="line">)&#125;</span><br><span class="line">onPanResponderMove = &#123;Animated.event([</span><br><span class="line">    <span class="literal">null</span>,                               <span class="comment">// 忽略原生事件</span></span><br><span class="line">    &#123; <span class="attr">dx</span>: pan.x, <span class="attr">dy</span>: pan.y &#125;            <span class="comment">// 从 gestureState 中解析出 dx 和 dy 的值</span></span><br><span class="line">])&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="Animated-结合-PanResponder"><a href="#Animated-结合-PanResponder" class="headerlink" title="Animated 结合 PanResponder"></a>Animated 结合 PanResponder</h2><p>下面的示例是 Animated 结合 PanResponder 实现，手势动画的变化：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    StyleSheet,</span><br><span class="line">    View, Text,</span><br><span class="line">    PanResponder,</span><br><span class="line">    Animated,</span><br><span class="line">    Dimensions</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="built_in">window</span> = Dimensions.get(<span class="string">'window'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">touch</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="comment">// 创建动画值</span></span><br><span class="line">        <span class="keyword">this</span>.value = &#123; <span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span> &#125;;</span><br><span class="line">        <span class="keyword">this</span>.animatedValue = <span class="keyword">new</span> Animated.ValueXY(<span class="keyword">this</span>.value);</span><br><span class="line">        <span class="comment">// 监听动画值变化</span></span><br><span class="line">        <span class="keyword">this</span>.animatedValue.addListener(<span class="function"><span class="params">value</span> =&gt;</span> <span class="keyword">this</span>.value = value);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.panResponder = PanResponder.create(&#123;</span><br><span class="line">            onStartShouldSetPanResponder: <span class="function"><span class="params">()</span> =&gt;</span> <span class="literal">true</span>,</span><br><span class="line">            onMoveShouldSetPanResponder: <span class="function"><span class="params">()</span> =&gt;</span> <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">            onPanResponderGrant: <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">                <span class="comment">// 初始化</span></span><br><span class="line">                <span class="keyword">this</span>.animatedValue.setValue(&#123; <span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span> &#125;);</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 事件映射</span></span><br><span class="line">            onPanResponderMove: Animated.event([</span><br><span class="line">                <span class="literal">null</span>, &#123; <span class="attr">dx</span>: <span class="keyword">this</span>.animatedValue.x, <span class="attr">dy</span>: <span class="keyword">this</span>.animatedValue.y &#125;</span><br><span class="line">            ], &#123; <span class="attr">listener</span>: <span class="keyword">this</span>.onScroll &#125;),</span><br><span class="line">            onPanResponderRelease: <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">                <span class="comment">// 复位动画</span></span><br><span class="line">                Animated.spring(<span class="keyword">this</span>.animatedValue, &#123;</span><br><span class="line">                    toValue: <span class="number">0</span>,</span><br><span class="line">                    tension: <span class="number">80</span></span><br><span class="line">                &#125;).start();</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// onPanResponderTerminate: this.onPanResponderRelease,</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 颜色动画，在 Y 轴方向上</span></span><br><span class="line">    interpolatedColorAnimation =  <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">this</span>.animatedValue.y.interpolate(&#123;</span><br><span class="line">        inputRange: [<span class="number">0</span>, <span class="built_in">window</span>.height],</span><br><span class="line">        outputRange: [<span class="string">'rgba(225, 0, 0, 1)'</span>, <span class="string">'rgba(0, 255, 0, 1)'</span>],</span><br><span class="line">        extrapolate: <span class="string">'clamp'</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 旋转动画，在 X 轴方向上</span></span><br><span class="line">    interpolatedRotateAnimation = <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">this</span>.animatedValue.x.interpolate(&#123;</span><br><span class="line">        <span class="comment">// 在 X 轴 0 时，为 -360deg，在中间时为 0 deg</span></span><br><span class="line">        inputRange: [<span class="number">0</span>, <span class="built_in">window</span>.width / <span class="number">2</span>, <span class="built_in">window</span>.width],</span><br><span class="line">        outputRange: [<span class="string">'-360deg'</span>, <span class="string">'0deg'</span>, <span class="string">'360deg'</span>]</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.container&#125;&gt;</span><br><span class="line">                &lt;Animated.View</span><br><span class="line">                    style=&#123;[</span><br><span class="line">                        styles.box,</span><br><span class="line">                        &#123;</span><br><span class="line">                            transform: [</span><br><span class="line">                                &#123; <span class="attr">translateX</span>: <span class="keyword">this</span>.animatedValue.x &#125;,</span><br><span class="line">                                &#123; <span class="attr">translateY</span>: <span class="keyword">this</span>.animatedValue.y &#125;,</span><br><span class="line">                                &#123; <span class="attr">rotate</span>: interpolatedRotateAnimation() &#125;</span><br><span class="line">                            ],</span><br><span class="line">                            backgroundColor: interpolatedColorAnimation()</span><br><span class="line">                        &#125;</span><br><span class="line">                    ]&#125;</span><br><span class="line">                    &#123;...this.panResponder.panHandlers&#125;</span><br><span class="line">                    /&gt;</span><br><span class="line">            &lt;<span class="regexp">/View&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">const styles = StyleSheet.create(&#123;</span></span><br><span class="line"><span class="regexp">    container: &#123;</span></span><br><span class="line"><span class="regexp">        flex: 1,</span></span><br><span class="line"><span class="regexp">    &#125;,</span></span><br><span class="line"><span class="regexp">    box: &#123;</span></span><br><span class="line"><span class="regexp">        width: 100,</span></span><br><span class="line"><span class="regexp">        height: 100</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;);</span></span><br></pre></td></tr></table></figure>
+<p>它的效果看起来像是这样（是 gif 录制卡）：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/8/animated-demo3.gif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="LayoutAnimation"><a href="#LayoutAnimation" class="headerlink" title="LayoutAnimation"></a>LayoutAnimation</h2><p>这里不说了，之前写过一篇：<a href="/2017/05/18/React%20Native/React%20Native%20LayoutAnimation/" target="_blank">React Native LayoutAnimation</a></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://reactnative.cn/docs/next/animations.html#content" target="_blank" rel="noopener">http://reactnative.cn/docs/next/animations.html#content</a></li>
+<li><a href="https://race604.com/react-native-touch-event/" target="_blank" rel="noopener">https://race604.com/react-native-touch-event/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.853Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/08/React Native/Animated/React Native 动画详解/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/08/React Native/Animated/React Native 动画详解/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/08/Vue/Vue 与 React 在更新数据上有什么不同/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Vue 与 React 在更新数据上有什么不同？</h4>
+        <h4 class="summary">Vue 与 React 是两个不同的框架，它们在数据更新上采用了不同的方式。
+React 更新数据React 并没有实现...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/08/React Native/React Native 手势详解/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 手势详解</h4>
+        <h4 class="summary">在移动应用开发中，触摸和动画是不可忽视的两个方面。React-Native 针对手势处理，提供了几组 API，为基本的点...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

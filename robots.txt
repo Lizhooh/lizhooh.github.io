@@ -1,0 +1,43 @@
+User-agent: baidspider
+Disallow: /
+Disallow: /*
+Disallow: /admin
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*
+
+User-Agent: 360Spider
+Disallow: /*
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*
+
+User-Agent: Sogouspider
+Disallow: /*
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*
+
+User-Agent: Yahoo! Slurp
+Disallow: /*
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*
+
+User-Agent: Yisouspider
+Disallow: /*
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*
+
+User-agent: Bingbot
+Disallow: /*
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*
+
+User-agent: *
+Disallow: /*
+Disallow: /categories/*
+Disallow: /tags/*
+Disallow: /archives/*

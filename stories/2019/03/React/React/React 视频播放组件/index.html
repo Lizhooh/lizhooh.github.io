@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/03/React/React/React 视频播放组件/">
+    
+    
+    <title>React 视频播放组件：Griffith | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Griffith 是知乎前端团队开源的一个 React HTML5 视频播放组件，目前已在知乎 web 和 mobile web 内使用，并在 GitHub 上开源。 Griffith 具有的特性：  快捷键支持 - Griffith 参考 YouTube 进行了快捷键支持 状态管理 - Griffith 使用 Context API 进行状态管理。对于 React 应用，可以通过引入 Gri">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 视频播放组件：Griffith">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/03/React/React/React 视频播放组件/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Griffith 是知乎前端团队开源的一个 React HTML5 视频播放组件，目前已在知乎 web 和 mobile web 内使用，并在 GitHub 上开源。 Griffith 具有的特性：  快捷键支持 - Griffith 参考 YouTube 进行了快捷键支持 状态管理 - Griffith 使用 Context API 进行状态管理。对于 React 应用，可以通过引入 Gri">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.879Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 视频播放组件：Griffith">
+<meta name="twitter:description" content="前言Griffith 是知乎前端团队开源的一个 React HTML5 视频播放组件，目前已在知乎 web 和 mobile web 内使用，并在 GitHub 上开源。 Griffith 具有的特性：  快捷键支持 - Griffith 参考 YouTube 进行了快捷键支持 状态管理 - Griffith 使用 Context API 进行状态管理。对于 React 应用，可以通过引入 Gri">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 视频播放组件：Griffith</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 视频播放组件：Griffith</h1>
+
+        <div class="meta-rest">
+            <h1>React 视频播放组件：Griffith</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-03-30T02:08:22.000Z" itemprop="datePublished" class="page-time">
+    2019-03-30
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#API-文档"><span class="post-toc-number">3.</span> <span class="post-toc-text">API 文档</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/React 视频播放组件"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 视频播放组件：Griffith</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 03 月 30 日 10:08" datetime="2019-03-30T02:08:22.000Z"  itemprop="datePublished">
+    2019-03-30
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 435</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/zhihu/griffith/blob/master/README-zh-Hans.md" target="_blank" rel="noopener">Griffith</a> 是知乎前端团队开源的一个 React HTML5 视频播放组件，目前已在知乎 web 和 mobile web 内使用，并在 GitHub 上开源。</p>
+<p><strong>Griffith 具有的特性：</strong></p>
+<ul>
+<li><strong>快捷键支持</strong> - Griffith 参考 YouTube 进行了快捷键支持</li>
+<li><strong>状态管理</strong> - Griffith 使用 Context API 进行状态管理。对于 React 应用，可以通过引入 Griffith 的 Context 来实现弹幕等自定义功能。</li>
+<li><strong>丰富的事件系统</strong> - 对于视频播放器中常见的首帧时长，缓冲次数等指标，可以通过接收 Griffith 事件来进行打点记录。</li>
+<li><strong>支持流式播放</strong> - Griffith 使用了 Media Source Extensions™ ，支持对 mp4 和 m3u8 格式的视频进行流式播放。</li>
+</ul>
+<a id="more"></a>
+<p><div id="player"></div></p>
+<script src="https://unpkg.com/griffith-standalone/dist/index.umd.min.js"></script>
+<script>
+    var target = document.getElementById('player');
+    var sources = {
+        hd: {
+        play_url: 'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_hd.mp4',
+        } ,
+        sd: {
+        play_url: 'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_sd.mp4',
+        },
+    };
+    var cover = '/assets/image/2019/3/20190330103113.png';
+
+    // 创建播放器
+    var player = Griffith.createPlayer(target);
+
+    // 载入视频
+    player.render({ sources, cover });
+</script>
+
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>安装：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install griffith</span><br></pre></td></tr></table></figure>
+<p>在 React 里使用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Player <span class="keyword">from</span> <span class="string">'griffith'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sources = &#123;</span><br><span class="line">    hd: &#123;</span><br><span class="line">        play_url: <span class="string">'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_hd.mp4'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    sd: &#123;</span><br><span class="line">        play_url: <span class="string">'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_sd.mp4'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> App = <span class="function"><span class="params">()</span> =&gt;</span> (</span><br><span class="line">    &lt;div style=&#123;&#123; <span class="attr">height</span>: <span class="number">360</span>, <span class="attr">width</span>: <span class="number">640</span> &#125;&#125;&gt;</span><br><span class="line">        &lt;Player sources=&#123;sources&#125; /&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<p>也可以在非 React 环境使用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;div id=<span class="string">"player"</span>&gt;&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">&lt;script src="https:/</span><span class="regexp">/unpkg.com/g</span>riffith-standalone/dist/index.umd.min.js<span class="string">"&gt;&lt;/script&gt;</span></span><br><span class="line"><span class="string">&lt;script&gt;</span></span><br><span class="line"><span class="string">    const target = document.getElementById('player');</span></span><br><span class="line"><span class="string">    const sources = &#123;</span></span><br><span class="line"><span class="string">        hd: &#123;</span></span><br><span class="line"><span class="string">        play_url: 'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_hd.mp4',</span></span><br><span class="line"><span class="string">        &#125; ,</span></span><br><span class="line"><span class="string">        sd: &#123;</span></span><br><span class="line"><span class="string">        play_url: 'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_sd.mp4',</span></span><br><span class="line"><span class="string">        &#125;,</span></span><br><span class="line"><span class="string">    &#125;;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    // 创建播放器</span></span><br><span class="line"><span class="string">    const player = Griffith.createPlayer(target);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    // 载入视频</span></span><br><span class="line"><span class="string">    player.render(&#123;sources&#125;);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    // 销毁视频</span></span><br><span class="line"><span class="string">    player.dispose();</span></span><br><span class="line"><span class="string">&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="API-文档"><a href="#API-文档" class="headerlink" title="API 文档"></a>API 文档</h2><p>看这里：<a href="https://github.com/zhihu/griffith/blob/master/packages/griffith/README-zh-Hans.md" target="_blank" rel="noopener">griffith API 文档</a></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/59686274" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/59686274</a></li>
+<li><a href="https://github.com/zhihu/griffith/blob/master/README-zh-Hans.md" target="_blank" rel="noopener">https://github.com/zhihu/griffith/blob/master/README-zh-Hans.md</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.879Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/03/React/React/React 视频播放组件/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/03/React/React/React 视频播放组件/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/03/React/React/Storybook：编写 React 组件最佳的选择/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Storybook：编写 React 组件最佳的选择</h4>
+        <h4 class="summary">Storybook 是一个开源工具，用于为 React，Vue 和 Angular 单独开发 UI 组件。它使构建令人惊...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/03/测试/单元测试/Jest 可视化测试 UI：Majestic/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Jest 可视化测试 UI：Majestic</h4>
+        <h4 class="summary">Majestic 是一个 Jest 的可视化测试 UI 工具，可以让你通过点点点进行测试你的代码，可以用在 React、...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

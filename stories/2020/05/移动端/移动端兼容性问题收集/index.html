@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2020/05/移动端/移动端兼容性问题收集/">
+    
+    
+    <title>移动端兼容性问题收集 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言移动端兼容性问题，坑多多，iOS 和 Android 都有。">
+<meta name="keywords" content="前端,移动端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="移动端兼容性问题收集">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2020/05/移动端/移动端兼容性问题收集/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言移动端兼容性问题，坑多多，iOS 和 Android 都有。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.920Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="移动端兼容性问题收集">
+<meta name="twitter:description" content="前言移动端兼容性问题，坑多多，iOS 和 Android 都有。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">移动端兼容性问题收集</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">移动端兼容性问题收集</h1>
+
+        <div class="meta-rest">
+            <h1>移动端兼容性问题收集</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2020-05-22T09:02:33.000Z" itemprop="datePublished" class="page-time">
+    2020-05-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/移动端/">移动端</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#移动端兼容性问题"><span class="post-toc-number">2.</span> <span class="post-toc-text">移动端兼容性问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Android"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">Android</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#背景图片有些设备会模糊"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">背景图片有些设备会模糊</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#点击链接出现蓝色框"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">点击链接出现蓝色框</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安卓手机的圆角失效"><span class="post-toc-number">2.1.3.</span> <span class="post-toc-text">安卓手机的圆角失效</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#默认会对邮箱地址的识别"><span class="post-toc-number">2.1.4.</span> <span class="post-toc-text">默认会对邮箱地址的识别</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#iOS"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">iOS</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-滚动条惯性失效"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">iOS 滚动条惯性失效</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#禁止自动识别号码"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">禁止自动识别号码</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#点击链接出现蓝色框-1"><span class="post-toc-number">2.2.3.</span> <span class="post-toc-text">点击链接出现蓝色框</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#设置-input-按钮样式会被默认样式覆盖"><span class="post-toc-number">2.2.4.</span> <span class="post-toc-text">设置 input 按钮样式会被默认样式覆盖</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-上的下拉框会有圆角"><span class="post-toc-number">2.2.5.</span> <span class="post-toc-text">iOS 上的下拉框会有圆角</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-下输入框设置-readonly-仍会聚焦"><span class="post-toc-number">2.2.6.</span> <span class="post-toc-text">iOS 下输入框设置 readonly 仍会聚焦</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-在播放视频时，会出现短暂的黑屏"><span class="post-toc-number">2.2.7.</span> <span class="post-toc-text">iOS 在播放视频时，会出现短暂的黑屏</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-中无法点击-span-div"><span class="post-toc-number">2.2.8.</span> <span class="post-toc-text">iOS 中无法点击 span, div</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-上双击强制缩放问题"><span class="post-toc-number">2.2.9.</span> <span class="post-toc-text">iOS 上双击强制缩放问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-上-input-存在重影边框问题"><span class="post-toc-number">2.2.10.</span> <span class="post-toc-text">iOS 上 input 存在重影边框问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#iOS-微信浏览器中重新设置-document-title-无效"><span class="post-toc-number">2.2.11.</span> <span class="post-toc-text">iOS 微信浏览器中重新设置 document.title 无效</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#通用"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">通用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#长时间按住页面出现闪退"><span class="post-toc-number">2.3.1.</span> <span class="post-toc-text">长时间按住页面出现闪退</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#动画硬件加速"><span class="post-toc-number">2.3.2.</span> <span class="post-toc-text">动画硬件加速</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#禁止复制、选中文本"><span class="post-toc-number">2.3.3.</span> <span class="post-toc-text">禁止复制、选中文本</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#横平时字体加粗不一致"><span class="post-toc-number">2.3.4.</span> <span class="post-toc-text">横平时字体加粗不一致</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#图片加-a-标签在-IE9-中出现边框"><span class="post-toc-number">2.3.5.</span> <span class="post-toc-text">图片加 a 标签在 IE9 中出现边框</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#lt-button-gt-元素一定要写上-type-属性不然会默认提交表单，出现想不到的-bug？"><span class="post-toc-number">2.3.6.</span> <span class="post-toc-text">&lt;button&gt; 元素一定要写上 type 属性不然会默认提交表单，出现想不到的 bug？</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#某些安卓手机的自带浏览器不识别-onkeydown-onkeypress-onkeyup-事件，这些事件会导致不能输入汉字。（这是有多烂的手机？）"><span class="post-toc-number">2.3.7.</span> <span class="post-toc-text">某些安卓手机的自带浏览器不识别 onkeydown onkeypress onkeyup 事件，这些事件会导致不能输入汉字。（这是有多烂的手机？）</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#视频自动播放的问题"><span class="post-toc-number">2.3.8.</span> <span class="post-toc-text">视频自动播放的问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#移动端弹层，点击穿透问题"><span class="post-toc-number">2.3.9.</span> <span class="post-toc-text">移动端弹层，点击穿透问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#移动端弹层，滚动穿透问题"><span class="post-toc-number">2.3.10.</span> <span class="post-toc-text">移动端弹层，滚动穿透问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#flex-布局下文本省略问题"><span class="post-toc-number">2.3.11.</span> <span class="post-toc-text">flex 布局下文本省略问题</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-移动端/移动端兼容性问题收集"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">移动端兼容性问题收集</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020 年 05 月 22 日 17:02" datetime="2020-05-22T09:02:33.000Z"  itemprop="datePublished">
+    2020-05-22
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/移动端/">移动端</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 872</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>移动端兼容性问题，坑多多，iOS 和 Android 都有。</p>
+<a id="more"></a>
+<h2 id="移动端兼容性问题"><a href="#移动端兼容性问题" class="headerlink" title="移动端兼容性问题"></a>移动端兼容性问题</h2><h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><h4 id="背景图片有些设备会模糊"><a href="#背景图片有些设备会模糊" class="headerlink" title="背景图片有些设备会模糊"></a>背景图片有些设备会模糊</h4><p>原因是手机的分辨率太小。</p>
+<p>解决方案： 用 2X 图片来代替 img 标签，然后</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.img</span> &#123;</span><br><span class="line">    <span class="attribute">background-size</span>: contain;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="点击链接出现蓝色框"><a href="#点击链接出现蓝色框" class="headerlink" title="点击链接出现蓝色框"></a>点击链接出现蓝色框</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">body</span> &#123; <span class="attribute">-webkit-tap-highlight-color</span>:<span class="built_in">rgba</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>); &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="安卓手机的圆角失效"><a href="#安卓手机的圆角失效" class="headerlink" title="安卓手机的圆角失效"></a>安卓手机的圆角失效</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">background-clip</span>: padding-box; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="默认会对邮箱地址的识别"><a href="#默认会对邮箱地址的识别" class="headerlink" title="默认会对邮箱地址的识别"></a>默认会对邮箱地址的识别</h4><p>解决方案：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"format-detection"</span> <span class="attr">content</span>=<span class="string">"telephone=no"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="iOS"><a href="#iOS" class="headerlink" title="iOS"></a>iOS</h3><h4 id="iOS-滚动条惯性失效"><a href="#iOS-滚动条惯性失效" class="headerlink" title="iOS 滚动条惯性失效"></a>iOS 滚动条惯性失效</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">overflow-scrolling</span>: touch; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="禁止自动识别号码"><a href="#禁止自动识别号码" class="headerlink" title="禁止自动识别号码"></a>禁止自动识别号码</h4><p>解决方案：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">content</span>=<span class="string">"telephone=no"</span> <span class="attr">name</span>=<span class="string">"format-detection"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="点击链接出现蓝色框-1"><a href="#点击链接出现蓝色框-1" class="headerlink" title="点击链接出现蓝色框"></a>点击链接出现蓝色框</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">-webkit-tap-highlight-color</span>: <span class="built_in">rgba</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>); &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="设置-input-按钮样式会被默认样式覆盖"><a href="#设置-input-按钮样式会被默认样式覆盖" class="headerlink" title="设置 input 按钮样式会被默认样式覆盖"></a>设置 input 按钮样式会被默认样式覆盖</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">input</span>,</span><br><span class="line"><span class="selector-tag">textarea</span> &#123;</span><br><span class="line">    <span class="attribute">border</span>: <span class="number">0</span>;</span><br><span class="line">    <span class="attribute">-webkit-appearance</span>: none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="iOS-上的下拉框会有圆角"><a href="#iOS-上的下拉框会有圆角" class="headerlink" title="iOS 上的下拉框会有圆角"></a>iOS 上的下拉框会有圆角</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">select</span> &#123;</span><br><span class="line">    <span class="attribute">border-radius</span>: <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="iOS-下输入框设置-readonly-仍会聚焦"><a href="#iOS-下输入框设置-readonly-仍会聚焦" class="headerlink" title="iOS 下输入框设置 readonly 仍会聚焦"></a>iOS 下输入框设置 readonly 仍会聚焦</h4><p>解决方案：改为 disabled。</p>
+<h4 id="iOS-在播放视频时，会出现短暂的黑屏"><a href="#iOS-在播放视频时，会出现短暂的黑屏" class="headerlink" title="iOS 在播放视频时，会出现短暂的黑屏"></a>iOS 在播放视频时，会出现短暂的黑屏</h4><p>解决方案：在视频上层添加一个海报图，制作播放前加载的假象。监听 onload 事件，加载完成后去掉海报。</p>
+<h4 id="iOS-中无法点击-span-div"><a href="#iOS-中无法点击-span-div" class="headerlink" title="iOS 中无法点击 span, div"></a>iOS 中无法点击 span, div</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">span</span>, <span class="selector-tag">div</span> &#123; <span class="attribute">cursor</span>: pointer; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="iOS-上双击强制缩放问题"><a href="#iOS-上双击强制缩放问题" class="headerlink" title="iOS 上双击强制缩放问题"></a>iOS 上双击强制缩放问题</h4><p>设置为 viewport 也不行。</p>
+<p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">touch-action</span>: manipulation; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="iOS-上-input-存在重影边框问题"><a href="#iOS-上-input-存在重影边框问题" class="headerlink" title="iOS 上 input 存在重影边框问题"></a>iOS 上 input 存在重影边框问题</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">input</span> &#123;</span><br><span class="line">    <span class="attribute">outline</span>: none;</span><br><span class="line">    <span class="attribute">-webkit-appearance</span>: none;</span><br><span class="line">    <span class="attribute">-webkit-tap-highlight-color</span>: <span class="built_in">rgba</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="iOS-微信浏览器中重新设置-document-title-无效"><a href="#iOS-微信浏览器中重新设置-document-title-无效" class="headerlink" title="iOS 微信浏览器中重新设置 document.title 无效"></a>iOS 微信浏览器中重新设置 document.title 无效</h4><p>解决方案：创建一个内容为空的 iframe，随后立即删除这个 iframe，这样就会刷新 title。</p>
+<h3 id="通用"><a href="#通用" class="headerlink" title="通用"></a>通用</h3><h4 id="长时间按住页面出现闪退"><a href="#长时间按住页面出现闪退" class="headerlink" title="长时间按住页面出现闪退"></a>长时间按住页面出现闪退</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">-webkit-touch-callout</span>: none; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="动画硬件加速"><a href="#动画硬件加速" class="headerlink" title="动画硬件加速"></a>动画硬件加速</h4><p>解决方案： 在需要动画的元素上加上</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.el</span> &#123;</span><br><span class="line">    <span class="attribute">transform</span>: <span class="built_in">translate3d</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="禁止复制、选中文本"><a href="#禁止复制、选中文本" class="headerlink" title="禁止复制、选中文本"></a>禁止复制、选中文本</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">user-select</span>: none; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="横平时字体加粗不一致"><a href="#横平时字体加粗不一致" class="headerlink" title="横平时字体加粗不一致"></a>横平时字体加粗不一致</h4><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* &#123; <span class="attribute">text-size-adjust</span>: <span class="number">100%</span>; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="图片加-a-标签在-IE9-中出现边框"><a href="#图片加-a-标签在-IE9-中出现边框" class="headerlink" title="图片加 a 标签在 IE9 中出现边框"></a>图片加 a 标签在 IE9 中出现边框</h4><p>解决方案：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">img</span> &#123; <span class="attribute">border</span>: none; &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="lt-button-gt-元素一定要写上-type-属性不然会默认提交表单，出现想不到的-bug？"><a href="#lt-button-gt-元素一定要写上-type-属性不然会默认提交表单，出现想不到的-bug？" class="headerlink" title="&lt;button&gt; 元素一定要写上 type 属性不然会默认提交表单，出现想不到的 bug？"></a><code>&lt;button&gt;</code> 元素一定要写上 type 属性不然会默认提交表单，出现想不到的 bug？</h4><h4 id="某些安卓手机的自带浏览器不识别-onkeydown-onkeypress-onkeyup-事件，这些事件会导致不能输入汉字。（这是有多烂的手机？）"><a href="#某些安卓手机的自带浏览器不识别-onkeydown-onkeypress-onkeyup-事件，这些事件会导致不能输入汉字。（这是有多烂的手机？）" class="headerlink" title="某些安卓手机的自带浏览器不识别 onkeydown onkeypress onkeyup 事件，这些事件会导致不能输入汉字。（这是有多烂的手机？）"></a>某些安卓手机的自带浏览器不识别 onkeydown onkeypress onkeyup 事件，这些事件会导致不能输入汉字。（这是有多烂的手机？）</h4><h4 id="视频自动播放的问题"><a href="#视频自动播放的问题" class="headerlink" title="视频自动播放的问题"></a>视频自动播放的问题</h4><p>在移动端浏览器里 video 很多都不能正常的自动播放（autoplay 属性）。</p>
+<p>解决方案：在 DOM onload 事件里用 调用 video 的 play 方法，手动去播放。</p>
+<h4 id="移动端弹层，点击穿透问题"><a href="#移动端弹层，点击穿透问题" class="headerlink" title="移动端弹层，点击穿透问题"></a>移动端弹层，点击穿透问题</h4><p>解决方案：使用 fastclick 这个库来解决。</p>
+<h4 id="移动端弹层，滚动穿透问题"><a href="#移动端弹层，滚动穿透问题" class="headerlink" title="移动端弹层，滚动穿透问题"></a>移动端弹层，滚动穿透问题</h4><p>出现这种原因是因为，弹层里有滚动条，底下里也有滚动条，有人说禁止 touchmove 的默认行为，那不行，那弹层的滚动条就不能滚动了。</p>
+<p>解决方案：底下的滚动条，在弹层打开时隐藏滚动条。或者这种弹层换一种思路是实现（不要要弹层了）。</p>
+<h4 id="flex-布局下文本省略问题"><a href="#flex-布局下文本省略问题" class="headerlink" title="flex 布局下文本省略问题"></a>flex 布局下文本省略问题</h4><p>在 flex 布局下，text-overflow 会失效, 无法使用样式让文字自动省略。</p>
+<p>解决方案：flex 布局下包裹一层，然后设置父级层 min-width: 0 即可。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.920Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2020/05/移动端/移动端兼容性问题收集/" target="_blank" rel="external">http://me.lizhooh.com/stories/2020/05/移动端/移动端兼容性问题收集/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动端/">移动端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2020/05/小程序/小程序蓝牙开发指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">小程序蓝牙开发指南</h4>
+        <h4 class="summary">小程序提供两种蓝牙的接口，一种是 ibeacon，一种是 ble 4.0（低功耗蓝牙）。蓝牙的应该场景非常广泛，在生活中...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2020/05/React Native/Socket/React Native 0.60+ 上使用 Socket.io/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 0.60+ 上使用 Socket.io</h4>
+        <h4 class="summary">React Native 之前使用时，用过 Socket.io，但是一直连接不上，表示连接超时什么的。
+今天再次试了一些...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/">
+    
+    
+    <title>React Native 文件操作 - fetch-blob | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="文件操作之前使用react-native-fs来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等。而 react-native-fetch-blob：是一个致力于为 React Native 开发人员提供文件访问和数据传输的项目更容易，更高效的 fs 库。在这里我将尝试使用react-native-fetch-blob来进行文件的操作。 支持的特性：  将数据直接从/转储到">
+<meta name="keywords" content="学习笔记,移动开发,React-Native,网络请求">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 文件操作 - fetch-blob">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="文件操作之前使用react-native-fs来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等。而 react-native-fetch-blob：是一个致力于为 React Native 开发人员提供文件访问和数据传输的项目更容易，更高效的 fs 库。在这里我将尝试使用react-native-fetch-blob来进行文件的操作。 支持的特性：  将数据直接从/转储到">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/569255043496518459.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/229081235107523308.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.854Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 文件操作 - fetch-blob">
+<meta name="twitter:description" content="文件操作之前使用react-native-fs来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等。而 react-native-fetch-blob：是一个致力于为 React Native 开发人员提供文件访问和数据传输的项目更容易，更高效的 fs 库。在这里我将尝试使用react-native-fetch-blob来进行文件的操作。 支持的特性：  将数据直接从/转储到">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/7/569255043496518459.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 文件操作 - fetch-blob</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 文件操作 - fetch-blob</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 文件操作 - fetch-blob</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-08-02T07:20:07.000Z" itemprop="datePublished" class="page-time">
+    2017-08-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#文件操作"><span class="post-toc-number">1.</span> <span class="post-toc-text">文件操作</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#react-native-fetch-blob"><span class="post-toc-number">2.</span> <span class="post-toc-text">react-native-fetch-blob</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#常用目录"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">常用目录</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#下载文件到特定路径"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">下载文件到特定路径</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#上传-下载进度"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">上传/下载进度</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#文件操作-1"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">文件操作</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#保存图片示例"><span class="post-toc-number">3.</span> <span class="post-toc-text">保存图片示例</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#真实的应用"><span class="post-toc-number">4.</span> <span class="post-toc-text">真实的应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/IO/React Native 文件操作 - fetch-blob"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 文件操作 - fetch-blob</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 08 月 02 日 15:20" datetime="2017-08-02T07:20:07.000Z"  itemprop="datePublished">
+    2017-08-02
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1335</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="文件操作"><a href="#文件操作" class="headerlink" title="文件操作"></a>文件操作</h2><p>之前使用<code>react-native-fs</code>来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等。<br>而 <code>react-native-fetch-blob</code>：是一个致力于为 React Native 开发人员提供文件访问和数据传输的项目更容易，更高效的 fs 库。<br>在这里我将尝试使用<code>react-native-fetch-blob</code>来进行文件的操作。</p>
+<p><strong>支持的特性：</strong></p>
+<ul>
+<li>将数据直接从/转储到没有 base64 桥接的存储</li>
+<li>File API 支持常规文件，资源文件和 CameraRoll 文件</li>
+<li>本地到本地文件操作 API，减少 JS 桥接性能损失</li>
+<li>文件流支持处理大文件</li>
+<li>Blob，File，XMLHttpRequest 的 polyfills，使基于浏览器的库可用于 RN（实验）</li>
+<li>支持基于 Oboe.js @jimhigson 的 JSON 流</li>
+</ul>
+<a id="more"></a>
+<h2 id="react-native-fetch-blob"><a href="#react-native-fetch-blob" class="headerlink" title="react-native-fetch-blob"></a>react-native-fetch-blob</h2><p><strong>安装：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install --save react-native-fetch-blob</span><br><span class="line">react-native link react-native-fetch-blob</span><br></pre></td></tr></table></figure>
+<p>在 Android 上添加外部 SD 访问限权：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">"com.rnfetchblobtest"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:versionCode</span>=<span class="string">"1"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:versionName</span>=<span class="string">"1.0"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.INTERNET"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.SYSTEM_ALERT_WINDOW"</span>/&gt;</span></span><br><span class="line">+   <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.READ_EXTERNAL_STORAGE"</span> /&gt;</span></span><br><span class="line">+   <span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.WRITE_EXTERNAL_STORAGE"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>以及 Android Download Manager （下载管理） 的 action （可选，不使用下载器就不用加）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.MAIN"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.LAUNCHER"</span> /&gt;</span></span><br><span class="line">+   <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.DOWNLOAD_COMPLETE"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>在<code>react-native-fetch-blob</code>里有两种 API：<strong>网络编程与文件操作</strong>，其 API 全部返回 Promise 对象。</p>
+<p>下面是一个文件请求，并下载到临时缓存目录里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> blob <span class="keyword">from</span> <span class="string">'react-native-fetch-blob'</span>;</span><br><span class="line"></span><br><span class="line">blob</span><br><span class="line">    .config(&#123;</span><br><span class="line">        fileCache: <span class="literal">true</span>,   <span class="comment">// 缓存到磁盘里，而不是内存中</span></span><br><span class="line">        appendExt: <span class="string">'jpg'</span>,  <span class="comment">// 设置临时文件扩展名</span></span><br><span class="line">    &#125;)</span><br><span class="line">    .fetch(<span class="string">'GET'</span>, <span class="string">'http://pic.7kk.com/upload/4/86/c252be7f05656db819fcc862a382e.jpg'</span>, &#123;</span><br><span class="line">        <span class="comment">//some headers ..</span></span><br><span class="line">    &#125;)</span><br><span class="line">    .then(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// /data/data/com.test/files/RNFetchBlobTmp_bljdsadjadjk12312jk.jpg</span></span><br><span class="line">        <span class="built_in">console</span>.log(res.path());</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="常用目录"><a href="#常用目录" class="headerlink" title="常用目录"></a>常用目录</h3><p>这些常量是包含常用文件夹的哈希映射：</p>
+<ul>
+<li>DocumentDir   （数据文件目录）</li>
+<li>CacheDir      （缓存文件目录）</li>
+<li>MainBundleDir （可用于访问仅嵌入 iOS 应用程序的文件）</li>
+<li>DCIMDir       （相册目录，仅限 Android）</li>
+<li>DownloadDir   （下载目录，仅限 Android）</li>
+<li>MusicDir      （音乐目录，仅限 Android）</li>
+<li>PictureDir    （图片目录，仅限 Android）</li>
+<li>MovieDir      （视频目录，仅限 Android）</li>
+<li>RingtoneDir   （铃音目录，仅限 Android）</li>
+<li>SDCard        （SD 卡目录，仅限 Android）</li>
+</ul>
+<h3 id="下载文件到特定路径"><a href="#下载文件到特定路径" class="headerlink" title="下载文件到特定路径"></a>下载文件到特定路径</h3><p>如果你喜欢一个特定的文件路径而不是随机生成的文件路径，可以使用 path 选项。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">blob</span><br><span class="line">    .config(&#123;</span><br><span class="line">        path : dirs.DocumentDir + <span class="string">'/meinv.jpg'</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">    .fetch(<span class="string">'GET'</span>, <span class="string">'http://pic.7kk.com/upload/4/86/c252be7f05656db819fcc862a382e.jpg'</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="上传-下载进度"><a href="#上传-下载进度" class="headerlink" title="上传/下载进度"></a>上传/下载进度</h3><p>在 version &gt;= 0.4.2 有可能知道上传/下载进度。之后 0.7.0IOS 和 Android 上传进度也支持：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">blob.fetch(<span class="string">'POST'</span>, <span class="string">'http://www.example.com/upload'</span>, &#123;</span><br><span class="line">      <span class="comment">//... some headers,</span></span><br><span class="line">      <span class="string">'Content-Type'</span> : <span class="string">'octet-stream'</span></span><br><span class="line">    &#125;, base64DataString)  <span class="comment">// 把图片转为 base64 格式，再上传</span></span><br><span class="line">    <span class="comment">// listen to upload progress event</span></span><br><span class="line">    .uploadProgress(<span class="function">(<span class="params">written, total</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'uploaded'</span>, written / total)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// listen to download progress event</span></span><br><span class="line">    .progress(<span class="function">(<span class="params">received, total</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'progress'</span>, received / total)</span><br><span class="line">    &#125;)</span><br><span class="line">    .then(<span class="function">(<span class="params">resp</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;)</span><br><span class="line">    .catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="文件操作-1"><a href="#文件操作-1" class="headerlink" title="文件操作"></a>文件操作</h3><p>文件操作支持大部分 API，并支持文件流，API 类似 Nodejs fs。<br>下面列出了部分，更多的看 <a href="https://github.com/wkh237/react-native-fetch-blob/wiki/File-System-Access-API" target="_blank" rel="noopener">WIKI</a></p>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>createFile(path, data, encoding) :Promise</td>
+<td>创建文件</td>
+</tr>
+<tr>
+<td>writeFile(path:string, content:string &amp; Array, encoding:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>writeStream(path:string, encoding:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>appendFile(path:string, content:string &amp; Array, encoding:string) :Promise</td>
+<td>追加文件内容</td>
+</tr>
+<tr>
+<td>readFile(path, encoding) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>readStream(path, encoding, bufferSize, interval) :<code>Promise&lt;RNFBReadStream&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>interval :number(optional, default is 10, -1 to disable)</td>
+<td>它限制了事件调度频率</td>
+</tr>
+<tr>
+<td>mkdir(path:string) :Promise</td>
+<td>支持递归创建</td>
+</tr>
+<tr>
+<td>ls(path:string) :Promise<array></array></td>
+<td></td>
+</tr>
+<tr>
+<td>mv(from:string, to:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>cp(src:string, dest:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>exists(path:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>isDir(path:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>unlink(path:string) :Promise</td>
+<td></td>
+</tr>
+<tr>
+<td>lstat(path:string) :<code>Promise&lt;RNFetchBlobStat&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>stat(path:string) :<code>Promise&lt;RNFetchBlobStat&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td>scanFile(path:string) :Promise (Android Only)</td>
+<td></td>
+</tr>
+<tr>
+<td>asset(filename:string) :string</td>
+<td></td>
+</tr>
+<tr>
+<td>df() :<code>Promise&lt;{ free: number, total: number }&gt;</code></td>
+<td>分区上可使用的磁盘空间</td>
+</tr>
+</tbody>
+</table>
+<p><strong>使用方式：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> blob <span class="keyword">from</span> <span class="string">'react-native-fetch-blob'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 DCIM 目录下创建一个 test 文件夹</span></span><br><span class="line">blob.fs.mkdir(blob.fs.dirs.DCIMDir + <span class="string">'/test'</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="保存图片示例"><a href="#保存图片示例" class="headerlink" title="保存图片示例"></a>保存图片示例</h2><p>如果希望有这样一个功能，在用户点击按钮时，把图片保存在本地的磁盘里。要实现，保存图片功能，使用 fetch 轻松搞定。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = blob.fs.dirs.DCIMDir + <span class="string">'/test/meinv.jpg'</span>;</span><br><span class="line"></span><br><span class="line">blob.config(&#123; <span class="attr">fileCache</span>: <span class="literal">true</span>, path &#125;)</span><br><span class="line">    .fetch(<span class="string">'GET'</span>, <span class="string">'http://pic.7kk.com/upload/c/22/e4d4b27deb13380f6b05f9bba0432.jpg'</span>)</span><br><span class="line">    .then(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">JSON</span>.stringify(res, <span class="literal">null</span>, <span class="number">3</span>));</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p><strong>结果：</strong></p>
+<div style="text-align: center"><br>    <img src="/assets/image/2017/7/569255043496518459.jpg" style="max-width: 520px"><br></div>
+
+<h2 id="真实的应用"><a href="#真实的应用" class="headerlink" title="真实的应用"></a>真实的应用</h2><p>下面的代码是我的某个 React Native 应用里抽离出来的。</p>
+<p>它经历了几件事情：</p>
+<ul>
+<li>确定图片存放的位置</li>
+<li>查找图片的后缀，根据后缀进行文件的命名</li>
+<li>根据 url 下载与保存图片到本地磁盘里</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 保存图片到本地</span></span><br><span class="line">save = <span class="keyword">async</span> event =&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> path = config.qrcodedir;</span><br><span class="line">    <span class="keyword">const</span> &#123; <span class="attr">image</span>: url, id &#125; = <span class="keyword">this</span>.props.data.qrcode;</span><br><span class="line">    <span class="keyword">const</span> &#123; name &#125; = <span class="keyword">this</span>.props.data;</span><br><span class="line">    <span class="keyword">const</span> types = [<span class="string">'png'</span>, <span class="string">'jpg'</span>, <span class="string">'jpeg'</span>, <span class="string">'gif'</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 检查文件夹存在性</span></span><br><span class="line">    <span class="keyword">if</span> (!(<span class="keyword">await</span> blob.fs.isDir(path))) &#123;</span><br><span class="line">        <span class="keyword">await</span> blob.fs.mkdir(path);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查找后缀</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> t <span class="keyword">of</span> types) &#123;</span><br><span class="line">        <span class="keyword">let</span> rex = <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">`\.<span class="subst">$&#123;t&#125;</span>$`</span>, <span class="string">'gi'</span>);</span><br><span class="line">        <span class="keyword">if</span> (rex.test(url)) &#123;</span><br><span class="line">            path += <span class="string">`/<span class="subst">$&#123;name&#125;</span>_<span class="subst">$&#123;id&#125;</span>.<span class="subst">$&#123;t&#125;</span>`</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 匹配不到后缀</span></span><br><span class="line">        <span class="keyword">if</span> (t === types[types.length - <span class="number">1</span>]) &#123;</span><br><span class="line">            <span class="keyword">return</span> Toast.show(<span class="string">`保存失败，未知错误`</span>, Toast.LONG);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 保存</span></span><br><span class="line">    <span class="keyword">const</span> res = <span class="keyword">await</span> blob.config(&#123; <span class="attr">fileCache</span>: <span class="literal">true</span>, path &#125;).fetch(<span class="string">'GET'</span>, url);</span><br><span class="line">    <span class="keyword">if</span> (res.path() &amp;&amp; res.path().length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        Toast.show(<span class="string">`保存成功：<span class="subst">$&#123;res.path()&#125;</span>`</span>, Toast.LONG);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        Toast.show(<span class="string">`保存失败，未知错误`</span>, Toast.LONG);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>结果：</strong></p>
+<div style="text-align: center"><br>    <img src="/assets/image/2017/7/229081235107523308.jpg" style="max-width: 520px"><br></div>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/wkh237/react-native-fetch-blob" target="_blank" rel="noopener">https://github.com/wkh237/react-native-fetch-blob</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.854Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络请求/">网络请求</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/08/React Native/React Native 目录结构最佳实践/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 目录结构最佳实践</h4>
+        <h4 class="summary">经过无数次研究与挖掘，终于探索出比较好的 React Native 开发目录结构。一个好的目录结构，是一个好的开始，它可...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/08/抓包&爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">爬虫：Nodejs 实现模拟登录的一次艰辛路程记录</h4>
+        <h4 class="summary">
+给自己定下写文章的目标后，就去找了几家博客平台来发布文章；作为一个懒人，不能所有博客文章都手动去各家平台发布，只好通过...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

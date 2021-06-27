@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/08/React Native/Router/React Native Navigator 自定义动画/">
+    
+    
+    <title>React Native Navigator 自定义动画 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言React Native 的 Navigator 模块在 v0.44 被移出主项目里，分到其他由第三方管理。比如：react-native-deprecated-custom-components。 虽然官方不推荐使用Navigator模块，而是推荐使用 react-navigation，但是react-navigation有个问题是导航动画不够丰富。因此目前还是没有其他很好的解决方案，所以还">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native Navigator 自定义动画">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/08/React Native/Router/React Native Navigator 自定义动画/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言React Native 的 Navigator 模块在 v0.44 被移出主项目里，分到其他由第三方管理。比如：react-native-deprecated-custom-components。 虽然官方不推荐使用Navigator模块，而是推荐使用 react-navigation，但是react-navigation有个问题是导航动画不够丰富。因此目前还是没有其他很好的解决方案，所以还">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.866Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native Navigator 自定义动画">
+<meta name="twitter:description" content="前言React Native 的 Navigator 模块在 v0.44 被移出主项目里，分到其他由第三方管理。比如：react-native-deprecated-custom-components。 虽然官方不推荐使用Navigator模块，而是推荐使用 react-navigation，但是react-navigation有个问题是导航动画不够丰富。因此目前还是没有其他很好的解决方案，所以还">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native Navigator 自定义动画</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native Navigator 自定义动画</h1>
+
+        <div class="meta-rest">
+            <h1>React Native Navigator 自定义动画</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-08-25T03:35:03.000Z" itemprop="datePublished" class="page-time">
+    2017-08-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Navigator-过渡动画"><span class="post-toc-number">2.</span> <span class="post-toc-text">Navigator 过渡动画</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义动画速度"><span class="post-toc-number">3.</span> <span class="post-toc-text">自定义动画速度</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义动画"><span class="post-toc-number">4.</span> <span class="post-toc-text">自定义动画</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#最后"><span class="post-toc-number">5.</span> <span class="post-toc-text">最后</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Router/React Native Navigator 自定义动画"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native Navigator 自定义动画</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 08 月 25 日 11:35" datetime="2017-08-25T03:35:03.000Z"  itemprop="datePublished">
+    2017-08-25
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1611</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>React Native 的 Navigator 模块在 v0.44 被移出主项目里，分到其他由第三方管理。比如：<code>react-native-deprecated-custom-components</code>。</p>
+<p>虽然官方不推荐使用<code>Navigator</code>模块，而是推荐使用 <a href="https://github.com/react-community/react-navigation" target="_blank" rel="noopener">react-navigation</a>，<br>但是<code>react-navigation</code>有个问题是导航动画不够丰富。因此目前还是没有其他很好的解决方案，所以还是要使用 <code>Navigator</code>模块。</p>
+<p>对于 Navigator 来说，它提供了几种的默认导航动画效果，这些动画效果各有不同，有的表现缓慢有的表现快速。</p>
+<a id="more"></a>
+<h2 id="Navigator-过渡动画"><a href="#Navigator-过渡动画" class="headerlink" title="Navigator 过渡动画"></a>Navigator 过渡动画</h2><p><code>Navigator</code>应该是 RN 的一个核心 component， 相当于 web SPA 的路由。<br>一般的 APP 在视图 “页面” 进出栈的时候都会有一个过渡动画，RN 当然也在 Navigator 中有相关的配置。如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Navigator</span></span></span><br><span class="line"><span class="tag">    <span class="attr">initialRouteStack</span>=<span class="string">&#123;Route&#125;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">renderScene</span>=<span class="string">&#123;this._renderRoute.bind(this)&#125;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">configureScene</span>=<span class="string">&#123;(route,</span> <span class="attr">routeStack</span>) =&gt;</span></span><br><span class="line">        Navigator.SceneConfigs.PushFromRight</span><br><span class="line">    &#125;</span><br><span class="line">    /&gt;</span><br></pre></td></tr></table></figure>
+<p>其中 configureScene 的配置项就用于配置“页面”进出的过渡动画。 官方默认的配置有这几种：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Navigator.SceneConfigs.PushFromRight (<span class="keyword">default</span>)</span><br><span class="line">Navigator.SceneConfigs.FloatFromRight</span><br><span class="line">Navigator.SceneConfigs.FloatFromLeft</span><br><span class="line">Navigator.SceneConfigs.FloatFromBottom</span><br><span class="line">Navigator.SceneConfigs.FloatFromBottomAndroid</span><br><span class="line">Navigator.SceneConfigs.FadeAndroid</span><br><span class="line">Navigator.SceneConfigs.HorizontalSwipeJump</span><br><span class="line">Navigator.SceneConfigs.HorizontalSwipeJumpFromRight</span><br><span class="line">Navigator.SceneConfigs.VerticalUpSwipeJump</span><br><span class="line">Navigator.SceneConfigs.VerticalDownSwipeJump</span><br></pre></td></tr></table></figure>
+<h2 id="自定义动画速度"><a href="#自定义动画速度" class="headerlink" title="自定义动画速度"></a>自定义动画速度</h2><p>但使用<code>PushFromRight</code>这种效果时会发现在切换的速度上有点缓慢，如果你想要类似<strong>微信/QQ</strong>，那种带有紧张感的导航切换速度，可能需要做一些调整。</p>
+<p>在官方文档上是没一介绍这部分的，所有我们需要自己去查看<strong>源码</strong>，来做修改。</p>
+<p>那么与速率相关的代码在哪里？在源码的 <code>NavigatorSceneConfigs.js</code> 文件里可以找到。</p>
+<blockquote>
+<p>我使用的是 react-native-deprecated-custom-components 这个包，可以在 <code>node_modules/react-native-deprecated-custom-components/src/NavigatorSceneConfigs.js</code> 里找到。<br><br>在 react-native v0.44 之前的版本，可以在 react-native 包里查找。</p>
+</blockquote>
+<p><strong>涉及的属性：</strong></p>
+<ul>
+<li>springFriction 弹簧类动画的摩擦系数</li>
+<li>springTension  弹簧类动画的弹性系数，用于微调动画结尾时的“弹性抖动”效果</li>
+<li>defaultTransitionVelocity  默认动画的加速度</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NavigatorSceneConfigs.js =&gt; 572 行处</span></span><br><span class="line"><span class="keyword">var</span> BaseConfig = &#123;</span><br><span class="line">    <span class="comment">// A list of all gestures that are enabled on this scene</span></span><br><span class="line">    gestures: &#123;</span><br><span class="line">        pop: directionMapping.BaseStartToEndGesture,</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Rebound spring parameters when transitioning FROM this scene</span></span><br><span class="line">    springFriction: <span class="number">26</span>,</span><br><span class="line">    springTension: <span class="number">200</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Velocity to start at when transitioning without gesture</span></span><br><span class="line">    defaultTransitionVelocity: <span class="number">1.5</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Animation interpolators for horizontal transitioning:</span></span><br><span class="line">    animationInterpolators: &#123;</span><br><span class="line">        into: buildStyleInterpolator(directionMapping.FromTheEnd),</span><br><span class="line">        out: buildStyleInterpolator(directionMapping.FadeToTheStart),</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>因为 object 在 js 里是引用关系，而且没有 private 的概念，所以我们可以在外部直接修改。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">configureScene = <span class="function">(<span class="params">route, navigator</span>) =&gt;</span> &#123;</span><br><span class="line">    Navigator.SceneConfigs.PushFromRight.defaultTransitionVelocity = <span class="number">12</span>;</span><br><span class="line">    Navigator.SceneConfigs.PushFromRight.springFriction = <span class="number">25</span>;</span><br><span class="line">    Navigator.SceneConfigs.PushFromRight.springTension = <span class="number">190</span>;</span><br><span class="line">    <span class="keyword">return</span> Navigator.SceneConfigs.PushFromRight;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>经过不断的微调，达到了类似微信导航切换的效果。</p>
+<h2 id="自定义动画"><a href="#自定义动画" class="headerlink" title="自定义动画"></a>自定义动画</h2><p>上面的动画还是挺丰富的，不过肯定没法满足大众的种类需求啊 T_T，所以需要我们自己定义了。</p>
+<blockquote>
+<p>在 NavigatorSceneConfigs.js 里</p>
+</blockquote>
+<p>看源码，可以知道关键的动画定义主要在这几个部分，我们把它抽离，做几个修改就变成了一个自定义的动画。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;</span><br><span class="line">    Dimensions,</span><br><span class="line">    PixelRatio</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> buildStyleInterpolator <span class="keyword">from</span> <span class="string">'buildStyleInterpolator'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> SCREEN_WIDTH = Dimensions.get(<span class="string">'window'</span>).width,</span><br><span class="line">    SCREEN_HEIGHT = Dimensions.get(<span class="string">'window'</span>).height;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 去左边</span></span><br><span class="line"><span class="keyword">const</span> OutToLeft = &#123;</span><br><span class="line">    transformTranslate: &#123;                     <span class="comment">// 转化，插值</span></span><br><span class="line">        <span class="keyword">from</span>: &#123;<span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">z</span>: <span class="number">0</span>&#125;,</span><br><span class="line">        to: &#123;<span class="attr">x</span>: -SCREEN_WIDTH, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">z</span>: <span class="number">0</span>&#125;,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        max: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'linear'</span>,</span><br><span class="line">        extrapolate: <span class="literal">true</span>,</span><br><span class="line">        round: PixelRatio.get()</span><br><span class="line">    &#125;,</span><br><span class="line">    translateX: &#123;</span><br><span class="line">        <span class="keyword">from</span>: <span class="number">0</span>,</span><br><span class="line">        to: -SCREEN_WIDTH,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        max: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'linear'</span>,</span><br><span class="line">        extrapolate: <span class="literal">true</span>,</span><br><span class="line">        round: PixelRatio.get()</span><br><span class="line">    &#125;,</span><br><span class="line">    opacity: &#123;</span><br><span class="line">        <span class="keyword">from</span>: <span class="number">1</span>,</span><br><span class="line">        to: <span class="number">0</span>,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        max: <span class="number">0.5</span>,</span><br><span class="line">        type: <span class="string">'linear'</span>,</span><br><span class="line">        extrapolate: <span class="literal">false</span>,</span><br><span class="line">        round: <span class="number">100</span></span><br><span class="line">    &#125;,</span><br><span class="line">    scale: &#123;</span><br><span class="line">        value: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'constant'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 到达右边</span></span><br><span class="line"><span class="keyword">const</span> InFromRight = &#123;</span><br><span class="line">    transformTranslate: &#123;</span><br><span class="line">        <span class="keyword">from</span>: &#123;<span class="attr">x</span>: SCREEN_WIDTH, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">z</span>: <span class="number">0</span>&#125;,</span><br><span class="line">        to: &#123;<span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">z</span>: <span class="number">0</span>&#125;,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        max: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'linear'</span>,</span><br><span class="line">        extrapolate: <span class="literal">true</span>,</span><br><span class="line">        round: PixelRatio.get()</span><br><span class="line">    &#125;,</span><br><span class="line">    translateX: &#123;</span><br><span class="line">        <span class="keyword">from</span>: SCREEN_WIDTH,</span><br><span class="line">        to: <span class="number">0</span>,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        max: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'linear'</span>,</span><br><span class="line">        extrapolate: <span class="literal">true</span>,</span><br><span class="line">        round: PixelRatio.get()</span><br><span class="line">    &#125;,</span><br><span class="line">    opacity: &#123;</span><br><span class="line">        <span class="keyword">from</span>: <span class="number">0</span>,</span><br><span class="line">        to: <span class="number">1</span>,</span><br><span class="line">        min: <span class="number">0.5</span>,</span><br><span class="line">        max: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'linear'</span>,</span><br><span class="line">        extrapolate: <span class="literal">true</span>,</span><br><span class="line">        round: PixelRatio.get()</span><br><span class="line">    &#125;,</span><br><span class="line">    scale: &#123;</span><br><span class="line">        value: <span class="number">1</span>,</span><br><span class="line">        type: <span class="string">'constant'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从左到右手势库</span></span><br><span class="line"><span class="keyword">const</span> BaseLeftToRightGesture = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If the gesture can end and restart during one continuous touch</span></span><br><span class="line">    isDetachable: <span class="literal">false</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// How far the swipe must drag to start transitioning</span></span><br><span class="line">    gestureDetectMovement: <span class="number">2</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Amplitude of release velocity that is considered still</span></span><br><span class="line">    notMoving: <span class="number">0.3</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Fraction of directional move required.</span></span><br><span class="line">    directionRatio: <span class="number">0.66</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Velocity to transition with when the gesture release was "not moving"</span></span><br><span class="line">    snapVelocity: <span class="number">2</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Region that can trigger swipe. iOS default is 30px from the left edge</span></span><br><span class="line">    edgeHitWidth: <span class="number">30</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Ratio of gesture completion when non-velocity release will cause action</span></span><br><span class="line">    stillCompletionRatio: <span class="number">3</span> / <span class="number">5</span>,</span><br><span class="line"></span><br><span class="line">    fullDistance: SCREEN_WIDTH,</span><br><span class="line"></span><br><span class="line">    direction: <span class="string">'left-to-right'</span></span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> MyScene = &#123;</span><br><span class="line">    <span class="comment">// 你自定义的输出的动画名称 MyPushFromRight</span></span><br><span class="line">    MyPushFromRight: &#123;</span><br><span class="line">        <span class="comment">// A list of all gestures that are enabled on this scene</span></span><br><span class="line">        gestures: &#123;</span><br><span class="line">            pop: BaseLeftToRightGesture</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Rebound spring parameters when transitioning FROM this scene</span></span><br><span class="line">        springFriction: <span class="number">26</span>,</span><br><span class="line">        springTension: <span class="number">200</span>,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Velocity to start at when transitioning without gesture</span></span><br><span class="line">        defaultTransitionVelocity: <span class="number">16</span>,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Animation interpolators for horizontal transitioning:</span></span><br><span class="line">        <span class="comment">// 水平过渡动画插值：</span></span><br><span class="line">        animationInterpolators: &#123;</span><br><span class="line">            <span class="comment">// 进入</span></span><br><span class="line">            into: buildStyleInterpolator(InFromRight),</span><br><span class="line">            <span class="comment">// 移出</span></span><br><span class="line">            out: buildStyleInterpolator(OutToLeft)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> MyScene;</span><br></pre></td></tr></table></figure>
+<p>上述是笔者搞的一个横向无缩放滑动的过渡动画。如果满足你的需要，可以直接拿去用了。</p>
+<p>下面以此为例简单说明一下，按接口的输出从后往前简述主要方法。</p>
+<p>手势功能动画，用于定义 APP 中的手势，比如 IOS 中大幅的从左向右滑动会退回上一页面，这个只是简单说明，实际行为的配置在 BaseLeftToRightGesture 里，不再多述。</p>
+<blockquote>
+<p> gestures</p>
+</blockquote>
+<p>弹簧类动画的摩擦系数、弹性系数，用于微调动画结尾时的“弹性抖动”效果，自己试一下就有所体会。</p>
+<blockquote>
+<p>springFriction<br>springTension</p>
+</blockquote>
+<p>动画插值配置，具体的动画实现就全在这里啦。</p>
+<blockquote>
+<p>animationInterpolators</p>
+</blockquote>
+<p>以<code>OutToLeft</code>为例，这是一个返回的过渡动画，效果是页面从左侧平行滑出，无缩放，透明度渐减。<br>其中有<code>translateX、opacity、scale</code>等几个动画属性，看似和 CSS3 的动画很像。</p>
+<p><strong>对于不变的属性：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">value: <span class="number">1</span>,                           <span class="comment">// 属性值，比如长度、透明度、放缩比例、角度等</span></span><br><span class="line">type: <span class="string">'constant'</span>                    <span class="comment">// 类型是常量</span></span><br></pre></td></tr></table></figure>
+<p><strong>对于变化属性：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span>: &#123;<span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">z</span>: <span class="number">0</span>&#125;,           <span class="comment">// 初始值</span></span><br><span class="line">to: &#123;<span class="attr">x</span>: -SCREEN_WIDTH, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">z</span>: <span class="number">0</span>&#125;, <span class="comment">// 终状态值</span></span><br><span class="line">min: <span class="number">0</span>,                             <span class="comment">// 变化范围最小值</span></span><br><span class="line">max: <span class="number">1</span>,                             <span class="comment">// 变化范围最大值</span></span><br><span class="line">type: <span class="string">'linear'</span>,                     <span class="comment">// 变化速度类型</span></span><br><span class="line">extrapolate: <span class="literal">true</span>,                  <span class="comment">// 预判断</span></span><br><span class="line">round: PixelRatio.get()             <span class="comment">// 精确范围，eg.: PixelRatio.get() 精确到屏幕像素比倍数</span></span><br></pre></td></tr></table></figure>
+<p><strong>目前源码中提到的动画属性有：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">transformTranslate                  <span class="comment">// 3D 位移变化</span></span><br><span class="line">translateX                          <span class="comment">// X 轴位移变化，类比 Y、Z</span></span><br><span class="line">opacity                             <span class="comment">// 透明度</span></span><br><span class="line">scale                               <span class="comment">// 放缩</span></span><br><span class="line">transformScale                      <span class="comment">// 兼容性放缩</span></span><br><span class="line">scaleX                              <span class="comment">// X 轴放缩比例，类比 Y</span></span><br><span class="line">transformRotateRadians              <span class="comment">// 旋转弧度</span></span><br></pre></td></tr></table></figure>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>根据这里属性与官方的实例，就可以定制出你需要的动画效果。</p>
+<p>注意到，源码的模块依赖：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    Dimensions,</span><br><span class="line">    I18nManager,</span><br><span class="line">    PixelRatio,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> buildStyleInterpolator = <span class="built_in">require</span>(<span class="string">'./buildStyleInterpolator'</span>);</span><br></pre></td></tr></table></figure>
+<p>如果是想把自定义动画的 js 文件放到外面，就需要安装：<code>buildStyleInterpolator</code>。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.866Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/08/React Native/Router/React Native Navigator 自定义动画/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/08/React Native/Router/React Native Navigator 自定义动画/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/08/React/immutable/使用 immutable 进一步优化 React 性能/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">使用 immutable 进一步优化 React 性能</h4>
+        <h4 class="summary">
+Shared mutable state is the root of all evil（共享的可变状态是万恶之源） ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/08/HTML5/前端自定义事件调度/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">前端 自定义事件调度</h4>
+        <h4 class="summary">在 Nodejs 里有一个非常好的事件模块：Events，很多的 api 的基于它来构建。在前端里，可以使用 creat...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

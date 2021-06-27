@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/02/CSS/深入学习 CSS 网格布局（Grid）/">
+    
+    
+    <title>深入学习 CSS 网格布局（Grid） | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言CSS 网格布局可以使我们能够比以往任何时候都可以更灵活构建和控制自定义网格，甚至是比 Flexbox 布局还有灵活以及语意化。 CSS 网格布局用于将页面分割成数个主要区域">
+<meta name="keywords" content="前端,CSS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入学习 CSS 网格布局（Grid）">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/02/CSS/深入学习 CSS 网格布局（Grid）/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言CSS 网格布局可以使我们能够比以往任何时候都可以更灵活构建和控制自定义网格，甚至是比 Flexbox 布局还有灵活以及语意化。 CSS 网格布局用于将页面分割成数个主要区域">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/grid-elements.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180126163308.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180201165652.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180201170043.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180201151919.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180201160602.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180201154633.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.809Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入学习 CSS 网格布局（Grid）">
+<meta name="twitter:description" content="前言CSS 网格布局可以使我们能够比以往任何时候都可以更灵活构建和控制自定义网格，甚至是比 Flexbox 布局还有灵活以及语意化。 CSS 网格布局用于将页面分割成数个主要区域">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/1/grid-elements.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">深入学习 CSS 网格布局（Grid）</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">深入学习 CSS 网格布局（Grid）</h1>
+
+        <div class="meta-rest">
+            <h1>深入学习 CSS 网格布局（Grid）</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-02-01T06:09:41.000Z" itemprop="datePublished" class="page-time">
+    2018-02-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/CSS/">CSS</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#兼容性"><span class="post-toc-number">2.</span> <span class="post-toc-text">兼容性</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本知识"><span class="post-toc-number">3.</span> <span class="post-toc-text">基本知识</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#单元格与区域"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">单元格与区域</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#grid-template"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">grid-template-*</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#grid-auto"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">grid-auto-*</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#grid"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">grid-*</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-CSS/深入学习 CSS 网格布局（Grid）"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">深入学习 CSS 网格布局（Grid）</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 02 月 01 日 14:09" datetime="2018-02-01T06:09:41.000Z"  itemprop="datePublished">
+    2018-02-01
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/CSS/">CSS</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 946</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>CSS 网格布局可以使我们能够比以往任何时候都可以更灵活构建和控制自定义网格，甚至是比 Flexbox 布局还有灵活以及语意化。</p>
+<p>CSS 网格布局用于将页面分割成数个主要区域</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/grid-elements.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="兼容性"><a href="#兼容性" class="headerlink" title="兼容性"></a>兼容性</h2><p>浏览器对 CSS Grid 的兼容性： <a href="https://caniuse.com/#feat=css-grid" target="_blank" rel="noopener">https://caniuse.com/#feat=css-grid</a><br>主流的现代浏览器都支持，ie11 需要加前缀 -ms。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180126163308.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h2><p>CSS 网格布局的属性以 grid-* 为前缀开头。基本的网格元素包括了：</p>
+<ul>
+<li>container 容器。</li>
+<li>rows 行元素。</li>
+<li>columns 列元素。</li>
+</ul>
+<p>在 grid 布局里最常用的的几个属性是：</p>
+<ul>
+<li>display: grid; <code>指定为 grid 布局</code></li>
+<li>grid-template-columns; <code>定义网格中的列大小</code></li>
+<li>grid-template-rows; <code>定义网格中的行大小</code></li>
+<li>grid-auto-columns; <code>定义自动布局的列大小</code></li>
+<li>grid-auto-rows; <code>定义自动布局的行大小</code></li>
+<li>grid-columns; <code>定义列网格线</code><ul>
+<li>grid-columns-start;</li>
+<li>grid-columns-end;</li>
+<li>grid-columns-gap;</li>
+</ul>
+</li>
+<li>grid-rows; <code>定义行网格线</code><ul>
+<li>grid-rows-start;</li>
+<li>grid-rows-end;</li>
+<li>grid-rows-gap;</li>
+</ul>
+</li>
+</ul>
+<h3 id="单元格与区域"><a href="#单元格与区域" class="headerlink" title="单元格与区域"></a>单元格与区域</h3><p>一个网格单元是在一个网格元素中最小的单位， 从概念上来讲其实它和表格的一个单元格很像。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180201165652.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>网格项目可以向行或着列的方向扩展一个或多个单元，并且会创建一个网格区域。网格区域的形状必须是一个矩形。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180201170043.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="grid-template"><a href="#grid-template" class="headerlink" title="grid-template-*"></a>grid-template-*</h3><p><code>grid-template-*</code> 是用来定义网格中的行或列大小的。</p>
+<p>比较常见的用法是：</p>
+<ul>
+<li>grid-template-columns: 200px 200px 200px; <code>固定大小</code></li>
+<li>grid-template-columns: 1fr 1fr 1fr; <code>比例伸缩</code></li>
+<li>grid-template-columns: repeat(3, 1fr); <code>分为三列，每列都是 1 伸缩比例</code></li>
+<li>grid-template-columns: repeat(2, 1fr, 2fr); <code>分为四列，第 1，3 列为 1fr，而 2，4 列为 2fr</code></li>
+</ul>
+<blockquote>
+<p>grid 的排序是从左到右，从上到下，如果一行的项过多就会自动挤到下一行。<br>grid-template-rows 与 grid-template-columns 用法一样。<br>grid-template-* 的参数位置代表着每列或行的位置，不能使用一个表示全部。</p>
+</blockquote>
+<p>下面的代码把页面分为 <code>3 列 2 行</code>。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="css"><span class="selector-class">.wrapper</span> &#123;</span></span><br><span class="line">    display: grid;</span><br><span class="line">    grid-template-columns: repeat(3, 1fr);</span><br><span class="line">    grid-template-rows: 100px 200px;</span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"wrapper"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>A<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>B<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>C<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>D<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>E<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180201151919.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="grid-auto"><a href="#grid-auto" class="headerlink" title="grid-auto-*"></a>grid-auto-*</h3><p><code>grid-auto-*</code> 是用于定义自动布局的行或列的大小。</p>
+<p>比较常见的用法是：</p>
+<ul>
+<li>grid-auto-rows: 200px; <code>所有的行指定其大小</code></li>
+<li>grid-auto-rows: 1fr; <code>所有的行指定其伸缩比例</code></li>
+<li>grid-auto-rows: minmax(100px, auto); <code>所有的行指定其大小，并指定了范围</code></li>
+</ul>
+<blockquote>
+<p>grid-auto-* 是用于指定所有的行、列的，minmax 表示了一个范围大小。</p>
+</blockquote>
+<h3 id="grid"><a href="#grid" class="headerlink" title="grid-*"></a>grid-*</h3><p><code>grid-*</code> 是用于定义行或列网格线的，更多的是用于跨行或列布局的。</p>
+<p>比较常见的用法是：</p>
+<ul>
+<li>grid-columns-start: 1; <code>列开始线</code></li>
+<li>grid-columns-end: 4; <code>列结束线</code></li>
+<li>grid-rows-start: 2; <code>行开始线</code></li>
+<li>grid-rows-end: 3; <code>行结束线</code></li>
+</ul>
+<p>具体看下面的示例：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="css"><span class="selector-class">.wrapper</span> &#123;</span></span><br><span class="line">    display: grid;</span><br><span class="line">    grid-template-columns: repeat(3, 1fr);</span><br><span class="line">    grid-auto-rows: 100px;</span><br><span class="line">&#125;</span><br><span class="line"><span class="css"><span class="selector-class">.box1</span> &#123;</span></span><br><span class="line">    grid-column-start: 1;</span><br><span class="line">    grid-column-end: 4;</span><br><span class="line">    grid-row-start: 1;</span><br><span class="line">    grid-row-end: 3;</span><br><span class="line">&#125;</span><br><span class="line"><span class="css"><span class="selector-class">.box2</span> &#123;</span></span><br><span class="line">    grid-column-start: 1;</span><br><span class="line">    grid-row-start: 3;</span><br><span class="line">    grid-row-end: 5;</span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"wrapper"</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"box1"</span>&gt;</span>A<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"box2"</span>&gt;</span>B<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">div</span>&gt;</span>C<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">div</span>&gt;</span>D<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">div</span>&gt;</span>E<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180201160602.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>现在为它添加一些辅佐线，这样就可以清晰的知道网格线的用法了。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180201154633.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>在上图里（放大）红线表示网格的列线，蓝线表示网格的行线。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Grid_Layout/Basic_Concepts_of_Grid_Layout" target="_blank" rel="noopener">网格布局的基本概念 - CSS | MDN</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Grid_Layout/Relationship_of_Grid_Layout" target="_blank" rel="noopener">grid layout 和其它布局方法的联系 - CSS | MDN</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.809Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/02/CSS/深入学习 CSS 网格布局（Grid）/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/02/CSS/深入学习 CSS 网格布局（Grid）/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CSS/">CSS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/02/Python/Python  大数据分析 - Numpy/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Python  大数据分析 - Numpy</h4>
+        <h4 class="summary">Python 的语法简洁，成熟的库繁多，开发效率高，Python 在大数据分析领域上有非常好的优势。本文介绍 Pytho...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/01/React/Universal 同构/React 服务端渲染实践记录/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React 服务端渲染实践记录</h4>
+        <h4 class="summary">SSR 是一个比 SPA 更上一层，并且难度更大的一个应用模式。国内很多大厂都渐渐的使用了 SSR 的架构，比如知乎，b...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

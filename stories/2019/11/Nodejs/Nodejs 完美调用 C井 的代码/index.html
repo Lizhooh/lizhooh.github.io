@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/11/Nodejs/Nodejs 完美调用 C井 的代码/">
+    
+    
+    <title>Nodejs 完美调用 C# 的代码 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 Nodejs 里有许多的与原生调用的模块，例如：node-ffi，edge-atom-shell 等。它们提供的是在 Nodejs 里与 C、C++、C# 等语言的通讯。 本文以 edge-atom-shell，介绍如何在 Nodejs 里调用 C# 的代码，C# 生成的 DLL 库。">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs 完美调用 C# 的代码">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/11/Nodejs/Nodejs 完美调用 C井 的代码/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 Nodejs 里有许多的与原生调用的模块，例如：node-ffi，edge-atom-shell 等。它们提供的是在 Nodejs 里与 C、C++、C# 等语言的通讯。 本文以 edge-atom-shell，介绍如何在 Nodejs 里调用 C# 的代码，C# 生成的 DLL 库。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.839Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs 完美调用 C# 的代码">
+<meta name="twitter:description" content="前言在 Nodejs 里有许多的与原生调用的模块，例如：node-ffi，edge-atom-shell 等。它们提供的是在 Nodejs 里与 C、C++、C# 等语言的通讯。 本文以 edge-atom-shell，介绍如何在 Nodejs 里调用 C# 的代码，C# 生成的 DLL 库。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs 完美调用 C# 的代码</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs 完美调用 C# 的代码</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs 完美调用 C# 的代码</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-11-08T09:16:46.000Z" itemprop="datePublished" class="page-time">
+    2019-11-08
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#调用-C-代码"><span class="post-toc-number">2.</span> <span class="post-toc-text">调用 C# 代码</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">3.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Nodejs 完美调用 C井 的代码"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs 完美调用 C# 的代码</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 11 月 08 日 17:16" datetime="2019-11-08T09:16:46.000Z"  itemprop="datePublished">
+    2019-11-08
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 401</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 Nodejs 里有许多的与原生调用的模块，例如：<code>node-ffi</code>，<code>edge-atom-shell</code> 等。它们提供的是在 Nodejs 里与 C、C++、C# 等语言的通讯。</p>
+<p>本文以 edge-atom-shell，介绍如何在 Nodejs 里调用 C# 的代码，C# 生成的 DLL 库。</p>
+<a id="more"></a>
+<h2 id="调用-C-代码"><a href="#调用-C-代码" class="headerlink" title="调用 C# 代码"></a>调用 C# 代码</h2><p>首先，这里的 edge.func 内的注释就是 C# 的代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> edge = <span class="built_in">require</span>(<span class="string">'edge-js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> helloWorld = edge.func(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;<span class="comment">/*</span></span><br><span class="line"><span class="comment">    async (input) =&gt; &#123;</span></span><br><span class="line"><span class="comment">        return ".NET Welcomes " + input.ToString();</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">*/</span>&#125;);</span><br><span class="line"></span><br><span class="line">helloWorld(<span class="string">'JavaScript'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">error, result</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (error) <span class="keyword">throw</span> error;</span><br><span class="line">    <span class="built_in">console</span>.log(result);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>运行之后，可以看到输出 <code>.NET Welcomes JavaScript</code>。</p>
+<p>这样在注释里写 C# 的代码比较挫，不过可以直接导入 C# 的文件。</p>
+<p>下面是一个 <code>text.cs</code> 文件。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> System.Threading.Tasks;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Person</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> anInteger = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">double</span> aNumber = <span class="number">3.1415</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">string</span> aString = <span class="string">"foo"</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">bool</span> aBoolean = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">byte</span>[] aBuffer = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">10</span>];</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">object</span>[] anArray = <span class="keyword">new</span> <span class="keyword">object</span>[] &#123; <span class="number">1</span>, <span class="string">"foo"</span> &#125;;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">object</span> anObject = <span class="keyword">new</span> &#123; a = <span class="string">"foo"</span>, b = <span class="number">12</span> &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Startup</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">async</span> Task&lt;<span class="keyword">object</span>&gt; <span class="title">Invoke</span>(<span class="params"><span class="keyword">dynamic</span> input</span>)</span> &#123;</span><br><span class="line">        Person person = <span class="keyword">new</span> Person();</span><br><span class="line">        <span class="keyword">return</span> person;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着在 Nodejs 里自己调用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> edge = <span class="built_in">require</span>(<span class="string">'edge-js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> getPerson = edge.func(<span class="string">'./test.cs'</span>);</span><br><span class="line"></span><br><span class="line">getPerson(<span class="literal">null</span>, <span class="function"><span class="keyword">function</span> (<span class="params">error, result</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (error) <span class="keyword">throw</span> error;</span><br><span class="line">    <span class="built_in">console</span>.log(result);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>输出内容：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    anInteger: <span class="number">1</span>,</span><br><span class="line">    aNumber: <span class="number">3.1415</span>,</span><br><span class="line">    aString: <span class="string">'foo'</span>,</span><br><span class="line">    aBoolean: <span class="literal">true</span>,</span><br><span class="line">    aBuffer: <span class="xml"><span class="tag">&lt;<span class="name">Buffer</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span> <span class="attr">00</span>&gt;</span>,</span></span><br><span class="line"><span class="xml">    anArray: [ 1, 'foo' ],</span></span><br><span class="line"><span class="xml">    anObject: &#123; a: 'foo', b: 12 &#125;</span></span><br><span class="line"><span class="xml">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这样使用文件的话，必须实现 <code>Startup</code> 类和 Invoke 方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public <span class="class"><span class="keyword">class</span> <span class="title">Startup</span> </span>&#123;</span><br><span class="line">    public <span class="keyword">async</span> Task&lt;object&gt; Invoke(dynamic input) &#123;</span><br><span class="line">        <span class="comment">// 这里相当于入口函数</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Hello"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!-- ## 调用 DLL
+
+## 在 Electron 上 -->
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.npmjs.com/package/edge-atom-shell" target="_blank" rel="noopener">https://www.npmjs.com/package/edge-atom-shell</a></li>
+<li><a href="https://www.npmjs.com/package/edge-js" target="_blank" rel="noopener">https://www.npmjs.com/package/edge-js</a></li>
+<li><a href="https://www.npmjs.com/package/electron-edge-js" target="_blank" rel="noopener">https://www.npmjs.com/package/electron-edge-js</a></li>
+<li><a href="https://github.com/node-ffi/node-ffi" target="_blank" rel="noopener">https://github.com/node-ffi/node-ffi</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.839Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/11/Nodejs/Nodejs 完美调用 C井 的代码/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/11/Nodejs/Nodejs 完美调用 C井 的代码/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/11/React/Style/React 样式库 Emotion 使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">💅 React 样式库 Emotion 使用指南</h4>
+        <h4 class="summary">Emotion 是一个比 styled-components 更加轻量级的 CSS in JS 样式库。
+除了提供出色的...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/10/Nodejs/Nodejs 数据分析：Pandasjs/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs 数据分析：Pandasjs</h4>
+        <h4 class="summary">Pandasjs 是一个 Nodejs 是模仿 Python pandas 库的开源（实验）库。它依赖于 Immutab...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/04/Redis/对基于 Redis 分布式计算的研究/">
+    
+    
+    <title>对基于 Redis 分布式计算的研究 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言所谓分布式计算是一门计算科学，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分。">
+<meta name="keywords" content="数据库,NoSQL,学习笔记,Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对基于 Redis 分布式计算的研究">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/04/Redis/对基于 Redis 分布式计算的研究/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言所谓分布式计算是一门计算科学，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/4/20180418133726.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/4/20180418125902.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/4/20180418140633.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.890Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="对基于 Redis 分布式计算的研究">
+<meta name="twitter:description" content="前言所谓分布式计算是一门计算科学，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/4/20180418133726.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">对基于 Redis 分布式计算的研究</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">对基于 Redis 分布式计算的研究</h1>
+
+        <div class="meta-rest">
+            <h1>对基于 Redis 分布式计算的研究</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-04-18T03:38:12.000Z" itemprop="datePublished" class="page-time">
+    2018-04-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redis/">Redis</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#背景"><span class="post-toc-number">2.</span> <span class="post-toc-text">背景</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#设计"><span class="post-toc-number">3.</span> <span class="post-toc-text">设计</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Redis/对基于 Redis 分布式计算的研究"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">对基于 Redis 分布式计算的研究</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 04 月 18 日 11:38" datetime="2018-04-18T03:38:12.000Z"  itemprop="datePublished">
+    2018-04-18
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redis/">Redis</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 818</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>所谓分布式计算是一门计算科学，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/4/20180418133726.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>现在有海量的计算任务，每个任务都有自己的特点，每一个计算任务大概需要花费 100ms 的时间去计算。一开始在单台机器上部署了计算进程，但是发现总体的计算使用的时间非常长，1 万个计算任务总共需要花费 1000 秒的时间，尽管 CPU 使用率几乎接近 100%，但计算的速度还是不尽人意。</p>
+<p>为了解决这个问题，接下来将使用 Redis 做分布式计算。为什么是 Redis 呢？实际上使用任何一个数据库都可以，相对来说使用 Redis 只是为了临时存储计算任务的信息数据。</p>
+<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h2><p>如果把每个计算任务看成一个任务项，那么多个任务项可以组成一个队列或数组结构。每个任务项里多有许多的计算信息，比如计算的依赖参数等。</p>
+<p>因此，这里将使用 Redis 的 List 结构存储计算任务信息，每一个 List 标记为一个任务项。并且分为 3 个队列：</p>
+<ul>
+<li>待计算队列（AwaitQueue）：此队列里存放的是等待计算的队列任务。</li>
+<li>计算中队列（ActiveQueue）：此队列的存放的是计算中的队列任务。</li>
+<li>计算完成队列（CompleteQueue）：此队列里计算的是以完成的队列任务。</li>
+</ul>
+<p>List 的 Item 是字符串结构，为了能够存储多个计算任务信息，需要把任务信息序列化与反序列化存储。</p>
+<p>整个执行的流程如下：当需要计算时，从 AwaitQueue 里取一个任务项（pop）放到 ActiveQueue 里，标识为计算中。当计算结束后，从 ActiveQueue 里移至 CompleteQueue 里。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/4/20180418125902.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>Redis 的责任是如何存储待计算、计算中、计算完成的关系，它本身并不负责计算任务。</p>
+<p>Redis 里的计算任务信息结构为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    id: <span class="string">"abc"</span>,</span><br><span class="line">    params: [],   <span class="comment">// 参数列表</span></span><br><span class="line">    result: <span class="string">""</span>,   <span class="comment">// 结果</span></span><br><span class="line">    time: <span class="string">""</span>,     <span class="comment">// 时间相关</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当某个进程开始启动计算时，首先第一步是从 AwaitQueue 里出队一个项，入队 ActiveQueue，在计算完成后添加到 CompleteQueue 里。</p>
+<p>实际上 ActiveQueue 并不能使用 List 结构，它只能使用 Set 结构，不然会难以在队列里找到当前的任务项。</p>
+<p>具体示例代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Redis = <span class="built_in">require</span>(<span class="string">'ioredis'</span>);</span><br><span class="line"><span class="comment">// 默认是 http://127.0.0.1:6379， 0 号数据库</span></span><br><span class="line"><span class="keyword">const</span> redis = <span class="keyword">new</span> Redis();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化待计算队列</span></span><br><span class="line"><span class="keyword">const</span> tasks = [... new <span class="built_in">Array</span>(<span class="number">10</span>)].map(<span class="function">(<span class="params">i, index</span>) =&gt;</span> (&#123;</span><br><span class="line">    id: index + <span class="number">1</span>,</span><br><span class="line">    params: [<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">    result: <span class="literal">null</span>,</span><br><span class="line">    time: <span class="built_in">Date</span>.now(),</span><br><span class="line">&#125;)).map(<span class="function"><span class="params">i</span> =&gt;</span> <span class="built_in">JSON</span>.stringify(i));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 入队</span></span><br><span class="line">redis.rpush(<span class="string">'await-queue'</span>, tasks);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模拟</span></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 出队</span></span><br><span class="line">    <span class="keyword">const</span> task = <span class="built_in">JSON</span>.parse(<span class="keyword">await</span> redis.lpop(<span class="string">'await-queue'</span>));</span><br><span class="line">    <span class="comment">// id</span></span><br><span class="line">    <span class="keyword">await</span> redis.sadd(<span class="string">'active-queue'</span>, task.id);</span><br><span class="line">    <span class="comment">// 计算</span></span><br><span class="line">    <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">rs</span> =&gt;</span> setTimeout(rs, <span class="number">100</span>));</span><br><span class="line">    <span class="comment">// 完成</span></span><br><span class="line">    <span class="keyword">await</span> redis.srem(<span class="string">'active-queue'</span>, task.id);</span><br><span class="line">    <span class="keyword">await</span> redis.rpush(<span class="string">'complete-queue'</span>, <span class="built_in">JSON</span>.stringify(task));</span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure>
+<p>在整个系统里会有一个计算任务发布的进程，相当于一个<strong>生产者的角色</strong>。当启动计算进程时，计算进程从 Redis 里拿到数据后计算，相当于<strong>消费者的角色</strong>。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/4/20180418140633.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.890Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/04/Redis/对基于 Redis 分布式计算的研究/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/04/Redis/对基于 Redis 分布式计算的研究/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NoSQL/">NoSQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/04/同构/After/After：React + React Router 同构应用开发/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">After：React + React Router 同构应用开发</h4>
+        <h4 class="summary">同构即未来！就像 Next.js 一样，After.js 是一个使用 React 和 React Router 的一个同...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/04/后端/使用 JSDoc 生成后端 API 文档/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">使用 JSDoc 生成后端 API 文档</h4>
+        <h4 class="summary">JSDoc 是一个可以根据规范化的注释、自动生成接口文档。包括参数说明、示例等。可以使用 JSDoc 记录如：命名空间，...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

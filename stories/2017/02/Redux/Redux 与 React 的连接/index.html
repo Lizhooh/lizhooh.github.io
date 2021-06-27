@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/02/Redux/Redux 与 React 的连接/">
+    
+    
+    <title>Redux 与 React 的连接 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="手动连接Redux 与 React 连接有手动连接的方式。 一般来说有以下几个步骤：  编写 React 组件 编写 Redux 的 reducer，action，Store 将 state 和 dispatch 连接到 React 组件里">
+<meta name="keywords" content="前端,React,学习笔记,Redux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redux 与 React 的连接">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/02/Redux/Redux 与 React 的连接/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="手动连接Redux 与 React 连接有手动连接的方式。 一般来说有以下几个步骤：  编写 React 组件 编写 Redux 的 reducer，action，Store 将 state 和 dispatch 连接到 React 组件里">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/redux-architecture.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/20170311161746.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.891Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redux 与 React 的连接">
+<meta name="twitter:description" content="手动连接Redux 与 React 连接有手动连接的方式。 一般来说有以下几个步骤：  编写 React 组件 编写 Redux 的 reducer，action，Store 将 state 和 dispatch 连接到 React 组件里">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/3/redux-architecture.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Redux 与 React 的连接</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Redux 与 React 的连接</h1>
+
+        <div class="meta-rest">
+            <h1>Redux 与 React 的连接</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-02-23T05:54:54.000Z" itemprop="datePublished" class="page-time">
+    2017-02-23
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#手动连接"><span class="post-toc-number">1.</span> <span class="post-toc-text">手动连接</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#手动连接带来的问题"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">手动连接带来的问题</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自动连接"><span class="post-toc-number">2.</span> <span class="post-toc-text">自动连接</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#连接步骤"><span class="post-toc-number">3.</span> <span class="post-toc-text">连接步骤</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#编写-component，组件是无状态的，只使用-props"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">编写 component，组件是无状态的，只使用 props</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#编写-action"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">编写 action</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#编写-reducer"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">编写 reducer</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建-Store"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">创建 Store</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#连接-redux-到组件上"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">连接 redux 到组件上</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#最后，把新的组件放在-lt-Provider-gt-里面"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">最后，把新的组件放在&lt;Provider&gt;里面</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#react-redux-与-react-router-结合"><span class="post-toc-number">4.</span> <span class="post-toc-text">react-redux 与 react-router 结合</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#关于-connect-使用的几种方式"><span class="post-toc-number">5.</span> <span class="post-toc-text">关于 connect 使用的几种方式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#第一种写法，自动绑定-dispatch"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">第一种写法，自动绑定 dispatch</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#第二种写法，手动绑定-dispatch"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">第二种写法，手动绑定 dispatch</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#第三种写法，-使用-bindActionCreators-来自动绑定"><span class="post-toc-number">5.3.</span> <span class="post-toc-text">第三种写法， 使用 bindActionCreators 来自动绑定</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#第四种写法，手动发起-dispatch"><span class="post-toc-number">5.4.</span> <span class="post-toc-text">第四种写法，手动发起 dispatch</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#第五种写法，使用装饰器"><span class="post-toc-number">5.5.</span> <span class="post-toc-text">第五种写法，使用装饰器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#最后"><span class="post-toc-number">5.6.</span> <span class="post-toc-text">最后</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#推荐文件目录结构"><span class="post-toc-number">6.</span> <span class="post-toc-text">推荐文件目录结构</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Redux/Redux 与 React 的连接"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Redux 与 React 的连接</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 02 月 23 日 13:54" datetime="2017-02-23T05:54:54.000Z"  itemprop="datePublished">
+    2017-02-23
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1651</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="手动连接"><a href="#手动连接" class="headerlink" title="手动连接"></a>手动连接</h2><p>Redux 与 React 连接有手动连接的方式。</p>
+<p>一般来说有以下几个步骤：</p>
+<ul>
+<li>编写 React 组件</li>
+<li>编写 Redux 的 reducer，action，Store</li>
+<li>将 state 和 dispatch 连接到 React 组件里</li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/3/redux-architecture.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">import</span> &#123; createStore &#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"><span class="keyword">const</span> Store = createStore(_reducer);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">render</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    ReactDOM.render(</span><br><span class="line">        &lt;Counter</span><br><span class="line">            value=&#123;Store.getState()&#125;</span><br><span class="line">            onClick=&#123;() =&gt; Store.dispatch(&#123; <span class="attr">type</span>: <span class="string">'Insert'</span> &#125;)&#125;</span><br><span class="line">            /&gt;</span><br><span class="line">        , Root</span><br><span class="line">    );</span><br><span class="line">&#125;; render();</span><br><span class="line"></span><br><span class="line">Store.subsrcibe(render);</span><br></pre></td></tr></table></figure>
+<h3 id="手动连接带来的问题"><a href="#手动连接带来的问题" class="headerlink" title="手动连接带来的问题"></a>手动连接带来的问题</h3><p>手动连接的缺点还是比较明显的：</p>
+<ul>
+<li>无法直接给里面的组件传递 state 和方法。</li>
+<li>任意 state 的变化都会导致整个组件树的重新渲染，没有优化性能。</li>
+</ul>
+<h2 id="自动连接"><a href="#自动连接" class="headerlink" title="自动连接"></a>自动连接</h2><p>Redux 与 React 连接有自动连接，使用的是 react-redux。<br>相比手动连接，它内置了性能优化的功能，帮助程序减少不必要的性能消耗。</p>
+<p>先是安装 react-redux</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save react-redux redux</span><br></pre></td></tr></table></figure>
+<h2 id="连接步骤"><a href="#连接步骤" class="headerlink" title="连接步骤"></a>连接步骤</h2><p>下面实现一个数据的双向绑定。</p>
+<p><img src="/assets/image/2017/3/20170311161746.png"></p>
+<p>连接步骤主要分以下几步：</p>
+<ol>
+<li>编写 <code>component</code>，组件是无状态的，只使用 <code>props</code></li>
+<li>编写 <code>action</code></li>
+<li>编写 <code>reducer</code></li>
+<li>创建 <code>Store</code></li>
+<li>连接 <code>redux</code> 到组件上</li>
+<li>最后，把新的组件放在<code>&lt;Provider&gt;</code>里面</li>
+</ol>
+<h3 id="编写-component，组件是无状态的，只使用-props"><a href="#编写-component，组件是无状态的，只使用-props" class="headerlink" title="编写 component，组件是无状态的，只使用 props"></a>编写 component，组件是无状态的，只使用 props</h3><blockquote>
+<p>myComponent.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> myComponent = <span class="function">(<span class="params">&#123;text, name, onChange&#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;div className=<span class="string">"index"</span>&gt;</span><br><span class="line">        &lt;p&gt;&#123;text&#125;&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">        &lt;input defaultValue=&#123;name&#125; onChange=&#123;onChange&#125; /</span>&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="编写-action"><a href="#编写-action" class="headerlink" title="编写 action"></a>编写 action</h3><blockquote>
+<p>action.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> updateText = <span class="function">(<span class="params">e</span>) =&gt;</span> (&#123;</span><br><span class="line">    type: <span class="string">'change'</span>,</span><br><span class="line">    payload: e.target.value</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="编写-reducer"><a href="#编写-reducer" class="headerlink" title="编写 reducer"></a>编写 reducer</h3><blockquote>
+<p>reducer.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">reducer</span>(<span class="params">state = &#123;</span></span></span><br><span class="line"><span class="function"><span class="params">    text: <span class="string">'你好，访问者'</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">    name: <span class="string">'访问者'</span></span></span></span><br><span class="line"><span class="function"><span class="params">&#125;, action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'change'</span>:</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                name: action.payload,</span><br><span class="line">                text: <span class="string">'你好，'</span> + action.payload</span><br><span class="line">            &#125;;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> state;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="创建-Store"><a href="#创建-Store" class="headerlink" title="创建 Store"></a>创建 Store</h3><blockquote>
+<p>main.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; createStore &#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="keyword">import</span> &#123; Provider &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> reducer <span class="keyword">from</span> <span class="string">'./reducer'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Store</span></span><br><span class="line"><span class="keyword">const</span> store = createStore(reducer);</span><br></pre></td></tr></table></figure>
+<h3 id="连接-redux-到组件上"><a href="#连接-redux-到组件上" class="headerlink" title="连接 redux 到组件上"></a>连接 redux 到组件上</h3><blockquote>
+<p>App.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; connect &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span>;</span><br><span class="line"><span class="comment">// connect 是 react-redux 用来自动连接的函数，它有几种的使用方式。（后面介绍）</span></span><br><span class="line"><span class="comment">// 返回一个新的组件。</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123;</span><br><span class="line">        <span class="comment">// 让 store 中的 state 与 组件的 props 连接在一起</span></span><br><span class="line">        text: state.text,</span><br><span class="line">        name: state.name</span><br><span class="line">    &#125;),</span><br><span class="line">    dispatch =&gt; (&#123;</span><br><span class="line">        <span class="comment">// updateText 是一个 action 函数，事件与 dispatch 连接在一起</span></span><br><span class="line">        onChange: <span class="function">(<span class="params">event</span>) =&gt;</span> dispatch(updateText(event)),</span><br><span class="line">    &#125;),</span><br><span class="line">)(myComponent); <span class="comment">// 把 myComponent 连接成一个新的组件。</span></span><br></pre></td></tr></table></figure>
+<h3 id="最后，把新的组件放在-lt-Provider-gt-里面"><a href="#最后，把新的组件放在-lt-Provider-gt-里面" class="headerlink" title="最后，把新的组件放在&lt;Provider&gt;里面"></a>最后，把新的组件放在<code>&lt;Provider&gt;</code>里面</h3><p>例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; createStore &#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="keyword">import</span> &#123; Provider &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;         <span class="comment">// connect 所在文件</span></span><br><span class="line"><span class="keyword">import</span> reducer <span class="keyword">from</span> <span class="string">'./reducer'</span>; <span class="comment">// reducer 所在文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Store</span></span><br><span class="line"><span class="keyword">const</span> store = createStore(reducer);</span><br><span class="line"></span><br><span class="line">ReactDOM.render(</span><br><span class="line">    &lt;Provider store=&#123;store&#125;&gt;</span><br><span class="line">        &lt;App /&gt;</span><br><span class="line">    &lt;<span class="regexp">/Provider&gt;</span></span><br><span class="line"><span class="regexp">    , document.getElementById('app'))</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h2 id="react-redux-与-react-router-结合"><a href="#react-redux-与-react-router-结合" class="headerlink" title="react-redux 与 react-router 结合"></a>react-redux 与 react-router 结合</h2><p>如果你想，使用<code>react-router</code>，那就把<code>&lt;Router&gt;</code>放在<code>&lt;Provider&gt;</code>里面，其他不变。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Provider</span> <span class="attr">store</span>=<span class="string">&#123;store&#125;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Router</span> <span class="attr">history</span>=<span class="string">&#123;hashHistory&#125;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Router</span> <span class="attr">path</span>=<span class="string">"/"</span> <span class="attr">component</span>=<span class="string">&#123;App&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="关于-connect-使用的几种方式"><a href="#关于-connect-使用的几种方式" class="headerlink" title="关于 connect 使用的几种方式"></a>关于 connect 使用的几种方式</h2><p>connect 支持多种写法，下面列举几种常用的写法，都是接收 2 个参数<code>state function, dispatch function</code></p>
+<h3 id="第一种写法，自动绑定-dispatch"><a href="#第一种写法，自动绑定-dispatch" class="headerlink" title="第一种写法，自动绑定 dispatch"></a>第一种写法，自动绑定 dispatch</h3><p>connect 的第一个参数是参数为<code>state</code>的函数，该函数返回的对象<code>Object</code>将被合并到组件的<code>props</code>中<br>也就是说：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 把 text, name 合并到组件的 props 里，这样就可以使用 this.props.text, this.props.name</span></span><br><span class="line">&#123;</span><br><span class="line">    text: state.text,  <span class="comment">// =&gt; this.props.text</span></span><br><span class="line">    name: state.name,  <span class="comment">// =&gt; this.props.name</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>connect 的第二个参数是多个<code>action</code>创建函数组成的对象，该对象也会被合并到组件的<code>props</code>中<br>也就是说：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 把 text, name 合并到组件的 props 里，这样就可以使用 this.props.onChange,</span></span><br><span class="line">&#123;</span><br><span class="line">    onChange: updateText,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来 connect 就会自动的帮你绑定使用<code>dispatch</code>函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123;</span><br><span class="line">        text: state.text,</span><br><span class="line">        name: state.name</span><br><span class="line">    &#125;),</span><br><span class="line">    &#123;</span><br><span class="line">        onChange: updateText,</span><br><span class="line">    &#125;</span><br><span class="line">)(myComponent);</span><br></pre></td></tr></table></figure>
+<h3 id="第二种写法，手动绑定-dispatch"><a href="#第二种写法，手动绑定-dispatch" class="headerlink" title="第二种写法，手动绑定 dispatch"></a>第二种写法，手动绑定 dispatch</h3><p>第二种写法和第一种差不多，不过你需要自己去绑定<code>dispatch</code><br>connect 的第二个参数是参数为<code>dispatch</code>的函数，返回的对象会合并到组件的<code>props</code>中</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123;</span><br><span class="line">        text: state.text,</span><br><span class="line">        name: state.name</span><br><span class="line">    &#125;),</span><br><span class="line">    dispatch =&gt; (&#123;</span><br><span class="line">        onChange: <span class="function">(<span class="params">event</span>) =&gt;</span> dispatch(updateText(event)),</span><br><span class="line">    &#125;),</span><br><span class="line">)(myComponent);</span><br></pre></td></tr></table></figure>
+<h3 id="第三种写法，-使用-bindActionCreators-来自动绑定"><a href="#第三种写法，-使用-bindActionCreators-来自动绑定" class="headerlink" title="第三种写法， 使用 bindActionCreators 来自动绑定"></a>第三种写法， 使用 bindActionCreators 来自动绑定</h3><p>第三种写法与第二种差不多，但是使用了<code>redux</code>的<code>bindActionCreators</code>方法来自动绑定<code>dispatch</code><br>bindActionCreators 的第一个参数为多个<code>action</code>创建函数组成的对象，第二个参数为<code>dispatch</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; bindActionCreators &#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123;</span><br><span class="line">        text: state.text,</span><br><span class="line">        name: state.name</span><br><span class="line">    &#125;),</span><br><span class="line">    dispatch =&gt; bindActionCreators(&#123; onChange &#125;, dispatch),</span><br><span class="line">)(myComponent);</span><br></pre></td></tr></table></figure>
+<h3 id="第四种写法，手动发起-dispatch"><a href="#第四种写法，手动发起-dispatch" class="headerlink" title="第四种写法，手动发起 dispatch"></a>第四种写法，手动发起 dispatch</h3><p>connect 的第一个参数不变，第二个参数为空。这时候，<code>connect</code> 会给组件传接一个 <code>dispatch props</code>，你需要自己在组件内使用 <code>dispatch</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line">    state =&gt; (&#123;</span><br><span class="line">        text: state.text,</span><br><span class="line">        name: state.name</span><br><span class="line">    &#125;)</span><br><span class="line">)(myComponent);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 组件改为：</span></span><br><span class="line"><span class="keyword">const</span> myComponent = <span class="function">(<span class="params">&#123;text, name, dispatch&#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;div className=<span class="string">"index"</span>&gt;</span><br><span class="line">        &lt;p&gt;&#123;text&#125;&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">        &lt;input</span></span><br><span class="line"><span class="regexp">            defaultValue=&#123;name&#125;</span></span><br><span class="line"><span class="regexp">            onChange=&#123;event =&gt; &#123;</span></span><br><span class="line"><span class="regexp">                dispatch(updateText(event));</span></span><br><span class="line"><span class="regexp">            &#125;&#125;</span></span><br><span class="line"><span class="regexp">            /</span>&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="第五种写法，使用装饰器"><a href="#第五种写法，使用装饰器" class="headerlink" title="第五种写法，使用装饰器"></a>第五种写法，使用装饰器</h3><p>使用装饰器（ES7 特性），将<code>connect</code>写在组件类的上面。这样<code>connect</code>就会去装饰组件类，去修改它的<code>props</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@connect(</span><br><span class="line">    state =&gt; (&#123;</span><br><span class="line">        text: state.text,</span><br><span class="line">        name: state.name</span><br><span class="line">    &#125;),</span><br><span class="line">    &#123;</span><br><span class="line">        onChange: updateText,</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">myComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>还有很多的写法，比如第五种与第二种结合。<br>比较推荐的是：第一种，第二种，第四种写法。</p>
+<h2 id="推荐文件目录结构"><a href="#推荐文件目录结构" class="headerlink" title="推荐文件目录结构"></a>推荐文件目录结构</h2><p>根据多次探索，终于找到比较好的文件目录结构：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">redux</span><br><span class="line">  │── actions</span><br><span class="line">  │     │── index.js</span><br><span class="line">  │</span><br><span class="line">  │── reducers</span><br><span class="line">  │     │── index.js</span><br><span class="line">  │</span><br><span class="line">  │── store.js</span><br><span class="line">  │── types.js</span><br></pre></td></tr></table></figure>
+<p>说明：</p>
+<ul>
+<li><p>store 的创建在 store.js 里编写：</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> thunk <span class="keyword">from</span> <span class="string">'redux-thunk'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    createStore,</span><br><span class="line">    combineReducers,</span><br><span class="line">    compose,</span><br><span class="line">    applyMiddleware,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Store</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> store = createStore(</span><br><span class="line">    combineReducers(&#123;</span><br><span class="line">        ...reducers</span><br><span class="line">    &#125;),</span><br><span class="line">    compose(</span><br><span class="line">        applyMiddleware(thunk),</span><br><span class="line">    ),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>所有的 action.type 都在<code>types.js</code>里定义，这样方便集中管理，对于需要网络请求，多种 action.type 的，可以定义一个扩展类型函数：</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 扩展状态类型</span></span><br><span class="line"><span class="comment">* <span class="doctag">@returns<span class="type">&#123;Object&#125;</span></span></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">const</span> extendState = <span class="function">(<span class="params">obj</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">Object</span>.keys(obj).forEach(<span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">        obj[key + <span class="string">'_in'</span>] = obj[key] + <span class="string">'_in'</span>;                <span class="comment">// 进行中</span></span><br><span class="line">        obj[key + <span class="string">'_fail'</span>] = obj[key] + <span class="string">'_fail'</span>;            <span class="comment">// 失败了</span></span><br><span class="line">        obj[key + <span class="string">'_success'</span>] = obj[key] + <span class="string">'_success'</span>;      <span class="comment">// 成功了</span></span><br><span class="line">        obj[key + <span class="string">'_success'</span>] = obj[key] + <span class="string">'_other'</span>;        <span class="comment">// 其他情况</span></span><br><span class="line">        obj[key + <span class="string">'_complete'</span>] = obj[key] + <span class="string">'_complete'</span>;    <span class="comment">// 完成了</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>所有的 reducer 都在 reducers 目录下定义，<code>index.js</code>负责汇总树枝。类似的有：</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> root_init_state = &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = root_init_state, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">return</span> state</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> login_sign &#125; <span class="keyword">from</span> <span class="string">'./login-sign'</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>所有的 action 都在 actions 目录下定义，<code>index.js</code>负责汇总树枝。类似的有：</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> _loginSignActions <span class="keyword">from</span> <span class="string">'./login-sign'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 登录注册 actions</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> loginSignActions = _loginSignActions;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>这样做的好处就是方便集中管理。在以前，reducer 与 action 都依附在 components、view、page 下，导致找起来特别不好找，特别是目录嵌入很深的时候。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.891Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/02/Redux/Redux 与 React 的连接/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/02/Redux/Redux 与 React 的连接/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/02/ECMAScript/ES6 初识 Generator/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">ES6 初识 Generator</h4>
+        <h4 class="summary">GeneratorGenerator 是 ES6 新增加的一个函数，叫生成器。它涉及了 ECMAScript 引擎运行底...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/02/Nodejs/Nodejs 版本管理（nvm）和守护进程（forever）/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs 版本管理（nvm）和守护进程（forever）</h4>
+        <h4 class="summary">nvmnvm 是一个 Nodejs 的版本管理工具，它可以帮助我们管理 Nodejs 的版本或者是安装 Nodejs。它...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

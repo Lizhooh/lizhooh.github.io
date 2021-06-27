@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2016/10/抓包&爬虫/JsDom 使用指南/">
+    
+    
+    <title>JsDom 使用指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言jsdom 是许多 Web 标准的纯 JavaScript 实现，特别是 WHATWG DOM 和 HTML 标准，用于 Node.js。一般来说，该项目的目标是模拟足够多的 Web 浏览器子集，以便用于测试和挖掘真实世界的 Web 应用程序。 说白，一般我们会使用它来在 Nodejs 上解析 DOM。 jsdom">
+<meta name="keywords" content="Nodejs,爬虫">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JsDom 使用指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2016/10/抓包&爬虫/JsDom 使用指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言jsdom 是许多 Web 标准的纯 JavaScript 实现，特别是 WHATWG DOM 和 HTML 标准，用于 Node.js。一般来说，该项目的目标是模拟足够多的 Web 浏览器子集，以便用于测试和挖掘真实世界的 Web 应用程序。 说白，一般我们会使用它来在 Nodejs 上解析 DOM。 jsdom">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/jsdom/jsdom/master/logo.svg?sanitize=true">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.916Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JsDom 使用指南">
+<meta name="twitter:description" content="前言jsdom 是许多 Web 标准的纯 JavaScript 实现，特别是 WHATWG DOM 和 HTML 标准，用于 Node.js。一般来说，该项目的目标是模拟足够多的 Web 浏览器子集，以便用于测试和挖掘真实世界的 Web 应用程序。 说白，一般我们会使用它来在 Nodejs 上解析 DOM。 jsdom">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/jsdom/jsdom/master/logo.svg?sanitize=true">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">JsDom 使用指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">JsDom 使用指南</h1>
+
+        <div class="meta-rest">
+            <h1>JsDom 使用指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2016-10-12T02:05:57.000Z" itemprop="datePublished" class="page-time">
+    2016-10-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#构造函数"><span class="post-toc-number">3.</span> <span class="post-toc-text">构造函数</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#执行-script"><span class="post-toc-number">4.</span> <span class="post-toc-text">执行 script</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#假装成一个视觉浏览器"><span class="post-toc-number">5.</span> <span class="post-toc-text">假装成一个视觉浏览器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#加载子资源"><span class="post-toc-number">6.</span> <span class="post-toc-text">加载子资源</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#虚拟控制台"><span class="post-toc-number">7.</span> <span class="post-toc-text">虚拟控制台</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#cookie-jar"><span class="post-toc-number">8.</span> <span class="post-toc-text">cookie jar</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">9.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-抓包&amp;爬虫/JsDom 使用指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">JsDom 使用指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2016 年 10 月 12 日 10:05" datetime="2016-10-12T02:05:57.000Z"  itemprop="datePublished">
+    2016-10-12
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 866</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>jsdom</code> 是许多 Web 标准的纯 JavaScript 实现，特别是 WHATWG DOM 和 HTML 标准，用于 Node.js。一般来说，该项目的目标是模拟足够多的 Web 浏览器子集，以便用于测试和挖掘真实世界的 Web 应用程序。</p>
+<p>说白，一般我们会使用它来在 Nodejs 上解析 DOM。</p>
+<div style="text-align: center"><img width="100" height="100" src="https://raw.githubusercontent.com/jsdom/jsdom/master/logo.svg?sanitize=true" alt><br><b>jsdom</b><br></div>
+
+<a id="more"></a>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>jsdom 和 cheerio 有类似功能，但是 cheerio 更倾向于 DOM 的解析，而 jsdom 除了 DOM 解析外还有一些其他的功能。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> jsdom = <span class="built_in">require</span>(<span class="string">"jsdom"</span>);</span><br><span class="line"><span class="keyword">const</span> &#123; JSDOM &#125; = jsdom;</span><br><span class="line"><span class="comment">// 一个 DOM 就这么来了</span></span><br><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(<span class="string">`&lt;!DOCTYPE html&gt;&lt;p&gt;Hello world&lt;/p&gt;`</span>);</span><br><span class="line"><span class="built_in">console</span>.log(dom.window.document.querySelector(<span class="string">"p"</span>).textContent);</span><br></pre></td></tr></table></figure>
+<p>这样就构造了一个 DOM 处理，后面的处理基本都是操作 DOM 节点。</p>
+<p>也可以把 JQuery 加载进去：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">jsdom.env(<span class="string">"http://www.baidu.com"</span>, [<span class="string">"http://code.jquery.com/jquery.js"</span>],</span><br><span class="line">    (err, <span class="built_in">window</span>) =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">window</span>.$(<span class="string">'title'</span>).html());</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">window</span>.$(<span class="string">'.sizeBox'</span>).html());</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h2 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h2><p>JSDOM 的构造函数有一系列的配置项。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(html, &#123;</span><br><span class="line">    url: <span class="string">"https://example.org/"</span>,</span><br><span class="line">    referrer: <span class="string">"https://example.com/"</span>,</span><br><span class="line">    contentType: <span class="string">"text/html"</span>,</span><br><span class="line">    userAgent: <span class="string">"Mellblomenator/9000"</span>,</span><br><span class="line">    includeNodeLocations: <span class="literal">true</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><b>说明：</b></p>
+<ul>
+<li><code>url</code>：默认为”about:blank”，这是一个 url 地址，可以通过 window.location，document.URL 获取。</li>
+<li><code>referrer</code>：影响 document.referrer 的值。</li>
+<li><code>contentType</code>：影响 document.contentType 以及如何解析文档，默认为”text/html”。</li>
+<li><code>userAgent</code>：影响 navigator.userAgent 的值，浏览器的标识。</li>
+<li><code>includeNodeLocations</code>：保留由 HTML 解析器产生的位置信息，它默认为 false 提供最佳性能。</li>
+</ul>
+<h2 id="执行-script"><a href="#执行-script" class="headerlink" title="执行 script"></a>执行 script</h2><p>jsdom 最强大的功能是它可以在 jsdom 中执行脚本，jsdom 提供了一个沙盒环境。但是要注意的是，如果 script 足以强大，可以击穿沙盒访问 Nodejs 环境。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(<span class="string">`</span></span><br><span class="line"><span class="string">    &lt;body&gt;</span></span><br><span class="line"><span class="string">        &lt;script&gt;document.body.appendChild(document.createElement("hr"));&lt;/script&gt;</span></span><br><span class="line"><span class="string">    &lt;/body&gt;</span></span><br><span class="line"><span class="string">`</span>);</span><br><span class="line"></span><br><span class="line">dom.window.document.body.children.length === <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<p>在默认情况下，所有的 script 并不会运行，如果要运行则需要使用 dangerously 选项。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(<span class="string">`</span></span><br><span class="line"><span class="string">    &lt;body&gt;</span></span><br><span class="line"><span class="string">        &lt;script&gt;document.body.appendChild(document.createElement("hr"));&lt;/script&gt;</span></span><br><span class="line"><span class="string">    &lt;/body&gt;</span></span><br><span class="line"><span class="string">`</span>, &#123; <span class="attr">runScripts</span>: <span class="string">"dangerously"</span> &#125;);</span><br><span class="line"></span><br><span class="line">dom.window.document.body.children.length === <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+<p>如果从外部执行脚本，而不是让 script 元素执行，那么使用  outside-only 选项。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">window</span> = (<span class="keyword">new</span> JSDOM(<span class="string">``</span>, &#123; <span class="attr">runScripts</span>: <span class="string">"outside-only"</span> &#125;)).window;</span><br><span class="line"></span><br><span class="line"><span class="built_in">window</span>.eval(<span class="string">`document.body.innerHTML = "&lt;p&gt;Hello, world!&lt;/p&gt;";`</span>);</span><br><span class="line"><span class="built_in">window</span>.document.body.children.length === <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="假装成一个视觉浏览器"><a href="#假装成一个视觉浏览器" class="headerlink" title="假装成一个视觉浏览器"></a>假装成一个视觉浏览器</h2><p>jsdom 没有渲染可视内容的能力，在默认情况下会像无头浏览器一样工作。</p>
+<p>当 pretendToBeVisual 选项设置为 true，jsdom 会假装它正在渲染并显示内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">window</span> = (<span class="keyword">new</span> JSDOM(<span class="string">``</span>, &#123; <span class="attr">pretendToBeVisual</span>: <span class="literal">true</span> &#125;)).window;</span><br><span class="line"></span><br><span class="line"><span class="built_in">window</span>.requestAnimationFrame(<span class="function"><span class="params">timestamp</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(timestamp &gt; <span class="number">0</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="加载子资源"><a href="#加载子资源" class="headerlink" title="加载子资源"></a>加载子资源</h2><p>默认情况下，jsdom 不会加载任何子资源，如脚本，样式表，图像或 iframe。如果希望加载，设置 usable 选项。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(html, &#123; <span class="attr">resources</span>: <span class="string">"usable"</span> &#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="虚拟控制台"><a href="#虚拟控制台" class="headerlink" title="虚拟控制台"></a>虚拟控制台</h2><p>在 jsdom 里有一个 virtual console 类似 console 的使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> virtualConsole = <span class="keyword">new</span> jsdom.VirtualConsole();</span><br><span class="line"></span><br><span class="line">virtualConsole.on(<span class="string">"error"</span>, () =&gt; &#123; ... &#125;);</span><br><span class="line">virtualConsole.on(<span class="string">"warn"</span>, () =&gt; &#123; ... &#125;);</span><br><span class="line">virtualConsole.on(<span class="string">"info"</span>, () =&gt; &#123; ... &#125;);</span><br><span class="line">virtualConsole.on(<span class="string">"dir"</span>, () =&gt; &#123; ... &#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(<span class="string">``</span>, &#123; virtualConsole &#125;);</span><br></pre></td></tr></table></figure>
+<p>当，在 html 里使用 console 时，virtualConsole 提供对应的输出，获取相关信息。</p>
+<p>virtualConsole 提供了一个输出流重定向，可以把 virtualConsole 重定向到 Nodejs 的 console 上。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virtualConsole.sendTo(<span class="built_in">console</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="cookie-jar"><a href="#cookie-jar" class="headerlink" title="cookie jar"></a>cookie jar</h2><p>像网页浏览器一样，jsdom 具有 cookie jar 的概念。<br>默认情况下，JSDOM 构造函数将返回一个带有空 cookie 的实例，cookie 最好自己去设置。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> cookieJar = <span class="keyword">new</span> jsdom.CookieJar(store, options);</span><br><span class="line"><span class="keyword">const</span> dom = <span class="keyword">new</span> JSDOM(html, &#123; cookieJar &#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/jsdom/jsdom" target="_blank" rel="noopener">https://github.com/jsdom/jsdom</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.916Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2016/10/抓包&amp;爬虫/JsDom 使用指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2016/10/抓包&amp;爬虫/JsDom 使用指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2016/11/MongoDB/原生 MongoDB 驱动的使用/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">原生 MongoDB 驱动的使用</h4>
+        <h4 class="summary">Mongoose 用多了竟然某一天发现连原生的 MongoDB 驱动都不会使用。前言Mongoose 用多了竟然某一天发...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2016/08/Nodejs/Nodejs 文件上传/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs 文件上传</h4>
+        <h4 class="summary">文件上传Nodejs 文件上传，最原始的是利用 req.body 来实现，但是这样非常不好扩展。
+对于复合表单处理，目前...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/09/React/React/React 中使用 PureComponent/">
+    
+    
+    <title>React 中使用 PureComponent | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 React 15.3 里，React 提供了 React.PureComponent 来支持一些性能优化方面的，它取代了之前的 pure-render-mixin。 React.PureComponent 最重要的一个用处就是优化 React 应用，这很容易快速地实现。使用 React.PureComponent 对性能的提升是非常可观的，因为它减少了应用中的渲染次数。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 中使用 PureComponent">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/09/React/React/React 中使用 PureComponent/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 React 15.3 里，React 提供了 React.PureComponent 来支持一些性能优化方面的，它取代了之前的 pure-render-mixin。 React.PureComponent 最重要的一个用处就是优化 React 应用，这很容易快速地实现。使用 React.PureComponent 对性能的提升是非常可观的，因为它减少了应用中的渲染次数。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/t0131e05b31c1284209.gif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.876Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 中使用 PureComponent">
+<meta name="twitter:description" content="前言在 React 15.3 里，React 提供了 React.PureComponent 来支持一些性能优化方面的，它取代了之前的 pure-render-mixin。 React.PureComponent 最重要的一个用处就是优化 React 应用，这很容易快速地实现。使用 React.PureComponent 对性能的提升是非常可观的，因为它减少了应用中的渲染次数。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/9/t0131e05b31c1284209.gif">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 中使用 PureComponent</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 中使用 PureComponent</h1>
+
+        <div class="meta-rest">
+            <h1>React 中使用 PureComponent</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-09-05T01:34:58.000Z" itemprop="datePublished" class="page-time">
+    2017-09-05
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#阅读源码"><span class="post-toc-number">2.</span> <span class="post-toc-text">阅读源码</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原理分析"><span class="post-toc-number">3.</span> <span class="post-toc-text">原理分析</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用-PureComponent"><span class="post-toc-number">4.</span> <span class="post-toc-text">使用 PureComponent</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#需要注意的地方"><span class="post-toc-number">5.</span> <span class="post-toc-text">需要注意的地方</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#场景"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">场景</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#浅比较的缺陷"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">浅比较的缺陷</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#引用改变"><span class="post-toc-number">5.3.</span> <span class="post-toc-text">引用改变</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#回调函数导致失效"><span class="post-toc-number">5.4.</span> <span class="post-toc-text">回调函数导致失效</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#深比较"><span class="post-toc-number">6.</span> <span class="post-toc-text">深比较</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#总结"><span class="post-toc-number">7.</span> <span class="post-toc-text">总结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">8.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/React 中使用 PureComponent"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 中使用 PureComponent</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 09 月 05 日 9:34" datetime="2017-09-05T01:34:58.000Z"  itemprop="datePublished">
+    2017-09-05
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2152</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  22.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React 15.3 里，React 提供了 React.PureComponent 来支持一些性能优化方面的，它取代了之前的 pure-render-mixin。</p>
+<p><code>React.PureComponent</code> 最重要的一个用处就是优化 React 应用，这很容易快速地实现。使用 React.PureComponent 对性能的提升是非常可观的，因为它减少了应用中的渲染次数。</p>
+<p><img src="/assets/image/2017/9/t0131e05b31c1284209.gif" alt></p>
+<a id="more"></a>
+<h2 id="阅读源码"><a href="#阅读源码" class="headerlink" title="阅读源码"></a>阅读源码</h2><p>PureComponent 相关的代码在：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">react\lib\ReactBaseClasses.js</span><br><span class="line">react\lib\shallowCompare.js</span><br><span class="line">react\lib\ReactComponentWithPureRenderMixin.js</span><br></pre></td></tr></table></figure>
+<p>其中与 shouldComponentUpdate 相关的在 shallowCompare 与 ReactComponentWithPureRenderMixin，其它可以不用看。</p>
+<p>在 ReactComponentWithPureRenderMixin 里可以看到，PureComponent 对 shouldComponentUpdate 进行了处理，做了一个<strong>浅比较</strong>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ReactComponentWithPureRenderMixin = &#123;</span><br><span class="line">    shouldComponentUpdate: <span class="function"><span class="keyword">function</span> (<span class="params">nextProps, nextState</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> shallowCompare(<span class="keyword">this</span>, nextProps, nextState);</span><br><span class="line">      &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在来看看<strong>浅比较</strong>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> shallowEqual = <span class="built_in">require</span>(<span class="string">'fbjs/lib/shallowEqual'</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">shallowCompare</span>(<span class="params">instance, nextProps, nextState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> !shallowEqual(instance.props, nextProps) ||</span><br><span class="line">           !shallowEqual(instance.state, nextState);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再去看看 shallowEqual 的算法：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断 x, y 是否相等</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">is</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// SameValue algorithm</span></span><br><span class="line">    <span class="keyword">if</span> (x === y) &#123;</span><br><span class="line">        <span class="comment">// Steps 1-5, 7-10</span></span><br><span class="line">        <span class="comment">// Steps 6.b-6.e: +0 != -0</span></span><br><span class="line">        <span class="comment">// Added the nonzero y check to make Flow happy, but it is redundant</span></span><br><span class="line">        <span class="keyword">return</span> x !== <span class="number">0</span> || y !== <span class="number">0</span> || <span class="number">1</span> / x === <span class="number">1</span> / y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Step 6.a: NaN == NaN</span></span><br><span class="line">        <span class="keyword">return</span> x !== x &amp;&amp; y !== y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 浅比较</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">shallowEqual</span>(<span class="params">objA, objB</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (is(objA, objB)) &#123;                   <span class="comment">// 两个对象的引用地址相同</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> objA !== <span class="string">'object'</span> ||</span><br><span class="line">        objA === <span class="literal">null</span> ||</span><br><span class="line">        <span class="keyword">typeof</span> objB !== <span class="string">'object'</span> ||</span><br><span class="line">        objB === <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> keysA = <span class="built_in">Object</span>.keys(objA);</span><br><span class="line">    <span class="keyword">var</span> keysB = <span class="built_in">Object</span>.keys(objB);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (keysA.length !== keysB.length) &#123;   <span class="comment">// 长度不同</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Test for A's keys different from B.</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; keysA.length; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!hasOwnProperty.call(objB, keysA[i]) ||</span><br><span class="line">            !is(objA[keysA[i]], objB[keysA[i]])) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p><code>PureComponent</code>改变了生命周期方法<code>shouldComponentUpdate</code>，并且它会自动检查组件是否需要重新渲染。这时，只有 PureComponent 检测到<code>state</code>或者<code>props</code>发生变化时，PureComponent才会调用 render方法，因此，你不用手动写额外的检查，就可以在很多组件中改变 state， 例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">this</span>.state.someVal !== computedVal) &#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123; <span class="attr">someVal</span>: computedVal &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据 React 源码，如果组件是纯组件（Pure Component），那么一下比较是很容易理解的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">this</span>._compositeType === CompositeTypes.PureClass) &#123;</span><br><span class="line">    shouldUpdate =</span><br><span class="line">        !shallowEqual(prevProps, nextProps) ||</span><br><span class="line">        !shallowEqual(inst.state, nextState);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>PureComponent 只会<strong>“浅”</strong>检查组件的 props 和 state，这就意味着嵌套对象和数组是不会被比较的。</p>
+<p>深比较操作是非常昂贵的，同时如果这个组件还是纯组件（PureComponent），那么深比较将会更浪费。<br>另外，你也可以使用 shouldComponentUpdate 来手动确定组件是否需要重新渲染。</p>
+<p>最简单的方式就是根据特点直接比较 props 或 state：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shouldComponentUpdate(nextProps, nextState) &#123;</span><br><span class="line">    <span class="keyword">return</span> nextProps.user.id === props.user.id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="使用-PureComponent"><a href="#使用-PureComponent" class="headerlink" title="使用 PureComponent"></a>使用 PureComponent</h2><p>使用 PureComponent 非常简单，只需要继承 PureComponent 即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; PureComponent &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">PureComponent</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;h1&gt;Hello world!&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="需要注意的地方"><a href="#需要注意的地方" class="headerlink" title="需要注意的地方"></a>需要注意的地方</h2><p>PureComponent 并不是随便使用就可以达到效果的，主要由 js 引起的坑，比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">1</span>, <span class="number">2</span>] == [<span class="number">1</span>, <span class="number">2</span>]; <span class="comment">// false</span></span><br><span class="line">&#123;<span class="attr">a</span>: <span class="number">1</span>&#125; == &#123;<span class="attr">a</span>: <span class="number">1</span>&#125;; <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<h3 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h3><p>什么场景需要使用 PureComponent？我们来做一个实验。</p>
+<p>先是使用 Component 而不使用 PureComponent。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> itemAllRenderCount = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Item</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; text &#125; = <span class="keyword">this</span>.props;</span><br><span class="line">        itemAllRenderCount++;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'我渲染了：'</span> + text);</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;li&gt;</span><br><span class="line">                &lt;span&gt;&#123;text&#125;&lt;<span class="regexp">/span&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>li&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            list: [],</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    addText = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            list: <span class="keyword">this</span>.state.list.concat([&#123;</span><br><span class="line">                text: Mock.Random.name()</span><br><span class="line">            &#125;]),</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; list &#125; = <span class="keyword">this</span>.state;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'Item 全部渲染次数：'</span> + itemAllRenderCount);</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;button onClick=&#123;<span class="keyword">this</span>.addText&#125;&gt;添加&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">                &lt;br /</span>&gt;</span><br><span class="line">                &lt;ul&gt;</span><br><span class="line">                    &#123;list.map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> (</span><br><span class="line">                        &lt;Item text=&#123;item.text&#125; key=&#123;index&#125; /&gt;</span><br><span class="line">                    ))&#125;</span><br><span class="line">                &lt;<span class="regexp">/ul&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当你添加到 10 个元素时，发现全部的 Item 总共渲染了 <code>45</code> 次，这是非常糟糕的。此刻，把 Item 类改成继承 PureComponent。还是添加 10 个元素，所有的 Item 总共只渲染了 <code>10</code> 次。如果 <code>Item</code> 组件非常多节点，不使用 PureComponent 会是明显存在<strong>性能问题</strong>。</p>
+<h3 id="浅比较的缺陷"><a href="#浅比较的缺陷" class="headerlink" title="浅比较的缺陷"></a>浅比较的缺陷</h3><p>因为 PureComponent 是会进行浅比较的。所以，只要数组的引用地址不改变，它就不会重新渲染。</p>
+<p>这样，应该选择直接切断引用关系。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> a = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line"><span class="keyword">const</span> b = a;</span><br><span class="line">a.push(<span class="number">4</span>);          <span class="comment">// push 并不能切断引用</span></span><br><span class="line"><span class="built_in">console</span>.log(b);     <span class="comment">// [1, 2, 3, 4]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用 concat</span></span><br><span class="line">a = a.concat([<span class="number">5</span>]);</span><br><span class="line"><span class="built_in">console</span>.log(a);     <span class="comment">// [1, 2, 3, 4, 5]</span></span><br><span class="line"><span class="built_in">console</span>.log(b);     <span class="comment">// [1, 2, 3, 4]</span></span><br></pre></td></tr></table></figure>
+<p>同时，可以避免在父组件里做这样一件事情。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">render() &#123;</span><br><span class="line">    <span class="keyword">const</span>  &#123; posts &#125; = <span class="keyword">this</span>.props;</span><br><span class="line">    <span class="keyword">const</span> top = posts.sort(<span class="function">(<span class="params">a, b</span>) =&gt;</span> a.like - b.like).slice(<span class="number">0</span>, <span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>top 每次都会是新的内存地址，所以要必要考虑这样做是否会影响 PureComponent。</p>
+<h3 id="引用改变"><a href="#引用改变" class="headerlink" title="引用改变"></a>引用改变</h3><p>PureComponent 节约了我们的时间，避免了多余的代码。</p>
+<p>那么，掌握如何正确使用它是非常重要的，否则如果使用不当，它就无法发挥作用。因为 PureComponent 仅仅是浅比较（shadow comparison），所以改变组件内部的 props 或者 state，它将不会发挥作用。</p>
+<p>如果 props 设置直接为对象或数组，会导致 PureComponent 一直返回 true：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;Entity</span><br><span class="line">    style=&#123;&#123; <span class="attr">color</span>: <span class="string">'green'</span> &#125;&#125;</span><br><span class="line">    values=&#123;[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]&#125;</span><br><span class="line">    onChang=&#123;e =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(e);</span><br><span class="line">    &#125;&#125;</span><br><span class="line">    /&gt;</span><br></pre></td></tr></table></figure>
+<p>在上面的三个属性都会导致 PureComponent 一直返回 <code>true</code>。</p>
+<p>为什么会这样呢？因为，在每次 render 的时候，<code>style</code> 都会丢弃之前的对象并重新创建对象导致 props 的<strong>引用改变</strong>。同理 values 会重新创建一个数组，onChang 会重新创建一个匿名函数。</p>
+<p>为什么保留 props 引用，而不影响 PureComponent 的判断，需要：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Entity</span><br><span class="line">    style=&#123;styles.entity&#125;</span><br><span class="line">    values=&#123;<span class="keyword">this</span>.values&#125;</span><br><span class="line">    onChang=&#123;<span class="keyword">this</span>.onChang&#125;</span><br><span class="line">    /&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="回调函数导致失效"><a href="#回调函数导致失效" class="headerlink" title="回调函数导致失效"></a>回调函数导致失效</h3><p>对于一个组件来说，回调函数是 props。巧合属于浅比较里面。</p>
+<p>如果是这样写请注意了，你可以会在此处<strong>滑倒</strong>，这个组件每次都会重新渲染，还不如继承 Component。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">list.map(<span class="function">(<span class="params">user, index</span>) =&gt;</span> (</span><br><span class="line">    &lt;Item</span><br><span class="line">        key=&#123;<span class="string">`item-<span class="subst">$&#123;user.id&#125;</span>`</span>&#125;</span><br><span class="line">        name=&#123;user.name&#125;</span><br><span class="line">        onClick=&#123;e =&gt; <span class="keyword">this</span>.like(user.id)&#125;</span><br><span class="line">        /&gt;</span><br><span class="line">))</span><br></pre></td></tr></table></figure>
+<p>首先，这里有三个 props，任何一个 props 的改变都会导致 <code>Item</code> 组件重新渲染。而问题在于每次父组件渲染时，onClick 的回调函数是一个匿名的函数，每次都会重新申请一块内存地址。也就是说 onClick 每次都会变，即使回调函数执行的内容是相同的。</p>
+<p>在这里需要一个 user.id 作为 <strong>上下文</strong>，那么如何解决？</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Item</span><br><span class="line">    name=&#123;user.name&#125;</span><br><span class="line">    id=&#123;user.id&#125;</span><br><span class="line">    onClick=&#123;<span class="keyword">this</span>.like&#125;</span><br><span class="line">    /&gt;</span><br></pre></td></tr></table></figure>
+<p>把 <strong>上下文</strong> 作为 props 传递个 Item 组件。</p>
+<p>在 Item 组件里的 onClick 做一下处理。（这里非常重要）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; PureComponent &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">Item</span> <span class="keyword">extends</span> <span class="title">PureComponent</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; onClick, name, id &#125; = <span class="keyword">this</span>.props;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;p onClick=&#123;e =&gt; onClick(id)&#125;&gt;</span><br><span class="line">                &#123;name&#125;</span><br><span class="line">            &lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这样，这个 Item 组件 PureComponent 的效果就不会失效了。</p>
+<h2 id="深比较"><a href="#深比较" class="headerlink" title="深比较"></a>深比较</h2><p>虽然说<strong>深比较</strong>昂贵，但是如果 React 重新渲染组件的时间比<strong>深比较</strong>还要慢，那么<strong>深比较</strong>，是很值得去使用的，这取决于特定的环境。</p>
+<p>深比较比较通常需要递归的执行，能够直接判断两个对象是否相等。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> a = &#123; <span class="attr">id</span>: <span class="number">1</span> &#125;, b = &#123; <span class="attr">id</span>: <span class="number">1</span> &#125;;</span><br><span class="line"><span class="built_in">console</span>.log(a === b);           <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(deepEql(a, b));     <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>如何做一个深比较，一般我们编写一个基础类，就叫 <code>deep-component</code> 吧。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> deepEql <span class="keyword">from</span> <span class="string">'deep-eql'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">DeepComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    shouldComponentUpdate(nextProps, nextState) &#123;</span><br><span class="line">        <span class="keyword">const</span> f1 = !deepEql(nextState, <span class="keyword">this</span>.state);     <span class="comment">// true 是为不同，需要更新</span></span><br><span class="line">        <span class="keyword">if</span> (f1 === <span class="literal">true</span>) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">const</span> f2 = !deepEql(nextProps, <span class="keyword">this</span>.props);</span><br><span class="line">        <span class="keyword">return</span> f2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个深比较先是比较了 state 的差异性，再去比较 props 的差异性，而不是两个都比较完成后，再去决定是否重新渲染，这样做可以节省一些时间。</p>
+<p>使用的时候，只需要继承这个组件即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>事实上，如果你已经意识到 shallowEqual 和 js references 的特性，过渡到 PureComponent 是相当容易的。正常情况下，迁移的方式非常简单，就像改变组件继承的基类，从 Component 到 PureComponent。这样不仅能平滑过渡，甚至可以提升性能。但是，需要做一些调节，才能让 PureComponent 发挥真正的作用。</p>
+<p><strong>注意：</strong>在纯组件有子组件的时候，所有基于 this.context 改变的子组件，在 this.context 改变时将不会重新渲染，除非在父组件中声明 contextTypes。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://60devs.com/pure-component-in-react.html" target="_blank" rel="noopener">https://60devs.com/pure-component-in-react.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.876Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/09/React/React/React 中使用 PureComponent/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/09/React/React/React 中使用 PureComponent/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/09/Go/Go Web 开发/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Go Web 开发</h4>
+        <h4 class="summary">Go 是一种新的语言，一种并发的、带垃圾回收的、快速编译的语言，被誉为速度最接近 C 的语言，本文，记录着如何使用 Go...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/09/Nodejs/Koa/Koa2 源码阅读（二）/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Koa2 源码阅读（二）</h4>
+        <h4 class="summary">上节（Koa2 源码阅读（一））粗略了阅读了 Koa 的 lib\application.js 文件，收获很大。这节把剩...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

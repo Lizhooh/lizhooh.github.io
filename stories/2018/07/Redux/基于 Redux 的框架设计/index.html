@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/07/Redux/基于 Redux 的框架设计/">
+    
+    
+    <title>基于 Redux 的框架设计 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用 Redux 的时候会发现 Redux 很绕。的确 Redux 的代码是比较多。对一个一个需要加载数据的组件，使用 Redux 会存在很多重复的代码编写，特别是写 Reducer。">
+<meta name="keywords" content="前端,React,Redux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Redux 的框架设计">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/07/Redux/基于 Redux 的框架设计/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用 Redux 的时候会发现 Redux 很绕。的确 Redux 的代码是比较多。对一个一个需要加载数据的组件，使用 Redux 会存在很多重复的代码编写，特别是写 Reducer。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180704155834.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180705180937.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180705182141.jfif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.893Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 Redux 的框架设计">
+<meta name="twitter:description" content="前言Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用 Redux 的时候会发现 Redux 很绕。的确 Redux 的代码是比较多。对一个一个需要加载数据的组件，使用 Redux 会存在很多重复的代码编写，特别是写 Reducer。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/7/20180704155834.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">基于 Redux 的框架设计</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">基于 Redux 的框架设计</h1>
+
+        <div class="meta-rest">
+            <h1>基于 Redux 的框架设计</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-07-04T07:59:49.000Z" itemprop="datePublished" class="page-time">
+    2018-07-04
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#命名"><span class="post-toc-number">2.</span> <span class="post-toc-text">命名</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#约定"><span class="post-toc-number">3.</span> <span class="post-toc-text">约定</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#设计"><span class="post-toc-number">4.</span> <span class="post-toc-text">设计</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Module"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">Module</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Action"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">Action</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#简单示例"><span class="post-toc-number">5.</span> <span class="post-toc-text">简单示例</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">6.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Redux/基于 Redux 的框架设计"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">基于 Redux 的框架设计</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 07 月 04 日 15:59" datetime="2018-07-04T07:59:49.000Z"  itemprop="datePublished">
+    2018-07-04
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1911</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用 Redux 的时候会发现 Redux 很绕。的确 Redux 的代码是比较多。对一个一个需要加载数据的组件，使用 Redux 会存在很多重复的代码编写，特别是写 Reducer。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180704155834.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>本文介绍的是<strong>如何基于 Redux 设计一个上层的框架</strong>。此框架的目的就是为了简化 Redux 相关的代码编写，让整个项目的开发更加容易以及更好的维护。<br><a id="more"></a></p>
+<h2 id="命名"><a href="#命名" class="headerlink" title="命名"></a>命名</h2><p>先个框架命一个名称，就叫 <code>Redux-Fine</code> 吧。对于命名来说并不需要有什么特别的意义，而是根据自己的喜欢即可。<code>Fine</code> 命为精细、细微、优秀等意思，这是我一个非常喜欢的单词。</p>
+<h2 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h2><p>无论是什么框架都会有一些<strong>约定</strong>的，就像 Redux 一样，它约定了 Store、Action、Reducer 等概念。</p>
+<p>在 <code>Redux-Fine</code> 里，我设计了以下约定：</p>
+<ul>
+<li>不需要写 Reducer，这部分会在框架初始化的时候自动构建。</li>
+<li>为了简化代码，Action 的写法将改变。</li>
+<li>使用 ES6 的语法开发。</li>
+<li>只适用于逻辑拆分（combineReducers）方式。因为在大多数项目里都会使用逻辑拆分，很少会使用只有一个 reducer 的方式，如果只有一个 reducer，那根本没必要使用 Redux。</li>
+<li>逻辑拆分不能嵌套扩展，只能同级垂直扩展，一个逻辑拆分定义为一个 module。</li>
+<li>为了方便获取 module，可以使用全局的方式引入，就像 mongoose 一样。</li>
+<li>提供一键创建 store 的方式，少写点代码。</li>
+</ul>
+<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h2><p>在 Redux-Fine 里被设计为 Reducer 自动构建，为 Action 提供一个 commit 函数，返回的就是最新的数据。</p>
+<h3 id="Module"><a href="#Module" class="headerlink" title="Module"></a>Module</h3><p>通常对于大型的应用来说，做逻辑拆分是很有必要的。在 Redux 里做逻辑拆分，使用 combineReducers 函数，它可以把一颗大的 State 树，拆分为几个小的 State 树。</p>
+<p>例如，下面的对象就是一个典型的<strong>逻辑拆分</strong>后的树结构。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    home: &#123;&#125;,       <span class="comment">// Home 页面的数据</span></span><br><span class="line">    user: &#123;&#125;,       <span class="comment">// User 页面的数据</span></span><br><span class="line">    admin: &#123;&#125;,      <span class="comment">// Admin 页面的数据</span></span><br><span class="line">    login: &#123;&#125;,      <span class="comment">// Login 页面的数据</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑拆分常用的手法是，每一个页面对应着一个小 State 树，这样设计层次会比较清晰（千万不要，进行多维度的嵌套）。</p>
+<p>基于这种理论，在 <code>Redux-Fine</code> 里定义了一个 Module 的基类，用户只需要继承这个基类，实现对应的 module 功能即可。一个 Module 就代表着一个逻辑拆分。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserModule</span> <span class="keyword">extends</span> <span class="title">fine</span>.<span class="title">Module</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注册一个 module，此时 redux-fine 会自动构建 reducer 的相关代码。</span></span><br><span class="line">fine.modules(<span class="string">'user'</span>, UserModule);</span><br></pre></td></tr></table></figure>
+<p>基于类的继承实现 Module 有几个好处：</p>
+<ul>
+<li>可以集中式的管理，每一个逻辑拆分的内容。</li>
+<li>在类里可以很方便的使用 this 引用上下文。</li>
+</ul>
+<p>Redux-Fine 提供一个 modules 函数，此函数有 get/set 两个功能。当只有一个参数时，尝试获取 modules 的实例（如果不存在则报错），当有两个尝试时，就用于构建与初始化 module。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> userModule = fine.modules(<span class="string">'user'</span>);</span><br></pre></td></tr></table></figure>
+<p>在 module 里规定了写法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserModule</span> <span class="keyword">extends</span> <span class="title">fine</span>.<span class="title">Module</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 使用 initState 代表着这个 module 的初始值，默认是 &#123;&#125;</span></span><br><span class="line">    initState = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 一个箭头函数就代表着一个  action</span></span><br><span class="line">    getList = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">        <span class="comment">// this.state 是指向本 module 的数据源，它是一个浅拷贝值。</span></span><br><span class="line">        <span class="keyword">const</span> page = <span class="keyword">this</span>.state.page;</span><br><span class="line">        <span class="comment">// this.store 是指向所有的数据源，它是一个浅拷贝值。</span></span><br><span class="line">        <span class="keyword">const</span> page2 = <span class="keyword">this</span>.store.user.page;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 非箭头函数，不会被识别为 action</span></span><br><span class="line">    index() &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Action"><a href="#Action" class="headerlink" title="Action"></a>Action</h3><p>在 Action 里的写法与之前的不同。首先不需要写 Action.Type，不需要调用 dispatch。提供一个 commit 函数，用于更新数据状态。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserModule</span> <span class="keyword">extends</span> <span class="title">fine</span>.<span class="title">Module</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 在 module 里可以获取 store 上下文</span></span><br><span class="line">    <span class="comment">// 使用 initState 代表着这个 module 的初始值</span></span><br><span class="line">    initState = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这是一个 action 函数</span></span><br><span class="line">    getList = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">        <span class="comment">// 一堆异步操作</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// commit 是从 fine.Module 继承而来的一个方法。</span></span><br><span class="line">        <span class="comment">// commit 是一个提交数据改变的接口，在 commit 回调函数里有两个参数</span></span><br><span class="line">        <span class="keyword">this</span>.commit(<span class="function"><span class="params">state</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.initState;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">// commit 会有两个形式，commit(cb) 和 commit(moduleName, cb);</span></span><br><span class="line">        <span class="keyword">this</span>.commit(<span class="string">'home'</span>, state =&gt; &#123;</span><br><span class="line">            <span class="keyword">return</span> &#123;...state &#125;;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">// 当 commit 第一个参数为回调的时候，提交的数据改变只是改变本 module 的 state。</span></span><br><span class="line">        <span class="comment">// 当 commit 第一个参数为字符串时，提交的数据会改变指定的 module（如果不存在则报错）的 state，</span></span><br><span class="line">        <span class="comment">// 这时候 commit 的参数为目标 mudule 的 state。</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这是一个非 action 函数</span></span><br><span class="line">    index() &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>commit 的行为类似于 dispatch，但是它比 dispatch 做的更多事情。在原生的 Redux，如果要在 action 里执行异步操作，则需要使用 <code>redux-thunk</code>。在这里就不需要使用 thunk 了，你可以在任何异步操作完成后调用 commit 函数。</p>
+<p>commit 是一个异步函数，可以使用 await commit 等待最新的状态值。如果没有 await commit，那么多个 commit 之间就是并发的形式。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> res = <span class="keyword">await</span> <span class="keyword">this</span>.commit(<span class="function"><span class="params">state</span> =&gt;</span> &#123; <span class="attr">text</span>: <span class="string">'abc'</span> &#125;);</span><br><span class="line"><span class="built_in">console</span>.log(res);           <span class="comment">// &#123; text: 'abc' &#125;</span></span><br><span class="line"><span class="keyword">this</span>.commit(<span class="function"><span class="params">state</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(state);     <span class="comment">// &#123; text: 'abc' &#125;</span></span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>实际上并没有真正抹去 action.type，在框架内部还是要使用到 action.type。在框架里，调用一个 commit 时，会触发一个 type 为 <code>模块名-时间戳</code> 的 action。</p>
+<p>为了方便获取 action，Redux-Fine 提供一个 <code>actions</code> 的函数，用于提取 module 的 action，只要是类方法并且是箭头函数都会被认为是 action。有两个个特殊除外，如果是 <code>_xxx</code> 则排除，如果方法是非使用 <code>=</code> 赋值的方式创建，那么也会排除（这部分是无法枚举出来）。因此可以利用这两点，区分 action 函数与非 action 函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> actions = fine.actions(<span class="string">'user'</span>); <span class="comment">// 返回一个对象</span></span><br><span class="line"><span class="comment">// &#123; getList &#125;</span></span><br></pre></td></tr></table></figure>
+<p>为什么这样设计呢？在实际的项目了，我发现很多 Action 的引用都存在多级目录的引用的问题。使全局获取实例方式可以避免这个问题。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不好的做法，多级目录带来层级太深</span></span><br><span class="line"><span class="keyword">import</span> actions <span class="keyword">from</span> <span class="string">'.../../../action/user'</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><p>因为框架设计的内容比较少，代码也很少，在一定程度上是成功的。现在来一波测试看看有没有效果。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180705180937.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Fine <span class="keyword">from</span> <span class="string">'redux-fine'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HomeModule</span> <span class="keyword">extends</span> <span class="title">Fine</span>.<span class="title">Module</span> </span>&#123;</span><br><span class="line">    initState = &#123; <span class="attr">list</span>: [], <span class="attr">loading</span>: <span class="literal">false</span>, <span class="attr">error</span>: <span class="string">''</span> &#125;;</span><br><span class="line"></span><br><span class="line">    getList = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; list &#125; = <span class="keyword">this</span>.state;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.commit(<span class="function"><span class="params">state</span> =&gt;</span> (&#123; ...state, <span class="attr">loading</span>: <span class="literal">true</span> &#125;));</span><br><span class="line">        <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">rs</span> =&gt;</span> setTimeout(rs, <span class="number">1000</span>));</span><br><span class="line">        <span class="keyword">this</span>.commit(<span class="function"><span class="params">state</span> =&gt;</span> (&#123;</span><br><span class="line">            ...state,</span><br><span class="line">            list: list.concat([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]),</span><br><span class="line">            loading: <span class="literal">false</span>,</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注册 module</span></span><br><span class="line">Fine.modules(<span class="string">'home'</span>, HomeModule);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> store = Fine.store();</span><br><span class="line"><span class="keyword">const</span> actions = Fine.actions(<span class="string">'home'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(store.getState().home);</span><br><span class="line"><span class="comment">// 调用一个 action 函数。</span></span><br><span class="line">actions.getList().then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(store.getState().home);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>使用的顺序是先写 <code>fine.module</code>，最后才写 <code>fine.store</code>。因为这是在 Redux 里面的约束，在创建 Store 的时候需要确定的 Reducer，在创建完成后就不能再添加 Reducer 了。建议是一个 module 对应着一个 js 文件。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>在 Redux 里有非常复杂的数据变化流程，看下图。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180705182141.jfif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>当使用 Redux-Fine 的时候，就没有了 reducer 和 dispatch 这部分，减少了大约 40% 的代码编写量。Redux-Fine 并没有最大多事情，只是简单化整个流程。Redux-Fine 核心代码只要 100 多行，在性能与体积大小上得以保证。</p>
+<blockquote>
+<p>目前 Redux-Fine 并未开源。</p>
+</blockquote>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.893Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/07/Redux/基于 Redux 的框架设计/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/07/Redux/基于 Redux 的框架设计/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React-Navigation 自定义导航动画</h4>
+        <h4 class="summary">React Navigation 源于 React Native 社区对一个可扩展且易于使用的导航解决方案的需求，它完全...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/06/React Native/Media/谈谈 React Native 音乐应用实现思路/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">📱 谈谈 React Native 音乐应用实现思路</h4>
+        <h4 class="summary">前端React Native 可以做很多类型的应用，但是一般很少人用 React Native 做直播应用、视频应用、音...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/12/React/React/React 定义一个 Model 组件/">
+    
+    
+    <title>React 定义一个 Model 组件 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Model（弹窗）组件是一个比较常用的组件，在 React 里要设计一个 Model 组件可以不是一件简单的事情。因为 Model 组件很多时候都是挂载在 body 下的，而且又是全局悬浮状态。 在 React 里定义 Model 组件有两种方法：  使用 ReactDOM.render 使用 React 16 提供的  下面就来介绍一下这两种定义（设计）方式。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 定义一个 Model 组件">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/12/React/React/React 定义一个 Model 组件/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Model（弹窗）组件是一个比较常用的组件，在 React 里要设计一个 Model 组件可以不是一件简单的事情。因为 Model 组件很多时候都是挂载在 body 下的，而且又是全局悬浮状态。 在 React 里定义 Model 组件有两种方法：  使用 ReactDOM.render 使用 React 16 提供的  下面就来介绍一下这两种定义（设计）方式。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.877Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 定义一个 Model 组件">
+<meta name="twitter:description" content="前言Model（弹窗）组件是一个比较常用的组件，在 React 里要设计一个 Model 组件可以不是一件简单的事情。因为 Model 组件很多时候都是挂载在 body 下的，而且又是全局悬浮状态。 在 React 里定义 Model 组件有两种方法：  使用 ReactDOM.render 使用 React 16 提供的  下面就来介绍一下这两种定义（设计）方式。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 定义一个 Model 组件</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 定义一个 Model 组件</h1>
+
+        <div class="meta-rest">
+            <h1>React 定义一个 Model 组件</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-12-14T01:03:40.000Z" itemprop="datePublished" class="page-time">
+    2017-12-14
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ReactDOM-render"><span class="post-toc-number">2.</span> <span class="post-toc-text">ReactDOM.render</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NodeRender"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">NodeRender</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ReactDOM-createPortal"><span class="post-toc-number">3.</span> <span class="post-toc-text">ReactDOM.createPortal</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Portal-组件"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">Portal 组件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Model-组件"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">Model 组件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-1"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">4.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/React 定义一个 Model 组件"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 定义一个 Model 组件</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 12 月 14 日 9:03" datetime="2017-12-14T01:03:40.000Z"  itemprop="datePublished">
+    2017-12-14
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1227</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Model（弹窗）</code>组件是一个比较常用的组件，在 React 里要设计一个 Model 组件可以不是一件简单的事情。因为 Model 组件很多时候都是挂载在 <code>body</code> 下的，而且又是全局悬浮状态。</p>
+<p>在 React 里定义 Model 组件有两种方法：</p>
+<ul>
+<li>使用 ReactDOM.render</li>
+<li>使用 React 16 提供的</li>
+</ul>
+<p>下面就来介绍一下这两种定义（设计）方式。</p>
+<a id="more"></a>
+<h2 id="ReactDOM-render"><a href="#ReactDOM-render" class="headerlink" title="ReactDOM.render"></a>ReactDOM.render</h2><p>这种方式的做法很简单，先是在 body 里创建一个节点，再把内容渲染进去即可。</p>
+<h3 id="NodeRender"><a href="#NodeRender" class="headerlink" title="NodeRender"></a>NodeRender</h3><p>创建一个高阶组件，它的作用就是返回一个组件类。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span>;</span><br><span class="line"><span class="keyword">import</span> styled <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (Component, id, opts) =&gt; <span class="class"><span class="keyword">class</span> <span class="title">NodeRender</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">this</span>.props = props;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">        <span class="keyword">this</span>.options = &#123;</span><br><span class="line">            clickModelClose: <span class="literal">true</span>,</span><br><span class="line">            ...opts,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 卸载节点</span></span><br><span class="line">    unmount() &#123;</span><br><span class="line">        ReactDOM.render(<span class="literal">null</span>, <span class="keyword">this</span>.el)</span><br><span class="line">        <span class="built_in">document</span>.body.removeChild(<span class="keyword">this</span>.el);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打开弹框</span></span><br><span class="line">    open = <span class="function">(<span class="params">data</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> el = <span class="built_in">document</span>.getElementById(<span class="keyword">this</span>.id);</span><br><span class="line">        <span class="keyword">if</span> (el) <span class="keyword">return</span>;</span><br><span class="line">        <span class="built_in">document</span>.body.style = <span class="string">'overflow: hidden'</span>;</span><br><span class="line"></span><br><span class="line">        data !== <span class="literal">undefined</span> ?</span><br><span class="line">            <span class="keyword">this</span>.renderNode(<span class="keyword">this</span>.renderModel(&#123; data &#125;)) :</span><br><span class="line">            <span class="keyword">this</span>.renderNode(<span class="keyword">this</span>.renderModel());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭弹框</span></span><br><span class="line">    close = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">document</span>.body.style = <span class="string">''</span>;</span><br><span class="line">        <span class="keyword">this</span>.unmount();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 渲染在 body 节点下</span></span><br><span class="line">    renderNode(component) &#123;</span><br><span class="line">        <span class="keyword">this</span>.component = component || React.createElement(<span class="string">'div'</span>);</span><br><span class="line">        <span class="keyword">this</span>.el = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</span><br><span class="line">        <span class="keyword">this</span>.el.id = <span class="keyword">this</span>.id || <span class="built_in">Math</span>.random();</span><br><span class="line">        <span class="built_in">document</span>.body.appendChild(<span class="keyword">this</span>.el);</span><br><span class="line">        <span class="comment">// 渲染到指定节点上</span></span><br><span class="line">        ReactDOM.render(<span class="keyword">this</span>.component, <span class="keyword">this</span>.el)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 渲染模型</span></span><br><span class="line">    renderModel = <span class="function">(<span class="params">props</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> p = &#123; ...props, ...this.props &#125;;</span><br><span class="line">        <span class="built_in">Object</span>.keys(p).forEach(<span class="function"><span class="params">i</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">typeof</span> p[i] === <span class="string">'function'</span> &amp;&amp; (p[i] = p[i].bind(<span class="keyword">this</span>));</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;Model</span><br><span class="line">                alpha=&#123;<span class="number">0.25</span>&#125;</span><br><span class="line">                className=<span class="string">"flex flex-center"</span></span><br><span class="line">                onClick=&#123;e =&gt; &#123;</span><br><span class="line">                    <span class="keyword">if</span> (e.target === e.currentTarget &amp;&amp; <span class="keyword">this</span>.options.clickModelClose) &#123;</span><br><span class="line">                        <span class="keyword">typeof</span> p.onClick === <span class="string">'function'</span> &amp;&amp; p.onClick(e);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;&#125;</span><br><span class="line">                &gt;</span><br><span class="line">                &lt;Component &#123;...p&#125; model=&#123;<span class="keyword">this</span>&#125; /&gt;</span><br><span class="line">            &lt;<span class="regexp">/Model&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">const Model = styled.div`</span></span><br><span class="line"><span class="regexp">    position: fixed;</span></span><br><span class="line"><span class="regexp">    z-index: 1001;</span></span><br><span class="line"><span class="regexp">    top: 0;</span></span><br><span class="line"><span class="regexp">    left: 0;</span></span><br><span class="line"><span class="regexp">    right: 0;</span></span><br><span class="line"><span class="regexp">    bottom: 0;</span></span><br><span class="line"><span class="regexp">    background-color: rgba(1, 1, 1, $&#123;props =&gt; props.alpha&#125; );</span></span><br><span class="line"><span class="regexp">`;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">Model.defaultProps = &#123;</span></span><br><span class="line"><span class="regexp">    alpha: 0.48,</span></span><br><span class="line"><span class="regexp">&#125;;</span></span><br></pre></td></tr></table></figure>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>这就可以这样使用它。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">const</span> Model = NodeRender(</span><br><span class="line">    &lt;p&gt;弹框内容&lt;<span class="regexp">/p&gt;,   /</span><span class="regexp">/ &lt;- model 里的内容组件</span></span><br><span class="line"><span class="regexp">    'abcde',</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">export default class extends Component &#123;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    constructor(props) &#123;</span></span><br><span class="line"><span class="regexp">        this.model = new Model(&#123;</span></span><br><span class="line"><span class="regexp">            onClick(e) &#123;</span></span><br><span class="line"><span class="regexp">                console.log('click');</span></span><br><span class="line"><span class="regexp">                this.close();</span></span><br><span class="line"><span class="regexp">            &#125;</span></span><br><span class="line"><span class="regexp">        &#125;);</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    render() &#123;</span></span><br><span class="line"><span class="regexp">        const &#123; show &#125; = this.state;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">        return (</span></span><br><span class="line"><span class="regexp">            &lt;div&gt;</span></span><br><span class="line"><span class="regexp">                &lt;button onClick=&#123;e =&gt; this.model.open()&#125;&gt;点我&lt;/</span>button&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>可以看起，使用起来非常方便。直接通过实例就行控制显示和关闭，不用把组件放进 render 里。<br>它是通过闭包保存了 Component 的上下文，在关闭时直接在 DOM 上删除节点，在打开时直接在 DOM 上创建节点。</p>
+<h2 id="ReactDOM-createPortal"><a href="#ReactDOM-createPortal" class="headerlink" title="ReactDOM.createPortal"></a>ReactDOM.createPortal</h2><p>createPortal 是 React 16 提供的一个新 API，它可以直接跳出当前的 VDOM，渲染到任意的节点上。<br>createPortal 的第一个参数是 component，第二个参数是 element，和 ReactDOM.render 差不多。</p>
+<h3 id="Portal-组件"><a href="#Portal-组件" class="headerlink" title="Portal 组件"></a>Portal 组件</h3><p>定义一个 Portal 组件，这个组件的作用就是在 body 下创建一个节点，把 props.children 渲染到这个节点里。<br>它的作用就是可以直接在父组件里直接渲染到任意的位置。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">PortalComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.el = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</span><br><span class="line">        <span class="keyword">this</span>.el.id = <span class="keyword">this</span>.props.id || <span class="built_in">Math</span>.random();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="built_in">document</span>.body.appendChild(<span class="keyword">this</span>.el);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentWillUnmount() &#123;</span><br><span class="line">        <span class="built_in">document</span>.body.removeChild(<span class="keyword">this</span>.el);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidCatch(err, info) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(err);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> ReactDOM.createPortal(</span><br><span class="line">            <span class="keyword">this</span>.props.children,</span><br><span class="line">            <span class="keyword">this</span>.el</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Model-组件"><a href="#Model-组件" class="headerlink" title="Model 组件"></a>Model 组件</h3><p>接下来定义一个 Model 组件，把它挂载在 Portal 组件下面。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> styled <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"><span class="keyword">import</span> Portal <span class="keyword">from</span> <span class="string">'./portal'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">ModalComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> defaultProps = &#123;</span><br><span class="line">        onClick: <span class="function"><span class="params">()</span> =&gt;</span> &#123; &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    onClick = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (e.target === e.currentTarget) &#123;</span><br><span class="line">            <span class="keyword">this</span>.props.onClick(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; children, ...other &#125; = <span class="keyword">this</span>.props;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;Portal&gt;</span><br><span class="line">                &lt;Container &#123;...other&#125; onClick=&#123;<span class="keyword">this</span>.onClick&#125;&gt;</span><br><span class="line">                    &#123;<span class="keyword">this</span>.props.children&#125;</span><br><span class="line">                &lt;<span class="regexp">/Container&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>Portal&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Container = styled.div<span class="string">`</span></span><br><span class="line"><span class="string">    position: fixed;</span></span><br><span class="line"><span class="string">    z-index: 1001;</span></span><br><span class="line"><span class="string">    top: 0;</span></span><br><span class="line"><span class="string">    left: 0;</span></span><br><span class="line"><span class="string">    right: 0;</span></span><br><span class="line"><span class="string">    bottom: 0;</span></span><br><span class="line"><span class="string">    background-color: rgba(1, 1, 1, <span class="subst">$&#123;props =&gt; props.alpha&#125;</span> );</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">Container.defaultProps = &#123;</span><br><span class="line">    alpha: <span class="number">0.48</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>使用的时候，可以这样使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">this</span>.state = &#123; <span class="attr">show</span>: <span class="literal">false</span> &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; show &#125; = <span class="keyword">this</span>.state;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;button onClick=&#123;<span class="keyword">this</span>.setState(&#123; <span class="attr">show</span>: <span class="literal">true</span> &#125;)&#125;&gt;点我&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">                &#123;show &amp;&amp;</span></span><br><span class="line"><span class="regexp">                    &lt;Model onClick=&#123;this.setState(&#123; show: false &#125;)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                        &lt;p&gt;弹框内容&lt;/</span>p&gt;</span><br><span class="line">                    &lt;<span class="regexp">/Model&gt;</span></span><br><span class="line"><span class="regexp">                &#125;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 ReactDOM.createPortal 与上面的 ReactDOM.render 的使用方式不同。<br>Portal 需要在父组件里插入 Model，并且通过父组件的状态控制打开与关闭。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>使用 ReactDOM.render 创建的 Model 组件可以不用插入到父组件里，也不需要父组件进行状态的控制显示 Model 组件。因为它可以充当一个函数来使用，props 通过构造函数进行传递，内部的 state 由 Model Content Component 自己控制，也可以在父组件上控制。</p>
+<p>使用 ReactDOM.createPortal 创建的 Model 需要插入到父组件里，而且需要通过父组件的状态进行控制 Model 的打开与关闭，Model Content Component。</p>
+<p>而我更倾味于第一种实现方式。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.877Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/12/React/React/React 定义一个 Model 组件/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/12/React/React/React 定义一个 Model 组件/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/12/React Native/React Native 由繁到简实现夜间模式/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 由繁到简实现夜间模式</h4>
+        <h4 class="summary">夜间模式 能提升用户体验的功能，现在很多 App 都有实现夜间模式。那么如何在 React Native 上实现夜间模式...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/12/React/Style/更进一步管理 React 组件样式/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">💅 更进一步管理 React 组件样式</h4>
+        <h4 class="summary">styled-components 是一个 CSS in Javascript 的框架，可用于 React/React ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

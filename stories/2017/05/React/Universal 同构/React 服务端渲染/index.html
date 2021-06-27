@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/05/React/Universal 同构/React 服务端渲染/">
+    
+    
+    <title>React 服务端渲染（SSR） | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="React Server研究了一个上午，React 是如何进行服务端渲染的？ 首先，React 在 Nodejs 里有两个 API： 12345import React from &apos;react&apos;;import &amp;#123;    renderToString,    renderToStaticMarkup&amp;#125; from &apos;react-dom/server&apos;;  renderToStrin">
+<meta name="keywords" content="Javascript,React,服务端渲染">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 服务端渲染（SSR）">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/05/React/Universal 同构/React 服务端渲染/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="React Server研究了一个上午，React 是如何进行服务端渲染的？ 首先，React 在 Nodejs 里有两个 API： 12345import React from &apos;react&apos;;import &amp;#123;    renderToString,    renderToStaticMarkup&amp;#125; from &apos;react-dom/server&apos;;  renderToStrin">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/5/react_redux.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/5/20170512122017.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/5/20171105164502.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.887Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 服务端渲染（SSR）">
+<meta name="twitter:description" content="React Server研究了一个上午，React 是如何进行服务端渲染的？ 首先，React 在 Nodejs 里有两个 API： 12345import React from &apos;react&apos;;import &amp;#123;    renderToString,    renderToStaticMarkup&amp;#125; from &apos;react-dom/server&apos;;  renderToStrin">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/5/react_redux.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 服务端渲染（SSR）</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 服务端渲染（SSR）</h1>
+
+        <div class="meta-rest">
+            <h1>React 服务端渲染（SSR）</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-05-12T03:53:39.000Z" itemprop="datePublished" class="page-time">
+    2017-05-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#React-Server"><span class="post-toc-number">1.</span> <span class="post-toc-text">React Server</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ES6，7-环境配置"><span class="post-toc-number">2.</span> <span class="post-toc-text">ES6，7 环境配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#react"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">react</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#babel-node"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">babel-node</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#app"><span class="post-toc-number">3.</span> <span class="post-toc-text">app</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Hello"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">Hello</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#render"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">render</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#getState"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">getState</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#app-js"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">app.js</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#view"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">view</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#最后"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">最后</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#查看源码"><span class="post-toc-number">3.7.</span> <span class="post-toc-text">查看源码</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#发生了什么？"><span class="post-toc-number">4.</span> <span class="post-toc-text">发生了什么？</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#同构技术"><span class="post-toc-number">5.</span> <span class="post-toc-text">同构技术</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#需要注意的地方"><span class="post-toc-number">6.</span> <span class="post-toc-text">需要注意的地方</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#根据-url-初始化数据"><span class="post-toc-number">6.1.</span> <span class="post-toc-text">根据 url 初始化数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#前后端环境"><span class="post-toc-number">6.2.</span> <span class="post-toc-text">前后端环境</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#资源加载差异"><span class="post-toc-number">6.3.</span> <span class="post-toc-text">资源加载差异</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#生命周期方法"><span class="post-toc-number">6.4.</span> <span class="post-toc-text">生命周期方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#后端性能相关"><span class="post-toc-number">6.5.</span> <span class="post-toc-text">后端性能相关</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Universal 同构/React 服务端渲染"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 服务端渲染（SSR）</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 05 月 12 日 11:53" datetime="2017-05-12T03:53:39.000Z"  itemprop="datePublished">
+    2017-05-12
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2399</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  25  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="React-Server"><a href="#React-Server" class="headerlink" title="React Server"></a>React Server</h2><p>研究了一个上午，<code>React</code> 是如何进行服务端渲染的？</p>
+<p>首先，<code>React</code> 在 Nodejs 里有两个 API：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    renderToString,</span><br><span class="line">    renderToStaticMarkup</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-dom/server'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>renderToString</code> 是把 React 元素转成一个 HTML 字符串，因为服务端渲染已经标识了 reactid，所以在浏览器端再次渲染，React 只是做事件绑定，而不会将所有的 DOM 树重新渲染，这样能带来高性能的页面首次加载！同构黑魔法主要从这个 API 而来。</li>
+<li><code>renderToStaticMarkup</code> 这个 API 相当于一个简化版的 renderToString，如果你的应用基本上是静态文本，建议用这个方法，少了一大批的 reactid，DOM 树自然精简了，在 IO 流传输上节省一部分流量。</li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/5/react_redux.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>那么下面就开始，<code>React</code> 服务端渲染。</p>
+<h2 id="ES6，7-环境配置"><a href="#ES6，7-环境配置" class="headerlink" title="ES6，7 环境配置"></a>ES6，7 环境配置</h2><h3 id="react"><a href="#react" class="headerlink" title="react"></a>react</h3><p>主要配置 react, stage-0 即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev babel-preset-react babel-preset-stage-0</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"presets"</span>: [<span class="string">"react"</span>, <span class="string">"stage-0"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="babel-node"><a href="#babel-node" class="headerlink" title="babel-node"></a>babel-node</h3><p>因为最新版的 Nodejs 对 ES6 还没达到 100% 的支持，所以用 babel-node 来代替 node，并且它支持 es6, jsx。</p>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g babel-cli</span><br></pre></td></tr></table></figure>
+<p>安装完之后，把 <code>node</code> 换成 <code>babel-node</code> 即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># node app.js</span></span><br><span class="line">babel-node app.js</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong><br>如果在使用<code>babel</code>时遇到以下错误：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ReferenceError</span>: regeneratorRuntime is not defined</span><br></pre></td></tr></table></figure>
+<p>那么安装：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev babel-plugin-transform-runtime</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"presets"</span>: [<span class="string">"react"</span>, <span class="string">"stage-0"</span>],</span><br><span class="line">    <span class="attr">"plugins"</span>: [</span><br><span class="line">        <span class="string">"transform-runtime"</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="app"><a href="#app" class="headerlink" title="app"></a>app</h2><p>目录结构：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">├── package.json</span><br><span class="line">├── react</span><br><span class="line">├   ├── getState.js</span><br><span class="line">├   ├── hello.jsx</span><br><span class="line">├   └── index.js</span><br><span class="line">├── app.js</span><br><span class="line">├── public</span><br><span class="line">└── views</span><br><span class="line">    └── index.ejs</span><br></pre></td></tr></table></figure>
+<h3 id="Hello"><a href="#Hello" class="headerlink" title="Hello"></a>Hello</h3><p>接下来编写一个组件，这个组件是共用的代码，在前端需要用 <code>Webpack</code> 编译成 es5 代码，在 Nodejs 上因为有 babel-node 就不需要编译。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> getState <span class="keyword">from</span> <span class="string">'./getState'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.state = getState();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    onChange = <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123; <span class="attr">text</span>: event.target.value &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;h2&gt;Hello&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">                &lt;div&gt;&#123;this.state.text&#125;&lt;/</span>div&gt;</span><br><span class="line">                &lt;input</span><br><span class="line">                    type=<span class="string">"text"</span> value=&#123;<span class="keyword">this</span>.state.text&#125;</span><br><span class="line">                    onChange=&#123;<span class="keyword">this</span>.onChange&#125; /&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="render"><a href="#render" class="headerlink" title="render"></a>render</h3><p>编写 render 函数，这也是前后端共用的代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; render &#125; <span class="keyword">from</span> <span class="string">'react-dom'</span>;</span><br><span class="line"><span class="keyword">import</span> Hello <span class="keyword">from</span> <span class="string">'./hello'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="built_in">window</span> !== <span class="string">'undefined'</span> &amp;&amp; <span class="built_in">window</span>) &#123;</span><br><span class="line">    render(</span><br><span class="line">        &lt;Hello /&gt;,</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>)</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="getState"><a href="#getState" class="headerlink" title="getState"></a>getState</h3><p>getState 是一个初始化状态的函数，它会根据当前的环境不同而获取 state。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = &#123;&#125;) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="built_in">window</span> !== <span class="string">'undefined'</span> &amp;&amp; <span class="built_in">window</span>.__STATE__) &#123;</span><br><span class="line">        state = <span class="built_in">window</span>.__STATE__;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="app-js"><a href="#app-js" class="headerlink" title="app.js"></a>app.js</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">'colors'</span>;</span><br><span class="line"><span class="keyword">import</span> Koa <span class="keyword">from</span> <span class="string">'koa'</span>;</span><br><span class="line"><span class="keyword">import</span> logger <span class="keyword">from</span> <span class="string">'koa-logger'</span>;</span><br><span class="line"><span class="keyword">import</span> statics <span class="keyword">from</span> <span class="string">'koa-static'</span>;</span><br><span class="line"><span class="keyword">import</span> Router <span class="keyword">from</span> <span class="string">'koa-router'</span>;</span><br><span class="line"><span class="keyword">import</span> bodyparser <span class="keyword">from</span> <span class="string">'koa-bodyparser'</span>;</span><br><span class="line"><span class="keyword">import</span> views <span class="keyword">from</span> <span class="string">'koa-views'</span>;</span><br><span class="line"><span class="keyword">import</span> gzip <span class="keyword">from</span> <span class="string">'koa-gzip'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; renderToString &#125; <span class="keyword">from</span> <span class="string">'react-dom/server'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> Hello <span class="keyword">from</span> <span class="string">'./react/hello'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 服务端首屏渲染</span></span><br><span class="line">router.get(<span class="string">'/'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">    <span class="keyword">await</span> ctx.render(<span class="string">'index'</span>, &#123;</span><br><span class="line">        app: renderToString(</span><br><span class="line">            &lt;Hello /&gt;</span><br><span class="line">        ),</span><br><span class="line">        state: <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">            text: <span class="string">'呵呵呵'</span></span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 中间件</span></span><br><span class="line">app</span><br><span class="line">    .use(logger())</span><br><span class="line">    .use(gzip())</span><br><span class="line">    .use(statics(__dirname + <span class="string">'/public'</span>))</span><br><span class="line">    .use(bodyparser())</span><br><span class="line">    .use(views(__dirname + <span class="string">'/views'</span>, &#123; <span class="attr">extension</span>: <span class="string">'ejs'</span> &#125;))</span><br><span class="line">    .use(router.routes())</span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>, _ =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'\n\trun server in 3000\n'</span>.red);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="view"><a href="#view" class="headerlink" title="view"></a>view</h3><p>视图模版使用 <code>ejs</code>，<code>main.2ebb5379.js</code> 是使用 <code>Webpack</code> 编译出来的前端代码。<br>在 <code>ejs</code> 里，<code>&lt;%-   %&gt;</code> 指的是不转义，<code>&lt;%=   %&gt;</code> 指的是不转义。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width,initial-scale=1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"referrer"</span> <span class="attr">content</span>=<span class="string">"never"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"shortcut icon"</span> <span class="attr">href</span>=<span class="string">"/favicon.ico"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React App<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"root"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">%-</span> <span class="attr">app</span> %&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">window</span>.__STATE__ = (&lt;%- state %&gt;)</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"/static/js/main.2ebb5379.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>启动服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">babel-node app.js</span><br></pre></td></tr></table></figure>
+<p>访问：<code>http://127.0.0.1:3000</code></p>
+<p><img src="/assets/image/2017/5/20170512122017.png" alt></p>
+<h3 id="查看源码"><a href="#查看源码" class="headerlink" title="查看源码"></a>查看源码</h3><p>查看 html 的源代码可以看到，<code>React</code>首屏服务端渲染的目标已经完成。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width,initial-scale=1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"referrer"</span> <span class="attr">content</span>=<span class="string">"never"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"shortcut icon"</span> <span class="attr">href</span>=<span class="string">"/favicon.ico"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React App<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"root"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">data-reactroot</span>=<span class="string">""</span> <span class="attr">data-reactid</span>=<span class="string">"1"</span> <span class="attr">data-react-checksum</span>=<span class="string">"780676788"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">h2</span> <span class="attr">data-reactid</span>=<span class="string">"2"</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">data-reactid</span>=<span class="string">"3"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">data-reactid</span>=<span class="string">"4"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">window</span>.__STATE__ = (&#123;<span class="string">"text"</span>:<span class="string">"呵呵呵"</span>&#125;)</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"/static/js/main.2ebb5379.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>说明：</strong></p>
+<ul>
+<li><code>root</code> 的数据从 renderToString() 里来</li>
+<li><code>__STATE__</code> 的数据从 state 里来</li>
+</ul>
+<h2 id="发生了什么？"><a href="#发生了什么？" class="headerlink" title="发生了什么？"></a>发生了什么？</h2><p>首先，<code>React</code>的组件在服务端进行渲染，得到渲染结果后的字符串模板，嵌入 HTML 结构里，最后把初始化的状态赋值在一个<code>window.__STATE__</code>变量里。</p>
+<p>以往的<code>React</code>单页面应用，是首屏是一个简单化没有数据的 HTML 结构，这样在首次加载时需要向后端发起请求，来获取数据。而现在，数据直接从后端获取，并且把首次加载的结构也渲染了。</p>
+<p>为什么需要服务端渲染？什么情况下进行服务端渲染？<br>当我们要求渲染时间尽量快、页面响应速度快时（优点），才会采用服务器渲染，并且应该<strong>按需</strong>对页面进行渲染，首次加载/首屏。<br>即服务端渲染的优势在于：由中间层（node 端）为客户端请求初始数据、并由 node 渲染页面。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/5/20171105164502.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p><strong>客户端渲染路线：</strong></p>
+<ol>
+<li>请求一个 html <code>-&gt;</code></li>
+<li>服务端返回一个 html <code>-&gt;</code></li>
+<li>浏览器下载 html 里面的 js/css 文件 <code>-&gt;</code></li>
+<li>等待 js 加载并初始化完成 <code>-&gt;</code></li>
+<li>js 代码终于可以运行，由js代码向后端请求数据（ajax/fetch） <code>-&gt;</code></li>
+<li>等待后端数据返回 <code>-&gt;</code></li>
+<li>react-dom（客户端）从无到完整地，把数据渲染为响应页面</li>
+</ol>
+<p><strong>服务端渲染路线：</strong></p>
+<ol>
+<li>请求一个html <code>-&gt;</code></li>
+<li>服务端请求数据( 内网请求快 ) <code>-&gt;</code></li>
+<li>服务器初始化渲染组件与数据（服务端性能好，较快） <code>-&gt;</code></li>
+<li>服务端返回已经有正确内容的页面 <code>-&gt;</code></li>
+<li>客户端请求 js/css 文件 <code>-&gt;</code></li>
+<li>等待 js 加载并初始化完成 <code>-&gt;</code></li>
+<li>react-dom（客户端）把剩下一部分渲染完成（内容小，渲染快）</li>
+</ol>
+<h2 id="同构技术"><a href="#同构技术" class="headerlink" title="同构技术"></a>同构技术</h2><p><code>React</code> 服务端渲染，看其他更像是一种同构技术（Universal），前后端共用一套代码。</p>
+<p><strong>目前为止：</strong></p>
+<ul>
+<li><strong>性能：</strong> SPA 需要更多的客户端代码，需要下载数据的体积也更大。这使得手机加载速度很慢。</li>
+<li><strong>SEO：</strong> 因为单页面应用依赖于 JavaScript 的执行，服务器不会提供它们可能用到的任何 HTML 内容。因此，web 爬虫很难去索引到这些页面。</li>
+</ul>
+<p><strong>所谓的同构 JavaScript 应用：</strong></p>
+<p>同构 JavaScript 应用基于 JavaScript 编写，可以在客户端和服务端运行。正因为此，你只需要写一次代码，就可以在服务端渲染静态页面，还可以在客户端完成复杂的交互。所以，这种方式互通了两个世界，并且避免了前面提到了两个问题。</p>
+<h2 id="需要注意的地方"><a href="#需要注意的地方" class="headerlink" title="需要注意的地方"></a>需要注意的地方</h2><p>原来的应用是 SPA，要迁移到 SSR 需要注意几个问题。</p>
+<h3 id="根据-url-初始化数据"><a href="#根据-url-初始化数据" class="headerlink" title="根据 url 初始化数据"></a>根据 url 初始化数据</h3><p>很多时候需要根据 url 来初始化数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderFullPage</span>(<span class="params">html, initialState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`</span></span><br><span class="line"><span class="string">        &lt;!doctype html&gt;</span></span><br><span class="line"><span class="string">        &lt;html&gt;</span></span><br><span class="line"><span class="string">            &lt;head&gt;</span></span><br><span class="line"><span class="string">                &lt;title&gt;Redux Universal Example&lt;/title&gt;</span></span><br><span class="line"><span class="string">            &lt;/head&gt;</span></span><br><span class="line"><span class="string">            &lt;body&gt;</span></span><br><span class="line"><span class="string">                &lt;div id="root"&gt;<span class="subst">$&#123;html&#125;</span>&lt;/div&gt;</span></span><br><span class="line"><span class="string">                &lt;script&gt;</span></span><br><span class="line"><span class="string">                    window.__INITIAL_STATE__ = <span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(initialState)&#125;</span></span></span><br><span class="line"><span class="string">                &lt;/script&gt;</span></span><br><span class="line"><span class="string">                &lt;script src="/static/bundle.js"&gt;&lt;/script&gt;</span></span><br><span class="line"><span class="string">            &lt;/body&gt;</span></span><br><span class="line"><span class="string">        &lt;/html&gt;</span></span><br><span class="line"><span class="string">    `</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">router.use(<span class="string">'/home'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">    <span class="comment">// getinitState 是从数据库来取出的数据并整理成 state</span></span><br><span class="line">    <span class="keyword">let</span> initialState = <span class="keyword">await</span> getinitState();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建新的 Redux store 实例</span></span><br><span class="line">    <span class="keyword">const</span> store = createStore(counterApp, initialState);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把组件渲染成字符串</span></span><br><span class="line">    <span class="keyword">const</span> html = renderToString(</span><br><span class="line">        &lt;Provider store=&#123;store&#125;&gt;</span><br><span class="line">            &lt;App /&gt;</span><br><span class="line">        &lt;<span class="regexp">/Provider&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    /</span><span class="regexp">/ 从 Redux store 得到初始 state</span></span><br><span class="line"><span class="regexp">    const finalState = store.getState();</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">    /</span><span class="regexp">/ 把渲染后的页面发给客户端</span></span><br><span class="line"><span class="regexp">    ctx.body = renderFullPage(html, finalState);</span></span><br><span class="line"><span class="regexp">&#125;)</span></span><br></pre></td></tr></table></figure>
+<h3 id="前后端环境"><a href="#前后端环境" class="headerlink" title="前后端环境"></a>前后端环境</h3><p>SSR 需要共用一套代码，这就意味着需要前后端环境的判断。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isEnv = <span class="built_in">require</span>(<span class="string">'is-env'</span>);</span><br><span class="line">isEnv(<span class="string">'nodejs'</span>);</span><br><span class="line"><span class="comment">// 或者</span></span><br><span class="line"><span class="keyword">const</span> isNode = <span class="keyword">typeof</span> <span class="built_in">window</span> === <span class="string">'undefined'</span>;</span><br></pre></td></tr></table></figure>
+<p>在 Nodejs 里是没有 window 对象的，因此可以利用 window 对象来判断环境。</p>
+<h3 id="资源加载差异"><a href="#资源加载差异" class="headerlink" title="资源加载差异"></a>资源加载差异</h3><p>我们在进行组件化开发的模式式，样式文件也是通过 require 方法来引入的，而 Node 同样是无法默认解析样式文件的。类似的，一些浏览器环境需要的工具脚本，一定是依赖浏览器 API 的（BOM 对象），所以也不应该在 Node 加载，于是就有了：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (isNode) &#123;</span><br><span class="line">    <span class="comment">// 服务端需要的资源</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 组件样式</span></span><br><span class="line">    <span class="built_in">require</span>(<span class="string">'./Main.less'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 工具</span></span><br><span class="line">    <span class="keyword">const</span> ajax = <span class="built_in">require</span>(<span class="string">'js/ajax.js'</span>);</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 前端渲染组件，服务端渲染时不需要</span></span><br><span class="line">    <span class="keyword">const</span> SlidingBar = <span class="built_in">require</span>(<span class="string">'../../components/SlidingBar.jsx'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 一些mixin也不需在Node加载</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="生命周期方法"><a href="#生命周期方法" class="headerlink" title="生命周期方法"></a>生命周期方法</h3><p>React 组件在服务端只有 componentDidMount 之前的方法会被执行（之后已经到了前端那里了）。<br>因此也要保证在 getInitialState、render 等方法中不会使用到浏览器 API，而将相应的操作放到 componentDidMount 中执行。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="comment">// ... 在这里执行</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;...&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="后端性能相关"><a href="#后端性能相关" class="headerlink" title="后端性能相关"></a>后端性能相关</h3><p>请求放在后端渲染，势必会多一些压力点。除了需要在接入层做到负载均衡，在缓存上也可以考虑分布式缓存等优化策略。在数据超时的情况，也需要保证页面的正常输出，而此时返回的内容其实就等同于非服务端渲染的 HTML 页面内容。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://www.alloyteam.com/2015/10/8783/" target="_blank" rel="noopener">http://www.alloyteam.com/2015/10/8783/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.887Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/05/React/Universal 同构/React 服务端渲染/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/05/React/Universal 同构/React 服务端渲染/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/服务端渲染/">服务端渲染</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/05/Nodejs/Nodejs 命令行开发/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Nodejs 命令行开发</h4>
+        <h4 class="summary">最简单开始Nodejs 里有许多优秀的命令行工具，比如：http-server, babel-cli 等。但是它们又是怎...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/05/React Native/Router/React Native 新 Navigation 的使用/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 新 Navigation 的使用</h4>
+        <h4 class="summary">Navigation最近 React-Native 0.44.0 发布了，发现原有的 Navigation 从 Reac...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

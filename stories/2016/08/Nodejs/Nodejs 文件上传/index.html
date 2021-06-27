@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2016/08/Nodejs/Nodejs 文件上传/">
+    
+    
+    <title>Nodejs 文件上传 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="文件上传Nodejs 文件上传，最原始的是利用 req.body 来实现，但是这样非常不好扩展。 对于复合表单处理，目前有两种流行而健壮的选择：Busboy 和 Formidable。我发现 Formidable 要稍微简单一些，因为它有一个方便的回调方法，能够提供包含字段和文件信息的对象。对于 Busboy 而言，你必须对每一个字段和文件事件进行监听。 同步与异步本文，介绍两个文件上传的方式：同">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs 文件上传">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2016/08/Nodejs/Nodejs 文件上传/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="文件上传Nodejs 文件上传，最原始的是利用 req.body 来实现，但是这样非常不好扩展。 对于复合表单处理，目前有两种流行而健壮的选择：Busboy 和 Formidable。我发现 Formidable 要稍微简单一些，因为它有一个方便的回调方法，能够提供包含字段和文件信息的对象。对于 Busboy 而言，你必须对每一个字段和文件事件进行监听。 同步与异步本文，介绍两个文件上传的方式：同">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815000643507.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815100653881.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815105143245.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815112541978.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815114717284.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815114556159.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815115809804.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.840Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs 文件上传">
+<meta name="twitter:description" content="文件上传Nodejs 文件上传，最原始的是利用 req.body 来实现，但是这样非常不好扩展。 对于复合表单处理，目前有两种流行而健壮的选择：Busboy 和 Formidable。我发现 Formidable 要稍微简单一些，因为它有一个方便的回调方法，能够提供包含字段和文件信息的对象。对于 Busboy 而言，你必须对每一个字段和文件事件进行监听。 同步与异步本文，介绍两个文件上传的方式：同">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2016/8/20160815000643507.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs 文件上传</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs 文件上传</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs 文件上传</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2016-08-21T07:29:30.000Z" itemprop="datePublished" class="page-time">
+    2016-08-21
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#文件上传"><span class="post-toc-number">1.</span> <span class="post-toc-text">文件上传</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#同步与异步"><span class="post-toc-number">2.</span> <span class="post-toc-text">同步与异步</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基于Express"><span class="post-toc-number">3.</span> <span class="post-toc-text">基于Express</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Form-方式进行同步上传文件"><span class="post-toc-number">4.</span> <span class="post-toc-text">Form 方式进行同步上传文件</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Formidable"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">Formidable</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Formidable-API-使用"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">Formidable API 使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#前端工作"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">前端工作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#后端配置路由"><span class="post-toc-number">4.4.</span> <span class="post-toc-text">后端配置路由</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#引入-Formidable-模块"><span class="post-toc-number">4.5.</span> <span class="post-toc-text">引入 Formidable 模块</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Ajax-方式进行异步上传文件"><span class="post-toc-number">5.</span> <span class="post-toc-text">Ajax 方式进行异步上传文件</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#前端工作-1"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">前端工作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#jQuery-File-Upload"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">jQuery-File-Upload</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#前端配置"><span class="post-toc-number">5.3.</span> <span class="post-toc-text">前端配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#后端配置"><span class="post-toc-number">5.4.</span> <span class="post-toc-text">后端配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#非自动上传"><span class="post-toc-number">5.5.</span> <span class="post-toc-text">非自动上传</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">6.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Nodejs 文件上传"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs 文件上传</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2016 年 08 月 21 日 15:29" datetime="2016-08-21T07:29:30.000Z"  itemprop="datePublished">
+    2016-08-21
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2249</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  25  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h2><p>Nodejs 文件上传，最原始的是利用 req.body 来实现，但是这样非常不好扩展。</p>
+<p>对于复合表单处理，目前有两种流行而健壮的选择：Busboy 和 Formidable。<br>我发现 Formidable 要稍微简单一些，因为它有一个方便的回调方法，能够提供包含字段和文件信息的对象。<br>对于 Busboy 而言，你必须对每一个字段和文件事件进行监听。</p>
+<h2 id="同步与异步"><a href="#同步与异步" class="headerlink" title="同步与异步"></a>同步与异步</h2><p>本文，介绍两个文件上传的方式：同步与异步</p>
+<p>同步基于：<code>Formidable</code><br>异步基于：<code>jQuery-File-Upload</code></p>
+<a id="more"></a>
+<h2 id="基于Express"><a href="#基于Express" class="headerlink" title="基于Express"></a>基于Express</h2><p>借助 Express 的路由机制</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>),</span><br><span class="line">    app     = express();</span><br><span class="line"></span><br><span class="line">app.set(<span class="string">'port'</span>, <span class="number">8888</span>);</span><br></pre></td></tr></table></figure>
+<p>先设置静态资源目录：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">app.use(express.static(</span><br><span class="line">    path.join(__dirname, <span class="string">'public'</span>)</span><br><span class="line">));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 或者</span></span><br><span class="line">app.get(<span class="string">'/public*'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> url = req.url;</span><br><span class="line">    res.sendFile(__dirname + url);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="Form-方式进行同步上传文件"><a href="#Form-方式进行同步上传文件" class="headerlink" title="Form 方式进行同步上传文件"></a>Form 方式进行同步上传文件</h2><p>基于 Formidable 的异步文件上传方式。</p>
+<h3 id="Formidable"><a href="#Formidable" class="headerlink" title="Formidable"></a>Formidable</h3><p>Formidable 是一个很好的文件上传封装模块。</p>
+<blockquote>
+<p>sNPM: <a href="https://www.npmjs.com/package/formidable" target="_blank" rel="noopener">https://www.npmjs.com/package/formidable</a></p>
+</blockquote>
+<h3 id="Formidable-API-使用"><a href="#Formidable-API-使用" class="headerlink" title="Formidable API 使用"></a>Formidable API 使用</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下载对应包</span></span><br><span class="line">npm install --save formidable</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引入模块</span></span><br><span class="line"><span class="keyword">var</span> formidable = <span class="built_in">require</span>(<span class="string">'formidable'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建Formidable.IncomingForm对象</span></span><br><span class="line"><span class="keyword">var</span> form = <span class="keyword">new</span> formidable.IncomingForm();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置表单域的编码</span></span><br><span class="line">form.encoding = <span class="string">'utf-8'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置上传文件存放的临时文件夹，默认为系统的临时文件夹</span></span><br><span class="line">form.uploadDir = <span class="string">"/my/dir"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置该属性为true可以使得上传的文件保持原来的文件的扩展名</span></span><br><span class="line">form.keepExtensions = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 限制所有存储表单字段域的大小，超出会触发error事件，默认2M</span></span><br><span class="line">form.maxFieldsSize = <span class="number">2</span> * <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置上传文件的检验码，可以有两个取值'sha1' or 'md5'.</span></span><br><span class="line">form.hash = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// true时，当调用form.parse()方法时，回调函数的files参数将会是file数组，需要html5中multiple特性</span></span><br><span class="line">form.multiples = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回服务器已经接收到当前表单数据多少字节</span></span><br><span class="line">form.bytesReceived</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回将要接收到当前表单所有数据的大小</span></span><br><span class="line">form.bytesExpected</span><br><span class="line"></span><br><span class="line"><span class="comment">// (常用)* 该方法会转换请求中所包含的表单数据，callback会包含所有字段域和文件信息</span></span><br><span class="line">form.parse(req, <span class="function"><span class="keyword">function</span>(<span class="params">error, fields, files</span>) </span>&#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 每当有一对字段/文件已经接收到，便会触发该事件</span></span><br><span class="line">form.on(<span class="string">'file'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">name, file</span>) </span>&#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当上传流中出现错误便会触发该事件</span></span><br><span class="line">form.on(<span class="string">'error'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">error</span>) </span>&#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当所有的请求已经接收到，并且所有的文件都已上传到服务器中，该事件会触发</span></span><br><span class="line">form.on(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="前端工作"><a href="#前端工作" class="headerlink" title="前端工作"></a>前端工作</h3><p>首先，需要做好前端的工作，编写html页面。以同步的方式进行文件上传，在前端里面非常简单，只需要在<code>&lt;from&gt;</code>里面写好<code>action</code>就可以了。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">type</span>=<span class="string">"text/css"</span> <span class="attr">href</span>=<span class="string">"/public/css/semantic.min.css"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="css">    <span class="selector-class">.ui</span> *&#123;</span></span><br><span class="line">        font-family: "Consolas" !important;</span><br><span class="line">        font-size: 17px !important;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"ui grid"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"eight wide centered column"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">form</span> <span class="attr">class</span>=<span class="string">"ui form"</span> <span class="attr">id</span>=<span class="string">"form"</span> <span class="attr">method</span>=<span class="string">"post"</span> <span class="attr">enctype</span>=<span class="string">"multipart/form-data"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">action</span>=<span class="string">"/contest/&#123;&#123;year&#125;&#125;/&#123;&#123;month&#125;&#125;"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"field"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"ui file"</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"file"</span> <span class="attr">id</span>=<span class="string">"fieldPhoto"</span> <span class="attr">multiple</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">button</span> <span class="attr">class</span>=<span class="string">"ui button"</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">id</span>=<span class="string">"sub"</span>&gt;</span>Submit<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2016/8/20160815000643507.png" alt="文件上传" title>
+            </div>
+            <div class="image-caption">文件上传</div>
+        </figure>
+    
+<h3 id="后端配置路由"><a href="#后端配置路由" class="headerlink" title="后端配置路由"></a>后端配置路由</h3><p>这里需要用 Express 配置路由，假设这是个 /about</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">app.get(<span class="string">'/about'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> now = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">    res.render(<span class="string">'about'</span>, &#123;</span><br><span class="line">            <span class="comment">// 模版引擎数据</span></span><br><span class="line">            year: now.getFullYear(),</span><br><span class="line">            month: now.getMonth(),</span><br><span class="line">            fortune: forturn.getForurn(),</span><br><span class="line">            title: <span class="string">'Again'</span>,</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">function</span>(<span class="params">error, html</span>) </span>&#123;</span><br><span class="line">            res.status(<span class="number">200</span>).send(html);</span><br><span class="line">        &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="引入-Formidable-模块"><a href="#引入-Formidable-模块" class="headerlink" title="引入 Formidable 模块"></a>引入 Formidable 模块</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save formidable</span><br></pre></td></tr></table></figure>
+<p>并创建对象</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> formidable = <span class="built_in">require</span>(<span class="string">'formidable'</span>);</span><br></pre></td></tr></table></figure>
+<p>配置文件上传后处理的路由 (注意：如果部分文件夹不存在，会抛出异常：No such file or directory 文件路径不存在)</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 文件上传的url地址</span></span><br><span class="line">app.post(<span class="string">'/contest/:year/:month'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 创建 formidable 对象</span></span><br><span class="line">    <span class="keyword">var</span> form = <span class="keyword">new</span> formidable.IncomingForm();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 文件上传临时文件存放路径</span></span><br><span class="line">    form.uploadDir = __dirname + <span class="string">'/public/tmp'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析文件</span></span><br><span class="line">    form.parse(req, <span class="function"><span class="keyword">function</span>(<span class="params">error, fields, files</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(error) <span class="keyword">return</span> res.redirect(<span class="number">303</span>, <span class="string">'/error'</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 根据 name 的名称, &lt;input name="file" type="file" /&gt;</span></span><br><span class="line">        <span class="keyword">var</span> file = files.file;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 设置新的文件名</span></span><br><span class="line">        <span class="keyword">var</span> name = <span class="built_in">Date</span>.now() + <span class="string">'-'</span> + path.basename(file.name);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 限制上传文件类型</span></span><br><span class="line">        <span class="keyword">var</span> docType = [<span class="string">'image/jpeg'</span>, <span class="string">'image/png'</span>, <span class="string">'image/gif'</span>];</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 文件类型不是合法的</span></span><br><span class="line">        <span class="keyword">if</span>(docType.indexOf(file.type) == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="comment">//手动触发 error</span></span><br><span class="line">            form.emit(<span class="string">'error'</span>, <span class="string">"不允许的类型"</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 删掉临时文件</span></span><br><span class="line">            fs.unlink(file.path, <span class="function"><span class="keyword">function</span>(<span class="params">error</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(error) <span class="built_in">console</span>.warn(error);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 移动文件到指定目录</span></span><br><span class="line">            fs.rename(file.path, __dirname + <span class="string">'/public/uploads/'</span> + name,</span><br><span class="line">                <span class="function"><span class="keyword">function</span>(<span class="params">error</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">if</span>(error) <span class="built_in">console</span>.warn(error);</span><br><span class="line">                &#125;</span><br><span class="line">            );</span><br><span class="line">            <span class="comment">// 返回文件上传成功后的信息</span></span><br><span class="line">            res.send(files);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    form.on(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 上传完成后，处理的工作，比如跳转到其他页面</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这样的会，基本实现的用 form 同步的文件上传。<br>这是 <code>res.send(files);</code> 返回的信息</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2016/8/20160815100653881.png" alt="文件上传" title>
+            </div>
+            <div class="image-caption">文件上传</div>
+        </figure>
+    
+<h2 id="Ajax-方式进行异步上传文件"><a href="#Ajax-方式进行异步上传文件" class="headerlink" title="Ajax 方式进行异步上传文件"></a>Ajax 方式进行异步上传文件</h2><p>基于 jQuery-File-Upload 的异步文件上传方式。</p>
+<h3 id="前端工作-1"><a href="#前端工作-1" class="headerlink" title="前端工作"></a>前端工作</h3><p>首先，需要做好前端的工作，编写html页面。<br>注意 data-url=”/upload” 是上传处理地址</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="css">    <span class="selector-class">.ui</span> *&#123;</span></span><br><span class="line">        font-family: "Consolas" !important;</span><br><span class="line">        font-size: 17px !important;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="css">    <span class="selector-class">.ui</span> <span class="selector-tag">p</span>&#123;</span></span><br><span class="line">        margin: 5px !important;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="css">    <span class="selector-class">.ui</span> <span class="selector-tag">label</span>&#123;</span></span><br><span class="line">        margin: 2px !important;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="css">    <span class="selector-class">.ui</span> <span class="selector-class">.bar</span> &#123;</span></span><br><span class="line">        height: 1;</span><br><span class="line">        color: white;</span><br><span class="line"><span class="css">        <span class="selector-tag">background</span>: <span class="selector-id">#00ACED</span>;</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"ui grid"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"eight wide centered column"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">form</span> <span class="attr">class</span>=<span class="string">"ui form"</span> <span class="attr">id</span>=<span class="string">"form"</span> <span class="attr">method</span>=<span class="string">"post"</span> <span class="attr">enctype</span>=<span class="string">"multipart/form-data"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"field"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"ui file"</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"file"</span> <span class="attr">id</span>=<span class="string">"fieldPhoto"</span> <span class="attr">data-url</span>=<span class="string">"/upload"</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">button</span> <span class="attr">class</span>=<span class="string">"ui button"</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">id</span>=<span class="string">"sub"</span>&gt;</span>Submit<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!--手动上传--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"ui message"</span> <span class="attr">id</span>=<span class="string">"upbut"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"ui message"</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!--动态加载条--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"progress"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"bar"</span> <span class="attr">style</span>=<span class="string">"width: 0%;"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"header"</span>&gt;</span>File List :  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!--文件列表--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"uploads"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span></span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2016/8/20160815105143245.png" alt="文件上传" title>
+            </div>
+            <div class="image-caption">文件上传</div>
+        </figure>
+    
+<h3 id="jQuery-File-Upload"><a href="#jQuery-File-Upload" class="headerlink" title="jQuery-File-Upload"></a>jQuery-File-Upload</h3><p>使用 Ajax 异步上传要用到一些JQuery插件， jQuery File Upload 是一个真正别出心裁的文件上传，可拖拽，可以看到上传文件缩略图，并查能看进度条的优秀JQuery插件，在Github上已有20000+star<br>而 Jquery-File-Upload-Middleware 则是 jQuery-File-Upload 在 Nodejs 上的中间件。<br>在前端页面中需要添加一些，Js代码来进行Ajax，使用 jQuery File Upload 你必须引入一些依赖库。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/public/js/jquery.min.js"</span> &gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--相关依赖库--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/public/js/jquery.ui.widget.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/public/js/jquery.iframe-transport.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/public/js/jquery.fileupload.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>接着编写js, 配置相关参数</p>
+<h3 id="前端配置"><a href="#前端配置" class="headerlink" title="前端配置"></a>前端配置</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    $(<span class="string">'#fieldPhoto'</span>).fileupload( &#123;</span><br><span class="line">        dataType: <span class="string">'json'</span>,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在传递过程中触发，用于制作动态加载条</span></span><br><span class="line">        progressall: <span class="function"><span class="keyword">function</span>(<span class="params">e, data</span>) </span>&#123;</span><br><span class="line">            <span class="comment">// 计算百分比</span></span><br><span class="line">            <span class="keyword">var</span> progress = <span class="built_in">parseInt</span>(data.loaded / data.total * <span class="number">100</span>, <span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 设置动画</span></span><br><span class="line">            $(<span class="string">'#progress .bar'</span>)</span><br><span class="line">                .stop()</span><br><span class="line">                .animate(&#123;<span class="string">'width'</span>: progress + <span class="string">'%'</span>&#125;, <span class="number">120</span>)</span><br><span class="line">                .text(progress + <span class="string">'%'</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(progress &gt;= <span class="number">100</span>) &#123;</span><br><span class="line">                $(<span class="string">'#progress .bar'</span>).css(<span class="string">'width'</span>, <span class="string">'0%'</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">        // 选择文件，显示到界面，但是不上传。点击文件名后上传</span></span><br><span class="line"><span class="comment">        add: function (e, data) &#123;</span></span><br><span class="line"><span class="comment">            data.context = $('&lt;label class="ui label"&gt;').text(data.files[0].name)</span></span><br><span class="line"><span class="comment">                .appendTo($('#upbut'))</span></span><br><span class="line"><span class="comment">                .click(function () &#123;</span></span><br><span class="line"><span class="comment">                    $(this).replaceWith($('&lt;p/&gt;').text(data.files[0].name + ' Ok...'));</span></span><br><span class="line"><span class="comment">                    data.submit();</span></span><br><span class="line"><span class="comment">                &#125;);</span></span><br><span class="line"><span class="comment">        &#125;,</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 上传结束后触发</span></span><br><span class="line">        done: <span class="function"><span class="keyword">function</span>(<span class="params">e, data</span>) </span>&#123;</span><br><span class="line">            <span class="comment">// 遍历已经上传的文件</span></span><br><span class="line">            $.each(data.result.files, <span class="function"><span class="keyword">function</span>(<span class="params">index, file</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">var</span> html =<span class="string">'&lt;p&gt;&lt;a href="'</span> + file.url + <span class="string">'" target="_blank"&gt; '</span></span><br><span class="line">                                + file.originalName + <span class="string">' &lt;/a&gt; size: '</span> +</span><br><span class="line">                                <span class="built_in">parseInt</span>(file.size/<span class="number">1024</span>) +<span class="string">' KB. &lt;/p&gt;'</span>;</span><br><span class="line"></span><br><span class="line">                $(<span class="string">'#uploads'</span>).append(html);</span><br><span class="line">                <span class="built_in">console</span>.log(file);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="后端配置"><a href="#后端配置" class="headerlink" title="后端配置"></a>后端配置</h3><p>服务端设置，首先，安装 jquery-file-upload-middleware 包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save jquery-file-upload-middleware</span><br></pre></td></tr></table></figure>
+<p>然后在你的应用文件中添加以下代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> jqupload = <span class="built_in">require</span>(<span class="string">'jquery-file-upload-middleware'</span>);</span><br></pre></td></tr></table></figure>
+<p><strong>接着，去编写 Nodejs 的路由配置</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="string">'/upload'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">request, response, next</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> time  = <span class="keyword">new</span> <span class="built_in">Date</span>,</span><br><span class="line">        stamp = time.getTime(),</span><br><span class="line">        day   = time.getDate(),</span><br><span class="line">        month = time.getMonth() + <span class="number">1</span>,</span><br><span class="line">        year  = time.getFullYear();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 按天来对文件进行分组</span></span><br><span class="line">    <span class="keyword">var</span> filename = year + <span class="string">'-'</span> + month + <span class="string">'-'</span> + day;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 上传开始时触发</span></span><br><span class="line">    jqupload.on(<span class="string">'begin'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">fileInfo, request, response</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 设置新名称</span></span><br><span class="line">        fileInfo.name = stamp + <span class="string">'-'</span> + fileInfo.originalName;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    jqupload.fileHandler(&#123;</span><br><span class="line">        uploadDir: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> __dirname + <span class="string">'/public/uploads/'</span> + path.basename(filename);</span><br><span class="line">        &#125;,</span><br><span class="line">        uploadUrl: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">'/public/uploads/'</span> + path.basename(filename);</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)(request, response, next);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>配置完成后，对页面进行测试。点击上传后，获得相关文件信息</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2016/8/20160815112541978.png" alt="文件上传" title>
+            </div>
+            <div class="image-caption">文件上传</div>
+        </figure>
+    
+<p>根据 console.log(file); 在控制台可以看到一个文件信息对象</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2016/8/20160815114717284.png" alt="文件上传" title>
+            </div>
+            <div class="image-caption">文件上传</div>
+        </figure>
+    
+<p>去访问图片的 url , 发现能正常访问</p>
+<p>Ajax文件上传 OK</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2016/8/20160815114556159.png" alt="文件上传" title>
+            </div>
+            <div class="image-caption">文件上传</div>
+        </figure>
+    
+<h3 id="非自动上传"><a href="#非自动上传" class="headerlink" title="非自动上传"></a>非自动上传</h3><p>当时你会发现，每次选择文件后就会自动上传。这是 jquery-file-upload 的默认设置造成的。</p>
+<p><strong>因此，把上面 js 注释去掉后，就可以根据自己的需求时间来上传。</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">add: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</span><br><span class="line">    data.context = $(<span class="string">'&lt;label class="ui label"&gt;'</span>).text(data.files[<span class="number">0</span>].name)</span><br><span class="line">        .appendTo($(<span class="string">'#upbut'</span>))</span><br><span class="line">        .click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            $(<span class="keyword">this</span>).replaceWith($(<span class="string">'&lt;p/&gt;'</span>).text(data.files[<span class="number">0</span>].name + <span class="string">' Ok...'</span>));</span><br><span class="line">            data.submit();</span><br><span class="line">        &#125;);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>当你点击每个 label 时，文件才会上传到服务器里，不点击，<code>文件只会临时保存在内存中</code>。</p>
+<p><img src="/assets/image/2016/8/20160815115809804.png" alt="文件上传"></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>Node-formidable API 说明：<a href="https://github.com/felixge/node-formidable" target="_blank" rel="noopener">https://github.com/felixge/node-formidable</a></li>
+<li>jQuery-File-Upload API 说明：<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/API" target="_blank" rel="noopener">https://github.com/blueimp/jQuery-File-Upload/wiki/API</a></li>
+<li>jquery-file-upload-middleware API 说明：<a href="https://github.com/aguidrevitch/jquery-file-upload-middleware" target="_blank" rel="noopener">https://github.com/aguidrevitch/jquery-file-upload-middleware</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.840Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2016/08/Nodejs/Nodejs 文件上传/" target="_blank" rel="external">http://me.lizhooh.com/stories/2016/08/Nodejs/Nodejs 文件上传/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2016/10/抓包&爬虫/JsDom 使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">JsDom 使用指南</h4>
+        <h4 class="summary">jsdom 是许多 Web 标准的纯 JavaScript 实现，特别是 WHATWG DOM 和 HTML 标准，用于...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2016/03/Style/Sass 学习笔记/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Sass 学习笔记</h4>
+        <h4 class="summary">简介Sass 是一款强化 CSS 的辅助工具，它在 CSS 语法的基础上增加了变量 (variables)、嵌套 (ne...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

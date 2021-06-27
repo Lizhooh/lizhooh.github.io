@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/04/抓包&爬虫/Puppeteer 使用指南/">
+    
+    
+    <title>Puppeteer 使用指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言前端自动化测试是一个很复杂以及涉及面广阔的知识点，同时也是前端工程化重要的分支，讲究的是自动化与智能模拟测试。Puppeteer 是一个可用于前端自动化测试的工具 ……">
+<meta name="keywords" content="后端,Nodejs,爬虫">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Puppeteer 使用指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/04/抓包&爬虫/Puppeteer 使用指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言前端自动化测试是一个很复杂以及涉及面广阔的知识点，同时也是前端工程化重要的分支，讲究的是自动化与智能模拟测试。Puppeteer 是一个可用于前端自动化测试的工具 ……">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/4/2096.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.917Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Puppeteer 使用指南">
+<meta name="twitter:description" content="前言前端自动化测试是一个很复杂以及涉及面广阔的知识点，同时也是前端工程化重要的分支，讲究的是自动化与智能模拟测试。Puppeteer 是一个可用于前端自动化测试的工具 ……">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/4/2096.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Puppeteer 使用指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Puppeteer 使用指南</h1>
+
+        <div class="meta-rest">
+            <h1>Puppeteer 使用指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-04-22T11:39:08.000Z" itemprop="datePublished" class="page-time">
+    2018-04-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Puppeteer"><span class="post-toc-number">2.</span> <span class="post-toc-text">Puppeteer</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#页面截图"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">页面截图</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#保存-PDF"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">保存 PDF</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#页面-DOM-操作"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">页面 DOM 操作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加载-script-style"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">加载 script/style</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#模拟行为"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">模拟行为</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#爬取数据"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">爬取数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#性能与分析"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">性能与分析</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#调试技巧"><span class="post-toc-number">2.8.</span> <span class="post-toc-text">调试技巧</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#前端自动化测试"><span class="post-toc-number">2.9.</span> <span class="post-toc-text">前端自动化测试</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自动化实践示例"><span class="post-toc-number">2.10.</span> <span class="post-toc-text">自动化实践示例</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">3.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-抓包&amp;爬虫/Puppeteer 使用指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Puppeteer 使用指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 04 月 22 日 19:39" datetime="2018-04-22T11:39:08.000Z"  itemprop="datePublished">
+    2018-04-22
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2472</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  27.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前端自动化测试是一个很复杂以及涉及面广阔的知识点，同时也是前端工程化重要的分支，讲究的是自动化与智能模拟测试。Puppeteer 是一个可用于前端自动化测试的工具 ……</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/4/2096.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="Puppeteer"><a href="#Puppeteer" class="headerlink" title="Puppeteer"></a>Puppeteer</h2><p>Puppeteer 是一个 Chrome 开发团队推出的一个无头浏览器库，可以让开发者在 Nodejs 里调 Chrome 的 API 来操纵 Web 应用。Puppeteer 类似于 Selenium 或是 PhantomJs，但它不同的是它的操作 Dom 可以完全在内存中进行模拟既在 V8 引擎中处理而不打开浏览器，可以认为这是一个真实存在而看不见的浏览器外壳。</p>
+<p>Puppeteer 的使用方式与 PhantomJs，如果使用过从 PhantomJs 过渡到 Puppeteer 几乎是没有任何的难度。</p>
+<p>可参考 PhantomJs 的相关文章：<a href="/stories/2017/10/抓包&爬虫/Phantomjs%20简明的使用教程/"> Phantomjs 简明的使用教程。</a></p>
+<p><b>安装：</b><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add puppeteer</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>安装，在国内环境会被墙，解决方案参考：<a href="https://github.com/GoogleChrome/puppeteer/issues/1597" target="_blank" rel="noopener">puppeteer/issues/1597</a>，也可以像笔者一样，开<a href="https://github.com/getlantern/forum" target="_blank" rel="noopener">蓝灯</a>后 yarn 安然无恙的安装。</p>
+</blockquote>
+<p>下面介绍 puppeteer 的基本使用方式。此外，推荐看一个很好的示例库：<a href="https://github.com/checkly/puppeteer-examples" target="_blank" rel="noopener">puppeteer-examples</a>。</p>
+<h3 id="页面截图"><a href="#页面截图" class="headerlink" title="页面截图"></a>页面截图</h3><p>下面使用 puppeteer 来对百度进行截图，并保存到本地。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">'puppeteer'</span>);</span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();       <span class="comment">// 启动一个浏览器</span></span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();           <span class="comment">// 加载一个页面标签</span></span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">'https://www.baidu.com'</span>);       <span class="comment">// 访问某个页面</span></span><br><span class="line">    <span class="keyword">await</span> page.screenshot(&#123; <span class="attr">path</span>: <span class="string">'baidu.png'</span> &#125;);   <span class="comment">// 截图并保存在本地</span></span><br><span class="line">    <span class="keyword">await</span> browser.close();                          <span class="comment">// 关闭浏览器（释放内存）</span></span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure>
+<p>在默认情况下，使用的是 headless 模式（无头浏览器），也可以不使用 headless，在 launch 里设置 headless 为 false 即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">puppeteer.launch(&#123; <span class="attr">headless</span>: <span class="literal">false</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>在上面的示例里可以看到截图的大小是 800px * 600px，那是 puppeteer 默认的窗口大小，同样也可以自己设置。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">page.setViewport(&#123; <span class="attr">width</span>: <span class="number">1920</span>, <span class="attr">height</span>: <span class="number">1080</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>参考 API：<a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagesetviewportviewport" target="_blank" rel="noopener">page.setViewport</a></p>
+<h3 id="保存-PDF"><a href="#保存-PDF" class="headerlink" title="保存 PDF"></a>保存 PDF</h3><p>在 Chrome 里所有功能 Puppeteer 都支持，包括把页面保存成 PDF，也没问题。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">'puppeteer'</span>);</span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">    <span class="keyword">await</span> page.goto( <span class="string">'https://www.baidu.com'</span>);</span><br><span class="line">    <span class="keyword">await</span> page.pdf(&#123; <span class="attr">path</span>: <span class="string">'hn.pdf'</span>, <span class="attr">format</span>: <span class="string">'A4'</span> &#125;);</span><br><span class="line">    <span class="keyword">await</span> browser.close();</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p>参考 API：<a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagepdfoptions" target="_blank" rel="noopener">page.pdf</a></p>
+<h3 id="页面-DOM-操作"><a href="#页面-DOM-操作" class="headerlink" title="页面 DOM 操作"></a>页面 DOM 操作</h3><p>下面代码表明如何获取页面的 title 标签的值。通过上下文传参数，进行数据的交互。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">'puppeteer'</span>);</span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">'https://www.baidu.com'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 监听 console 输出</span></span><br><span class="line">    page.on(<span class="string">"console"</span>, (msgobj) =&gt; <span class="built_in">console</span>.log(<span class="string">"PAGE LOG:"</span>, msgobj));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> dimensions = <span class="keyword">await</span> page.evaluate(<span class="function">(<span class="params">&#123; selector &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> title = <span class="built_in">document</span>.querySelector(selector).innerText;</span><br><span class="line">        <span class="built_in">console</span>.log(title);</span><br><span class="line">        <span class="keyword">return</span> &#123; title &#125;;</span><br><span class="line">    &#125;, &#123; <span class="attr">selector</span>: <span class="string">'head &gt; title'</span> &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'Dimensions:'</span>, dimensions);</span><br><span class="line">    <span class="keyword">await</span> browser.close();</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p>输出的结果：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">PAGE LOG: ConsoleMessage &#123;</span><br><span class="line">  _type: <span class="string">'log'</span>,</span><br><span class="line">  _text: <span class="string">'百度一下，你就知道'</span>,</span><br><span class="line">  _args:</span><br><span class="line">   [ JSHandle &#123;</span><br><span class="line">       _context: [ExecutionContext],</span><br><span class="line">       _client: [CDPSession],</span><br><span class="line">       _remoteObject: [<span class="built_in">Object</span>],</span><br><span class="line">       _disposed: <span class="literal">false</span> &#125; ] &#125;</span><br><span class="line">Dimensions: &#123; <span class="attr">title</span>: <span class="string">'百度一下，你就知道'</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>因为 console 事件返回的是序列化信息，所以可以根据对应的关系，映射到 nodejs 里的 console 对象上。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">page.on(<span class="string">"console"</span>, msgobj =&gt; <span class="built_in">console</span>[msgobj._type](<span class="string">'PAGE Print:'</span>, msgobj._text));</span><br></pre></td></tr></table></figure>
+<p><code>page</code> 还提供了，几个便捷的查询 API。</p>
+<ul>
+<li>page.$</li>
+<li>page.$$</li>
+<li>page.$eval</li>
+<li>page.$$eval</li>
+</ul>
+<h3 id="加载-script-style"><a href="#加载-script-style" class="headerlink" title="加载 script/style"></a>加载 script/style</h3><p>puppeteer 提供 page.addScriptTag 和 page.addStyleTag 用于额外的加载脚本与样式。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> page.addScriptTag(&#123;</span><br><span class="line">    url: <span class="string">'https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js'</span>,</span><br><span class="line">    path: <span class="string">''</span>,       <span class="comment">// 本地 js 文件路径</span></span><br><span class="line">    content: <span class="string">''</span>,    <span class="comment">// 上下文，可以是 js 代码</span></span><br><span class="line">    type: <span class="string">''</span>,       <span class="comment">// module 为 ES6 模块</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="模拟行为"><a href="#模拟行为" class="headerlink" title="模拟行为"></a>模拟行为</h3><p>下面，首先是打开 360 搜索的主页，接着在输入框里输入 puppeteer 关键件，并且点击搜索按钮提交。最后等待页面跳转后，把结果内容输出。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">"puppeteer"</span>);</span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">"https://www.so.com/"</span>, &#123; <span class="attr">waitUntil</span>: <span class="string">"networkidle2"</span> &#125;);</span><br><span class="line">    page.on(<span class="string">"console"</span>, msgobj =&gt; <span class="built_in">console</span>[msgobj._type](<span class="string">'PAGE Print:'</span>, msgobj._text));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> page.evaluate(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> kw = <span class="built_in">document</span>.getElementById(<span class="string">'input'</span>);</span><br><span class="line">        kw.value = <span class="string">'puppeteer'</span>;</span><br><span class="line">        <span class="built_in">console</span>.log(kw.value);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> page.click(<span class="string">"#search-button"</span>);</span><br><span class="line">    <span class="keyword">await</span> page.waitForNavigation(&#123; <span class="attr">waitUntil</span>: <span class="string">"networkidle2"</span> &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(page.url());</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">await</span> page.title());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> page.evaluate(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> resEl = <span class="built_in">document</span>.querySelector(<span class="string">'ul.result'</span>).querySelectorAll(<span class="string">'.res-title'</span>);</span><br><span class="line">        <span class="keyword">const</span> list = <span class="built_in">Array</span>.from(resEl);</span><br><span class="line">        <span class="keyword">return</span> list.map(<span class="function"><span class="params">i</span> =&gt;</span> i.innerText);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(result);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> browser.close();</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p>运行的结果：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PAGE Print: puppeteer</span><br><span class="line">https:<span class="comment">//www.so.com/s?ie=utf-8&amp;fr=none&amp;src=360sou_newhome&amp;q=puppeteer</span></span><br><span class="line">puppeteer_360搜索</span><br><span class="line">[ <span class="string">'Puppeteer的入门教程和实践- 任乃千- 简书'</span>,</span><br><span class="line">  <span class="string">'puppeteer - npm'</span>,</span><br><span class="line">  <span class="string">'如何成为Puppeteer大师'</span>,</span><br><span class="line">  <span class="string">'GitHub - GoogleChrome/puppeteer: Headless Chrome Node API'</span>,</span><br><span class="line">  <span class="string">'PS3《Puppeteer》将出中文版9月上市_电视游戏_新浪游戏_新浪网'</span>,</span><br><span class="line">  <span class="string">'puppeteer学习(一)——puppeteer与Chrome Headless - zrxJuly - ...'</span>,</span><br><span class="line">  <span class="string">'Puppeteer--UI自动化测试初探- CNode技术社区'</span>,</span><br><span class="line">  <span class="string">'Puppeteer 入门教程- 小一辈无产阶级码农'</span>,</span><br><span class="line">  <span class="string">'自动爬取SF文章并推荐到掘金--Puppeteer再探- CSDN博客'</span> ];</span><br></pre></td></tr></table></figure>
+<p>相关 API：</p>
+<ul>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pageclickselector-options" target="_blank" rel="noopener">page.click(selector)</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagehoverselector" target="_blank" rel="noopener">page.hover(selector)</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagemouse" target="_blank" rel="noopener">page.mouse(selector)</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#touchscreentapx-y" target="_blank" rel="noopener">page.touchscreen(selector)</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagefocusselector" target="_blank" rel="noopener">page.focus(selector)</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-keyboard" target="_blank" rel="noopener">page.keyboard</a></li>
+</ul>
+<p>其外还可以使用 <a href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-elementhandle" target="_blank" rel="noopener">ElementHandle</a> 类。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">'puppeteer'</span>);</span><br><span class="line"></span><br><span class="line">puppeteer.launch().then(<span class="keyword">async</span> browser =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">'https://www.baidu.com'</span>);</span><br><span class="line">    <span class="keyword">const</span> inputElement = <span class="keyword">await</span> page.$(<span class="string">'input[type=submit]'</span>);</span><br><span class="line">    <span class="keyword">await</span> inputElement.click();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="爬取数据"><a href="#爬取数据" class="headerlink" title="爬取数据"></a>爬取数据</h3><p>下面一个示例展示了如何爬取腾讯天气的天气数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">"puppeteer"</span>);</span><br><span class="line"><span class="keyword">const</span> devices = <span class="built_in">require</span>(<span class="string">'puppeteer/DeviceDescriptors'</span>);</span><br><span class="line"><span class="keyword">const</span> iPhone = devices[<span class="string">'iPhone 6'</span>];   <span class="comment">// 设备 user-agent 信息</span></span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.time(<span class="string">'run'</span>);</span><br><span class="line">    <span class="comment">// 1 start</span></span><br><span class="line">    <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">    <span class="keyword">await</span> page.emulate(iPhone);</span><br><span class="line">    <span class="comment">// 1 end</span></span><br><span class="line">    <span class="comment">// 2 start</span></span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">"http://weather.news.qq.com/"</span>, &#123; <span class="attr">waitUntil</span>: <span class="string">"networkidle2"</span> &#125;);</span><br><span class="line">    page.on(<span class="string">"console"</span>, msgobj =&gt; <span class="built_in">console</span>[msgobj._type](<span class="string">'PAGE Print:'</span>, msgobj._text));</span><br><span class="line">    <span class="comment">// 2 end</span></span><br><span class="line">    <span class="comment">// 3 start</span></span><br><span class="line">    <span class="keyword">const</span> res = <span class="keyword">await</span> page.evaluate(<span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">        city: $(<span class="string">'#txt-cur-location'</span>).text(),         <span class="comment">// 城市</span></span><br><span class="line">        time: $(<span class="string">'#txt-pub-time'</span>).text(),             <span class="comment">// 时间</span></span><br><span class="line">        temperature: $(<span class="string">'#txt-temperature'</span>).text(),   <span class="comment">// 温度</span></span><br><span class="line">        humidity: $(<span class="string">'#txt-humidity'</span>).text(),         <span class="comment">// 湿度</span></span><br><span class="line">        kPa: $(<span class="string">'#txt-kPa'</span>).text(),                   <span class="comment">// 帕斯卡</span></span><br><span class="line">        wind: $(<span class="string">'#txt-wind'</span>).text(),                 <span class="comment">// 风向</span></span><br><span class="line">    &#125;));</span><br><span class="line">    <span class="built_in">console</span>.log(res);</span><br><span class="line">    <span class="comment">// 3 end</span></span><br><span class="line">    <span class="keyword">await</span> browser.close();</span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<h3 id="性能与分析"><a href="#性能与分析" class="headerlink" title="性能与分析"></a>性能与分析</h3><p>在上面的爬取腾讯天气数据的示例里，在 1 阶段使用了 2143.250ms 的时间，在 2 阶段使用了 2707.230ms 的时间，在 3 阶段使用了 18.688ms 的时间。</p>
+<p>很明显，puppeteer 在加载时需要一定的时间，而通常网络上的加载数据以及 DOM 的加载速度占主要的消耗时间。<br>因此，可以从两方面去优化性能：</p>
+<ul>
+<li>复用 browser 对象，browser 对象是一个浏览器对象，可以使用 browser 创建无数个页面，在一定条件下尽量复用 browser。</li>
+<li>优化页面加载性能，这部分是前端的事情了。</li>
+</ul>
+<p>对于分析来说 Chrome 提供了 Trace API，在 puppeteer 里同样也可以使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> page.tracing.start(&#123; <span class="attr">path</span>: <span class="string">'./data/trace/trace.json'</span> &#125;);</span><br><span class="line"><span class="keyword">await</span> page.goto(<span class="string">'http://www.baidu.com'</span>);</span><br><span class="line"><span class="keyword">await</span> page.tracing.stop();</span><br></pre></td></tr></table></figure>
+<p>在分析完成后，在 Chrome 里导入 json 文件查看分析结果。</p>
+<h3 id="调试技巧"><a href="#调试技巧" class="headerlink" title="调试技巧"></a>调试技巧</h3><p>无论如何调试都是很困难的，puppeteer 也一样如此，为了能够方便调试，列出了以下技巧。</p>
+<ul>
+<li><p>关掉无界面模式，有时查看浏览器显示的内容是很有用的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">puppeteer.launch(&#123; <span class="attr">headless</span>: <span class="literal">false</span> &#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>减慢速度，slowMo 选项以指定的毫秒减慢 puppeteer 的操作。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">puppeteer.launch(&#123;</span><br><span class="line">    headless: <span class="literal">false</span>,</span><br><span class="line">    slowMo: <span class="number">250</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>捕获 console 的输出，通过监听 console 事件。在 page.evaluate 里调试代码时这也很方便。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">page.on(<span class="string">'console'</span>, msg =&gt; <span class="built_in">console</span>[msgobj._type](<span class="string">'PAGE Print:'</span>, msgobj._text););</span><br><span class="line"><span class="keyword">await</span> page.evaluate(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">`url is <span class="subst">$&#123;location.href&#125;</span>`</span>));</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动详细日志记录，所有公共 API 调用和内部协议流量都将通过 puppeteer 命名空间下的 debug 模块进行记录。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># Basic verbose logging</span><br><span class="line">env DEBUG=<span class="string">"puppeteer:*"</span> node script.js</span><br><span class="line"></span><br><span class="line"># Debug output can be enabled/disabled by namespace</span><br><span class="line">env DEBUG=<span class="string">"puppeteer:*,-puppeteer:protocol"</span> node script.js</span><br><span class="line">env DEBUG=<span class="string">"puppeteer:session"</span> node script.js</span><br><span class="line">env DEBUG=<span class="string">"puppeteer:mouse,puppeteer:keyboard"</span> node script.js</span><br><span class="line">env DEBUG=<span class="string">"puppeteer:*"</span> env DEBUG_COLORS=<span class="literal">true</span> node script.js <span class="number">2</span>&gt;&amp;<span class="number">1</span> | grep -v <span class="string">'"Network'</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="前端自动化测试"><a href="#前端自动化测试" class="headerlink" title="前端自动化测试"></a>前端自动化测试</h3><p>前端自动化测试与 puppeteer 息息相关，可以说它是前端自动化测试的一个必需品。</p>
+<p>那么 Puppeteer 可以为前端自动化测试做些什么？</p>
+<ul>
+<li>应用加载性能。可以通过使用 puppeteer 对应用进行测试加载的时间。</li>
+<li>业务逻辑自动化测试，通过页面截图，DOM 操作来测试业务功能是否具有完整性。</li>
+<li>模拟（user-agent）多设备分辨率进行测试。</li>
+<li>前端监控，用于作为前端监控的一个基础套件。</li>
+</ul>
+<h3 id="自动化实践示例"><a href="#自动化实践示例" class="headerlink" title="自动化实践示例"></a>自动化实践示例</h3><p>下面一个示例展示的是使用 puppeteer 来注册一个 GitHub 账号，并在设置项里修改用户信息，最后去找一个开源库，点一个 <code>Star</code>。</p>
+<blockquote>
+<p>理论上等待页面转跳完成使用的是 page.waitForNavigation 的 API，但是它有 BUG，请看：<a href="https://github.com/GoogleChrome/puppeteer/issues/257" target="_blank" rel="noopener">issues/257</a>，所有这里暂时使用 wait(2000) 代替。</p>
+</blockquote>
+<p>首先，解决第一步，注册一个 GitHub 账号。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">"puppeteer"</span>);</span><br><span class="line"><span class="keyword">const</span> randomString = <span class="built_in">require</span>(<span class="string">'crypto-random-string'</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">wait</span>(<span class="params">time</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">rs</span> =&gt;</span> setTimeout(rs, time));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch(&#123; <span class="attr">headless</span>: <span class="literal">false</span>, <span class="attr">slowMo</span>: <span class="number">0</span> &#125;);;</span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// setting</span></span><br><span class="line">    <span class="keyword">await</span> page.deleteCookie(... await page.cookies())</span><br><span class="line">    page.setViewport(&#123; <span class="attr">width</span>: <span class="number">1920</span>, <span class="attr">height</span>: <span class="number">1080</span> &#125;);</span><br><span class="line">    page.on(<span class="string">"console"</span>, msgobj =&gt; <span class="built_in">console</span>[msgobj._type](<span class="string">'Page Console:'</span>, msgobj._text));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 去到首页</span></span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">'https://github.com/'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输入随机的帐号和密码</span></span><br><span class="line">    <span class="keyword">const</span> data = &#123;</span><br><span class="line">        ac: <span class="string">'abc'</span> + randomString(<span class="number">8</span>),</span><br><span class="line">        pw: randomString(<span class="number">12</span>),</span><br><span class="line">        email: <span class="string">'abc'</span> + randomString(<span class="number">6</span>) + <span class="string">'@753.com'</span>,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> page.evaluate(<span class="function">(<span class="params">&#123; ac, pw, email &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(ac, pw, email);</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">'user[login]'</span>).value = ac;</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">'user[password]'</span>).value = pw;</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">'user[email]'</span>).value = email;</span><br><span class="line">    &#125;, data);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 注册它</span></span><br><span class="line">    <span class="keyword">await</span> page.click(<span class="string">'button[type=submit]'</span>);</span><br><span class="line">    <span class="keyword">await</span> wait(<span class="number">2000</span>); <span class="comment">// page.waitForNavigation</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// next</span></span><br><span class="line">&#125; ();</span><br></pre></td></tr></table></figure>
+<p>当注册完成后，page 对象就会有记录 cookie 信息，那么不需要登录就可以去到设置页了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置内容</span></span><br><span class="line"><span class="keyword">await</span> page.goto(<span class="string">'https://github.com/settings/profile'</span>);</span><br><span class="line"><span class="keyword">await</span> page.evaluate(<span class="function">(<span class="params">&#123; company, location &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">document</span>.querySelector(<span class="string">'#user_profile_company'</span>).value = company;</span><br><span class="line">    <span class="built_in">document</span>.querySelector(<span class="string">'#user_profile_location'</span>).value = location;</span><br><span class="line">&#125;, &#123; <span class="attr">company</span>: <span class="string">"Test"</span>, <span class="attr">location</span>: <span class="string">"Test"</span> &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新</span></span><br><span class="line"><span class="keyword">await</span> page.click(<span class="string">'button.btn.btn-primary[type=submit]'</span>);</span><br><span class="line"><span class="keyword">await</span> wait(<span class="number">2000</span>);</span><br></pre></td></tr></table></figure>
+<p>设置信息后，去搜索一个开源库，为它点一颗星。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 搜索，一个开源库</span></span><br><span class="line"><span class="keyword">const</span> q = <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">await</span> page.goto(<span class="string">`https://github.com/search?utf8=%E2%9C%93&amp;q=<span class="subst">$&#123;q&#125;</span>`</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 搜索结果第一个</span></span><br><span class="line"><span class="keyword">await</span> page.click(<span class="string">'.repo-list-item h3 a'</span>);</span><br><span class="line"><span class="keyword">await</span> wait(<span class="number">2000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 点星</span></span><br><span class="line"><span class="keyword">await</span> page.click(<span class="string">'button.btn[title *= "Star"]'</span>);</span><br><span class="line"><span class="keyword">await</span> wait(<span class="number">2000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 观望 10 秒</span></span><br><span class="line"><span class="keyword">await</span> wait(<span class="number">1000</span> * <span class="number">10</span>);</span><br><span class="line"><span class="keyword">await</span> browser.close();</span><br></pre></td></tr></table></figure>
+<p>好了，整个过程结束了。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.zhihu.com/question/29922082" target="_blank" rel="noopener">https://www.zhihu.com/question/29922082</a></li>
+<li><a href="https://developers.google.cn/web/tools/puppeteer/?hl=zh-cn" target="_blank" rel="noopener">https://developers.google.cn/web/tools/puppeteer/?hl=zh-cn</a></li>
+<li><a href="http://www.infoq.com/cn/news/2017/09/how-belcome-Puppeteer-master" target="_blank" rel="noopener">http://www.infoq.com/cn/news/2017/09/how-belcome-Puppeteer-master</a></li>
+<li><a href="https://www.jianshu.com/p/2f04f9d665ce" target="_blank" rel="noopener">https://www.jianshu.com/p/2f04f9d665ce</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.917Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/04/抓包&amp;爬虫/Puppeteer 使用指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/04/抓包&amp;爬虫/Puppeteer 使用指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/04/小程序/笔记 · 小程序开发杂记/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">笔记 · 小程序开发杂记</h4>
+        <h4 class="summary">记录微信小程序开发的一些杂笔记 ……
+本地数据持久化本地数据持久化（storage），小程序提供了异步（storage）...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/04/同构/After/After：React + React Router 同构应用开发/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">After：React + React Router 同构应用开发</h4>
+        <h4 class="summary">同构即未来！就像 Next.js 一样，After.js 是一个使用 React 和 React Router 的一个同...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

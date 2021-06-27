@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/10/React/Ant-design/React 中使用 Ant Design 轻指南/">
+    
+    
+    <title>React 中使用 Ant Design 轻指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="Ant DesignAnt Design 不止是一种设计语言，更是一个优秀的 UI 库，并且是 React 技术栈的。 它有以下特性：  提炼自企业级中后台产品的交互语言和视觉风格。 开箱即用的高质量 React 组件。 使用 TypeScript 构建，提供完整的类型定义文件。 基于 npm + webpack + babel 的工作流，支持 ES2015 和 TypeScript。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 中使用 Ant Design 轻指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/10/React/Ant-design/React 中使用 Ant Design 轻指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="Ant DesignAnt Design 不止是一种设计语言，更是一个优秀的 UI 库，并且是 React 技术栈的。 它有以下特性：  提炼自企业级中后台产品的交互语言和视觉风格。 开箱即用的高质量 React 组件。 使用 TypeScript 构建，提供完整的类型定义文件。 基于 npm + webpack + babel 的工作流，支持 ES2015 和 TypeScript。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171012094458.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171012110551.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.871Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 中使用 Ant Design 轻指南">
+<meta name="twitter:description" content="Ant DesignAnt Design 不止是一种设计语言，更是一个优秀的 UI 库，并且是 React 技术栈的。 它有以下特性：  提炼自企业级中后台产品的交互语言和视觉风格。 开箱即用的高质量 React 组件。 使用 TypeScript 构建，提供完整的类型定义文件。 基于 npm + webpack + babel 的工作流，支持 ES2015 和 TypeScript。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/10/20171012094458.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 中使用 Ant Design 轻指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 中使用 Ant Design 轻指南</h1>
+
+        <div class="meta-rest">
+            <h1>React 中使用 Ant Design 轻指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-10-12T04:06:12.000Z" itemprop="datePublished" class="page-time">
+    2017-10-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Ant-Design"><span class="post-toc-number">1.</span> <span class="post-toc-text">Ant Design</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#环境配置"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">环境配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#配置别名路径"><span class="post-toc-number">1.1.1.</span> <span class="post-toc-text">配置别名路径</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#配置-Sass"><span class="post-toc-number">1.1.2.</span> <span class="post-toc-text">配置 Sass</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#简单使用"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">简单使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Ant-Design-Mobile"><span class="post-toc-number">2.</span> <span class="post-toc-text">Ant Design Mobile</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#环境配置-1"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">环境配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#React-Native-上使用-Antd-mobile"><span class="post-toc-number">3.</span> <span class="post-toc-text">React Native 上使用 Antd-mobile</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#环境配置-2"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">环境配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义主题"><span class="post-toc-number">4.</span> <span class="post-toc-text">自定义主题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#定制方式"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">定制方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#修改-webpack-配置"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">修改 webpack 配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#全覆盖方式"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">全覆盖方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#暴力方法（最后的方法）"><span class="post-toc-number">4.4.</span> <span class="post-toc-text">暴力方法（最后的方法）</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#精选组件"><span class="post-toc-number">5.</span> <span class="post-toc-text">精选组件</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#一些问题"><span class="post-toc-number">6.</span> <span class="post-toc-text">一些问题</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Ant-design/React 中使用 Ant Design 轻指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 中使用 Ant Design 轻指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 10 月 12 日 12:06" datetime="2017-10-12T04:06:12.000Z"  itemprop="datePublished">
+    2017-10-12
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2659</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  30  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="Ant-Design"><a href="#Ant-Design" class="headerlink" title="Ant Design"></a>Ant Design</h2><p><a href="https://ant.design/index-cn" target="_blank" rel="noopener">Ant Design</a> 不止是一种设计语言，更是一个优秀的 UI 库，并且是 React 技术栈的。</p>
+<p>它有以下特性：</p>
+<ul>
+<li>提炼自企业级中后台产品的交互语言和视觉风格。</li>
+<li>开箱即用的高质量 React 组件。</li>
+<li>使用 TypeScript 构建，提供完整的类型定义文件。</li>
+<li>基于 npm + webpack + babel 的工作流，支持 ES2015 和 TypeScript。</li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171012094458.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<blockquote>
+<p>因为要用到 Antd，赶紧爬一下坑先。</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><p>这里介绍是使用 create-react-app 创建的项目。</p>
+<p><strong>安装依赖：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install --save antd</span><br><span class="line">npm install --save-dev babel-plugin-import react-app-rewired</span><br></pre></td></tr></table></figure></p>
+<p>说明：</p>
+<ul>
+<li>react-app-rewired 是用来覆盖 webpack 配置的。</li>
+<li>babel-plugin-import 是异步加载组件 import() 插件。</li>
+</ul>
+<p><strong>修改 npm scripts：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* package.json */</span></span><br><span class="line"><span class="string">"scripts"</span>: &#123;</span><br><span class="line">    <span class="string">"start"</span>: <span class="string">"react-app-rewired start"</span>,</span><br><span class="line">    <span class="string">"build"</span>: <span class="string">"react-app-rewired build"</span>,</span><br><span class="line">    <span class="string">"test"</span>: <span class="string">"react-app-rewired test --env=jsdom"</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在项目根目录创建一个<code>config-overrides.js</code>用于修改默认配置，添加异步加载功能 <code>import()</code>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; injectBabelPlugin &#125; = <span class="built_in">require</span>(<span class="string">'react-app-rewired'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 修改一些配置</span></span><br><span class="line">    config = injectBabelPlugin([<span class="string">'import'</span>, &#123; <span class="attr">libraryName</span>: <span class="string">'antd'</span>, <span class="attr">style</span>: <span class="string">'css'</span> &#125;], config);</span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="配置别名路径"><a href="#配置别名路径" class="headerlink" title="配置别名路径"></a>配置别名路径</h4><p>create-react-app 默认是不加别名的。可以给它加个别名，并重新配置 autoprefixer 等级。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> autoprefixer = <span class="built_in">require</span>(<span class="string">'autoprefixer'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加个别名路径</span></span><br><span class="line">config.resolve.alias = &#123;</span><br><span class="line">    ...config.resolve.alias,</span><br><span class="line">    <span class="string">'@'</span>: path.join(__dirname, <span class="string">'./src'</span>),</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// autoprefixer 等级</span></span><br><span class="line">config.module.rules[<span class="number">1</span>].oneOf[<span class="number">3</span>].use[<span class="number">2</span>].options.plugins = <span class="function"><span class="params">()</span> =&gt;</span> [</span><br><span class="line">    <span class="built_in">require</span>(<span class="string">'postcss-flexbugs-fixes'</span>),</span><br><span class="line">    autoprefixer(&#123;</span><br><span class="line">        browsers: [</span><br><span class="line">            <span class="string">'&gt;5%'</span>,</span><br><span class="line">            <span class="string">'last 4 versions'</span>,</span><br><span class="line">            <span class="string">'Firefox ESR'</span>,</span><br><span class="line">            <span class="string">'not ie &lt; 11'</span>, <span class="comment">// React 16 doesn't support IE11 anyway</span></span><br><span class="line">        ],</span><br><span class="line">        flexbox: <span class="string">'no-2009'</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<h4 id="配置-Sass"><a href="#配置-Sass" class="headerlink" title="配置 Sass"></a>配置 Sass</h4><p>一般来说我会选择使用 Scss，而不是 Less。Less 有些语法真的不好用。<br>在 config.override.js 里添加函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sass build</span></span><br><span class="line"><span class="keyword">const</span> colors = <span class="built_in">require</span>(<span class="string">'colors'</span>);</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> cp = <span class="built_in">require</span>(<span class="string">'child_process'</span>);</span><br><span class="line"><span class="keyword">const</span> ck = <span class="built_in">require</span>(<span class="string">'chokidar'</span>);</span><br><span class="line"><span class="keyword">const</span> sass = <span class="built_in">require</span>(<span class="string">'node-sass'</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">time</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`[<span class="subst">$&#123;d.toString().match(<span class="regexp">/\d&#123;2&#125;:\d&#123;2&#125;:\d&#123;2&#125;/</span>)&#125;</span> <span class="subst">$&#123;d.getMilliseconds()&#125;</span>]`</span>.green;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 监控 app.scss 文件，随便编译它</span></span><br><span class="line"><span class="comment"> * src/style 任意一个 .scss 变化都会触发 css 编译</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">(<span class="function"><span class="keyword">function</span> <span class="title">watchSass</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;time()&#125;</span> watch-scss.`</span>);</span><br><span class="line">    <span class="keyword">let</span> state = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> inputpath = <span class="string">'./src/style/app.scss'</span>;</span><br><span class="line">    <span class="keyword">const</span> outputpath = <span class="string">'./src/style/app.css'</span>;</span><br><span class="line"></span><br><span class="line">    ck.watch(<span class="string">'./src/style'</span>, &#123;</span><br><span class="line">        ignored: <span class="regexp">/(([\/\\])\..)|\.(css|less|js|svg)$/</span>,</span><br><span class="line">    &#125;).on(<span class="string">'change'</span>, <span class="keyword">async</span> (_path, event) =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(<span class="regexp">/\.scss$/</span>.test(_path) &amp;&amp; !state)) <span class="keyword">return</span>;</span><br><span class="line">        state = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">rs</span> =&gt;</span> setTimeout(rs, <span class="number">120</span>));</span><br><span class="line">        <span class="keyword">const</span> temp = fs.readFileSync(outputpath, <span class="string">'utf8'</span>).toString();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// scss =&gt; css</span></span><br><span class="line">        sass.render(&#123;</span><br><span class="line">            file: inputpath,</span><br><span class="line">            precision: <span class="literal">true</span>,</span><br><span class="line">            data: fs.readFileSync(inputpath, <span class="string">'utf8'</span>).toString(),</span><br><span class="line">            outputStyle: <span class="string">'compressed'</span>,</span><br><span class="line">            outFile: outputpath,</span><br><span class="line">            sourceMap: <span class="literal">false</span>,</span><br><span class="line">            precision: <span class="literal">true</span>,</span><br><span class="line">        &#125;, (err, result) =&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (err) &#123;</span><br><span class="line">                <span class="built_in">console</span>.error(<span class="string">`<span class="subst">$&#123;time()&#125;</span> watch-scss error:\n`</span>, err.message.red);</span><br><span class="line">                <span class="keyword">return</span> state = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 内容没变</span></span><br><span class="line">            <span class="keyword">if</span> (temp.trim() === result.css.toString().trim()) &#123;</span><br><span class="line">                <span class="keyword">return</span> state = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            fs.writeFileSync(outputpath, result.css.toString().trim());</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;time()&#125;</span> watch-scss build: $ <span class="subst">$&#123;_path&#125;</span> =&gt; <span class="subst">$&#123;outputpath&#125;</span>`</span>);</span><br><span class="line">            state = <span class="literal">false</span>;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>它的作用就是通过监听 .scss 文件的变化，来对 app.scss 文件进行监控编译。</p>
+<h3 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h3><p>引入组件使用：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Button &#125; <span class="keyword">from</span> <span class="string">'antd'</span>;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&lt;Button type=<span class="string">"primary"</span>&gt;This is a button&lt;<span class="regexp">/Button&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果在页面上看到蓝色按钮，表示部署成功。</p>
+<h2 id="Ant-Design-Mobile"><a href="#Ant-Design-Mobile" class="headerlink" title="Ant Design Mobile"></a>Ant Design Mobile</h2><p><a href="https://mobile.ant.design/index-cn" target="_blank" rel="noopener">Antd-mobile</a> 与 Ant Design 不同，它支持更多的平台，有以下特性和优势：</p>
+<ul>
+<li>UI 样式高度可配置，拓展性更强，轻松适应各类产品风格</li>
+<li>基于 React Native 的 iOS / Android / Web 多平台支持，组件丰富、能全面覆盖各类场景</li>
+<li>提供 组件按需加载 / Web 页面高清显示 / SVG Icon 等优化方案，一体式开发</li>
+<li>使用 TypeScript 开发，提供类型定义文件，支持类型及属性智能提示，方便业务开发</li>
+<li>全面兼容 react / preact；</li>
+</ul>
+<h3 id="环境配置-1"><a href="#环境配置-1" class="headerlink" title="环境配置"></a>环境配置</h3><p>这里介绍是使用 create-react-app 创建的项目。<br>环境配置与上面相同，唯一不同的是库名的引入：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Button &#125; <span class="keyword">from</span> <span class="string">'antd-mobile'</span>; <span class="comment">// &lt;-- 这里</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&lt;Button type=<span class="string">"primary"</span>&gt;This is a button&lt;<span class="regexp">/Button&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果在，页面上看到按钮，表示部署成功。</p>
+<h2 id="React-Native-上使用-Antd-mobile"><a href="#React-Native-上使用-Antd-mobile" class="headerlink" title="React Native 上使用 Antd-mobile"></a>React Native 上使用 Antd-mobile</h2><p>Antd-mobile 不但支持 Web，同时还支持 React-Native（真是福利）。</p>
+<h3 id="环境配置-2"><a href="#环境配置-2" class="headerlink" title="环境配置"></a>环境配置</h3><p>在使用 react-native init antd-demo 之后，进行环境的配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install --save antd-mobile</span><br><span class="line">npm install --save-dev babel-plugin-import</span><br></pre></td></tr></table></figure>
+<p>修改 <code>.babelrc</code> config 文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"presets"</span>: [<span class="string">"react-native"</span>],</span><br><span class="line">    <span class="string">"plugins"</span>: [[<span class="string">"import"</span>, &#123; <span class="string">"libraryName"</span>: <span class="string">"antd-mobile"</span> &#125;]],</span><br><span class="line">    <span class="string">"env"</span>: &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>修改后需要重新编译一次：<code>react-native run-android</code>，如果还是失败了，可能需要清理缓存：<code>cd android &amp;&amp; gradlew clean</code>。</p>
+<p>引入组件使用：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Button &#125; <span class="keyword">from</span> <span class="string">'antd-mobile'</span>;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&lt;Button type=<span class="string">"primary"</span>&gt;This is a button&lt;<span class="regexp">/Button&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果在，页面上看到按钮，表示部署成功。</p>
+<h2 id="自定义主题"><a href="#自定义主题" class="headerlink" title="自定义主题"></a>自定义主题</h2><p>Antd 默认是蓝色主题，如果不喜欢可以自己定制。Antd 使用的预处理语言是 Less。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171012110551.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>Antd 提供了这些变量的定制 <a href="https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less" target="_blank" rel="noopener">默认样式变量</a>，并且采用 <code>modifyVars</code> 的方式来覆盖变量。</p>
+<p>或者在目录下寻找：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">\node_modules\antd-mobile\lib\style\themes\default.less</span><br><span class="line">\node_modules\antd\lib\style\themes\default.less</span><br></pre></td></tr></table></figure></p>
+<h3 id="定制方式"><a href="#定制方式" class="headerlink" title="定制方式"></a>定制方式</h3><p>这里介绍是使用 create-react-app 创建的项目。</p>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># less 安装 v3 会报错（坑粑粑的）</span></span><br><span class="line">npm install --save-dev react-app-rewire-less less@2 less-loader</span><br></pre></td></tr></table></figure>
+<p>更改 <code>config-overrides.js</code> 文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; injectBabelPlugin &#125; = <span class="built_in">require</span>(<span class="string">'react-app-rewired'</span>);</span><br><span class="line"><span class="keyword">const</span> rewireLess = <span class="built_in">require</span>(<span class="string">'react-app-rewire-less'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line">    config = injectBabelPlugin([<span class="string">'import'</span>, &#123; <span class="attr">libraryName</span>: <span class="string">'antd'</span>, <span class="attr">style</span>: <span class="literal">true</span> &#125;], config);</span><br><span class="line">    config = rewireLess.withLoaderOptions(&#123;</span><br><span class="line">        <span class="comment">// 覆盖的变量</span></span><br><span class="line">        modifyVars: &#123; <span class="string">"@primary-color"</span>: <span class="string">"#1DA57A"</span> &#125;,</span><br><span class="line">    &#125;)(config, env);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>为了更好的管理，把覆盖的变量统一放在一个文件。<br>在项目目录创建一个 <code>theme.js</code> 文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">    <span class="string">'@primary-color'</span>: <span class="string">'#FF9900'</span>,</span><br><span class="line">    <span class="string">'@link-color'</span>: <span class="string">'#1DA57A'</span>,</span><br><span class="line">    <span class="string">'@border-radius-base'</span>: <span class="string">'2px'</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>config-overrides.js</code> 更改为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; injectBabelPlugin &#125; = <span class="built_in">require</span>(<span class="string">'react-app-rewired'</span>);</span><br><span class="line"><span class="keyword">const</span> rewireLess = <span class="built_in">require</span>(<span class="string">'react-app-rewire-less'</span>);</span><br><span class="line"><span class="keyword">const</span> theme = <span class="built_in">require</span>(<span class="string">'./theme'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line">    config = injectBabelPlugin([<span class="string">'import'</span>, &#123; <span class="attr">libraryName</span>: <span class="string">'antd'</span>, <span class="attr">style</span>: <span class="literal">true</span> &#125;], config);</span><br><span class="line">    config = rewireLess.withLoaderOptions(&#123;</span><br><span class="line">        <span class="comment">// 覆盖的变量</span></span><br><span class="line">        modifyVars: theme(),</span><br><span class="line">    &#125;)(config, env);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>如果看到橙色按钮说明成功了。</p>
+<blockquote>
+<p>备注：此时配置成功时可以直接引入 less 来使用。</p>
+</blockquote>
+<h3 id="修改-webpack-配置"><a href="#修改-webpack-配置" class="headerlink" title="修改 webpack 配置"></a>修改 webpack 配置</h3><p>如果上面的方法不行，试一下这种方法。<br>先把 npm scripts 改为最初状态，接着把 webpack 配置文件吐出来，并安装模块：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">npm run eject</span><br><span class="line">npm install --save-dev babel-preset-stage-0</span><br><span class="line">npm install --save-dev babel-plugin-import</span><br><span class="line">npm install --save-dev less less-loader</span><br></pre></td></tr></table></figure>
+<p>接着，在项目根目录下创建 <code>.babelrc</code>文件，并且把 package.json 里的 babel 项去掉：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"presets"</span>: [ <span class="string">"react-app"</span> ],</span><br><span class="line">    <span class="string">"plugins"</span>: [</span><br><span class="line">        <span class="string">"transform-runtime"</span>,</span><br><span class="line">        <span class="comment">// https://github.com/ant-design/babel-plugin-import</span></span><br><span class="line">        [</span><br><span class="line">            <span class="string">"import"</span>, &#123; <span class="string">"libraryName"</span>: <span class="string">"antd"</span>, <span class="string">"style"</span>: <span class="literal">true</span> &#125;</span><br><span class="line">        ]</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着在下面两个的文件里添加：</p>
+<blockquote>
+<p>webpack.config.dev.js<br>webpack.config.prod.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ant design 主题颜色</span></span><br><span class="line"><span class="keyword">let</span> theme = <span class="string">''</span>;</span><br><span class="line"><span class="keyword">try</span> &#123; theme = <span class="built_in">require</span>(<span class="string">'../src/theme.js'</span>)() &#125;</span><br><span class="line"><span class="keyword">catch</span> (err) &#123;&#125;</span><br><span class="line"><span class="keyword">const</span> mod = <span class="string">`?&#123;"sourceMap":true,"modifyVars":<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(theme)&#125;</span>&#125;`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// webpack config</span></span><br><span class="line">rules: [</span><br><span class="line">    &#123;</span><br><span class="line">        test: <span class="regexp">/\.less$/</span>,</span><br><span class="line">        loader: <span class="string">"style-loader!css-loader!less-loader?"</span> + mod</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>在 theme.js 文件里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">    <span class="string">'@primary-color'</span>: <span class="string">'#FF9900'</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果看到橙色按钮说明成功了。</p>
+<blockquote>
+<p>如果你想写 less，可以使用 <code>less-vars-to-js</code> 把 less 转为 js object.</p>
+</blockquote>
+<p>可以参考以下配置：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * ant design 主题配置</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> lessToJs = <span class="built_in">require</span>(<span class="string">'less-vars-to-js'</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> themeVariables = &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    themeVariables = lessToJs(</span><br><span class="line">        fs.readFileSync(</span><br><span class="line">            path.join(__dirname, <span class="string">'../src/style/ant-theme.less'</span>),</span><br><span class="line">            <span class="string">'utf8'</span></span><br><span class="line">        )</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (err) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&#123;</span><br><span class="line">    test: <span class="regexp">/\.less$/</span>,</span><br><span class="line">    loader: <span class="string">`style-loader!css-loader!less-loader?&#123;"sourceMap":true,"modifyVars":<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(theme)&#125;</span>&#125;`</span>,</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<h3 id="全覆盖方式"><a href="#全覆盖方式" class="headerlink" title="全覆盖方式"></a>全覆盖方式</h3><p>如果上面的方法都失败了只能这样了，使用全覆盖方式，这种方式会把所有 style 引入（大概有 <code>500k</code> 的 css 文件）。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@import</span> <span class="string">"~antd/dist/antd.less"</span>;   <span class="comment">// 引入官方提供的 less 样式入口文件</span></span><br><span class="line"><span class="keyword">@import</span> <span class="string">"your-theme-file.less"</span>;   <span class="comment">// 用于覆盖上面定义的变量</span></span><br></pre></td></tr></table></figure>
+<p>新建一个 style.less 包含上面代码，在 index.js 引入。</p>
+<h3 id="暴力方法（最后的方法）"><a href="#暴力方法（最后的方法）" class="headerlink" title="暴力方法（最后的方法）"></a>暴力方法（最后的方法）</h3><p>上面全覆盖方式把所有 style 都引入，有点不科学了，实在不行可以参考下面的直接修改源码的方式，这种方式不会引入所有 style，可以享受 <code>import()</code> 的福利。</p>
+<p>style 相关的 less 文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">\node_modules\antd-mobile\lib\style\themes\default.less</span><br><span class="line">\node_modules\antd\lib\style\themes\default.less</span><br></pre></td></tr></table></figure>
+<p>config-overrides.js 文件修改成：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; injectBabelPlugin &#125; = <span class="built_in">require</span>(<span class="string">'react-app-rewired'</span>);</span><br><span class="line"><span class="keyword">const</span> rewireLess = <span class="built_in">require</span>(<span class="string">'react-app-rewire-less'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line">    config = injectBabelPlugin([<span class="string">'import'</span>, &#123; <span class="attr">libraryName</span>: <span class="string">'antd'</span>, <span class="attr">style</span>: <span class="literal">true</span> &#125;], config);</span><br><span class="line">    config = rewireLess.withLoaderOptions(&#123; &#125;)(config, env);</span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>为了方便，使用 nodejs 编写一个自动化程序，在根目录下创建一个 <code>extra-theme.js</code> 文件，它的任务就是找到目标文件，在 default.less 文件里追加额外的变量，实现覆盖变量，自定义主题样式的功能。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 默认主题路径</span></span><br><span class="line"><span class="keyword">const</span> antd_style_path = <span class="string">'./node_modules/antd/lib/style/themes/default.less'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 自定义的主题颜色</span></span><br><span class="line"><span class="keyword">const</span> theme = fs.readFileSync(<span class="string">'./src/style/antd-theme.less'</span>).toString();</span><br><span class="line"><span class="keyword">const</span> defaultTheme = fs.readFileSync(antd_style_path, <span class="string">'utf8'</span>).toString();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 开始</span></span><br><span class="line">fs.writeFileSync(</span><br><span class="line">    antd_style_path,</span><br><span class="line">    append(defaultTheme, theme)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置主题</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">append</span>(<span class="params">content, theme</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 首次添加，没有 /* &#123; */  /* &#125; */ [区域标志]</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="regexp">/\/\*\s\&#123;\s\*\//i</span>.test(content) &amp;&amp; !<span class="regexp">/\/\*\s\&#125;\s\*\//i</span>.test(content)) &#123;</span><br><span class="line">        content += <span class="string">`\n/* &#123; */\n<span class="subst">$&#123;theme&#125;</span>\n/* &#125; */\n`</span>;</span><br><span class="line">        <span class="keyword">return</span> content;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> temp = <span class="string">`/* &#123; */\n<span class="subst">$&#123;theme&#125;</span>\n/* &#125; */\n`</span>;</span><br><span class="line">        <span class="keyword">const</span> start = content.match(<span class="regexp">/\/\*\s\&#123;\s\*\/\n?/</span>);</span><br><span class="line">        <span class="keyword">const</span> end = content.match(<span class="regexp">/\/\*\s\&#125;\s\*\/\n?/</span>);</span><br><span class="line">        <span class="keyword">return</span> content.slice(<span class="number">0</span>, start.index) + temp + content.slice(end.index + end[<span class="number">0</span>].length);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其次在根目录下的 src/style 新建一个 antd-theme.less 文件：</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义的主题颜色</span></span><br><span class="line"><span class="variable">@primary-color:</span> <span class="number">#FF9900</span>;</span><br><span class="line"><span class="variable">@link-color:</span> <span class="number">#1DA57A</span>;</span><br><span class="line"><span class="variable">@border-radius-base:</span> <span class="number">2px</span>;</span><br><span class="line"><span class="variable">@color-bule:</span> bule;</span><br><span class="line"><span class="variable">@color-red:</span> red;</span><br></pre></td></tr></table></figure>
+<p>执行之后，就可以在 <code>default.less</code> 里看到新添加了的内容。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* &#123; */</span></span><br><span class="line"><span class="variable">@primary-color:</span> <span class="number">#FF9900</span>;</span><br><span class="line"><span class="variable">@link-color:</span> <span class="number">#1DA57A</span>;</span><br><span class="line"><span class="variable">@border-radius-base:</span> <span class="number">2px</span>;</span><br><span class="line"><span class="variable">@color-bule:</span> bule;</span><br><span class="line"><span class="variable">@color-red:</span> red;</span><br><span class="line"><span class="comment">/* &#125; */</span></span><br></pre></td></tr></table></figure>
+<p>接着在 npm scripts 里添加 <a href="http://www.ruanyifeng.com/blog/2016/10/npm_scripts.html" target="_blank" rel="noopener">钩子</a>，它会在对应命令执行之前执行。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"prestart"</span>: <span class="string">"node extra-theme.js"</span>,</span><br><span class="line"><span class="string">"prebuild"</span>: <span class="string">"node extra-theme.js"</span>,</span><br></pre></td></tr></table></figure>
+<h2 id="精选组件"><a href="#精选组件" class="headerlink" title="精选组件"></a>精选组件</h2><p>antd 是 Ant Design 设计规范的 React 实现，所以我们倾向于只提供符合该规范、且带有视觉展现的 UI 组件，也尽量不重复造轮子。<br>推荐使用以下社区已有的优秀实现，与 antd 形成互补：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">推荐组件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">路由</td>
+<td style="text-align:left"><a href="https://github.com/ReactTraining/react-router" target="_blank" rel="noopener">react-router</a></td>
+</tr>
+<tr>
+<td style="text-align:left">布局</td>
+<td style="text-align:left"><a href="https://github.com/whoisandy/react-blocks" target="_blank" rel="noopener">react-blocks</a></td>
+</tr>
+<tr>
+<td style="text-align:left">拖拽</td>
+<td style="text-align:left"><a href="https://github.com/gaearon/react-dnd" target="_blank" rel="noopener">react-dnd</a>，<a href="https://github.com/mzabriskie/react-draggable" target="_blank" rel="noopener">react-draggable</a></td>
+</tr>
+<tr>
+<td style="text-align:left">代码编辑器</td>
+<td style="text-align:left"><a href="https://github.com/scniro/react-codemirror2" target="_blank" rel="noopener">react-codemirror2</a></td>
+</tr>
+<tr>
+<td style="text-align:left">富文本编辑器</td>
+<td style="text-align:left"><a href="https://github.com/zenoamaro/react-quill" target="_blank" rel="noopener">react-quill</a>，<a href="https://github.com/jpuri/react-draft-wysiwyg" target="_blank" rel="noopener">react-draft-wysiwyg</a>，<a href="https://github.com/leejaen/react-lz-editor" target="_blank" rel="noopener">react-lz-editor</a>（Ant Design 风格）</td>
+</tr>
+<tr>
+<td style="text-align:left">拾色器</td>
+<td style="text-align:left"><a href="https://github.com/react-component/color-picker" target="_blank" rel="noopener">rc-color-picker</a>，<a href="http://casesandberg.github.io/react-color/" target="_blank" rel="noopener">react-color</a></td>
+</tr>
+<tr>
+<td style="text-align:left">响应式</td>
+<td style="text-align:left"><a href="https://github.com/contra/react-responsive" target="_blank" rel="noopener">react-responsive</a>，<a href="https://github.com/ReactTraining/react-media" target="_blank" rel="noopener">react-media</a></td>
+</tr>
+<tr>
+<td style="text-align:left">复制到剪贴板</td>
+<td style="text-align:left"><a href="https://github.com/nkbt/react-copy-to-clipboard" target="_blank" rel="noopener">react-copy-to-clipboard</a></td>
+</tr>
+<tr>
+<td style="text-align:left">页面 meta 属性</td>
+<td style="text-align:left"><a href="https://github.com/nfl/react-helmet" target="_blank" rel="noopener">react-helmet</a>，<a href="https://github.com/gaearon/react-document-title" target="_blank" rel="noopener">react-document-title</a></td>
+</tr>
+<tr>
+<td style="text-align:left">图标</td>
+<td style="text-align:left"><a href="https://github.com/andreypopp/react-fa" target="_blank" rel="noopener">react-fa</a>，<a href="https://github.com/gorangajic/react-icons" target="_blank" rel="noopener">react-icons</a></td>
+</tr>
+<tr>
+<td style="text-align:left">二维码</td>
+<td style="text-align:left"><a href="https://github.com/zpao/qrcode.react" target="_blank" rel="noopener">qrcode.react</a></td>
+</tr>
+<tr>
+<td style="text-align:left">可视化图表</td>
+<td style="text-align:left"><a href="https://github.com/antvis/g2-react" target="_blank" rel="noopener">g2-react</a>，<a href="https://github.com/recharts/recharts/" target="_blank" rel="noopener">recharts</a>，<a href="https://github.com/FormidableLabs/victory" target="_blank" rel="noopener">victory</a></td>
+</tr>
+<tr>
+<td style="text-align:left">顶部进度条</td>
+<td style="text-align:left"><a href="https://github.com/rstacruz/nprogress" target="_blank" rel="noopener">nprogress</a></td>
+</tr>
+<tr>
+<td style="text-align:left">应用国际化</td>
+<td style="text-align:left"><a href="https://github.com/yahoo/react-intl" target="_blank" rel="noopener">react-intl</a></td>
+</tr>
+<tr>
+<td style="text-align:left">代码高亮</td>
+<td style="text-align:left"><a href="https://github.com/conorhastings/react-syntax-highlighter" target="_blank" rel="noopener">react-syntax-highlighter</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Markdown 渲染</td>
+<td style="text-align:left"><a href="http://rexxars.github.io/react-markdown/" target="_blank" rel="noopener">react-markdown</a></td>
+</tr>
+<tr>
+<td style="text-align:left">无限滚动</td>
+<td style="text-align:left"><a href="https://github.com/bvaughn/react-virtualized" target="_blank" rel="noopener">react-virtualized</a></td>
+</tr>
+<tr>
+<td style="text-align:left">地图</td>
+<td style="text-align:left"><a href="https://github.com/tomchentw/react-google-maps" target="_blank" rel="noopener">react-google-maps</a>，<a href="https://github.com/istarkov/google-map-react" target="_blank" rel="noopener">google-map-react</a>，<a href="https://github.com/ElemeFE/react-amap" target="_blank" rel="noopener">react-amap</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h2><ul>
+<li>在 React Native 上尝试了一些组件，目前效果不理想。（待定）</li>
+<li>在 antd 上自定义时，之前试过成功了，后来使用 create-react-app 初始化新的项目时，怎么试都不能改变主题，暂时还不能确定是什么原因（可能是版本的问题），所以才有了<strong>暴力方法</strong>。</li>
+<li>在 antd-mobile 上自定义主题失败，同时在文档里也没有找到<strong>定制主题</strong>（可能真的不能定制）</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://ant.design/docs/react/use-with-create-react-app-cn" target="_blank" rel="noopener">use-with-create-react-app-cn</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.871Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/10/React/Ant-design/React 中使用 Ant Design 轻指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/10/React/Ant-design/React 中使用 Ant Design 轻指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/10/Nodejs/深入理解 Socket.io 中的 Room 与 Namespace/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">深入理解 Socket.io 中的 Room 与 Namespace</h4>
+        <h4 class="summary">房间与命名空间的关系在 Socket.io 里有房间与命名空间这么两个概念与结构。房间与命名空间都能实现 websock...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/10/Go/Go 优雅编写高并发爬虫（浅）/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Go 优雅编写高并发爬虫（浅）</h4>
+        <h4 class="summary">Go 语言是一种并发编程语言，在 Go 里有一个非常重要的关键字 go（goroutine），一般我们可以用它做一些异步...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

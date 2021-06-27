@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/09/Nodejs/Github 授权登录 Nodejs 的实现/">
+    
+    
+    <title>Github 授权登录 Nodejs 的实现 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言第三方登录太常见了，基本都是一个必备的功能。现在的第三方登录主要是基于 OAuth 2.0 来实现的。而 OAuth 2.0 协议为用户资源的授权提供了一个安全的、开放而又简易的标准。与以往的授权方式不同之处是 OAuth 的授权不会使第三方触及到用户的帐号信息（如用户名与密码），即第三方无需使用用户的用户名与密码就可以申请获得该用户资源的授权，因此 OAuth 是安全的。 本来是想试试 QQ">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Github 授权登录 Nodejs 的实现">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/09/Nodejs/Github 授权登录 Nodejs 的实现/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言第三方登录太常见了，基本都是一个必备的功能。现在的第三方登录主要是基于 OAuth 2.0 来实现的。而 OAuth 2.0 协议为用户资源的授权提供了一个安全的、开放而又简易的标准。与以往的授权方式不同之处是 OAuth 的授权不会使第三方触及到用户的帐号信息（如用户名与密码），即第三方无需使用用户的用户名与密码就可以申请获得该用户资源的授权，因此 OAuth 是安全的。 本来是想试试 QQ">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914194949.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914200042.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914200336.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914201021.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/login.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914203930.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914210010.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914210752.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/593a69e17af33.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.833Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Github 授权登录 Nodejs 的实现">
+<meta name="twitter:description" content="前言第三方登录太常见了，基本都是一个必备的功能。现在的第三方登录主要是基于 OAuth 2.0 来实现的。而 OAuth 2.0 协议为用户资源的授权提供了一个安全的、开放而又简易的标准。与以往的授权方式不同之处是 OAuth 的授权不会使第三方触及到用户的帐号信息（如用户名与密码），即第三方无需使用用户的用户名与密码就可以申请获得该用户资源的授权，因此 OAuth 是安全的。 本来是想试试 QQ">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/9/20170914194949.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Github 授权登录 Nodejs 的实现</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Github 授权登录 Nodejs 的实现</h1>
+
+        <div class="meta-rest">
+            <h1>Github 授权登录 Nodejs 的实现</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-09-15T01:25:35.000Z" itemprop="datePublished" class="page-time">
+    2017-09-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Github-授权登入"><span class="post-toc-number">2.</span> <span class="post-toc-text">Github 授权登入</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#GitHub-注册应用"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">GitHub 注册应用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Github-授权请求（获取-code）"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">Github 授权请求（获取 code）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#授权回掉处理（获取-access-token）"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">授权回掉处理（获取 access_token）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#获取-GitHub-账号信息"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">获取 GitHub 账号信息</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#总结"><span class="post-toc-number">3.</span> <span class="post-toc-text">总结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#扩展"><span class="post-toc-number">4.</span> <span class="post-toc-text">扩展</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Github 授权登录 Nodejs 的实现"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Github 授权登录 Nodejs 的实现</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 09 月 15 日 9:25" datetime="2017-09-15T01:25:35.000Z"  itemprop="datePublished">
+    2017-09-15
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1542</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>第三方登录太常见了，基本都是一个必备的功能。现在的第三方登录主要是基于 OAuth 2.0 来实现的。而<strong> OAuth 2.0 协议</strong>为用户资源的授权提供了一个安全的、开放而又简易的标准。与以往的授权方式不同之处是 OAuth 的授权不会使第三方触及到用户的帐号信息（如用户名与密码），即第三方无需使用用户的用户名与密码就可以申请获得该用户资源的授权，因此 OAuth 是安全的。</p>
+<p>本来是想试试 QQ 的授权登录，后来发现 QQ 的授权登录太麻烦了，又要各种申请，提交资料，还要上传身份证图片，坑爹的。算了，对于一个开发者来说，还是尝试一下<code>Github</code>吧。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/20170914194949.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="Github-授权登入"><a href="#Github-授权登入" class="headerlink" title="Github 授权登入"></a>Github 授权登入</h2><p>先将下原理吧，其实 Github 文档说得很清楚的。相关可以查看：<a href="https://developer.github.com/apps/building-integrations/setting-up-and-registering-oauth-apps/" target="_blank">GitHub Developer</a></p>
+<p>通过 GitHub 账号授权登入的过程主要包括三个方面：</p>
+<ul>
+<li><p>获取 code： 第三方客户端向 <a href="https://github.com/login/oauth/authorize" target="_blank" rel="noopener">https://github.com/login/oauth/authorize</a> 发送 get 请求，带上<code>?client_id=XXXXXX</code>的参数，这时会跳转到 GitHub 登入页面，授权后GitHub 会向客户端返回 <a href="https://redirect_url?code=XXXXXX" target="_blank" rel="noopener">https://redirect_url?code=XXXXXX</a> 。其中<code>client_id</code>和<code>redirect_url</code>是第三方事先在 GitHub 平台上配置好的。</p>
+</li>
+<li><p>通过 code 获取 access_token：客户端处理 <a href="https://redirect_url?code=XXXXXX" target="_blank" rel="noopener">https://redirect_url?code=XXXXXX</a> 请求，获取 code 值，之后向 <a href="https://github.com/login/oauth/access_token" target="_blank" rel="noopener">https://github.com/login/oauth/access_token</a> 发起 post 请求，请求参数为 client_di，client_secret 和 code。</p>
+</li>
+<li><p>通过 access_token 获取用户 GitHub 账号信息：第二步的请求会返回这样 <code>access_token = d0686dc49a22d64e77402db072b719f510f22421&amp;scope=user&amp;token_type=bearer</code> 的内容，只需要向 <a href="https://api.github.com/user?access_token=xxx" target="_blank" rel="noopener">https://api.github.com/user?access_token=xxx</a> 发送 GET 请求，即可获取到登录用户的基本信息。</p>
+</li>
+</ul>
+<p>又分为几个实现步骤：</p>
+<ul>
+<li>GitHub 注册应用</li>
+<li>Github 授权请求（获取 code）</li>
+<li>授权回掉处理（获取 access_token）</li>
+<li>获取 GitHub 账号信息</li>
+</ul>
+<p><strong>补充：</strong>下面的示例代码基于<code>Koa2</code>来实现。</p>
+<h3 id="GitHub-注册应用"><a href="#GitHub-注册应用" class="headerlink" title="GitHub 注册应用"></a>GitHub 注册应用</h3><p>首先，确保你有一个 Github 账号。在用户的头像处，点击 <code>Setting</code> 进入设置页面。找到 <code>Developer settings</code> 里的 <code>OAuth Apps</code>，选择新建一个 app 。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/20170914200042.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>之后，填写对应的信息。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/20170914200336.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>之后就可以看到 client Id 和 client Secret，用于后面向 GitHub 发送请求传参。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/20170914201021.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="Github-授权请求（获取-code）"><a href="#Github-授权请求（获取-code）" class="headerlink" title="Github 授权请求（获取 code）"></a>Github 授权请求（获取 code）</h3><p>在页面中添加 GitHub 登入跳转按钮，并在路由中对跳转请求进行转发处理：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/github/login"</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">Icon</span> <span class="attr">type</span>=<span class="string">"github"</span> <span class="attr">style</span>=<span class="string">&#123;&#123;fontSize:</span> <span class="attr">20</span>, <span class="attr">color:</span> '#<span class="attr">333</span>'&#125;&#125;/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/login.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>注意，并不是在前端用 <code>windows.location.href</code> 来转跳，而是后端重定向。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> github = <span class="built_in">require</span>(<span class="string">'./github'</span>);</span><br><span class="line">router.use(<span class="string">'/github'</span>, github.routes(), github.allowedMethods());</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">'../config'</span>);</span><br><span class="line"><span class="keyword">const</span> qs = <span class="built_in">require</span>(<span class="string">'qs'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router</span><br><span class="line">    .get(<span class="string">'/login'</span>, <span class="keyword">async</span> (ctx) =&gt; &#123;</span><br><span class="line">        <span class="comment">// 重定向到认证接口,并配置参数</span></span><br><span class="line">        <span class="keyword">let</span> path = <span class="string">"https://github.com/login/oauth/authorize"</span>;</span><br><span class="line"></span><br><span class="line">        path += qs.stringify(&#123;</span><br><span class="line">            client_id:  config.client_id,</span><br><span class="line">            scope: config.scope,</span><br><span class="line">            state: <span class="built_in">Date</span>.now(),</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">         <span class="comment">// 重定向到授权服务器</span></span><br><span class="line">        ctx.redirect(path);</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = router;</span><br></pre></td></tr></table></figure>
+<p>在 config 中事先添加配置请求所需参数 client_id，client_secret 和 scope。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="string">'database'</span>: <span class="string">'mongodb://localhost:27017/test-login'</span>,</span><br><span class="line">    <span class="string">'client_id'</span>: <span class="string">'xxxxxxxxxxxxx'</span>,                        <span class="comment">// 你的 client_id</span></span><br><span class="line">    <span class="string">'client_secret'</span>: <span class="string">'xxxxxxxxxxxxxxxxxxxxxxxxxxx'</span>,      <span class="comment">// 你的 client_secret</span></span><br><span class="line">    <span class="string">'scope'</span>: [<span class="string">'user'</span>],</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>其中 scope 参数可选。就是你期待你的应用需要调用 Github 哪些信息，可以填写多个，以逗号分割，比如：<code>scope=user,public_repo</code>。state 参数非必需，用于防治跨域伪造请求攻击。</p>
+<p>那么试试看，如何？</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/20170914203930.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>看，已经转跳到授权登录的页面了。</p>
+<h3 id="授权回掉处理（获取-access-token）"><a href="#授权回掉处理（获取-access-token）" class="headerlink" title="授权回掉处理（获取 access_token）"></a>授权回掉处理（获取 access_token）</h3><p>当你点击 <code>Authorize Lizhooh</code> 时，Github 就会把必要的参数通过你配置的回调地址传给你。</p>
+<p>点击授权后回调：<a href="http://127.0.0.1:3000/github/oauth?code=xxxxxx" target="_blank" rel="noopener">http://127.0.0.1:3000/github/oauth?code=xxxxxx</a></p>
+<p>在这里把 <code>/github/oauth</code> 补上：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.get(<span class="string">'/github/oauth'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> code = ctx.query.code;</span><br><span class="line">    <span class="built_in">console</span>.log(code);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> path = <span class="string">'https://github.com/login/oauth/access_token'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取用户 token，注意自行添加 node-fetch 模块</span></span><br><span class="line">    <span class="keyword">const</span> data = <span class="keyword">await</span> fetch(path, &#123;</span><br><span class="line">        method: <span class="string">'POST'</span>,</span><br><span class="line">        headers: &#123;</span><br><span class="line">            <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span></span><br><span class="line">        &#125;,</span><br><span class="line">        body: <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">            client_id: config.client_id,</span><br><span class="line">            client_secret: config.client_secret,</span><br><span class="line">            code: code</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">        .then(<span class="function"><span class="params">res</span> =&gt;</span> res.text())</span><br><span class="line">        .catch(<span class="function"><span class="params">err</span> =&gt;</span> <span class="built_in">console</span>.error(err));</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line"></span><br><span class="line">    ctx.body = &#123;</span><br><span class="line">        ...qs.parse(data),</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>GitHub 返回回掉地址时，先拿到请求中的 code 参数，然后向 <a href="https://github.com/login/oauth/access_token" target="_blank" rel="noopener">https://github.com/login/oauth/access_token</a> 发送 post 请求并带上client_id,client_secret,code参数，请求成功后会返回带有 access_token 的信息。</p>
+<blockquote>
+<p>token 在登录注册是一个非常重要的字符串，它确保的避免使用账号与密码来验证用户的登录状态。</p>
+</blockquote>
+<p><img src="/assets/image/2017/9/20170914210010.png" alt></p>
+<p>获取到 access_token 之后，就应该把它放进数据库好好保存，同时也可以把 state 等数据保存一下，这样可以知道登录的时间。</p>
+<h3 id="获取-GitHub-账号信息"><a href="#获取-GitHub-账号信息" class="headerlink" title="获取 GitHub 账号信息"></a>获取 GitHub 账号信息</h3><p>最后带上获取的 access_token 请求 <a href="https://api.github.com/user?access_token=xxx" target="_blank" rel="noopener">https://api.github.com/user?access_token=xxx</a>, 返回的就是之前 scope 中对应的账号信息。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.get(<span class="string">'/github/oauth'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">    <span class="comment">// 省略上面的代码</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> &#123; access_token &#125; = qs.parse(data);</span><br><span class="line">    <span class="keyword">const</span> user = <span class="keyword">await</span> fetch(<span class="string">'https://api.github.com/user?access_token='</span> + access_token)</span><br><span class="line">        .then(<span class="function"><span class="params">res</span> =&gt;</span> res.json())</span><br><span class="line">        .catch(<span class="function"><span class="params">err</span> =&gt;</span> <span class="built_in">console</span>.error(err));</span><br><span class="line"></span><br><span class="line">    ctx.body = &#123;</span><br><span class="line">        ...user,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/20170914210752.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>最后，授权登录成功后，你就可以根据 token 来获取用户的信息，包括了头像，名称等信息。</p>
+<p>之后，为了维持用户的登录状态与信息，你需要把这些信息储存在数据库里，以便以后使用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>最后，可以用所有的流程，可以用一张图片来概括。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/593a69e17af33.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>除此之外，如果你的应用还需要集成更多的其它第三方登录，那么需要写很多不同的登录代码，因为每个第三方登录的 SDK 都不同。这时是不是在想，会不会有人已经封装好模块，提供简单配置的方式实现第三方登录。</p>
+<p>是的，有个叫<code>passport.js</code>，它集成了众多的第三方登录策略，只需要简单的提供一些配置项。</p>
+<p>比如你可以使用，这些模块省去众多的代码编写。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm install passport-github2</span><br><span class="line">npm install passport-qq</span><br><span class="line">npm install passport-weibo</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>涉及登录注册等保密操作时，在使用别人开发的模块时，建议认真阅读源码，查看是否有<code>黑点</code>。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.833Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/09/Nodejs/Github 授权登录 Nodejs 的实现/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/09/Nodejs/Github 授权登录 Nodejs 的实现/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/09/Nodejs/解读 Nodejs 性能 API/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">解读 Nodejs 性能 API：Performance Timing</h4>
+        <h4 class="summary">本周末，我花了一点时间去查看与学习 Nodejs v8.5.0 更新的内容，其中一点就包括了与性能时间相关的 API，看...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/09/Nodejs/使用 Nginx 均衡负载 Nodejs 服务/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">使用 Nginx 负载均衡 Nodejs 服务</h4>
+        <h4 class="summary">Nginx (engine x) 是一个高性能的HTTP和反向代理服务器。在之前使用 Nodejs 的 Cluster ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

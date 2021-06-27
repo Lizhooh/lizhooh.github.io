@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/07/Nodejs/Nodejs 多核 CPU 分布式集群/">
+    
+    
+    <title>Nodejs 多核 CPU 分布式集群 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="集群Nodejs运行在 Chrome 的 JavaScript 运行时平台上，我们把该平台优雅地称之为 V8 引擎。不论是 V8 引擎，还是之后的 Nodejs，都是以单线程的方式运行的，因此，在多核心处理器的系统中并不能发挥其最大的性能。 但是，在 Nodejs 推出了 cluster（集群）模块后，最大限度的利用多核 CPU 运行 Nodejs 成为了可能。">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs 多核 CPU 分布式集群">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/07/Nodejs/Nodejs 多核 CPU 分布式集群/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="集群Nodejs运行在 Chrome 的 JavaScript 运行时平台上，我们把该平台优雅地称之为 V8 引擎。不论是 V8 引擎，还是之后的 Nodejs，都是以单线程的方式运行的，因此，在多核心处理器的系统中并不能发挥其最大的性能。 但是，在 Nodejs 推出了 cluster（集群）模块后，最大限度的利用多核 CPU 运行 Nodejs 成为了可能。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/kTAowsL.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/20170707220913.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/1546009164.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/1136196118.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/1796833337.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.839Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs 多核 CPU 分布式集群">
+<meta name="twitter:description" content="集群Nodejs运行在 Chrome 的 JavaScript 运行时平台上，我们把该平台优雅地称之为 V8 引擎。不论是 V8 引擎，还是之后的 Nodejs，都是以单线程的方式运行的，因此，在多核心处理器的系统中并不能发挥其最大的性能。 但是，在 Nodejs 推出了 cluster（集群）模块后，最大限度的利用多核 CPU 运行 Nodejs 成为了可能。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/9/kTAowsL.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs 多核 CPU 分布式集群</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs 多核 CPU 分布式集群</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs 多核 CPU 分布式集群</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-07-08T13:48:27.000Z" itemprop="datePublished" class="page-time">
+    2017-07-08
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#集群"><span class="post-toc-number">1.</span> <span class="post-toc-text">集群</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Cluster-模块"><span class="post-toc-number">2.</span> <span class="post-toc-text">Cluster 模块</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用-PM2"><span class="post-toc-number">3.</span> <span class="post-toc-text">使用 PM2</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-PM2-躺着实现负载均衡"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">使用 PM2 躺着实现负载均衡</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#保持运行"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">保持运行</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实时扩展集群"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">实时扩展集群</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#在产品环境实现零停机更新"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">在产品环境实现零停机更新</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用配置文件"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">使用配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#将-PM2-配置成自动启动"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">将 PM2 配置成自动启动</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#在-PM2-里运行-npm-script"><span class="post-toc-number">4.</span> <span class="post-toc-text">在 PM2 里运行 npm script</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#最后"><span class="post-toc-number">5.</span> <span class="post-toc-text">最后</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">6.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Nodejs 多核 CPU 分布式集群"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs 多核 CPU 分布式集群</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 07 月 08 日 21:48" datetime="2017-07-08T13:48:27.000Z"  itemprop="datePublished">
+    2017-07-08
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2027</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><p><code>Nodejs</code>运行在 Chrome 的 JavaScript 运行时平台上，我们把该平台优雅地称之为 <code>V8 引擎</code>。<br>不论是 V8 引擎，还是之后的 Nodejs，都是以<strong><em>单线程</em></strong>的方式运行的，因此，在多核心处理器的系统中并不能发挥其最大的性能。</p>
+<p>但是，在 Nodejs 推出了 cluster（集群）模块后，最大限度的利用多核 CPU 运行 Nodejs 成为了可能。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/kTAowsL.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="Cluster-模块"><a href="#Cluster-模块" class="headerlink" title="Cluster 模块"></a>Cluster 模块</h2><p><code>Nodejs</code>给我们提供了 cluster 模块，它可以生成多个工作线程来<strong><em>共享</em></strong>同一个 TCP 连接。</p>
+<p>下面的一个简单 Cluster 代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> cluster = <span class="built_in">require</span>(<span class="string">'cluster'</span>);</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>);</span><br><span class="line"><span class="keyword">const</span> numCPUs = <span class="built_in">require</span>(<span class="string">'os'</span>).cpus().length;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当该进程是主进程时，返回 True</span></span><br><span class="line"><span class="keyword">if</span> (cluster.isMaster) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`主进程 pid:<span class="subst">$&#123;process.pid&#125;</span> 正在运行`</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 衍生工作进程，根据 CPU 个数</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; numCPUs; i++) &#123;</span><br><span class="line">        cluster.fork();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cluster.on(<span class="string">'exit'</span>, (worker, code, signal) =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`工作进程 pid:<span class="subst">$&#123;worker.process.pid&#125;</span> 已退出`</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 工作进程可以共享任何 TCP 连接。</span></span><br><span class="line">    <span class="comment">// 在本例子中，共享的是一个 HTTP 服务器。</span></span><br><span class="line">    http.createServer(<span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">        res.writeHead(<span class="number">200</span>);</span><br><span class="line">        res.end(<span class="string">'你好世界\n'</span>);</span><br><span class="line">    &#125;).listen(<span class="number">8000</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`server run in 127.0.0.1:8000`</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`工作进程 pid:<span class="subst">$&#123;process.pid&#125;</span> 已启动`</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行起来，那么工作进程就会共享<code>8000</code>端口：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ node server.js</span><br><span class="line"></span><br><span class="line">server run <span class="keyword">in</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">8000</span></span><br><span class="line">主进程 pid:<span class="number">3596</span> 正在运行</span><br><span class="line">工作进程 pid:<span class="number">4324</span> 已启动</span><br><span class="line">工作进程 pid:<span class="number">4520</span> 已启动</span><br><span class="line">工作进程 pid:<span class="number">5644</span> 已启动</span><br><span class="line">工作进程 pid:<span class="number">6056</span> 已启动</span><br></pre></td></tr></table></figure>
+<p>当然，你可以指定任意数量的工作线程，线程的数量不仅限于 CPU 核心的数量，因为它只是作为一个运行在 CPU 上的子线程。</p>
+<p>正如你所看到的，要使其正常运行，你需要将你的代码封装到 cluster 的处理逻辑中，并添加一些额外的代码来指定当一个线程挂掉之后如何进行处理。</p>
+<p><strong>它是如何运作的呢？</strong></p>
+<p>首先，<code>Cluster</code>会创建一个<code>master</code>，然后根据你指定的数量复制出多个 server app （也被称之为工作线程）。<br>它通过<code>IPC</code>通道与主线程之间进行通信，并使用内置的负载均衡来更好地处理线程之间的压力，该负载均衡使用了<code>Round-robin</code>算法（也被称之为循环算法）。</p>
+<blockquote>
+<p><strong>什么是 Round Robin？</strong> <br><br>轮询调度（Round Robin Scheduling）算法就是以轮询的方式依次将请求调度不同的服务器，即每次调度执行 i = (i + 1) mod n，并选出第i台服务器。算法的优点是其简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度。<br><br>轮询调度算法假设所有服务器处理性能均相同，不管服务器的当前连接数和响应速度。该算法相对简单，不适用于服务器组中处理性能不一的情况，而且当请求服务时间变化比较大时，轮询调度算法容易导致服务器间的负载不平衡。<br><br>所以此种均衡算法适合于服务器组中的所有服务器都有相同的软硬件配置并且平均服务请求相对均衡的情况。</p>
+</blockquote>
+<p>当使用<code>Round-robin</code>调度策略时，master accepts() 所有传入的连接请求，然后将相应的<code>TCP</code>请求处理发送给选中的工作线程（该方式仍然通过<code>IPC</code>来进行通信）。</p>
+<p>比如说，当前有 10000 个请求，master 可能会平均分配给每个工作线程去处理，它们对应处理 2500 个请求，而每个工作线程是运行在不同的 CPU（多核 CPU）上的，这样处理性能会大大提升。</p>
+<h2 id="使用-PM2"><a href="#使用-PM2" class="headerlink" title="使用 PM2"></a>使用 PM2</h2><p>PM2 并不是雾霾的意思，而是一个非常优秀的 Nodejs 的进程管理器，下图，是 PM2 支持的功能。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/7/20170707220913.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="使用-PM2-躺着实现负载均衡"><a href="#使用-PM2-躺着实现负载均衡" class="headerlink" title="使用 PM2 躺着实现负载均衡"></a>使用 PM2 躺着实现负载均衡</h3><p>PM2 内置了 cluster 的处理逻辑，所以我们可以使用 PM2 来配置 Nodejs 集群。</p>
+<p>下面是 Koa2 的一个 http 服务：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">'/'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">    ctx.body = <span class="string">'hello world!'</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.use(router.routes());</span><br><span class="line">app.listen(<span class="number">3000</span>);</span><br></pre></td></tr></table></figure>
+<p>然后使用 PM2 命令来启动集群服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 start app.js -i 4</span><br></pre></td></tr></table></figure>
+<p>也可以通过 js/json 配置文件来启动：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"apps"</span> : [&#123;</span><br><span class="line">        <span class="attr">"script"</span>    : <span class="string">"api.js"</span>,</span><br><span class="line">        <span class="attr">"instances"</span> : <span class="number">0</span>,</span><br><span class="line">        <span class="attr">"exec_mode"</span> : <span class="string">"cluster"</span></span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后启动配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 start config.json</span><br></pre></td></tr></table></figure>
+<p>其中：<code>-i &lt;number of workers&gt;</code>参数用来告诉 PM2 以<code>cluster_mode</code>的形式运行 app.js，后面的数字表示要启动的工作线程的<strong>数量</strong>。如果给定的数字为 0，PM2  则会根据你 CPU 核心的数量来生成对应的工作线程。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/7/1546009164.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="保持运行"><a href="#保持运行" class="headerlink" title="保持运行"></a>保持运行</h3><p>无论如何，PM2 都会尽可能保持你的 app.js 运行。如果任意一个工作线程挂掉了，不用担心，PM2 会立即将其重启。当然，你也完全可以在任何时候手动重启这些线程（pm2 restart all）。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/7/1136196118.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="实时扩展集群"><a href="#实时扩展集群" class="headerlink" title="实时扩展集群"></a>实时扩展集群</h3><p>任何时候，如果你需要增加工作线程的数量，可以通过<code>pm2 scale &lt;app name&gt; &lt;n&gt;</code>来对集群进行扩展。参数<code>&lt;n&gt;</code>指定工作线程的数量，被用来<strong>增加</strong>或<strong>减少</strong>集群数。你也可以通过<code>pm2 scale app +3</code>的方式来指定要增加多少工作线程。</p>
+<p><img src="/assets/image/2017/7/1796833337.png" alt></p>
+<h3 id="在产品环境实现零停机更新"><a href="#在产品环境实现零停机更新" class="headerlink" title="在产品环境实现零停机更新"></a>在产品环境实现零停机更新</h3><p>PM2 的<code>reload &lt;app name&gt;</code>功能将依次<strong>重启</strong>所有的工作线程。每一个线程会等待在新的线程创建之后才会被终止掉，因此，当你在产品环境部署新的代码时，server 会不间断地一直保持运行。<br>使用<code>gracefulReload</code>功能可以达到相同的目的，不同的是它不会立即终止工作线程，而是通过 IPC 发送一个 shutdown 信号来关闭所有当前的连接并处理一些自定义的任务，然后再优雅地退出。如下面的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">process.on(<span class="string">'message'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">msg</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (msg === <span class="string">'shutdown'</span>) &#123;</span><br><span class="line">        close_all_connections();</span><br><span class="line">        delete_cache();</span><br><span class="line">        server.close();</span><br><span class="line">        process.exit(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="使用配置文件"><a href="#使用配置文件" class="headerlink" title="使用配置文件"></a>使用配置文件</h3><p>使用配置文件能够更好的配置 PM2，而不应该是使用一堆的命令。</p>
+<p>下面的 Javascript 的配置文件，只需要导入一个配置对象即可。推荐使用这种方式，因为还可以注释，使用 json 就不可以注释。</p>
+<p> <strong>注意：</strong>使用 Javascript 配置文件需要结束文件名<code>.config.js</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    apps : [&#123;</span><br><span class="line">        name        : <span class="string">"worker"</span>,             <span class="comment">// 应用名称</span></span><br><span class="line">        script      : <span class="string">"./worker.js"</span>,        <span class="comment">// 入口文件</span></span><br><span class="line">        watch       : <span class="literal">true</span>,</span><br><span class="line">        env: &#123;</span><br><span class="line">            <span class="string">"NODE_ENV"</span>: <span class="string">"development"</span>,      <span class="comment">// 开发模式</span></span><br><span class="line">        &#125;,</span><br><span class="line">        env_production : &#123;</span><br><span class="line">            <span class="string">"NODE_ENV"</span>: <span class="string">"production"</span>        <span class="comment">// 生成模式</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,&#123;</span><br><span class="line">        name       : <span class="string">"api-app"</span>,</span><br><span class="line">        script     : <span class="string">"./api.js"</span>,</span><br><span class="line">        instances  : <span class="number">4</span>,                     <span class="comment">// 4 个工作线程</span></span><br><span class="line">        exec_mode  : <span class="string">"cluster"</span>              <span class="comment">// 使用集群模式</span></span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也可以使用 json，基本和 Javascript object 差不多。</p>
+<p><strong>开始它：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 start ecosystem.config.js</span><br></pre></td></tr></table></figure>
+<h3 id="将-PM2-配置成自动启动"><a href="#将-PM2-配置成自动启动" class="headerlink" title="将 PM2 配置成自动启动"></a>将 PM2 配置成自动启动</h3><p>想要 PM2 在服务器重启后自动运行之前的应用，可以先通过 pm2 start 启动你的应用，然后执行下面的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 save</span><br></pre></td></tr></table></figure>
+<p>这将在<code>~/.pm2</code>目录下生成一个 dump.pm2 文件，里面描述了当前 PM2 上运行着的所有应用。然后执行命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 startup [platform]</span><br></pre></td></tr></table></figure>
+<p>注意有必要添加可选参数 platform 以明确告知 PM2 当前的系统环境。这样，下次当服务器重启时，PM2 会自动运行之前保存的应用。</p>
+<h2 id="在-PM2-里运行-npm-script"><a href="#在-PM2-里运行-npm-script" class="headerlink" title="在 PM2 里运行 npm script"></a>在 PM2 里运行 npm script</h2><p><a href="https://stackoverflow.com/questions/31579509/can-pm2-run-an-npm-start-script" target="_blank" rel="noopener">Can pm2 run an 'npm start' script</a></p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>Cluster 模块的功能非常强大，使用 PM2 会使它变得更加容易。在 Node 0.10.x 时代 cluster.js 还只是个试验品，但从 Node 0.11.x 开始已经逐渐成熟并开始准备正式发布，当然也包括 Node 0.12.x 版本。强烈推荐使用最新版的 Nodejs 和 PM2，这些产品的贡献者们一直在努力并使它们变得更好。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://nodejs.cn/api/cluster.html" target="_blank" rel="noopener">http://nodejs.cn/api/cluster.html</a></li>
+<li><a href="https://keymetrics.io/2015/03/26/pm2-clustering-made-easy/" target="_blank" rel="noopener">https://keymetrics.io/2015/03/26/pm2-clustering-made-easy/</a></li>
+<li><a href="http://pm2.keymetrics.io/docs/usage/cluster-mode/" target="_blank" rel="noopener">http://pm2.keymetrics.io/docs/usage/cluster-mode/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.839Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/07/Nodejs/Nodejs 多核 CPU 分布式集群/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/07/Nodejs/Nodejs 多核 CPU 分布式集群/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/07/抓包&爬虫/基于 Nodejs 的爬虫/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">基于 Nodejs，Cheerio 的爬虫</h4>
+        <h4 class="summary">Cheerio在 Nodejs 里有个叫 cheerio 的模块，它的最小型的 JQuery 的实现，能够轻松的解析抓取...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/Python/Python Request 使用/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Python Request 使用</h4>
+        <h4 class="summary">requestsRequests 是用 Python 语言编写，基于 urllib，采用 Apache2 License...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

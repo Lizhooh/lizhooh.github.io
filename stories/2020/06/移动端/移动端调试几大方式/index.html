@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2020/06/移动端/移动端调试几大方式/">
+    
+    
+    <title>移动端调试几大方式 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言移动端调试是一个比较难的点，手机系统涉及 Android 和 iOS 两大阵型。iOS 的麻烦点在于 iOS 本身的浏览器有很多兼容性坑，而 Android 的麻烦的在于 Android 手机有很多不同的版本以及浏览器，例如 UC，QQ，百度，360，微信浏览器等，特别是微信浏览器堪称移动端的 IE。 痛点移动端调试痛点在于：  开发时，在自己电脑上运行得好好的，在手机上打开就挂了，但是手机上">
+<meta name="keywords" content="前端,移动端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="移动端调试几大方式">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2020/06/移动端/移动端调试几大方式/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言移动端调试是一个比较难的点，手机系统涉及 Android 和 iOS 两大阵型。iOS 的麻烦点在于 iOS 本身的浏览器有很多兼容性坑，而 Android 的麻烦的在于 Android 手机有很多不同的版本以及浏览器，例如 UC，QQ，百度，360，微信浏览器等，特别是微信浏览器堪称移动端的 IE。 痛点移动端调试痛点在于：  开发时，在自己电脑上运行得好好的，在手机上打开就挂了，但是手机上">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://static.oschina.net/uploads/img/201604/28220925_QXNO.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2020/6/20200702200951.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2020/6/20200702200814.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2020/6/20200702200818.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.922Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="移动端调试几大方式">
+<meta name="twitter:description" content="前言移动端调试是一个比较难的点，手机系统涉及 Android 和 iOS 两大阵型。iOS 的麻烦点在于 iOS 本身的浏览器有很多兼容性坑，而 Android 的麻烦的在于 Android 手机有很多不同的版本以及浏览器，例如 UC，QQ，百度，360，微信浏览器等，特别是微信浏览器堪称移动端的 IE。 痛点移动端调试痛点在于：  开发时，在自己电脑上运行得好好的，在手机上打开就挂了，但是手机上">
+<meta name="twitter:image" content="http://static.oschina.net/uploads/img/201604/28220925_QXNO.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">移动端调试几大方式</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">移动端调试几大方式</h1>
+
+        <div class="meta-rest">
+            <h1>移动端调试几大方式</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2020-06-18T11:26:53.000Z" itemprop="datePublished" class="page-time">
+    2020-06-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/移动端/">移动端</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#痛点"><span class="post-toc-number">2.</span> <span class="post-toc-text">痛点</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#PC-上"><span class="post-toc-number">3.</span> <span class="post-toc-text">PC 上</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#在-Chorme-上"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">在 Chorme 上</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用模拟器-Charles"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">使用模拟器 + Charles</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#微信-web-开发者工具"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">微信 web 开发者工具</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#真机上"><span class="post-toc-number">4.</span> <span class="post-toc-text">真机上</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Vconsole"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">Vconsole</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Eruda"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">Eruda</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Charles"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">Charles</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Chrome-Android-USB-调试（强烈推荐）"><span class="post-toc-number">4.4.</span> <span class="post-toc-text">Chrome + Android USB 调试（强烈推荐）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Mac-Safari-IOS-USB-调试（强烈推荐）"><span class="post-toc-number">4.5.</span> <span class="post-toc-text">Mac + Safari + IOS USB 调试（强烈推荐）</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-移动端/移动端调试几大方式"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">移动端调试几大方式</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020 年 06 月 18 日 19:26" datetime="2020-06-18T11:26:53.000Z"  itemprop="datePublished">
+    2020-06-18
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/移动端/">移动端</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 897</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>移动端调试是一个比较难的点，手机系统涉及 Android 和 iOS 两大阵型。iOS 的麻烦点在于 iOS 本身的浏览器有很多兼容性坑，而 Android 的麻烦的在于 Android 手机有很多不同的版本以及浏览器，例如 UC，QQ，百度，360，微信浏览器等，特别是微信浏览器堪称移动端的 IE。</p>
+<h2 id="痛点"><a href="#痛点" class="headerlink" title="痛点"></a>痛点</h2><p>移动端调试痛点在于：</p>
+<ul>
+<li>开发时，在自己电脑上运行得好好的，在手机上打开就挂了，但是手机上又看不到 error log。</li>
+<li>上线后，某用户表示页面失灵，但我们自己又重现不出来，看不到用户侧的出错信息。</li>
+<li>某些界面在 PC 端上，在华为上显示正常，到了另一台手机，布局都花了。</li>
+</ul>
+<a id="more"></a>
+<h2 id="PC-上"><a href="#PC-上" class="headerlink" title="PC 上"></a>PC 上</h2><h3 id="在-Chorme-上"><a href="#在-Chorme-上" class="headerlink" title="在 Chorme 上"></a>在 Chorme 上</h3><p>在 PC Chorme 上，按  ctrl + shift + m 即可以进入移动端调试页面，这个大家都懂的。</p>
+<h3 id="使用模拟器-Charles"><a href="#使用模拟器-Charles" class="headerlink" title="使用模拟器 + Charles"></a>使用模拟器 + Charles</h3><p>使用 Android 模拟器（例如雷电模拟器），iOS 模拟器，外加 Charles 来调试。</p>
+<h3 id="微信-web-开发者工具"><a href="#微信-web-开发者工具" class="headerlink" title="微信 web 开发者工具"></a>微信 web 开发者工具</h3><p>微信 web 开发者工具很好的为我们提供了内置类似 weinre 的调试工具。使用起来也非常简单，直接打开工具即可。</p>
+<h2 id="真机上"><a href="#真机上" class="headerlink" title="真机上"></a>真机上</h2><h3 id="Vconsole"><a href="#Vconsole" class="headerlink" title="Vconsole"></a>Vconsole</h3><p>Vconsole 是腾讯出的一个移动端调试神器，界面设计良好，可以很方便的调试查看网络请求，js 输出，DOM 元素等。</p>
+<p>使用方式也非常简单：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 注意要在头部引入 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">'path/to/vconsole.min.js'</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 需要实例化才显示</span></span><br><span class="line"><span class="keyword">const</span> vconsole = <span class="keyword">new</span> vConsole();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 有一些方法可以使用</span></span><br><span class="line">vconsole.ready(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'Hello World'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><strong>在线 demo：</strong>微信扫描以下二维码（或微信内长按图片识别二维码），即可体验 vConsole 面板。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://static.oschina.net/uploads/img/201604/28220925_QXNO.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="Eruda"><a href="#Eruda" class="headerlink" title="Eruda"></a>Eruda</h3><p>Eruda 与  Vconsole 类似，这里就不具体介绍了，直接放出 github：<a href="https://github.com/liriliri/eruda" target="_blank" rel="noopener">https://github.com/liriliri/eruda</a></p>
+<h3 id="Charles"><a href="#Charles" class="headerlink" title="Charles"></a>Charles</h3><p>Charles 是一个抓包软件，可以在真机上进行抓包来调试网络层。</p>
+<h3 id="Chrome-Android-USB-调试（强烈推荐）"><a href="#Chrome-Android-USB-调试（强烈推荐）" class="headerlink" title="Chrome + Android USB 调试（强烈推荐）"></a>Chrome + Android USB 调试（强烈推荐）</h3><p><strong>分为几个步骤：</strong></p>
+<ul>
+<li>第一步：打开 Android 手机 设置 &gt; 开发者选项 &gt; USB 调试。</li>
+<li>第二步：通过数据线连接你的电脑和 Android 手机，记得授权。</li>
+<li>第三步：给你的 Android 手机下载一个手机版的 Chrome 浏览器，并在手机上的 Chrome 浏览器 中打开你需要调试的页面。</li>
+<li>第四步：打开你电脑上的 Chrome，按下图标注顺序，先 F12 打开调试面板，然后找到 remote devices（在右上角 <code>...</code> 图标 More Tools 里）。</li>
+<li>第五步：remote devices 里会显示在手机 chrome 打开的页面，每个页面右侧都有一个 Inspect 检查的按钮，点击就会出现你熟悉的调试页面了。</li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2020/6/20200702200951.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<blockquote>
+<p>具体原理，我猜是手机端的 Chrome 通过协议连接，把界面的数据传输到 PC 端的 Chorme 从而实现点对点的调试。</p>
+</blockquote>
+<h3 id="Mac-Safari-IOS-USB-调试（强烈推荐）"><a href="#Mac-Safari-IOS-USB-调试（强烈推荐）" class="headerlink" title="Mac + Safari + IOS USB 调试（强烈推荐）"></a>Mac + Safari + IOS USB 调试（强烈推荐）</h3><p><strong>分为几个步骤：</strong></p>
+<ul>
+<li>第一步：打开苹果手机 设置 &gt; Safari 浏览器 &gt; 高级 &gt; Web 检查器。</li>
+<li>第二步：打开 Mac 上的 Safari 浏览器 &gt; 偏好设置 &gt; 高级 &gt; 在菜单栏中显示“开发”菜单。</li>
+<li>第三步：用数据线连接你的 Mac 电脑和苹果手机，并选择信任设备。然后在手机的 Safari 浏览器 中打开你需要调试的页面。</li>
+<li>第四步：点击之后，就会出现熟悉的调试界面。</li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2020/6/20200702200814.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2020/6/20200702200818.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/liriliri/eruda" target="_blank" rel="noopener">https://github.com/liriliri/eruda</a></li>
+<li><a href="https://github.com/Tencent/vConsole" target="_blank" rel="noopener">https://github.com/Tencent/vConsole</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.922Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2020/06/移动端/移动端调试几大方式/" target="_blank" rel="external">http://me.lizhooh.com/stories/2020/06/移动端/移动端调试几大方式/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动端/">移动端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2020/06/移动端/移动端适配的方案/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">移动端适配的方案</h4>
+        <h4 class="summary">由于移动端不同的设备屏幕大小，不同的分辨率，导致 15px 在不同手机上显示不用的效果，有的手机看起来比较小，有的手机看...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2020/06/前端/Prettier 格式化配置/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Prettier 文档</h4>
+        <h4 class="summary">Prettier 的中文意思是“漂亮的、机灵的”，也是一个流行的代码格式化工具的名称，它能够解析代码，使用你自己设定的规...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

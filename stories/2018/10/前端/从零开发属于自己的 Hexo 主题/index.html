@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/10/前端/从零开发属于自己的 Hexo 主题/">
+    
+    
+    <title>从零开发属于自己的 Hexo 主题 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。 本文将会从零开始开发一个简单的博客主题。">
+<meta name="keywords" content="前端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开发属于自己的 Hexo 主题">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/10/前端/从零开发属于自己的 Hexo 主题/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。 本文将会从零开始开发一个简单的博客主题。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181004190915.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181007001337.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181004224510.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181004225944.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181006145903.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.906Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从零开发属于自己的 Hexo 主题">
+<meta name="twitter:description" content="前言什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。 本文将会从零开始开发一个简单的博客主题。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/10/20181004190915.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">从零开发属于自己的 Hexo 主题</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">从零开发属于自己的 Hexo 主题</h1>
+
+        <div class="meta-rest">
+            <h1>从零开发属于自己的 Hexo 主题</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-10-09T12:22:58.000Z" itemprop="datePublished" class="page-time">
+    2018-10-09
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/前端/">前端</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#目录结构"><span class="post-toc-number">3.</span> <span class="post-toc-text">目录结构</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#配置-Less"><span class="post-toc-number">4.</span> <span class="post-toc-text">配置 Less</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#布局模板"><span class="post-toc-number">5.</span> <span class="post-toc-text">布局模板</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#数据来源"><span class="post-toc-number">6.</span> <span class="post-toc-text">数据来源</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#全局变量"><span class="post-toc-number">6.1.</span> <span class="post-toc-text">全局变量</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#网站变量"><span class="post-toc-number">6.2.</span> <span class="post-toc-text">网站变量</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#页面导航"><span class="post-toc-number">7.</span> <span class="post-toc-text">页面导航</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#文章页"><span class="post-toc-number">8.</span> <span class="post-toc-text">文章页</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#归档页"><span class="post-toc-number">9.</span> <span class="post-toc-text">归档页</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#分类页"><span class="post-toc-number">10.</span> <span class="post-toc-text">分类页</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#标签页"><span class="post-toc-number">11.</span> <span class="post-toc-text">标签页</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#源信息"><span class="post-toc-number">12.</span> <span class="post-toc-text">源信息</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-前端/从零开发属于自己的 Hexo 主题"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">从零开发属于自己的 Hexo 主题</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 10 月 09 日 20:22" datetime="2018-10-09T12:22:58.000Z"  itemprop="datePublished">
+    2018-10-09
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/前端/">前端</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2486</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  27.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<p>本文将会从零开始开发一个简单的博客主题。</p>
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>首先，安装 hexo-cli，并创建一个项目。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># init</span></span><br><span class="line">hexo init blog</span><br><span class="line"></span><br><span class="line"><span class="comment"># install</span></span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">npm install</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">hexo server --debug</span><br></pre></td></tr></table></figure>
+<p>在创建完成后，会有一个初始化的项目文件，下面就在这个基础上开发自己的主题。</p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>主题目录结构以自带的 landscape 主题为例，创建以下的目录用于描述主题，这个主题名称就叫 <code>me</code> 吧。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">├── layout        <span class="comment"># 页面模板文件</span></span><br><span class="line">├── scripts       <span class="comment"># Hexo 脚本</span></span><br><span class="line">├── _config.yml   <span class="comment"># 主题的配置文件，可以配置一些变量</span></span><br><span class="line">├── README.md     <span class="comment"># 使用说明文件</span></span><br><span class="line">└── <span class="built_in">source</span>        <span class="comment"># 主题资源文件，包括页面样式，脚本，字体等</span></span><br></pre></td></tr></table></figure>
+<p>一般主要集中编写 layout 和 source 两个内容。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181004190915.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>其他的说明。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181007001337.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="配置-Less"><a href="#配置-Less" class="headerlink" title="配置 Less"></a>配置 Less</h2><p>Hexo 默认的 css 预处理是 stylus，但是笔者不会 stylus，为了方便配个 less 吧，这里使用的是 <a href="https://www.npmjs.com/package/hexo-renderer-less" target="_blank" rel="noopener">hexo-renderer-less</a>。</p>
+<p>先安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-renderer-less</span><br></pre></td></tr></table></figure>
+<p>在 <code>me/_config.yml</code> 里添加配置：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">less:</span></span><br><span class="line">  <span class="attr">compress:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>之后，在 source 里创建目录 css，以及文件 <code>css/index.less</code>，添加相应的 less 代码。在 source 目录里所有的文件都被视为资源，在编译时会编译在 public 目录下，并且会对部分后缀文件进行编译。</p>
+<p>例如 <code>source/css/index.less</code> 编译后 -&gt; <code>public/css/index.css</code>。只要安装了对于的渲染器，hexo 就会自动识别 <code>.less</code> 的文件后缀名，选取相应的渲染器进行渲染，这部分都不需要我们去管理。</p>
+<h2 id="布局模板"><a href="#布局模板" class="headerlink" title="布局模板"></a>布局模板</h2><p>Hexo 是一个博客框架，也有一定的约束，因此页面大致会分为几类。</p>
+<ul>
+<li>首页（index），对应的布局 index.jsx。</li>
+<li>文章（post），对应的布局 post.jsx。</li>
+<li>归档（archive），对应的布局 archive.jsx。</li>
+<li>分类（category），对应的布局 category.jsx。</li>
+<li>标签（tag），对应的布局 tag.jsx。</li>
+</ul>
+<p>Hexo 默认是使用 ejs 的渲染引擎，我这里使用的 <code>React</code> 的渲染引擎。在 layout 中创建 index.jsx 文件，首页将会使用该布局模板生成 HTML 文件。</p>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yarn add hexo-renderer-react react react-dom</span><br><span class="line">yarn add --dev babel-preset-es2015 babel-preset-react babel-preset-stage-0</span><br></pre></td></tr></table></figure>
+<p>接着在根目录下创建 <code>.babelrc</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"presets"</span>: [</span><br><span class="line">        <span class="string">"es2015"</span>,</span><br><span class="line">        <span class="string">"stage-0"</span>,</span><br><span class="line">        <span class="string">"react"</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了方便，添加一个通用的布局。</p>
+<p>添加布局文件：<code>me/layout/baseLayout.jsx</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> Debug <span class="keyword">from</span> <span class="string">'./components/debug'</span>;</span><br><span class="line"><span class="keyword">import</span> Navigate <span class="keyword">from</span> <span class="string">'./components/navigate'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (Component) =&gt; <span class="function">(<span class="params">props</span>) =&gt;</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> &#123; page, config, css, env, site &#125; = props;</span><br><span class="line">    <span class="keyword">const</span> View = Component;</span><br><span class="line">    <span class="keyword">const</span> title = page.title || config.title;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;html&gt;</span><br><span class="line">            &lt;head&gt;</span><br><span class="line">                &lt;meta httpEquiv=<span class="string">'content-type'</span> content=<span class="string">'text/html; charset=utf-8'</span> /&gt;</span><br><span class="line">                &lt;meta content=<span class="string">'width=device-width, initial-scale=1.0'</span> name=<span class="string">'viewport'</span> /&gt;</span><br><span class="line">                &lt;title&gt;&#123;title&#125;&lt;<span class="regexp">/title&gt;</span></span><br><span class="line"><span class="regexp">                &lt;div dangerouslySetInnerHTML=&#123;&#123; __html: css('css/i</span>ndex.css<span class="string">') &#125;&#125; /&gt;</span></span><br><span class="line"><span class="string">            &lt;/head&gt;</span></span><br><span class="line"><span class="string">            &lt;body&gt;</span></span><br><span class="line"><span class="string">                &lt;Navigate list=&#123;site.data.menu&#125; /&gt;</span></span><br><span class="line"><span class="string">                &lt;div className='</span>main<span class="string">'&gt;</span></span><br><span class="line"><span class="string">                    &lt;View &#123;...props&#125; /&gt;</span></span><br><span class="line"><span class="string">                &lt;/div&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">                &#123;env.debug &amp;&amp; env.env === '</span>development<span class="string">' &amp;&amp;</span></span><br><span class="line"><span class="string">                    &lt;Debug &#123;...props&#125; /&gt;</span></span><br><span class="line"><span class="string">                &#125;</span></span><br><span class="line"><span class="string">            &lt;/body&gt;</span></span><br><span class="line"><span class="string">        &lt;/html&gt;</span></span><br><span class="line"><span class="string">    );</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>接着在 <code>me/layout/index.jsx</code> 里添加主页代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> layout <span class="keyword">from</span> <span class="string">'./baseLayout'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> layout(<span class="function">(<span class="params">props</span>) =&gt;</span> (</span><br><span class="line">    &lt;h1&gt;Hello World&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">))</span></span><br></pre></td></tr></table></figure>
+<p>这样，在打开主页后就是显示 <code>Hello World</code> 了。</p>
+<blockquote>
+<p>还需要修改 hexo 的 _config.yml 中的 theme 字段，改为 me</p>
+</blockquote>
+<p><strong>注意事项：</strong>react 的渲染是服务端渲染，也就是使用 renderToString api 得出的 html，因此使用的 script 代码是无效的，其外文件后缀需要是 <code>jsx</code>。那么如何调试呢，你可以专门写一个组件用于输出当前的页面数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (props) =&gt; (</span><br><span class="line">    &lt;script dangerouslySetInnerHTML=&#123;&#123;</span><br><span class="line">        __html: <span class="string">`</span></span><br><span class="line"><span class="string">            var data = (<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(props)&#125;</span>);</span></span><br><span class="line"><span class="string">            console.log(data);</span></span><br><span class="line"><span class="string">        `</span></span><br><span class="line">    &#125;&#125; /&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h2 id="数据来源"><a href="#数据来源" class="headerlink" title="数据来源"></a>数据来源</h2><p>在 hexo 里，它相当于一个小型的后端服务，为你提供了很多页面的数据，在前端里可以直接使用这些数据进行渲染。</p>
+<p>主要有全局变量以及当前页面的变量，在这里可以查看：<a href="https://hexo.io/zh-cn/docs/variables" target="_blank" rel="noopener">https://hexo.io/zh-cn/docs/variables</a></p>
+<p>现在来尝试输出一些变量来看看。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123; page, config, theme, site &#125; = <span class="keyword">this</span>.props;</span><br></pre></td></tr></table></figure>
+<p>在了解了这些变量的内容后，我们就可以根据这些变量去渲染对应的内容。</p>
+<h3 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">变量</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">site</td>
+<td style="text-align:left">网站变量</td>
+</tr>
+<tr>
+<td style="text-align:left">page</td>
+<td style="text-align:left">针对该页面的内容以及 front-matter 所设定的变量。</td>
+</tr>
+<tr>
+<td style="text-align:left">config</td>
+<td style="text-align:left">网站配置</td>
+</tr>
+<tr>
+<td style="text-align:left">theme</td>
+<td style="text-align:left">主题配置。继承自网站配置。</td>
+</tr>
+<tr>
+<td style="text-align:left">_ (单下划线)</td>
+<td style="text-align:left">Lodash 函数库</td>
+</tr>
+<tr>
+<td style="text-align:left">path</td>
+<td style="text-align:left">当前页面的路径（不含根路径）</td>
+</tr>
+<tr>
+<td style="text-align:left">url</td>
+<td style="text-align:left">当前页面的完整网址</td>
+</tr>
+<tr>
+<td style="text-align:left">env</td>
+<td style="text-align:left">环境变量</td>
+</tr>
+</tbody>
+</table>
+<h3 id="网站变量"><a href="#网站变量" class="headerlink" title="网站变量"></a>网站变量</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">变量</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">site.posts</td>
+<td style="text-align:left">所有文章</td>
+</tr>
+<tr>
+<td style="text-align:left">site.pages</td>
+<td style="text-align:left">所有分页</td>
+</tr>
+<tr>
+<td style="text-align:left">site.categories</td>
+<td style="text-align:left">所有分类</td>
+</tr>
+<tr>
+<td style="text-align:left">site.tags</td>
+<td style="text-align:left">所有标签</td>
+</tr>
+</tbody>
+</table>
+<h2 id="页面导航"><a href="#页面导航" class="headerlink" title="页面导航"></a>页面导航</h2><p>通常的主题都有一个页面的导航，因此在这里尝试添加一个简单的页面导航。导航的数据从 <code>me/_config.yml</code> 里获取。</p>
+<p>往 <code>me/_config.yml</code> 里添加以下内容，作为导航的配置数据。</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Header</span></span><br><span class="line"><span class="attr">menu:</span></span><br><span class="line">  <span class="attr">home:</span></span><br><span class="line">    <span class="attr">text:</span> <span class="string">主页</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/</span></span><br><span class="line">  <span class="attr">archives:</span></span><br><span class="line">    <span class="attr">text:</span> <span class="string">归档</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/archives</span></span><br><span class="line">  <span class="attr">tags:</span></span><br><span class="line">    <span class="attr">text:</span> <span class="string">标签</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/tags</span></span><br><span class="line">  <span class="attr">categories:</span></span><br><span class="line">    <span class="attr">text:</span> <span class="string">分类</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/categories</span></span><br><span class="line">  <span class="attr">about:</span></span><br><span class="line">    <span class="attr">text:</span> <span class="string">关于</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/menu/about.html</span></span><br></pre></td></tr></table></figure>
+<p>接着在 layout 目录里添加一个 <code>me/layout/components/navigate.jsx</code> 目录，添加以下代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (&#123; theme &#125;) =&gt; (</span><br><span class="line">    &lt;div className=<span class="string">"navigate"</span>&gt;</span><br><span class="line">        &#123;<span class="built_in">Object</span>.keys(theme.menu).map(<span class="function">(<span class="params">key, index</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">const</span> item = theme.menu[key];</span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;a href=&#123;item.url&#125; key=&#123;index&#125; className=<span class="string">"nav-item"</span>&gt;</span><br><span class="line">                    &#123;item.text&#125;</span><br><span class="line">                &lt;<span class="regexp">/a&gt;</span></span><br><span class="line"><span class="regexp">            )</span></span><br><span class="line"><span class="regexp">        &#125;)&#125;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>在 <code>me/layout/index.jsx</code> 里添加组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;Navigate theme=&#123;props.theme&#125; /&gt;</span><br></pre></td></tr></table></figure>
+<p>这时候，输出的 html 内容是：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"navigate"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/"</span> <span class="attr">class</span>=<span class="string">"nav-item"</span>&gt;</span>主页<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/archives"</span> <span class="attr">class</span>=<span class="string">"nav-item"</span>&gt;</span>归档<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/tags"</span> <span class="attr">class</span>=<span class="string">"nav-item"</span>&gt;</span>标签<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/categories"</span> <span class="attr">class</span>=<span class="string">"nav-item"</span>&gt;</span>分类<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/menu/about.html"</span> <span class="attr">class</span>=<span class="string">"nav-item"</span>&gt;</span>关于<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>接下来尝试优化一下样式，在 <code>source/css/_navigate.less</code> 里添加代码，并在 index.less 里引进来：<code>@import &#39;./_navigate.less&#39;;</code>。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@navigate-height:</span> <span class="number">50px</span>;</span><br><span class="line"><span class="variable">@navigate-color:</span> <span class="number">#fff</span>;</span><br><span class="line"><span class="variable">@navigate-shadow:</span> <span class="number">1px</span> <span class="number">2px</span> <span class="number">10px</span> rgba(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0.12</span>);</span><br><span class="line"></span><br><span class="line"><span class="selector-class">.navigate</span> &#123;</span><br><span class="line">    <span class="attribute">background-color</span>: <span class="variable">@navigate-color</span>;</span><br><span class="line">    <span class="attribute">box-shadow</span>: <span class="variable">@navigate-shadow</span>;</span><br><span class="line">    <span class="attribute">height</span>: <span class="variable">@navigate-height</span>;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    <span class="attribute">align-items</span>: center;</span><br><span class="line">    <span class="attribute">padding</span>: <span class="number">0</span> <span class="number">16px</span>;</span><br><span class="line"></span><br><span class="line">    <span class="selector-tag">&amp;</span> &gt; <span class="selector-class">.nav-item</span> &#123;</span><br><span class="line">        <span class="attribute">text-decoration</span>: none;</span><br><span class="line">        <span class="attribute">color</span>: <span class="number">#333</span>;</span><br><span class="line">        <span class="attribute">padding</span>: <span class="number">0</span> <span class="number">16px</span>;</span><br><span class="line">        <span class="attribute">height</span>: <span class="number">100%</span>;</span><br><span class="line">        <span class="attribute">line-height</span>: <span class="variable">@navigate-height</span>;</span><br><span class="line"></span><br><span class="line">        <span class="selector-tag">&amp;</span><span class="selector-pseudo">:hover</span> &#123;</span><br><span class="line">            <span class="attribute">color</span>: <span class="number">#f34</span>;</span><br><span class="line">            <span class="attribute">background-color</span>: rgba(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0.03</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此外，这里需要在布局文件里引入 css，才能生效。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">dangerouslySetInnerHTML</span>=<span class="string">&#123;&#123;</span> <span class="attr">__html:</span> <span class="attr">props.css</span>('<span class="attr">css</span>/<span class="attr">index.css</span>') &#125;&#125; /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>渲染出来的效果，之后基本都是前端美化的事情了。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181004224510.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="文章页"><a href="#文章页" class="headerlink" title="文章页"></a>文章页</h2><p>文章页使用的入口文件是 <code>me/layout/post.jsx</code>。渲染也比较简单，需要使用 dangerouslySetInnerHTML 差值插入 html 数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> layout <span class="keyword">from</span> <span class="string">'./baseLayout'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> layout(<span class="function">(<span class="params">&#123; page &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;div className=<span class="string">'post'</span>&gt;</span><br><span class="line">        &lt;header&gt;</span><br><span class="line">            &#123;page.photos.length &gt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">                &lt;div</span><br><span class="line">                    className=<span class="string">'post-cover'</span></span><br><span class="line">                    style=&#123;&#123; <span class="attr">backgroundImage</span>: <span class="string">`url(<span class="subst">$&#123;page.photos[<span class="number">0</span>]&#125;</span>)`</span> &#125;&#125;</span><br><span class="line">                /&gt;</span><br><span class="line">            &#125;</span><br><span class="line">            &lt;div className=<span class="string">'post-title'</span>&gt;&#123;page.title&#125;&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>header&gt;</span><br><span class="line">        &lt;section className=<span class="string">'post-content markdown'</span>&gt;</span><br><span class="line">            &lt;div dangerouslySetInnerHTML=&#123;&#123; <span class="attr">__html</span>: page.content &#125;&#125; /&gt;</span><br><span class="line">        &lt;<span class="regexp">/section&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">));</span><br></pre></td></tr></table></figure>
+<h2 id="归档页"><a href="#归档页" class="headerlink" title="归档页"></a>归档页</h2><p>归档页使用的入口文件是 <code>me/layout/archive.jsx</code>。基本的布局不说了，这里主要是介绍如何渲染其归档的数据。</p>
+<p>归档的数据在 page.posts 里，这是一个数组，遍历它就行了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> layout <span class="keyword">from</span> <span class="string">'./baseLayout'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> layout(<span class="function">(<span class="params">&#123; url_for, date, page &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;ul className=<span class="string">"post-archive"</span>&gt;</span><br><span class="line">        &#123;page.posts.map(<span class="function">(<span class="params">post, index</span>) =&gt;</span> (</span><br><span class="line">            &lt;li className=<span class="string">"item"</span> key=&#123;index&#125;&gt;</span><br><span class="line">                &lt;a className=<span class="string">"title"</span> href=&#123;url_for(post.path)&#125;&gt;&#123;post.title&#125;&lt;<span class="regexp">/a&gt;</span></span><br><span class="line"><span class="regexp">                &lt;span className="date"&gt;&#123;date(post.date, "YYYY-MM-DD")&#125;&lt;/</span>span&gt;</span><br><span class="line">            &lt;<span class="regexp">/li&gt;</span></span><br><span class="line"><span class="regexp">        ))&#125;</span></span><br><span class="line"><span class="regexp">    &lt;/u</span>l&gt;</span><br><span class="line">));</span><br></pre></td></tr></table></figure>
+<p>在这里使用到了一些 hexo 内置的 api 工具函数，使用 url_for 格式化地址，主要是补全，使用 date 格式化时间，这是来自于 moment.js 库的 api。</p>
+<p>再加上 css，美化一下。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.post-archive</span> &#123;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="number">0</span>;</span><br><span class="line">    <span class="attribute">padding</span>: <span class="number">12px</span> <span class="number">0</span>;</span><br><span class="line">    <span class="attribute">list-style</span>: none;</span><br><span class="line"></span><br><span class="line">    &gt; <span class="selector-tag">li</span><span class="selector-class">.item</span> &#123;</span><br><span class="line">        <span class="attribute">padding</span>: <span class="number">16px</span>;</span><br><span class="line">        &gt; <span class="selector-class">.title</span> &#123; <span class="attribute">color</span>: <span class="number">#39f</span> &#125;</span><br><span class="line">        &gt; <span class="selector-class">.date</span> &#123;</span><br><span class="line">            <span class="attribute">color</span>: <span class="number">#678</span>;</span><br><span class="line">            <span class="attribute">font-size</span>: <span class="number">14px</span>;</span><br><span class="line">            <span class="attribute">float</span>: right;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181004225944.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="分类页"><a href="#分类页" class="headerlink" title="分类页"></a>分类页</h2><p>分类页的布局是会有两个，一个是所有的分类列表，另外一个是某个分类的详细列表。</p>
+<p>所有的分类列表需要在 source 目录里创建一个 categories 目录，在 <code>source/categories</code> 里需要创建一个 index.md 指定布局的文件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 分类</span><br><span class="line">comments: <span class="literal">false</span></span><br><span class="line">type: categories</span><br><span class="line">layout: categories</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>大致的意思是，分类列表使用 <code>categories.jsx</code> 这个布局文件。</p>
+<p>分类的数据在 site.categories 里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">site.categories.map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> (</span><br><span class="line">    &lt;a</span><br><span class="line">        key=&#123;index&#125;</span><br><span class="line">        href=&#123;<span class="string">`/categories/<span class="subst">$&#123;item.name&#125;</span>/`</span>&#125;</span><br><span class="line">        target=<span class="string">'_blank'</span>&gt;</span><br><span class="line">        &#123;item.name&#125;</span><br><span class="line">    &lt;<span class="regexp">/a&gt;</span></span><br><span class="line"><span class="regexp">))</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181006145903.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>当访问 <code>/category/</code> 时会使用 <code>layout/categories.jsx</code>，当访问 <code>/category/react/</code> 时，会使用 <code>layout/category.jsx</code>。</p>
+<blockquote>
+<p><strong>现在来解析一下为什么会这样？</strong><br>首先，菜单写着 /categories，因为 source 里的文件编译后会搬到 public 里，也就是 source/categories -&gt; public/categories。public 目录与路由映射，也就是 /categories -&gt; public/categories，因此最终访问是来到了 source/categories，如果 source/categories 里有一个 index.html 那么直接是访问的是 index.html 文件，但是如果是 index.md，hexo 再做一个解析，在 index.md 里指定了布局文件，那么会直接映射到 me/layout/xxxx 里，最后渲染的是 me/layout/xxxx 的文件内容。</p>
+</blockquote>
+<h2 id="标签页"><a href="#标签页" class="headerlink" title="标签页"></a>标签页</h2><p>标签页和分类页差不多，也是需要在 source 里创建一个 tags 目录，并在其创建 index.md，指定布局文件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 标签</span><br><span class="line">comments: <span class="literal">false</span></span><br><span class="line">type: tags</span><br><span class="line">layout: tags</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>当访问 <code>/tags/</code> 时会使用 <code>layout/tags.jsx</code>，当访问 <code>/tags/react/</code> 时，会使用 <code>layout/tag.jsx</code>。</p>
+<!-- ## 列表分页 -->
+<h2 id="源信息"><a href="#源信息" class="headerlink" title="源信息"></a>源信息</h2><p>在文章的顶部是可以放置一些源信息的。它会合并在 page 对象里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 从零开发属于自己的 Hexo 主题</span><br><span class="line">date: <span class="number">2018</span><span class="number">-10</span><span class="number">-04</span> <span class="number">18</span>:<span class="number">57</span>:<span class="number">20</span></span><br><span class="line">categories: 前端</span><br><span class="line">tags:</span><br><span class="line">    - 前端</span><br><span class="line">author: Lizhooh</span><br><span class="line">photos: http:<span class="comment">//pic1.win4000.com/wallpaper/8/580f26440b230.jpg</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>例如上面的数据，可以这样获取：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">page.title</span><br><span class="line">page.author</span><br><span class="line">page.photos</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.906Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/10/前端/从零开发属于自己的 Hexo 主题/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/10/前端/从零开发属于自己的 Hexo 主题/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/10/React/React/React Apollo（GraphQL）使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Apollo（GraphQL）使用指南</h4>
+        <h4 class="summary">React Apollo 是一个 Apollo 开源的一个 React + GraphQL 集成方案库，主要提供便利的 ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/10/React Native/React Native 配置 Typescript 编译/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 配置 Typescript 编译</h4>
+        <h4 class="summary">TypeScript 作为 JavaScript 的一个富类型扩展语言，深受代码风格严谨的前端开发者欢迎。本篇文章将详细...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

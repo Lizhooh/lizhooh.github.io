@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/05/React/React/图片懒加载的实现/">
+    
+    
+    <title>图片懒加载（lazyload）模式的实现 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言往往在大型 Web 应用里图片资源加载是非常影响性能的，当一个页面有许多图片时，就不应该一次性把它所有的加载，这样一来会浪费带宽，二来会影响前端性能。那么可以尝试对图片使用懒加载模式，这是需要应用的一个优化点，像淘宝、京东、网易精选等有长列表且多图片的页面里都是使用了图片懒加载模式。 下面就来看看，图片的懒加载模式是如何实现的，以及在 React 里如何实现。">
+<meta name="keywords" content="前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图片懒加载（lazyload）模式的实现">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/05/React/React/图片懒加载的实现/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言往往在大型 Web 应用里图片资源加载是非常影响性能的，当一个页面有许多图片时，就不应该一次性把它所有的加载，这样一来会浪费带宽，二来会影响前端性能。那么可以尝试对图片使用懒加载模式，这是需要应用的一个优化点，像淘宝、京东、网易精选等有长列表且多图片的页面里都是使用了图片懒加载模式。 下面就来看看，图片的懒加载模式是如何实现的，以及在 React 里如何实现。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.880Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="图片懒加载（lazyload）模式的实现">
+<meta name="twitter:description" content="前言往往在大型 Web 应用里图片资源加载是非常影响性能的，当一个页面有许多图片时，就不应该一次性把它所有的加载，这样一来会浪费带宽，二来会影响前端性能。那么可以尝试对图片使用懒加载模式，这是需要应用的一个优化点，像淘宝、京东、网易精选等有长列表且多图片的页面里都是使用了图片懒加载模式。 下面就来看看，图片的懒加载模式是如何实现的，以及在 React 里如何实现。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">图片懒加载（lazyload）模式的实现</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">图片懒加载（lazyload）模式的实现</h1>
+
+        <div class="meta-rest">
+            <h1>图片懒加载（lazyload）模式的实现</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-05-10T03:57:00.000Z" itemprop="datePublished" class="page-time">
+    2018-05-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#图片懒加载实现原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">图片懒加载实现原理</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#React-图片懒加载"><span class="post-toc-number">3.</span> <span class="post-toc-text">React 图片懒加载</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/图片懒加载的实现"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">图片懒加载（lazyload）模式的实现</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 05 月 10 日 11:57" datetime="2018-05-10T03:57:00.000Z"  itemprop="datePublished">
+    2018-05-10
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1353</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>往往在大型 Web 应用里图片资源加载是非常影响性能的，当一个页面有许多图片时，就不应该一次性把它所有的加载，这样一来会浪费带宽，二来会影响前端性能。那么可以尝试对图片使用懒加载模式，这是需要应用的一个优化点，像淘宝、京东、网易精选等有长列表且多图片的页面里都是使用了图片懒加载模式。</p>
+<p>下面就来看看，图片的懒加载模式是如何实现的，以及在 React 里如何实现。</p>
+<a id="more"></a>
+<h2 id="图片懒加载实现原理"><a href="#图片懒加载实现原理" class="headerlink" title="图片懒加载实现原理"></a>图片懒加载实现原理</h2><blockquote>
+<p><b>什么是图片懒加载模式？</b> 通俗的讲就是：当访问一个页面的时候，先把 img 元素或是其他元素的背景图片路径替换成一张大小为 1*1px 图片的路径或者是很小的 Base64 编码图片（这样只请求一次），只有当图片出现在浏览器的<code>可视区域内</code>时，才设置图片正真的路径，让图片显示出来。这就是图片懒加载。</p>
+</blockquote>
+<p><b>大致的实现思路是：</b>将 img 的 src 用占位图片地址代替，当页面滚动直至此图片出现在可视区域时，把真实的图片地址赋值给 src。看是很简单的实现，实际上最难的就是计算图片是否在可视区里面。</p>
+<p>通常会使用 data-original 来记录真实的图片地址，或者有些是使用 data-url、data-src 等。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"占位地址"</span> <span class="attr">data-original</span>=<span class="string">"真实地址"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>通常会使用到的属性：</p>
+<ul>
+<li>页可见区域宽/高： document.body.clientWidth/clientHeight</li>
+<li>网页可见区域宽/高： document.body.offsetWidth/offsetHeight</li>
+<li>网页正文全文宽/高： document.body.scrollWidth/scrollHeight</li>
+<li>滚动条顶端位置： document.body.scrollTop</li>
+<li>网页正文部分上： window.screenTop</li>
+<li>屏幕分辨率的宽/高： window.screen.width/height</li>
+<li>屏幕可用工作区高度： window.screen.availHeight</li>
+</ul>
+<p>一般来说，都会忽略水平的可视区计算。</p>
+<p>那么如何计算是否进入可视区？说难也不难，说简单有不简单。主要是通过监听滚动条的位置，判断滚动条的位置与当前元素的位置是否重叠。</p>
+<p>好，下面就来实现一个简单的。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">        img &#123;</span><br><span class="line"><span class="css">            <span class="selector-tag">transition</span>: <span class="selector-tag">all</span> 0<span class="selector-class">.5s</span> <span class="selector-tag">ease-in-out</span>;</span></span><br><span class="line"><span class="css">            <span class="selector-tag">background-color</span>: <span class="selector-id">#f54</span>;</span></span><br><span class="line"><span class="css">            <span class="selector-tag">box-shadow</span>: 0 5<span class="selector-tag">px</span> 12<span class="selector-tag">px</span> <span class="selector-tag">rgba</span>(1, 1, 1, 0<span class="selector-class">.12</span>);</span></span><br><span class="line">            margin: 10px;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"height: 2000px"</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">"https://timgsa.baidu.com/timg"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">data-original</span>=<span class="string">"http://news.cri.cn/mmsource/images/2014/08/13/39c47e1e55ff4bd3a692069057d96937.jpg"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">style</span>=<span class="string">"height: 300px; width: auto;"</span></span></span><br><span class="line"><span class="tag">            /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">"https://timgsa.baidu.com/timg"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">data-original</span>=<span class="string">"http://news.cri.cn/mmsource/images/2014/08/13/db52bdf2802a4ef191233ff00698dbd4.jpg"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">style</span>=<span class="string">"height: 300px; width: auto;"</span></span></span><br><span class="line"><span class="tag">            /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">    <span class="built_in">window</span>.onload = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span></span><br><span class="line"><span class="javascript">        <span class="keyword">const</span> imgs = <span class="built_in">document</span>.querySelectorAll(<span class="string">'img'</span>);</span></span><br><span class="line"><span class="javascript">        <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; imgs.length; i++) &#123;</span></span><br><span class="line"><span class="actionscript">            <span class="keyword">const</span> top = imgs[i].getBoundingClientRect().top;</span></span><br><span class="line"><span class="actionscript">            imgs[i].top = top;     <span class="comment">// 图片说在位置</span></span></span><br><span class="line"><span class="actionscript">            imgs[i].flag = <span class="literal">false</span>;  <span class="comment">// 标记是否设置了真实的 src</span></span></span><br><span class="line">        &#125;</span><br><span class="line"><span class="javascript">        <span class="built_in">window</span>.addEventListener(<span class="string">'scroll'</span>, e =&gt; &#123;</span></span><br><span class="line"><span class="javascript">            <span class="keyword">const</span> ch = <span class="built_in">document</span>.documentElement.clientHeight || <span class="built_in">document</span>.body.clientHeight;</span></span><br><span class="line"><span class="javascript">            <span class="keyword">const</span> t = <span class="built_in">document</span>.documentElement.scrollTop || <span class="built_in">document</span>.body.scrollTop;</span></span><br><span class="line"></span><br><span class="line"><span class="javascript">            <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; imgs.length; i++) &#123;</span></span><br><span class="line"><span class="actionscript">                <span class="comment">// 替换真实的 src</span></span></span><br><span class="line">                if (ch + t - 100 &gt; imgs[i].top &amp;&amp; !imgs[i].flag) &#123;</span><br><span class="line">                    imgs[i].src = imgs[i].dataset.original;</span><br><span class="line"><span class="actionscript">                    imgs[i].flag = <span class="literal">true</span>;</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>首先，获取每个 img 的说在位置顶部的距离，根据滚动条情况比较是否达到这个距离，到达之后设置其 src，完成一次懒加载。</p>
+<h2 id="React-图片懒加载"><a href="#React-图片懒加载" class="headerlink" title="React 图片懒加载"></a>React 图片懒加载</h2><p>关于 React 的实现，可以看这篇文章：<a href="https://w33ble.github.io/understanding-react/demos/lazy-load.html" target="_blank" rel="noopener">lazy-load</a>，里面已经讲得很清楚了</p>
+<p>下面是一个使用 <a href="https://github.com/jasonslyvia/react-lazyload" target="_blank" rel="noopener">react-lazyload</a> 实现的示例。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> LazyLoad <span class="keyword">from</span> <span class="string">'react-lazyload'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> src = <span class="string">'http://news.cri.cn/mmsource/images/2014/08/13/39c47e1e55ff4bd3a692069057d96937.jpg'</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div className=<span class="string">"App"</span>&gt;</span><br><span class="line">                &lt;p style=&#123;&#123; <span class="attr">height</span>: <span class="number">2000</span> &#125;&#125;&gt;</span><br><span class="line">                    Hello world</span><br><span class="line">                &lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;LazyLoad height=&#123;700&#125; offset=&#123;100&#125; once=&#123;true&#125;&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;div style=&#123;&#123; height: 700 &#125;&#125;&gt;</span></span><br><span class="line"><span class="regexp">                        &lt;img src=&#123;src&#125; /</span>&gt;</span><br><span class="line">                    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">                &lt;/</span>LazyLoad&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>大概说一下思路，因为 React 是动态渲染的，所以在图片没有到可视区域时，先渲染一个固定大小的 div。差不多到可视区域时，再把它渲染成 img，这样依赖连 src 都不用换了。</p>
+<p>还可以基于 <code>vanilla-lazyload</code> 集成，来看看咋弄。</p>
+<p>初始化项与目安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">create-react-app my-app</span><br><span class="line"><span class="built_in">cd</span> my-app</span><br><span class="line">yarn add vanilla-lazyload</span><br></pre></td></tr></table></figure>
+<p>之后，在 jsx 里添加 img，lazyload 需要根据 data-src 来获取真实地址的。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">    <span class="attr">src</span>=<span class="string">"https://timgsa.baidu.com/timg"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">data-src</span>=<span class="string">"http://news.cri.cn/mmsource/images/2014/08/13/39c47e1e55ff4bd3a692069057d96937.jpg"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">style</span>=<span class="string">&#123;&#123;</span> <span class="attr">height:</span> <span class="attr">300</span>, <span class="attr">width:</span> '<span class="attr">auto</span>' &#125;&#125;</span></span><br><span class="line"><span class="tag">    <span class="attr">alt</span>=<span class="string">""</span></span></span><br><span class="line"><span class="tag">    /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>之后，在 dom 加载完成后初始化。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> LazyLoad = <span class="built_in">require</span>(<span class="string">'vanilla-lazyload'</span>);</span><br><span class="line"><span class="built_in">window</span>.addEventListener(<span class="string">'load'</span>, e =&gt; &#123;</span><br><span class="line">    <span class="built_in">window</span>.lazyLoad = <span class="keyword">new</span> LazyLoad();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果使用动态插入 img，那么渲染完成后需要调用 update() 方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.setState(&#123;</span><br><span class="line">    view: (</span><br><span class="line">        &lt;img</span><br><span class="line">            src=<span class="string">"https://timgsa.baidu.com/timg"</span></span><br><span class="line">            data-src=<span class="string">"http://news.cri.cn/mmsource/images/2014/08/13/db52bdf2802a4ef191233ff00698dbd4.jpg"</span></span><br><span class="line">            style=&#123;&#123; <span class="attr">height</span>: <span class="number">300</span>, <span class="attr">width</span>: <span class="string">'auto'</span> &#125;&#125;</span><br><span class="line">            alt=<span class="string">""</span></span><br><span class="line">            /&gt;</span><br><span class="line">    ),</span><br><span class="line">&#125;, () =&gt; <span class="built_in">window</span>.lazyLoad.update());</span><br></pre></td></tr></table></figure>
+<p>因为 vanilla-lazyload 是非响应式的，当动态插入 img 时，它并不知道，所以需要手动更新。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.javascriptstuff.com/react-image-gallery/" target="_blank" rel="noopener">https://www.javascriptstuff.com/react-image-gallery/</a></li>
+<li><a href="https://w33ble.github.io/understanding-react/demos/lazy-load.html" target="_blank" rel="noopener">https://w33ble.github.io/understanding-react/demos/lazy-load.html</a></li>
+<li><a href="https://www.cnblogs.com/flyromance/p/5042187.html" target="_blank" rel="noopener">https://www.cnblogs.com/flyromance/p/5042187.html</a></li>
+<li><a href="https://www.andreaverlicchi.eu/lazyload" target="_blank" rel="noopener">https://www.andreaverlicchi.eu/lazyload</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.880Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/05/React/React/图片懒加载的实现/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/05/React/React/图片懒加载的实现/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/05/Typescript/如何优雅的编写 index.d.ts 文件？/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">如何优雅的编写 d.ts 文件？</h4>
+        <h4 class="summary">d.ts 是 Typescript 的描述文件，通常用于描述摸个函数/库的接口类型，在 vscode 里看见的智能提示，...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/05/React/Style/ClassNames 在 React 上的应用/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">💅 ClassNames 在 React 上的应用</h4>
+        <h4 class="summary">在 Vue 里有一个动态的 class 语法，很好的根据条件动态设置 class。例如：
+1
+就是当 show 为 tr...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

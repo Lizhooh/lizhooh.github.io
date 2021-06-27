@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/page/19/">
+    
+    
+    <title>Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lizhooh 的技术博客">
+<meta property="og:url" content="http://me.lizhooh.com/page/19/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:locale" content="zh-Hans">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lizhooh 的技术博客">
+<meta name="twitter:description" content="数据就像冰山一样，栩栩如生！">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Lizhooh 的技术博客</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header index-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Lizhooh 的技术博客</h1>
+
+        <div class="meta-rest">
+            <h1></h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+<div class="container body-wrap index">
+
+    <ul class="post-list">
+    
+        <li class="post-list-item fade">
+            <article id="post-Redux/精减 Redux 代码量"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 01 月 17 日 9:07" datetime="2018-01-17T01:07:45.000Z"  itemprop="datePublished">
+    2018-01-17
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2075
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 20 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/01/Redux/精减 Redux 代码量/">精减 Redux 代码量</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React 中使用 Redux 带来的不仅仅是数据状态的易维护性，还带来的是代码量的提升。事物总有好的一方面也有坏的一方面，使用 Redux 后，项目的代码量会增加很多，这是人人皆知的事情。</p>
+<p>为了解决这种困境，今天来<strong>谈谈</strong> Redux 代码多在哪里，如何去精减 Redux 的代码量。从另一个角度看，完全是为了减少工作量，提高开发效率。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180117091021.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <a href="/stories/2018/01/Redux/精减 Redux 代码量/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/01/Redux/精减 Redux 代码量/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-GraphQL/GraphQL 结合 Koa 实践体验"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 01 月 12 日 20:28" datetime="2018-01-12T12:28:04.000Z"  itemprop="datePublished">
+    2018-01-12
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/GraphQL/">GraphQL</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1322
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 12.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/">GraphQL 结合 Koa 实践体验</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 <code>GraphQL</code> 与 <code>Koa</code> 结合起来实际一把，其中还掺杂着 <code>Mongodb</code>。</p>
+<p>本文会先介绍 GraphQL，接着使用 Koa 搭建 http 服务，使用 Mongodb 存储数据，结合 GraphQL 搭建丰富的 Web API 服务。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/koa+graqhl.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <a href="/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GraphQL/">GraphQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Koa/">Koa</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Go/小谈 Go 中闭包与回调"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 01 月 05 日 19:35" datetime="2018-01-05T11:35:19.000Z"  itemprop="datePublished">
+    2018-01-05
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Go/">Go</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1107
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/01/Go/小谈 Go 中闭包与回调/">小谈 Go 中闭包与回调</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Javascript 里都有一个非常明显的特性，那就是闭包与回调。在 Go 里也有这种特性，它通过灵活的方式进行展示。</p>
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>闭包是一个特殊的结构，通常在一个函数（A）内返回另一个函数（B），这个返回的函数（A）引用了它所在的函数（B）里的变量。那么就构成了一个闭包结构。</p>
+    
+
+        <a href="/stories/2018/01/Go/小谈 Go 中闭包与回调/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Go/">Go</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/01/Go/小谈 Go 中闭包与回调/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Go/小谈 Go 中的包与模块"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 01 月 03 日 22:20" datetime="2018-01-03T14:20:52.000Z"  itemprop="datePublished">
+    2018-01-03
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Go/">Go</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：920
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/01/Go/小谈 Go 中的包与模块/">小谈 Go 中的包与模块</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>任何包系统设计的目的都是为了简化大型程序的设计和维护工作，通过将一组相关的特性放进一个独立的单元以便于理解和更新，在每个单元更新的同时保持和程序中其它单元的相对独立性。这种模块化的特性允许每个包可以被其它的不同项目共享和重用，在项目范围内、甚至全球范围统一的分发和复用。</p>
+<p>包的作用更多的是未来解决函数命名冲突的问题。</p>
+<h2 id="Go-中的包与模块"><a href="#Go-中的包与模块" class="headerlink" title="Go 中的包与模块"></a>Go 中的包与模块</h2><p>Go 中的包与模块，使用 <code>import</code> 关键字，通过路径进行导入。</p>
+    
+
+        <a href="/stories/2018/01/Go/小谈 Go 中的包与模块/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Go/">Go</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/01/Go/小谈 Go 中的包与模块/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/React/Gatsby：静态 Web 应用框架"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 01 月 01 日 20:30" datetime="2018-01-01T12:30:09.000Z"  itemprop="datePublished">
+    2018-01-01
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：911
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/">Gatsby：静态 Web 应用框架</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="https://www.gatsbyjs.org" target="_blank" rel="noopener">Gatsby</a> 是一个静态 Web 应用框架，允许你使用 React 来开发静态 Web 应用。<br>Gatsby.js 与 Next.js 很像，只不过它们的出发点不同。😋</p>
+    
+
+        <a href="/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Nodejs/Nodejs 多核工作进程『池』架构设计"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 12 月 30 日 9:07" datetime="2017-12-30T01:07:17.000Z"  itemprop="datePublished">
+    2017-12-30
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1497
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 15 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/12/Nodejs/Nodejs 多核工作进程『池』架构设计/">Nodejs 多核工作进程『池』架构设计</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>引出场景，还是关于 CPU 密集计算的问题，假设现在有很多计算任务，笔者我可能会选择使用 Child_Process 模块的 <code>Fork</code> 形式来执行计算任务。每来一个任务就 Fork 创建一个工作进程，执行完成后就释放工作进程。这样看起来好像没什么问题，其实它是有问题的。首先创建进程是消耗 CPU 和内存的，每个 Fork 进程都是一个 <code>V8</code> 实例，创建至少需要 <code>30ms</code> 和 <code>10mb</code> 以上的资源。</p>
+<p>现在可以换一个角度思考，如何创建后就让它持久不倒呢？这样就可以避免重新创建所带来的额外操作。</p>
+    
+
+        <a href="/stories/2017/12/Nodejs/Nodejs 多核工作进程『池』架构设计/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/12/Nodejs/Nodejs 多核工作进程『池』架构设计/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Nodejs/探讨：Nodejs 是如何应对 CPU 密集型任务的"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 12 月 24 日 20:20" datetime="2017-12-24T12:20:59.000Z"  itemprop="datePublished">
+    2017-12-24
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2602
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 27.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/12/Nodejs/探讨：Nodejs 是如何应对 CPU 密集型任务的/">探讨：Nodejs 是如何应对 CPU 密集型任务的</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Nodejs 天生异步，其最擅长的是处理<strong>密集型的 IO 任务</strong>。但是面对<strong> CPU 密集型任务</strong>，Nodejs 就显得非常无力了。<br>其中最大的原因是 Nodejs 单线程运行，并且采用事件循环的机制，导致在做密集计算时把整个事件循环都堵塞了。因为，<code>Event Loop</code> 在处理所有的任务、事件时都是沿着事件队列顺序执行的，所以在其中任何一个任务没有完成之前，其它的任务是无法进行的，也没有<strong>抢占式</strong>的方式执行其他任务，这就意味着密集计算很有可能会造成事件循环的阻塞。</p>
+<p>如果真的想要在 Nodejs 里做密集计算不是不可能，而且有很多方法可以解决，只是不太推荐使用 Nodejs 做密集计算，特别是有其他 IO 的应用。</p>
+    
+
+        <a href="/stories/2017/12/Nodejs/探讨：Nodejs 是如何应对 CPU 密集型任务的/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/12/Nodejs/探讨：Nodejs 是如何应对 CPU 密集型任务的/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/React Native 由繁到简实现夜间模式"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 12 月 16 日 8:48" datetime="2017-12-16T00:48:20.000Z"  itemprop="datePublished">
+    2017-12-16
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1356
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 12.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/12/React Native/React Native 由繁到简实现夜间模式/">React Native 由繁到简实现夜间模式</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><b>夜间模式</b> 能提升用户体验的功能，现在很多 App 都有实现夜间模式。那么如何在 React Native 上实现夜间模式呢？之前我的做法是使用 Redux，维护着一个 Theme Store 来进行动态的切换组件的颜色。</p>
+<p>但是这样有几个需要我吐槽的地方：</p>
+<ul>
+<li>相关组件需要通过 props 来动态切换颜色，非常不方便。</li>
+<li>给组件的 style 属性需要动态的对象析构，非常麻烦，代码也不美观。</li>
+</ul>
+<p>为了解决这些繁琐问题，我将使用 <code>styled-components</code> 来实现 React Native 夜间模式。</p>
+<p>关于夜间模式的问题：</p>
+<ul>
+<li><a href="https://www.zhihu.com/question/27726907" target="_blank" rel="noopener">「夜间模式」是不是伪需求？</a></li>
+<li><a href="https://www.zhihu.com/question/22936364" target="_blank" rel="noopener">如何设计「夜间模式」，有哪些值得注意的问题与经验？</a></li>
+</ul>
+    
+
+        <a href="/stories/2017/12/React Native/React Native 由繁到简实现夜间模式/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/12/React Native/React Native 由繁到简实现夜间模式/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/React/React 定义一个 Model 组件"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 12 月 14 日 9:03" datetime="2017-12-14T01:03:40.000Z"  itemprop="datePublished">
+    2017-12-14
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1227
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 12.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/12/React/React/React 定义一个 Model 组件/">React 定义一个 Model 组件</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Model（弹窗）</code>组件是一个比较常用的组件，在 React 里要设计一个 Model 组件可以不是一件简单的事情。因为 Model 组件很多时候都是挂载在 <code>body</code> 下的，而且又是全局悬浮状态。</p>
+<p>在 React 里定义 Model 组件有两种方法：</p>
+<ul>
+<li>使用 ReactDOM.render</li>
+<li>使用 React 16 提供的</li>
+</ul>
+<p>下面就来介绍一下这两种定义（设计）方式。</p>
+    
+
+        <a href="/stories/2017/12/React/React/React 定义一个 Model 组件/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/12/React/React/React 定义一个 Model 组件/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/Style/更进一步管理 React 组件样式"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 12 月 09 日 10:59" datetime="2017-12-09T02:59:10.000Z"  itemprop="datePublished">
+    2017-12-09
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1181
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 12.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/12/React/Style/更进一步管理 React 组件样式/">💅 更进一步管理 React 组件样式</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>styled-components 是一个 <code>CSS in Javascript</code> 的框架，可用于 React/React Native 上，在 Gzip 只有 18k 大小。它可以让你抛去在编写 React 组件时，每个组件都需要携带一个 CSS/Sass/Less 文件的烦恼。基于 Javascript 的灵活性，因此可以更方便的编写独立的组件，这意味着往往只需要一个 js 文件就可以稳稳的进行组件化编程。</p>
+<blockquote>
+<p>本文不会介绍基础内容，更多的参考相关文章：<a href="stories/2017/07/React/Style/Styled-Components%20最佳使用方式/" target="_blank">💅 Styled-Components 最佳使用方式</a></p>
+</blockquote>
+    
+
+        <a href="/stories/2017/12/React/Style/更进一步管理 React 组件样式/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/12/React/Style/更进一步管理 React 组件样式/">阅读更多</a>            </div>
+        </li>
+    
+    </ul>
+
+    
+<nav id="page-nav">
+    <div class="inner">
+    <a class="extend prev" rel="prev" href="/page/18/">上一页</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/20/">下一页</a>
+    </div>
+</nav>
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

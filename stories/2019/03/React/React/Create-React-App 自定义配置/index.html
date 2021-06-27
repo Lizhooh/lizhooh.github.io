@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/03/React/React/Create-React-App 自定义配置/">
+    
+    
+    <title>Create-React-App 自定义配置（重写 Webpack） | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在使用 Create-React-App 创建的项目，文件结构非常的简洁，但是有时候我们需要自己添加或修改一些 Webpack 配置，这时候可以使用 npm run eject 把 Webpack 的配置全部导出来。但是有时候并不想这样做，所以能不能使用不改变目录结构的方式呢？答案是可以的，下面就来看看怎么配置。 更多的了解可以查看官方的文档：create-react-app doc">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Create-React-App 自定义配置（重写 Webpack）">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/03/React/React/Create-React-App 自定义配置/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在使用 Create-React-App 创建的项目，文件结构非常的简洁，但是有时候我们需要自己添加或修改一些 Webpack 配置，这时候可以使用 npm run eject 把 Webpack 的配置全部导出来。但是有时候并不想这样做，所以能不能使用不改变目录结构的方式呢？答案是可以的，下面就来看看怎么配置。 更多的了解可以查看官方的文档：create-react-app doc">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.874Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Create-React-App 自定义配置（重写 Webpack）">
+<meta name="twitter:description" content="前言在使用 Create-React-App 创建的项目，文件结构非常的简洁，但是有时候我们需要自己添加或修改一些 Webpack 配置，这时候可以使用 npm run eject 把 Webpack 的配置全部导出来。但是有时候并不想这样做，所以能不能使用不改变目录结构的方式呢？答案是可以的，下面就来看看怎么配置。 更多的了解可以查看官方的文档：create-react-app doc">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Create-React-App 自定义配置（重写 Webpack）</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Create-React-App 自定义配置（重写 Webpack）</h1>
+
+        <div class="meta-rest">
+            <h1>Create-React-App 自定义配置（重写 Webpack）</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-03-11T08:40:47.000Z" itemprop="datePublished" class="page-time">
+    2019-03-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用-react-app-rewired"><span class="post-toc-number">2.</span> <span class="post-toc-text">使用 react-app-rewired</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#重写-Webpack-配置"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">重写 Webpack 配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置-Less"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">配置 Less</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置-Scss"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">配置 Scss</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Webpack-提取公共模块"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">Webpack 提取公共模块</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#IE-polyfill"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">IE polyfill</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用-craco"><span class="post-toc-number">3.</span> <span class="post-toc-text">使用 craco</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/Create-React-App 自定义配置"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Create-React-App 自定义配置（重写 Webpack）</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 03 月 11 日 16:40" datetime="2019-03-11T08:40:47.000Z"  itemprop="datePublished">
+    2019-03-11
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 928</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在使用 Create-React-App 创建的项目，文件结构非常的简洁，但是有时候我们需要自己添加或修改一些 Webpack 配置，这时候可以使用 <code>npm run eject</code> 把 Webpack 的配置全部导出来。但是有时候并不想这样做，所以能不能使用不改变目录结构的方式呢？答案是可以的，下面就来看看怎么配置。</p>
+<p>更多的了解可以查看官方的文档：<a href="https://facebook.github.io/create-react-app" target="_blank" rel="noopener">create-react-app doc</a></p>
+<a id="more"></a>
+<h2 id="使用-react-app-rewired"><a href="#使用-react-app-rewired" class="headerlink" title="使用 react-app-rewired"></a>使用 react-app-rewired</h2><p>react-app-rewired 可以说是一个比较出名并且早的一个重写 CRA 配置的一个库了，不过现在已经不维护的，CRA 已经更新到 3.0 了，与 2.x 有点不同。</p>
+<h3 id="重写-Webpack-配置"><a href="#重写-Webpack-配置" class="headerlink" title="重写 Webpack 配置"></a>重写 Webpack 配置</h3><p>重写 Webpack 的配置，使用到了 <a href="https://www.npmjs.com/package/react-app-rewired" target="_blank" rel="noopener">react-app-rewired</a>，这是一个专门用于重新 create-react-app 的配置的。</p>
+<p>react-app-rewired 的原理就是在启动了时候会读取 config.overrides 的配置项以及 react-scripts 的配置项，然后做一个合并，最后实际上是运行 react-scripts 的命令。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add react-app-rewired --dev</span><br></pre></td></tr></table></figure>
+<p>安装完成后，替换现有的 npm scripts 命令：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"scripts"</span>: &#123;</span><br><span class="line">    <span class="string">"start"</span>: <span class="string">"react-app-rewired start"</span>,</span><br><span class="line">    <span class="string">"build"</span>: <span class="string">"react-app-rewired build"</span>,</span><br><span class="line">    <span class="string">"test"</span>: <span class="string">"react-app-rewired test --env=jsdom"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之后在项目目录下添加 <code>config-overrides.js</code> 文件。</p>
+<p>在 config-overrides.js 里提供了 env 和 webpack config 的参数。你可以在这里使用 Nodejs 执行一些预操作，甚至是配置 less/scss。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* config-overrides.js */</span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="配置-Less"><a href="#配置-Less" class="headerlink" title="配置 Less"></a>配置 Less</h3><blockquote>
+<p>在 react-scripts 1.x 直接安装 less less-loader 就可以实现加载 less，而 2.x 反而无效，此问题待研究。</p>
+</blockquote>
+<p>以下是 react-scripts 2.x 添加 less 的办法，因为 1.x 自带 less 了。</p>
+<p>配置 less/scss 有两种，一种是在 webpack 里设置，另外一种是在 <code>config-override.js</code> 里添加自动监听文件变化的编译。</p>
+<p>现在介绍在 webpack 里设置的方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add less less-loader --dev</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line">    <span class="comment">//do stuff with the webpack config...</span></span><br><span class="line">    <span class="built_in">console</span>.log(config.module);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> rules = config.module.rules;</span><br><span class="line">    rules[rules.length - <span class="number">1</span>].oneOf.push(&#123;</span><br><span class="line">        test: <span class="regexp">/.less$/</span>,</span><br><span class="line">        exclude: <span class="regexp">/\.module\.less$/</span>,</span><br><span class="line">        loader: <span class="built_in">require</span>.resolve(<span class="string">'less-loader'</span>),</span><br><span class="line">        options: &#123;&#125;,</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    config.module.rules = rules;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// process.exit(0);</span></span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="配置-Scss"><a href="#配置-Scss" class="headerlink" title="配置 Scss"></a>配置 Scss</h3><p>在 <a href="mailto:react-scripts@2.0.0" target="_blank" rel="noopener">react-scripts@2.0.0</a> 或更高的版本里，官方已经添加了对 scss 的支持，因此，安装 <code>node-sass</code> 或 <code>sass</code> 即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add node-sass --dev</span><br></pre></td></tr></table></figure>
+<h3 id="Webpack-提取公共模块"><a href="#Webpack-提取公共模块" class="headerlink" title="Webpack 提取公共模块"></a>Webpack 提取公共模块</h3><p>create-react-app 的默认行为是把所有包的打包在一起。有时候需要把一些公共模块抽离出来单独打包，这时候使用修复 webpack 的 entry 配置。</p>
+<p>下面代码展示了把 react 等模块都打包在 vendor.js 里，而其他业务代码则打包在 app.js 里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">override</span>(<span class="params">config, env</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 加个别名路径</span></span><br><span class="line">    config.resolve.alias = &#123;</span><br><span class="line">        ...config.resolve.alias,</span><br><span class="line">        <span class="string">'@'</span>: path.join(__dirname, <span class="string">'./src'</span>),</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 修改出口</span></span><br><span class="line">    config.entry = &#123;</span><br><span class="line">        app: config.entry,</span><br><span class="line">        vendor: [</span><br><span class="line">            <span class="string">'react'</span>,</span><br><span class="line">            <span class="string">'react-dom'</span>,</span><br><span class="line">            <span class="string">'react-router-dom'</span>,</span><br><span class="line">            <span class="string">'redux'</span>,</span><br><span class="line">            <span class="string">'react-redux'</span>,</span><br><span class="line">            <span class="string">'styled-components'</span>,</span><br><span class="line">        ],</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提取公共模块</span></span><br><span class="line">    config.plugins.push(<span class="keyword">new</span> webpack.optimize.CommonsChunkPlugin(&#123;</span><br><span class="line">        name: <span class="string">'vendor'</span>,</span><br><span class="line">        filename: <span class="string">'vendor.[hash:8].js'</span></span><br><span class="line">    &#125;));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="IE-polyfill"><a href="#IE-polyfill" class="headerlink" title="IE polyfill"></a>IE polyfill</h3><p>默认是不包含 polyfill，因此需要手动安装。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add react-app-polyfill</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">'react-app-polyfill/ie9'</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="使用-craco"><a href="#使用-craco" class="headerlink" title="使用 craco"></a>使用 craco</h2><p>craco 是另外一个新秀，其特点就是更新跟进，支持 CRA 3.x，下面来看看怎样用。</p>
+<p>安装：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add @craco/craco</span><br></pre></td></tr></table></figure>
+<p>用法跟 react-app-rewired 差不多，craco 使用的是 <code>craco.config.js</code> 文件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function">(<span class="params">&#123; env &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>并且需要更改 npm script：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"scripts"</span>: &#123;</span><br><span class="line">    <span class="string">"start"</span>: <span class="string">"craco start"</span>,</span><br><span class="line">    <span class="string">"build"</span>: <span class="string">"craco build"</span>,</span><br><span class="line">    <span class="string">"test"</span>: <span class="string">"craco test"</span>,</span><br><span class="line">    <span class="string">"eject"</span>: <span class="string">"craco eject"</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>其配置对象内容看这里：<a href="https://www.npmjs.com/package/@craco/craco#configuration-overview" target="_blank" rel="noopener">craco#configuration-overview</a></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.npmjs.com/package/react-app-rewired" target="_blank" rel="noopener">https://www.npmjs.com/package/react-app-rewired</a></li>
+<li><a href="https://facebook.github.io/create-react-app/" target="_blank" rel="noopener">https://facebook.github.io/create-react-app/</a></li>
+<li><a href="https://www.jianshu.com/p/a46e30d7ef39" target="_blank" rel="noopener">https://www.jianshu.com/p/a46e30d7ef39</a></li>
+<li><a href="https://github.com/facebook/create-react-app/blob/master/packages/react-app-polyfill/README.md" target="_blank" rel="noopener">https://github.com/facebook/create-react-app/blob/master/packages/react-app-polyfill/README.md</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.874Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/03/React/React/Create-React-App 自定义配置/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/03/React/React/Create-React-App 自定义配置/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/03/Mysql/SQL 基础知识/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">SQL 基础知识</h4>
+        <h4 class="summary">SQL 是用于访问和处理数据库的标准的计算机语言，具有结构化查询语言，是多种关系式数据库中通用语言。
+对于 SQL 的基...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/03/React/React/浅谈 React 组件设计/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">浅谈 React 组件设计</h4>
+        <h4 class="summary">React 说到底也只是通过程序提供的工具，仅仅是工具，而且是受到一些程序限制的工具。实际业务当中遇到的各种各样的抽象，...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

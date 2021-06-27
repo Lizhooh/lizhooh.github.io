@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/11/React Native/React Native 接入微信 SDK 那些事/">
+    
+    
+    <title>React Native 接入微信 SDK 那些事 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言本文记录的是使用 React Native 开发 App 时，接入微信 SDK 的过程，包括了微信支付，微信分享，微信登录等。 接入流程接入流程看这篇文章：react-native-wechat （react-native 微信分享、支付) 好了，主要是使用到了 react-native-wechat 这个库。">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 接入微信 SDK 那些事">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/11/React Native/React Native 接入微信 SDK 那些事/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言本文记录的是使用 React Native 开发 App 时，接入微信 SDK 的过程，包括了微信支付，微信分享，微信登录等。 接入流程接入流程看这篇文章：react-native-wechat （react-native 微信分享、支付) 好了，主要是使用到了 react-native-wechat 这个库。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/11/20181114090740.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.863Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 接入微信 SDK 那些事">
+<meta name="twitter:description" content="前言本文记录的是使用 React Native 开发 App 时，接入微信 SDK 的过程，包括了微信支付，微信分享，微信登录等。 接入流程接入流程看这篇文章：react-native-wechat （react-native 微信分享、支付) 好了，主要是使用到了 react-native-wechat 这个库。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/11/20181114090740.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 接入微信 SDK 那些事</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 接入微信 SDK 那些事</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 接入微信 SDK 那些事</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-11-13T12:22:39.000Z" itemprop="datePublished" class="page-time">
+    2018-11-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#接入流程"><span class="post-toc-number">2.</span> <span class="post-toc-text">接入流程</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#微信授权登录"><span class="post-toc-number">3.</span> <span class="post-toc-text">微信授权登录</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#微信支付"><span class="post-toc-number">4.</span> <span class="post-toc-text">微信支付</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#签名与调试"><span class="post-toc-number">5.</span> <span class="post-toc-text">签名与调试</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/React Native 接入微信 SDK 那些事"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 接入微信 SDK 那些事</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 11 月 13 日 20:22" datetime="2018-11-13T12:22:39.000Z"  itemprop="datePublished">
+    2018-11-13
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1160</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文记录的是使用 React Native 开发 App 时，接入微信 SDK 的过程，包括了微信支付，微信分享，微信登录等。</p>
+<h2 id="接入流程"><a href="#接入流程" class="headerlink" title="接入流程"></a>接入流程</h2><p>接入流程看这篇文章：<a href="https://www.jianshu.com/p/6a792118fae4" target="_blank" rel="noopener">react-native-wechat （react-native 微信分享、支付)</a> 好了，主要是使用到了 react-native-wechat 这个库。</p>
+<a id="more"></a>
+<p>总的来说，<br>如果是微信分享，则需要 Appid。<br>如果是微信登录，则需要 Appid，AppSecret。<br>如果是微信支付，则需要 Appid，AppSecret，商家号。</p>
+<h2 id="微信授权登录"><a href="#微信授权登录" class="headerlink" title="微信授权登录"></a>微信授权登录</h2><p>微信授权登录的接入需要用到：AppId 以及 AppSecret。</p>
+<p>接入微信授权登录大致的思路是：在后端存储好获取的 openid，在 App 授权之后可以拿到 openid，与后端进行匹配，如果对上了就认为授权了，可以无需密码登录。</p>
+<p>在 App 会经历以下的过程：</p>
+<ul>
+<li>1 唤起微信，这时会有一个确定的按钮点击，点击之后可以拿到一些数据。</li>
+<li>2 根据 code 和 AppSecret 获取 openid，在获取 openid 之后就可以与后端交互了。</li>
+</ul>
+<p>具体流程看文档吧，写得很详细了：<a href="https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&amp;t=resource/res_list&amp;verify=1&amp;id=open1419317851&amp;token=ab580d746d7f60afdfa7cd044f45c5b1ba69f1ff&amp;lang=zh_CN" target="_blank" rel="noopener">移动应用微信登录开发指南</a></p>
+<p>获取用户信息的文档：<a href="https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&amp;t=resource/res_list&amp;verify=1&amp;id=open1419317853&amp;lang=zh_CN" target="_blank" rel="noopener">授权后接口调用（UnionID）</a></p>
+<p>在 React Native 上的代码实现如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> WeChat <span class="keyword">from</span> <span class="string">'react-native-wechat'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; ToastAndroid <span class="keyword">as</span> Toast &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">import</span> qs <span class="keyword">from</span> <span class="string">'qs'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 微信授权登录</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> wxAuthLogin = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> scope = <span class="string">'snsapi_userinfo'</span>;</span><br><span class="line">    <span class="keyword">const</span> state = <span class="built_in">Math</span>.random().toString(<span class="number">32</span>).slice(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> res = <span class="keyword">await</span> WeChat.sendAuthRequest(scope, state);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> url = <span class="string">'https://api.weixin.qq.com/sns/oauth2/access_token?'</span> + qs.stringify(&#123;</span><br><span class="line">            appid: <span class="string">''</span>,     <span class="comment">// 你的 appid</span></span><br><span class="line">            secret: <span class="string">''</span>,    <span class="comment">// 你的 AppSecret</span></span><br><span class="line">            code: res.code,</span><br><span class="line">            <span class="comment">// 注意这里一定要是 authorization_code</span></span><br><span class="line">            grant_type: <span class="string">'authorization_code'</span>,</span><br><span class="line">        &#125;);</span><br><span class="line">        res = <span class="keyword">await</span> fetch(url);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 拿到了 openid 了</span></span><br><span class="line">        <span class="keyword">if</span> (res.openid &amp;&amp; res.access_token) &#123;</span><br><span class="line">            <span class="comment">// 接着获取用户的信息</span></span><br><span class="line">            url = <span class="string">'https://api.weixin.qq.com/sns/userinfo?'</span> + qs.stringify(&#123;</span><br><span class="line">                access_token: res.access_token,</span><br><span class="line">                openid: res.openid,</span><br><span class="line">            &#125;);</span><br><span class="line">            res = <span class="keyword">await</span> fetch(url).then(<span class="function"><span class="params">res</span> =&gt;</span> res.json());</span><br><span class="line">            <span class="comment">// 已经拿到了 openid 和用户的基本信息了，这时把数据提交给后端完事</span></span><br><span class="line">            <span class="built_in">console</span>.log(res);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            Toast.show(<span class="string">'微信授权登录失败'</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">        <span class="keyword">if</span> (err.code === <span class="number">-2</span>) &#123;</span><br><span class="line">            Toast.show(<span class="string">'用户取消微信登录授权'</span>, Toast.SHORT);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (err.code === <span class="number">-4</span>) &#123;</span><br><span class="line">            Toast.show(<span class="string">'用户拒绝微信登录授权'</span>, Toast.SHORT);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">console</span>.error(err);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后得到的数据。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/11/20181114090740.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="微信支付"><a href="#微信支付" class="headerlink" title="微信支付"></a>微信支付</h2><p>微信支付的接入需要用到：AppId 以及 商家号。</p>
+<p>在接入之前需要后端写好通信的接口，具体的流程是这样的：</p>
+<ul>
+<li>1 用户在 App 中选择商品，提交订单，选择微信支付。<strong>（前端）</strong></li>
+<li>2 商户后台收到用户支付单，调用微信支付统一下单接口。<strong>（后端）</strong></li>
+<li>3 统一下单接口返回正常的 prepay_id，再按签名规范重新生成签名后，将数据传输给 App。参与签名的字段名为 appid，partnerid，prepayid，noncestr，timestamp，package。注意：package 的值格式为 Sign=WXPay。<strong>（后端）</strong></li>
+<li>4 商户 App 调起微信支付。<strong>（前端）</strong></li>
+<li>5 商户后台接收支付通知。<strong>（后端）</strong></li>
+<li>6 商户后台查询支付结果。<strong>（后端）</strong></li>
+</ul>
+<p>相关文档看这里：<a href="https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=9_1" target="_blank" rel="noopener">微信支付 - APP 支付开发者文档</a>。</p>
+<p>在 React Native 上的代码实现如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 请求后端获取必要的数据</span></span><br><span class="line">fetch(<span class="string">'http://127.0.0.1:3000/wechat/pay'</span>).then(<span class="function"><span class="params">res</span> =&gt;</span> res.json()).then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line"></span><br><span class="line">    res = &#123;</span><br><span class="line">        partnerId: <span class="string">''</span>,  <span class="comment">// 商家向财付通申请的商家 id</span></span><br><span class="line">        prepayId: <span class="string">''</span>,   <span class="comment">// 预支付订单</span></span><br><span class="line">        nonceStr: <span class="string">''</span>,   <span class="comment">// 随机串，防重发</span></span><br><span class="line">        timeStamp: <span class="string">''</span>,  <span class="comment">// 时间戳，防重发</span></span><br><span class="line">        package: <span class="string">''</span>,    <span class="comment">// 商家根据财付通文档填写的数据和签名</span></span><br><span class="line">        sign: <span class="string">''</span>        <span class="comment">// 商家根据微信开放平台文档对数据做的签名</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里是唤起微信支付</span></span><br><span class="line">    WeChat.pay(res).then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 到了这里就是用户点击支付之后，拿到的数据</span></span><br><span class="line">        <span class="built_in">console</span>.log(res);</span><br><span class="line">        <span class="comment">// &#123;</span></span><br><span class="line">        <span class="comment">//     returnKey: "",</span></span><br><span class="line">        <span class="comment">//     type: 'PayReq.Resp',</span></span><br><span class="line">        <span class="comment">//     transaction: null,</span></span><br><span class="line">        <span class="comment">//     openId: null,</span></span><br><span class="line">        <span class="comment">//     errStr: null,</span></span><br><span class="line">        <span class="comment">//     errCode: 0,</span></span><br><span class="line">        <span class="comment">// &#125;</span></span><br><span class="line">        <span class="comment">// 可以在请求后端，确认信息，接着显示支付成功页面</span></span><br><span class="line">        <span class="keyword">if</span> (res.errCode === <span class="number">0</span>) &#123;</span><br><span class="line">            Toast.show(<span class="string">'微信支付成功'</span>, Toast.SHORT);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="签名与调试"><a href="#签名与调试" class="headerlink" title="签名与调试"></a>签名与调试</h2><p>接入了微信 SDK 之后因为签名的问题，因此还需要把开发模式下的签名统一与发布的签名一样，不然每次调试都要发布一次。</p>
+<p>在 <code>android/app/build.gradle</code> 里添加统一签名。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">signingConfigs &#123;</span><br><span class="line">    release &#123;</span><br><span class="line">        <span class="keyword">if</span> (project.hasProperty(<span class="string">'MYAPP_RELEASE_STORE_FILE'</span>)) &#123;</span><br><span class="line">            storeFile file(MYAPP_RELEASE_STORE_FILE)</span><br><span class="line">            storePassword MYAPP_RELEASE_STORE_PASSWORD</span><br><span class="line">            keyAlias MYAPP_RELEASE_KEY_ALIAS</span><br><span class="line">            keyPassword MYAPP_RELEASE_KEY_PASSWORD</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    debug &#123;</span><br><span class="line">        <span class="keyword">if</span> (project.hasProperty(<span class="string">'MYAPP_RELEASE_STORE_FILE'</span>)) &#123;</span><br><span class="line">            storeFile file(MYAPP_RELEASE_STORE_FILE)</span><br><span class="line">            storePassword MYAPP_RELEASE_STORE_PASSWORD</span><br><span class="line">            keyAlias MYAPP_RELEASE_KEY_ALIAS</span><br><span class="line">            keyPassword MYAPP_RELEASE_KEY_PASSWORD</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而 MYAPP_RELEASE_xxx 是写在了 gradle.properties 里，例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MYAPP_RELEASE_STORE_FILE=../keystores/xxx.keystore  <span class="comment">// 签名文件</span></span><br><span class="line">MYAPP_RELEASE_KEY_ALIAS=xxx                         <span class="comment">// 别名</span></span><br><span class="line">MYAPP_RELEASE_STORE_PASSWORD=xxx                    <span class="comment">// 签名密码</span></span><br><span class="line">MYAPP_RELEASE_KEY_PASSWORD=xxx                      <span class="comment">// 别名密码</span></span><br></pre></td></tr></table></figure>
+<p>好了，后面编译后就可以在 debug 版本下调试微信 SDK 了。</p>
+<p>下一节：<a href>React Native 接入支付宝 SDK 那些事</a>。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.863Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/11/React Native/React Native 接入微信 SDK 那些事/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/11/React Native/React Native 接入微信 SDK 那些事/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/11/React Native/IO/React Native 文件相关操作/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 文件相关操作</h4>
+        <h4 class="summary">在移动端上常见的文件操作，包括：文件选择、文件编辑，文件读写，文件上传，文件查看，文件下载等。在 React Nativ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/11/React/Hooks/从 HOC、Render Props 到 Hooks 的演变/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">从 HOC、Render Props 到 Hooks 的演变</h4>
+        <h4 class="summary">对 React 开发比较深入的都知道在 React 里有 HOC 和 Render Props 两个模式。这两种模式各有...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

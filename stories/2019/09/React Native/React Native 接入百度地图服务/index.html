@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/09/React Native/React Native 接入百度地图服务/">
+    
+    
+    <title>React Native 接入百度地图服务 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言申请 SDK AppKey先去去百度地图的控制台 里创建一个 Android/iOS 的 应用。 创建的时候看到，需要 App SHA1，接下看看怎么去获取。如果是开发版，暂时没有弄密钥那就用默认的 debug.keystore。在根目录下执行以下的命令获取：">
+<meta name="keywords" content="Javascript,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 接入百度地图服务">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/09/React Native/React Native 接入百度地图服务/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言申请 SDK AppKey先去去百度地图的控制台 里创建一个 Android/iOS 的 应用。 创建的时候看到，需要 App SHA1，接下看看怎么去获取。如果是开发版，暂时没有弄密钥那就用默认的 debug.keystore。在根目录下执行以下的命令获取：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/9/20190913174342.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/9/20190913182946.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/9/20190913184254.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.863Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 接入百度地图服务">
+<meta name="twitter:description" content="前言申请 SDK AppKey先去去百度地图的控制台 里创建一个 Android/iOS 的 应用。 创建的时候看到，需要 App SHA1，接下看看怎么去获取。如果是开发版，暂时没有弄密钥那就用默认的 debug.keystore。在根目录下执行以下的命令获取：">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2019/9/20190913174342.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 接入百度地图服务</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 接入百度地图服务</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 接入百度地图服务</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-09-13T09:38:51.000Z" itemprop="datePublished" class="page-time">
+    2019-09-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#申请-SDK-AppKey"><span class="post-toc-number">2.</span> <span class="post-toc-text">申请 SDK AppKey</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#接入-React-Native"><span class="post-toc-number">3.</span> <span class="post-toc-text">接入 React Native</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#添加权限"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">添加权限</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#添加-AppKey"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">添加 AppKey</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#编译"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">编译</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#地图功能"><span class="post-toc-number">4.</span> <span class="post-toc-text">地图功能</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实现定位"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">实现定位</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#添加红点"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">添加红点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#绘制多边形"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">绘制多边形</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/React Native 接入百度地图服务"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 接入百度地图服务</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 09 月 13 日 17:38" datetime="2019-09-13T09:38:51.000Z"  itemprop="datePublished">
+    2019-09-13
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 978</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h2 id="申请-SDK-AppKey"><a href="#申请-SDK-AppKey" class="headerlink" title="申请 SDK AppKey"></a>申请 SDK AppKey</h2><p>先去去<a href="http://lbsyun.baidu.com/apiconsole/key/create" target="_blank" rel="noopener">百度地图的控制台</a> 里创建一个 Android/iOS 的 应用。</p>
+<p>创建的时候看到，需要 App SHA1，接下看看怎么去获取。如果是开发版，暂时没有弄密钥那就用默认的 debug.keystore。在根目录下执行以下的命令获取：</p>
+<a id="more"></a>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd android/app</span><br><span class="line"><span class="comment">// 如果是生产版本，就换成生产的 keystore 就行</span></span><br><span class="line">keytool -v -list -keystore debug.keystore</span><br><span class="line"><span class="comment">// 输入密码或空格 ~</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/9/20190913174342.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="接入-React-Native"><a href="#接入-React-Native" class="headerlink" title="接入 React Native"></a>接入 React Native</h2><p>在 React Native 里接入百度地图使用的是 <a href="https://github.com/lovebing/react-native-baidu-map" target="_blank" rel="noopener">react-native-baidu-map</a> 这个库。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yarn add react-native-baidu-map</span><br><span class="line"><span class="comment">// 如果使用 0.60+，请不要 link，不然报错</span></span><br><span class="line">react-native-link react-native-baidu-map</span><br></pre></td></tr></table></figure>
+<h3 id="添加权限"><a href="#添加权限" class="headerlink" title="添加权限"></a>添加权限</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 这个权限用于进行网络定位--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.ACCESS_COARSE_LOCATION"</span> /&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 这个权限用于访问GPS定位--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.ACCESS_FINE_LOCATION"</span> /&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.ACCESS_WIFI_STATE"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.INTERNET"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.SYSTEM_ALERT_WINDOW"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.ACCESS_NETWORK_STATE"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"com.android.launcher.permission.READ_SETTINGS"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.WAKE_LOCK"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.CHANGE_WIFI_STATE"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.WRITE_EXTERNAL_STORAGE"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.WRITE_SETTINGS"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="添加-AppKey"><a href="#添加-AppKey" class="headerlink" title="添加 AppKey"></a>添加 AppKey</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">".MainApplication"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:allowBackup</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:label</span>=<span class="string">"@string/app_name"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:icon</span>=<span class="string">"@mipmap/ic_launcher"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:theme</span>=<span class="string">"@style/AppTheme"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 百度地图 AppKey --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">"com.baidu.lbsapi.API_KEY"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">"你的 AppKey"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>添加完成后，重新编译（react-native run-android）。果然，如果有这么顺利就不叫 React Native，编译后一堆报错。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/9/20190913182946.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>最低的 Android SDK 版本要求是 19+，这时安装要求修改一下。在 <code>android\build.gradle</code> 里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    ext &#123;</span><br><span class="line">        buildToolsVersion = <span class="string">"28.0.3"</span></span><br><span class="line">        minSdkVersion = <span class="number">19</span>              <span class="comment">// 这里</span></span><br><span class="line">        compileSdkVersion = <span class="number">28</span></span><br><span class="line">        targetSdkVersion = <span class="number">28</span></span><br><span class="line">        supportLibVersion = <span class="string">"28.0.0"</span></span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>改了之后编译成功了，运行起来试试。果然，你大爷的，导入一个库而已，经历几波错误还不够。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/9/20190913184254.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>码的，作者说支持 react-native 0.57，实际上用的时候 react-native 0.59 以上都不支持，把 react-native 版本降为 0.58.4。</p>
+<h2 id="地图功能"><a href="#地图功能" class="headerlink" title="地图功能"></a>地图功能</h2><h3 id="实现定位"><a href="#实现定位" class="headerlink" title="实现定位"></a>实现定位</h3><p>先安装一个 react-native-android-location-services-dialog-box 用于提示用户开启定位。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yarn add react-native-android-location-services-dialog-box</span><br><span class="line">react-native link react-native-android-location-services-dialog-box</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> LocationServicesDialogBox <span class="keyword">from</span> <span class="string">'react-native-android-location-services-dialog-box'</span>;</span><br><span class="line"></span><br><span class="line">checkLocationServicesIsEnabled() &#123;</span><br><span class="line">    <span class="keyword">return</span> LocationServicesDialogBox.checkLocationServicesIsEnabled(&#123;</span><br><span class="line">        message: <span class="string">'&lt;h2&gt;开启位置服务&lt;/h2&gt;开启位置服务，获取精准定位&lt;br/&gt;'</span>,</span><br><span class="line">        ok: <span class="string">'去开启'</span>,</span><br><span class="line">        cancel: <span class="string">'取消'</span>,</span><br><span class="line">        enableHighAccuracy: <span class="literal">true</span>,</span><br><span class="line">        showDialog: <span class="literal">true</span>,</span><br><span class="line">        openLocationServices: <span class="literal">true</span>,</span><br><span class="line">        preventOutSideTouch: <span class="literal">false</span>,</span><br><span class="line">        preventBackClick: <span class="literal">false</span>,</span><br><span class="line">        providerListener: <span class="literal">true</span></span><br><span class="line">    &#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> err);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">onLocationProviderStatusChange = <span class="function"><span class="params">status</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// console.warn(status);</span></span><br><span class="line">    <span class="keyword">if</span> (!status.enabled) &#123;</span><br><span class="line">        <span class="keyword">this</span>.checkLocationServicesIsEnabled();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">componentWillMount() &#123;</span><br><span class="line">    DeviceEventEmitter.addListener(<span class="string">'locationProviderStatusChange'</span>,</span><br><span class="line">        <span class="keyword">this</span>.onLocationProviderStatusChange);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">componentDidMount() &#123;</span><br><span class="line">    <span class="keyword">this</span>.initLocation();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">componentWillUnmount() &#123;</span><br><span class="line">    LocationServicesDialogBox.stopListener();</span><br><span class="line">    DeviceEventEmitter.removeListener(<span class="string">'locationProviderStatusChange'</span>,</span><br><span class="line">        <span class="keyword">this</span>.onLocationProviderStatusChange);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着使用原生的定位模块，尝试定位，因为如果自己使用百度地图的定位话，不会弹出授权框。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Geolocation &#125; <span class="keyword">from</span> <span class="string">'react-native-baidu-map'</span>;</span><br><span class="line"><span class="keyword">import</span> NativeGeolocation <span class="keyword">from</span> <span class="string">'Geolocation'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://reactnative.cn/docs/0.58/geolocation/</span></span><br><span class="line">nativeGetCurrentPosition = <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    NativeGeolocation.getCurrentPosition(resolve, reject);</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> initLocation() &#123;</span><br><span class="line">    <span class="keyword">await</span> <span class="keyword">this</span>.checkLocationServicesIsEnabled();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> location = <span class="keyword">await</span> <span class="keyword">this</span>.nativeGetCurrentPosition();</span><br><span class="line">        <span class="keyword">const</span> coordinate = [location.coords.longitude, location.coords.latitude];</span><br><span class="line">        <span class="comment">// console.warn(coordinate);</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">        <span class="built_in">console</span>.warn(err);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> position = <span class="keyword">await</span> Geolocation.getCurrentPosition();</span><br><span class="line">    <span class="keyword">if</span> (!position.address) &#123;</span><br><span class="line">        alert(<span class="string">'百度地图：定位失败'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123; position &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="添加红点"><a href="#添加红点" class="headerlink" title="添加红点"></a>添加红点</h3><p>使用 Marker 添加红点等指示图标。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;Marker location=&#123;&#123; <span class="attr">longitude</span>: <span class="number">116.41248</span>, <span class="attr">latitude</span>: <span class="number">39.927893</span> &#125;&#125; /&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="绘制多边形"><a href="#绘制多边形" class="headerlink" title="绘制多边形"></a>绘制多边形</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算多边形的中心点</span></span><br><span class="line">getPolygonAreaCenter(points = []) &#123;</span><br><span class="line">    <span class="keyword">const</span> [sx, sy] = points.reduce(<span class="function">(<span class="params">[sumX, sumY], val</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 累加 x, y 的值</span></span><br><span class="line">        <span class="keyword">return</span> [sumX + val.longitude, sumY + val.latitude];</span><br><span class="line">    &#125;, [<span class="number">0</span>, <span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> x = sx / points.length;</span><br><span class="line">    <span class="keyword">const</span> y = sy / points.length;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123; <span class="attr">longitude</span>: x.toFixed(<span class="number">5</span>) * <span class="number">1</span>, <span class="attr">latitude</span>: y.toFixed(<span class="number">5</span>) * <span class="number">1</span> &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> polygonPoints = [</span><br><span class="line">    &#123; <span class="attr">longitude</span>: <span class="number">116.387112</span>, <span class="attr">latitude</span>: <span class="number">39.920977</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">longitude</span>: <span class="number">116.385243</span>, <span class="attr">latitude</span>: <span class="number">39.913063</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">longitude</span>: <span class="number">116.394226</span>, <span class="attr">latitude</span>: <span class="number">39.917988</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">longitude</span>: <span class="number">116.401772</span>, <span class="attr">latitude</span>: <span class="number">39.921364</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">longitude</span>: <span class="number">116.41248</span>, <span class="attr">latitude</span>: <span class="number">39.927893</span> &#125;,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line">&lt;Polygon</span><br><span class="line">    points=&#123;polygonPoints&#125;</span><br><span class="line">    fillColor=<span class="string">'773399ff'</span>    <span class="comment">// 第一个值是透明度</span></span><br><span class="line">    stroke=&#123;&#123;</span><br><span class="line">        width: <span class="number">1</span>,</span><br><span class="line">        color: <span class="string">'773399ff'</span>,</span><br><span class="line">    &#125;&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.863Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/09/React Native/React Native 接入百度地图服务/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/09/React Native/React Native 接入百度地图服务/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/09/React Native/React Native + React 混合开发/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native + React 混合开发</h4>
+        <h4 class="summary">实际上这里指的是 React Native 里使用 WebView 加载 H5 页面来实现对应的效果。而这个 H5 是使...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/09/Vue/Vue 插槽（slot）/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Vue 插槽（slot）</h4>
+        <h4 class="summary">Vue 实现了一套内容分发的 API，这套 API 的设计灵感源自 Web Components 规范草案，将  元素作...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

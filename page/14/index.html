@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/page/14/">
+    
+    
+    <title>Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lizhooh 的技术博客">
+<meta property="og:url" content="http://me.lizhooh.com/page/14/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:locale" content="zh-Hans">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lizhooh 的技术博客">
+<meta name="twitter:description" content="数据就像冰山一样，栩栩如生！">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Lizhooh 的技术博客</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header index-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Lizhooh 的技术博客</h1>
+
+        <div class="meta-rest">
+            <h1></h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+<div class="container body-wrap index">
+
+    <ul class="post-list">
+    
+        <li class="post-list-item fade">
+            <article id="post-React/Router/解决 React Router 4 不支持监听路由功能"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 08 月 19 日 13:37" datetime="2018-08-19T05:37:13.000Z"  itemprop="datePublished">
+    2018-08-19
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：242
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/08/React/Router/解决 React Router 4 不支持监听路由功能/">解决 React Router 4 不支持监听路由功能</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>使用 React Router 4 都知道，在 4 版本里没有事件系统，想要在路由里监听路由的改变也是一件非常困难的事情，现在查了好久资料终于查到了解决方案。</p>
+<h2 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h2><p>首先，第一步是去 Issues 里，搜索问题。输入的关键字是 <code>listen</code>。</p>
+<p>刚好找到了有一个人也问如何监听路由的改变的问题。</p>
+    
+
+        <a href="/stories/2018/08/React/Router/解决 React Router 4 不支持监听路由功能/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Router/">React-Router</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/08/React/Router/解决 React Router 4 不支持监听路由功能/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-后端/代码审查（Code Review）的建议"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 08 月 18 日 21:25" datetime="2018-08-18T13:25:11.000Z"  itemprop="datePublished">
+    2018-08-18
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：954
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/08/后端/代码审查（Code Review）的建议/">代码审查（Code Review）的建议</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>代码审查是一个可缺有不可缺的东西。代码评审也称代码复查，是指通过阅读代码来检查源代码与编码标准的符合性以及代码质量的活动。</p>
+<p>对于自己写的代码，会潜在地产生一种信任和依赖，所以自己有时候是很难发现其中的明显的错误以及规范问题的。然而，对于其他人来说，一开始是不会进入这种 “自我信任” 状态的，所以较容易发现问题。Code Review 就创造了这个机会，以第二双眼睛再次检查代码，帮助我们及时地发现潜在的问题。</p>
+    
+
+        <a href="/stories/2018/08/后端/代码审查（Code Review）的建议/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/08/后端/代码审查（Code Review）的建议/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-后端/谈谈 Router、Controller、Service"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 08 月 11 日 23:08" datetime="2018-08-11T15:08:04.000Z"  itemprop="datePublished">
+    2018-08-11
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1202
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/08/后端/谈谈 Router、Controller、Service/">谈谈 Router、Controller、Service</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在传统的后端开发里，有典型的架构，那就是 MVC 结构。MVC 讲究的是视图与逻辑分离，由控制器控制视图的结果。而到了现在，这种结构逐渐薄弱，演变为 MVP，甚至是只有 MV 的结构。在前端 SPA 应用架构里，更多的遵循 MVVM（双向的数据绑定），这种结构的好处是能够把视图与数据分离，但又能做到视图与数据关联。</p>
+<p>今天来谈谈后端里几个重要的概念：Router、Controller、Service，以及它们的责任体系。</p>
+    
+
+        <a href="/stories/2018/08/后端/谈谈 Router、Controller、Service/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/08/后端/谈谈 Router、Controller、Service/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/React/深入浅出 React 16+ 新的生命周期"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 08 月 10 日 14:16" datetime="2018-08-10T06:16:49.000Z"  itemprop="datePublished">
+    2018-08-10
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1504
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 15 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/08/React/React/深入浅出 React 16+ 新的生命周期/">深入浅出 React 16+ 新的生命周期</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>React 在 16 版本之后推出了新的渲染引擎（Fiber），随之而来的就是生命周期函数的改变。当然，这个更替是缓慢的，在整个 16 版本里都能无障碍的使用旧的三生命周期，但值得注意的是，旧的生命周期（unsafe）不能和新的生命周期同时出现在一个组件，否则会报错”你使用了一个不安全的生命周期”。</p>
+    
+
+        <a href="/stories/2018/08/React/React/深入浅出 React 16+ 新的生命周期/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/08/React/React/深入浅出 React 16+ 新的生命周期/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React/React/React 性能优化：细粒度更新"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 07 月 24 日 20:09" datetime="2018-07-24T12:09:27.000Z"  itemprop="datePublished">
+    2018-07-24
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：951
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/07/React/React/React 性能优化：细粒度更新/">React 性能优化：细粒度更新</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React 里优化的方式有很多，它本身是一个灵活的框架，可以从多个方面去优化组件的渲染性能。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180724204234.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>常用的优化手法有：</p>
+<ul>
+<li>shouldComponentUpdate 处的优化</li>
+<li>使用 immutable</li>
+</ul>
+<p>今天来谈谈，一个叫细粒度的优化方式。</p>
+    
+
+        <a href="/stories/2018/07/React/React/React 性能优化：细粒度更新/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/07/React/React/React 性能优化：细粒度更新/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Typescript/谈谈 Typescript 中 type 与 interface 的区别"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 07 月 17 日 22:47" datetime="2018-07-17T14:47:12.000Z"  itemprop="datePublished">
+    2018-07-17
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Typescript/">Typescript</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：400
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/07/Typescript/谈谈 Typescript 中 type 与 interface 的区别/">谈谈 Typescript 中 type 与 interface 的区别</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>因为在 Typescript 里 <code>type</code> 和 <code>interface</code> 都能实现类型的定义，因此在一些使用方面他们都很像。</p>
+    
+
+        <a href="/stories/2018/07/Typescript/谈谈 Typescript 中 type 与 interface 的区别/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Typescript/">Typescript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/07/Typescript/谈谈 Typescript 中 type 与 interface 的区别/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/Media/React Native Video 进阶指南"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 07 月 16 日 20:57" datetime="2018-07-16T12:57:15.000Z"  itemprop="datePublished">
+    2018-07-16
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：928
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/07/React Native/Media/React Native Video 进阶指南/">React Native Video 进阶指南</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在本节是是 react-native-video 的进阶指南。react-native-video 是一个 RN 上的视频库，它比较基础，不涉及太多 UI 控制层。在实际的开发中如果使用 react-native-video 做视频播放，那就要自己实现播放的控制栏，已经全屏播放等。</p>
+<p>本文主要围绕着如何在 react-native-video 里做定制播放器界面。</p>
+    
+
+        <a href="/stories/2018/07/React Native/Media/React Native Video 进阶指南/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/07/React Native/Media/React Native Video 进阶指南/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-后端/利用 WebHooks 进行自动化构建"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 07 月 12 日 22:34" datetime="2018-07-12T14:34:25.000Z"  itemprop="datePublished">
+    2018-07-12
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：435
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/07/后端/利用 WebHooks 进行自动化构建/">利用 WebHooks 进行自动化构建</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Webhooks 是一个 API 概念，在某件事情发生时，它都会进行消息的推送，在 Github、Gitlab 等代码管理应用上都有 WebHooks 的功能，在 slack、discord 等聊天应用里都有接收 Webhooks 消息的接口，这样一来 Webhooks 的使用意义就很大了。</p>
+<p>在持续集成工具里有一个老管家：<code>jenkins</code>，它可以根据 Git 的消息去自动的构建应用。现在利用 Webhooks 的机制也可以实现类似的功能。</p>
+    
+
+        <a href="/stories/2018/07/后端/利用 WebHooks 进行自动化构建/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/07/后端/利用 WebHooks 进行自动化构建/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/Router/React-Navigation 自定义导航动画"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 07 月 10 日 11:30" datetime="2018-07-10T03:30:03.000Z"  itemprop="datePublished">
+    2018-07-10
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1180
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 12.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/">React-Navigation 自定义导航动画</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>React Navigation 源于 React Native 社区对一个可扩展且易于使用的导航解决方案的需求，它完全使用 JavaScript 编写。React Navigation 所有内容都是使用 JavaScript 在 React Native 的基础上编写的。动画使用 Animated API 及其 Native 驱动程序选项，以便在主线程上运行动画并生成平滑的 60 fps 切换动效。</p>
+<p>在 React Navigation 里，默认的导航动画是 Android/IOS 上的原生效果，也就是在 Android 上是从底部到顶部的淡滑效果，在 IOS 上是从右到左的平滑效果。但是往往在开发应用的时候我们更倾向于同于使用从右到左的平滑效果。React Navigation 并没有提供这方面的动画效果，而是需要开发者自己去定义。</p>
+    
+
+        <a href="/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Redux/基于 Redux 的框架设计"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 07 月 04 日 15:59" datetime="2018-07-04T07:59:49.000Z"  itemprop="datePublished">
+    2018-07-04
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1911
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 17.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/07/Redux/基于 Redux 的框架设计/">基于 Redux 的框架设计</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用 Redux 的时候会发现 Redux 很绕。的确 Redux 的代码是比较多。对一个一个需要加载数据的组件，使用 Redux 会存在很多重复的代码编写，特别是写 Reducer。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180704155834.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>本文介绍的是<strong>如何基于 Redux 设计一个上层的框架</strong>。此框架的目的就是为了简化 Redux 相关的代码编写，让整个项目的开发更加容易以及更好的维护。<br>
+    
+
+        <a href="/stories/2018/07/Redux/基于 Redux 的框架设计/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/07/Redux/基于 Redux 的框架设计/">阅读更多</a>            </div>
+        </li>
+    
+    </ul>
+
+    
+<nav id="page-nav">
+    <div class="inner">
+    <a class="extend prev" rel="prev" href="/page/13/">上一页</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/15/">下一页</a>
+    </div>
+</nav>
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

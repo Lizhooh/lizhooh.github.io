@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/page/25/">
+    
+    
+    <title>Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lizhooh 的技术博客">
+<meta property="og:url" content="http://me.lizhooh.com/page/25/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:locale" content="zh-Hans">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lizhooh 的技术博客">
+<meta name="twitter:description" content="数据就像冰山一样，栩栩如生！">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Lizhooh 的技术博客</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header index-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Lizhooh 的技术博客</h1>
+
+        <div class="meta-rest">
+            <h1></h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+<div class="container body-wrap index">
+
+    <ul class="post-list">
+    
+        <li class="post-list-item fade">
+            <article id="post-Nodejs/Nodejs 验证码解决方案"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 08 月 15 日 9:21" datetime="2017-08-15T01:21:54.000Z"  itemprop="datePublished">
+    2017-08-15
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：579
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/08/Nodejs/Nodejs 验证码解决方案/">Nodejs 验证码解决方案</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>使用 Nodejs 开发验证码部分是非常麻烦的，这是因为 Nodejs 没有图形相关的 API，这就要使用 C++ 来编写扩展，给 Nodejs 来调用。<br>下面提出了几个可行的验证码解决方案。</p>
+<p>参考：<a href="https://www.zhihu.com/question/32156977" target="_blank" rel="noopener">https://www.zhihu.com/question/32156977</a></p>
+    
+
+        <a href="/stories/2017/08/Nodejs/Nodejs 验证码解决方案/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/08/Nodejs/Nodejs 验证码解决方案/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Electron/使用 Electron-vue 构建桌面应用"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 08 月 10 日 10:37" datetime="2017-08-10T02:37:10.000Z"  itemprop="datePublished">
+    2017-08-10
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Electron/">Electron</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1866
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 20 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/">使用 Electron-vue 构建桌面应用</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对于 Electron 开发来说，它并没有提供类似 vue-cli 的搭手架工具，然而早在之前就有人开发了<code>Electron-vue</code>。<br><code>Electron-vue</code>该项目的目的是消除使用 vue 手动设置 Electron 应用程序的需要。Electron-vue 利用了 vue-cli 脚手架，webpack 与 vue-loader，electron-packager 或 electron-builder，包括最常用的插件 vue-router，vuex。</p>
+<p>本文记录了 <code>electron-vue</code> 与 <code>electron-packager</code> 的使用，一个是构建工具，一个是打包发布工具。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/8/logo.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <a href="/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Electron/">Electron</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/React Native 目录结构最佳实践"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 08 月 08 日 20:53" datetime="2017-08-08T12:53:21.000Z"  itemprop="datePublished">
+    2017-08-08
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1553
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 17.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/08/React Native/React Native 目录结构最佳实践/">React Native 目录结构最佳实践</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>经过无数次<strong>研究</strong>与<strong>挖掘</strong>，终于探索出比较好的 React Native 开发目录结构。<br>一个好的目录结构，是一个好的开始，它可以把代码进一步的分离，提供维护性。</p>
+<p>在这之间，看过：<a href="https://www.zhihu.com/question/50750032/answer/136384653" target="_blank" rel="noopener">https://www.zhihu.com/question/50750032/answer/136384653</a> 个人感觉还是比较乱。<br>下面是我总结出来的 React Native 开发代码目录结构。</p>
+<p>此外，React Native 已经可以指定项目版本了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">react-native init myApp --version 0.45</span><br></pre></td></tr></table></figure>
+    
+
+        <a href="/stories/2017/08/React Native/React Native 目录结构最佳实践/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/08/React Native/React Native 目录结构最佳实践/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/IO/React Native 文件操作 - fetch-blob"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 08 月 02 日 15:20" datetime="2017-08-02T07:20:07.000Z"  itemprop="datePublished">
+    2017-08-02
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1335
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 15 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/">React Native 文件操作 - fetch-blob</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="文件操作"><a href="#文件操作" class="headerlink" title="文件操作"></a>文件操作</h2><p>之前使用<code>react-native-fs</code>来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等。<br>而 <code>react-native-fetch-blob</code>：是一个致力于为 React Native 开发人员提供文件访问和数据传输的项目更容易，更高效的 fs 库。<br>在这里我将尝试使用<code>react-native-fetch-blob</code>来进行文件的操作。</p>
+<p><strong>支持的特性：</strong></p>
+<ul>
+<li>将数据直接从/转储到没有 base64 桥接的存储</li>
+<li>File API 支持常规文件，资源文件和 CameraRoll 文件</li>
+<li>本地到本地文件操作 API，减少 JS 桥接性能损失</li>
+<li>文件流支持处理大文件</li>
+<li>Blob，File，XMLHttpRequest 的 polyfills，使基于浏览器的库可用于 RN（实验）</li>
+<li>支持基于 Oboe.js @jimhigson 的 JSON 流</li>
+</ul>
+    
+
+        <a href="/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络请求/">网络请求</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-抓包&amp;爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 08 月 01 日 13:14" datetime="2017-08-01T05:14:36.000Z"  itemprop="datePublished">
+    2017-08-01
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2149
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 20 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/08/抓包&爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/">爬虫：Nodejs 实现模拟登录的一次艰辛路程记录</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>给自己定下写文章的目标后，就去找了几家博客平台来发布文章；作为一个懒人，不能所有博客文章都手动去各家平台发布，只好通过编写脚本来发布。但是除了<code>Github</code>提供了比较详细的 Api 外，其他国内的博客平台都没有提供对应的接口，但总有办法的。<br>下面是我对某家博客平台模拟登录流程的记录（打死我都不会说这家平台是 segmentfault），个人觉得挺有意思的，也能从中学到不少产品安全设计的思路。</p>
+</blockquote>
+    
+
+        <a href="/stories/2017/08/抓包&爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/08/抓包&爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Python/Python 在数据持久化方面的知识"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 07 月 31 日 16:30" datetime="2017-07-31T08:30:05.000Z"  itemprop="datePublished">
+    2017-07-31
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Python/">Python</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：444
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/07/Python/Python 在数据持久化方面的知识/">Python 在数据持久化方面的知识</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><p>redis 是一个 key-value 存储系统。它支持存储的 value 类型相对更多，包括 string、list、set、zset 和 hash。<br>这些数据类型都支持 push/pop、add/remove 及取交集并集和差集及更丰富的操作，而且这些操作都是原子性的。</p>
+    
+
+        <a href="/stories/2017/07/Python/Python 在数据持久化方面的知识/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/07/Python/Python 在数据持久化方面的知识/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Nodejs/Nodejs 代理服务"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 07 月 29 日 9:51" datetime="2017-07-29T01:51:34.000Z"  itemprop="datePublished">
+    2017-07-29
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2189
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 20 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/07/Nodejs/Nodejs 代理服务/">Nodejs 代理服务</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="正向代理"><a href="#正向代理" class="headerlink" title="正向代理"></a>正向代理</h2><p>正向代理通常叫<strong>代理</strong>，意思是一个位于客户端和原始服务器（origin server）之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标（原始服务器），然后代理向原始服务器转交请求并将获得的内容返回给客户端。客户端才能使用正向代理。</p>
+    
+
+        <a href="/stories/2017/07/Nodejs/Nodejs 代理服务/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/07/Nodejs/Nodejs 代理服务/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/IO/React Native 文件操作 - fs"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 07 月 28 日 9:44" datetime="2017-07-28T01:44:46.000Z"  itemprop="datePublished">
+    2017-07-28
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1410
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 15 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/07/React Native/IO/React Native 文件操作 - fs/">React Native 文件操作 - fs</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="文件操作"><a href="#文件操作" class="headerlink" title="文件操作"></a>文件操作</h2><p>我想实现保存图片到本地相册的功能，然而 React Native 自带的 API 实现不了，包括<code>CameraRoll</code>也不行。无赖，在只能使用第三方组件。<br>对文件操作相关的目前有两个比较好的组件： <a href="https://github.com/itinance/react-native-fs" target="_blank" rel="noopener">react-native-fs</a> 和 <a href="https://github.com/wkh237/react-native-fetch-blob" target="_blank" rel="noopener">react-native-fetch-blob</a>，它们都有对本地文件操作的 API。<br>下面，介绍 react-native-fs 的集成与使用，它有着与 Nodejs 文件操作类似的 API 设计。<br>
+    
+
+        <a href="/stories/2017/07/React Native/IO/React Native 文件操作 - fs/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络请求/">网络请求</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/07/React Native/IO/React Native 文件操作 - fs/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/Media/解决 react-native-video 加载视频阻塞 UI 线程的问题"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 07 月 27 日 19:38" datetime="2017-07-27T11:38:47.000Z"  itemprop="datePublished">
+    2017-07-27
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：266
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 2.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/07/React Native/Media/解决 react-native-video 加载视频阻塞 UI 线程的问题/">解决 react-native-video 加载视频阻塞 UI 线程的问题</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="之前"><a href="#之前" class="headerlink" title="之前"></a>之前</h2><p><code>react-native-video</code>在之前，大概是 v0.9.0 版本，在 Android 上加载视频时会阻塞 UI 线程，导致整个画面冻结长达 3s - 10s 的时间，之后有人提出使用<code>ExoPlayer</code>来解决这个问题（v1.0 之后）。</p>
+<p>参考：</p>
+<blockquote>
+<p><a href="https://github.com/react-native-community/react-native-video/issues/555" target="_blank" rel="noopener">https://github.com/react-native-community/react-native-video/issues/555</a><br><a href="https://github.com/react-native-community/react-native-video/pull/426" target="_blank" rel="noopener">https://github.com/react-native-community/react-native-video/pull/426</a></p>
+</blockquote>
+    
+
+        <a href="/stories/2017/07/React Native/Media/解决 react-native-video 加载视频阻塞 UI 线程的问题/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/07/React Native/Media/解决 react-native-video 加载视频阻塞 UI 线程的问题/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-后端/今天来学习：RestFul API 设计"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017 年 07 月 25 日 11:51" datetime="2017-07-25T03:51:44.000Z"  itemprop="datePublished">
+    2017-07-25
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/后端/">后端</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2135
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 20 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2017/07/后端/今天来学习：RestFul API 设计/">今天来学习：RestFul API 设计</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="RestFul"><a href="#RestFul" class="headerlink" title="RestFul"></a>RestFul</h2><p><code>RestFul API</code> 是目前比较成熟的一套互联网应用程序的 API 设计理论。REST 指的是一组架构约束条件和原则。满足这些约束条件和原则的应用程序或设计就是 RESTful。</p>
+<p><strong>RestFul 架构：</strong></p>
+<ul>
+<li>每一个 URI 代表一种资源</li>
+<li>客户端和服务器之间，传递这种资源的某种表现层</li>
+<li>客户端通过四个 HTTP 动词，对服务器端资源进行操作，实现”表现层状态转化”</li>
+</ul>
+    
+
+        <a href="/stories/2017/07/后端/今天来学习：RestFul API 设计/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2017/07/后端/今天来学习：RestFul API 设计/">阅读更多</a>            </div>
+        </li>
+    
+    </ul>
+
+    
+<nav id="page-nav">
+    <div class="inner">
+    <a class="extend prev" rel="prev" href="/page/24/">上一页</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/26/">下一页</a>
+    </div>
+</nav>
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

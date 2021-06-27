@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/01/Redux/精减 Redux 代码量/">
+    
+    
+    <title>精减 Redux 代码量 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 React 中使用 Redux 带来的不仅仅是数据状态的易维护性，还带来的是代码量的提升。事物总有好的一方面也有坏的一方面，使用 Redux 后，项目的代码量会增加很多，这是人人皆知的事情。 为了解决这种困境，今天来谈谈 Redux 代码多在哪里，如何去精减 Redux 的代码量。从另一个角度看，完全是为了减少工作量，提高开发效率。">
+<meta name="keywords" content="前端,React,Redux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="精减 Redux 代码量">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/01/Redux/精减 Redux 代码量/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 React 中使用 Redux 带来的不仅仅是数据状态的易维护性，还带来的是代码量的提升。事物总有好的一方面也有坏的一方面，使用 Redux 后，项目的代码量会增加很多，这是人人皆知的事情。 为了解决这种困境，今天来谈谈 Redux 代码多在哪里，如何去精减 Redux 的代码量。从另一个角度看，完全是为了减少工作量，提高开发效率。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180117091021.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.894Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="精减 Redux 代码量">
+<meta name="twitter:description" content="前言在 React 中使用 Redux 带来的不仅仅是数据状态的易维护性，还带来的是代码量的提升。事物总有好的一方面也有坏的一方面，使用 Redux 后，项目的代码量会增加很多，这是人人皆知的事情。 为了解决这种困境，今天来谈谈 Redux 代码多在哪里，如何去精减 Redux 的代码量。从另一个角度看，完全是为了减少工作量，提高开发效率。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/1/20180117091021.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">精减 Redux 代码量</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">精减 Redux 代码量</h1>
+
+        <div class="meta-rest">
+            <h1>精减 Redux 代码量</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-01-17T01:07:45.000Z" itemprop="datePublished" class="page-time">
+    2018-01-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#代码多在哪里"><span class="post-toc-number">2.</span> <span class="post-toc-text">代码多在哪里</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Store"><span class="post-toc-number">3.</span> <span class="post-toc-text">Store</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#reducers，actions"><span class="post-toc-number">4.</span> <span class="post-toc-text">reducers，actions</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#types"><span class="post-toc-number">5.</span> <span class="post-toc-text">types</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#精减代码"><span class="post-toc-number">6.</span> <span class="post-toc-text">精减代码</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#中间件"><span class="post-toc-number">7.</span> <span class="post-toc-text">中间件</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#调试"><span class="post-toc-number">8.</span> <span class="post-toc-text">调试</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#面临一些问题"><span class="post-toc-number">9.</span> <span class="post-toc-text">面临一些问题</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">10.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Redux/精减 Redux 代码量"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">精减 Redux 代码量</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 01 月 17 日 9:07" datetime="2018-01-17T01:07:45.000Z"  itemprop="datePublished">
+    2018-01-17
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Redux/">Redux</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2075</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 React 中使用 Redux 带来的不仅仅是数据状态的易维护性，还带来的是代码量的提升。事物总有好的一方面也有坏的一方面，使用 Redux 后，项目的代码量会增加很多，这是人人皆知的事情。</p>
+<p>为了解决这种困境，今天来<strong>谈谈</strong> Redux 代码多在哪里，如何去精减 Redux 的代码量。从另一个角度看，完全是为了减少工作量，提高开发效率。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180117091021.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="代码多在哪里"><a href="#代码多在哪里" class="headerlink" title="代码多在哪里"></a>代码多在哪里</h2><p>开始学习 Redux 的时候会很不习惯，Redux 似乎多了很多代码。</p>
+<p>在很久很久以前，通常我的 redux 目录结构是这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">├── redux</span><br><span class="line">│   ├── actions</span><br><span class="line">│   │   ├── home.js</span><br><span class="line">│   │   └── about.js</span><br><span class="line">│   │</span><br><span class="line">│   ├── reducers</span><br><span class="line">│   │   ├── home.js</span><br><span class="line">│   │   └── about.js</span><br><span class="line">│   │</span><br><span class="line">│   ├── types.js        <span class="comment">// 所有的 type</span></span><br><span class="line">│   └── store.js</span><br><span class="line">│</span><br><span class="line">├── views</span><br><span class="line">│   ├── home.js</span><br><span class="line">│   └── about.js</span><br></pre></td></tr></table></figure>
+<p>一开始觉得这种方案非常好，每个 <code>view</code> 都对应着一个 <code>reducer</code> 和 <code>action</code> 文件，一眼都知道去哪个文件里找哪个内容，当时感觉上是觉得很好维护的。</p>
+<p>但是，后来我发现这样很不好。但 view 逐渐增多是需要创建的文件就非常多，如果遇到需要改文件名字的情况，那就要该四个文件（外加 style 文件），简直没完没了的。</p>
+<p>这就是 Redux 代码多的原因，你必须编写对应的 type，还要编写对应的 reducer 和 action，最后还要连接 React 组件。</p>
+<h2 id="Store"><a href="#Store" class="headerlink" title="Store"></a>Store</h2><p>Store 的初始化基本都是一个定值，只有在特定的情况下才会有所改变。</p>
+<p>基本的 Store 初始化代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    createStore,</span><br><span class="line">    combineReducers,</span><br><span class="line">    compose,</span><br><span class="line">    applyMiddleware,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"><span class="keyword">import</span> thunk <span class="keyword">from</span> <span class="string">'redux-thunk'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> hasReduxTool = !!<span class="built_in">window</span>.__REDUX_DEVTOOLS_EXTENSION__;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> devtool = <span class="function">(<span class="params">open</span>) =&gt;</span> (</span><br><span class="line">    <span class="comment">// 开启 redux devtool</span></span><br><span class="line">    open &amp;&amp;</span><br><span class="line">    hasReduxTool &amp;&amp;</span><br><span class="line">    <span class="built_in">window</span>.__REDUX_DEVTOOLS_EXTENSION__()</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 中间件</span></span><br><span class="line"><span class="keyword">const</span> middleware = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> hasReduxTool ?</span><br><span class="line">        compose(applyMiddleware(thunk), devtool(<span class="literal">true</span>)) :</span><br><span class="line">        applyMiddleware(thunk);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> createStore(</span><br><span class="line">    combineReducers(&#123;</span><br><span class="line">        ...reducers,</span><br><span class="line">    &#125;),</span><br><span class="line">    middleware(),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>因此，我们可以把 Store 的初始化代码打包成一个 npm 包，用的时候直接 install 后，配置一下就可以省了很多重复的编写，不如的会每次新项目都写这些初始化代码不无聊吗。</p>
+<p>最后会简约为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Store <span class="keyword">from</span> <span class="string">'redux-store-init'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">new</span> Store(&#123; reducers &#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>可以使用我封装的包： redux-store-init</p>
+</blockquote>
+<h2 id="reducers，actions"><a href="#reducers，actions" class="headerlink" title="reducers，actions"></a>reducers，actions</h2><p>现在已经不推荐把 reducer 和 action 分开在两个文件里了，因为后来发现 reducer 和 action 的分开在两个文件里后更难操作，因此选择了把它们写在同一个文件里的做法。</p>
+<p>除了这个问题外，还面临一个问题，那就是 reducers 里需要写很长很多的 case。</p>
+<p>例如，对于一个列表 listview 来说，它可能会有好几个这样的 case。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = init_state, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> LISTVIEW.load_init: <span class="keyword">return</span> &#123;</span><br><span class="line">            ...state,</span><br><span class="line">            list: action.list,</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> LISTVIEW.load_more: <span class="keyword">return</span> &#123;</span><br><span class="line">            ...state,</span><br><span class="line">            <span class="comment">// other</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> LISTVIEW.add_item: <span class="keyword">return</span> &#123;</span><br><span class="line">            ...state,</span><br><span class="line">            <span class="comment">// other</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> LISTVIEW.remove_item: <span class="keyword">return</span> &#123;</span><br><span class="line">            ...state,</span><br><span class="line">            <span class="comment">// other</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> LISTVIEW.update_item: <span class="keyword">return</span> &#123;</span><br><span class="line">            ...state,</span><br><span class="line">            <span class="comment">// other</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> LISTVIEW.reset_state: init_state,</span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">return</span> state;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看到上面的一堆 case 就觉得不好受了。</p>
+<p>这样带来的麻烦是，先需要在 types.js 文件里添加相应的 <code>type</code>，接着在 action 里编写函数，最后在 reducer 里捕获 <code>action.type</code> 返回对应的状态。</p>
+<p>好，为了解决 <code>case</code> 的问题，现在不使用 switch，而是在 action 里进行返回新的 state。</p>
+<p><strong>代码量，精减为：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// reducer</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = init_state, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (!!~action.type.indexOf(<span class="string">'LISTVIEW'</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> action.newState(state, init_state) || state;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// action</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> loadInit = <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">async</span> (dispatch, getState) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> res = <span class="keyword">await</span> api.getList();</span><br><span class="line">    dispatch(&#123;</span><br><span class="line">        type: LISTVIEW.load_init,</span><br><span class="line">        newState: <span class="function">(<span class="params">state, action</span>) =&gt;</span> (&#123;</span><br><span class="line">            list: res.data,</span><br><span class="line">        &#125;),</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样一下只就把 <code>switch</code>、<code>case</code> 去掉，代码变得非常简短，而且每次添加 type 时都不需要写 <code>case</code> 了。返回新的 state，通过 <span style="font-size: 24px">闭包的特性</span> 在 loadInit 上下文里获取到 <code>res.data</code>，这样再也不需要在 case 里写 <code>action.xxx</code> 的赋值了。</p>
+<p>不过在上面，因为使用了 <code>indexOf</code> 进行模糊查询，从性能上看肯定不如 switch。</p>
+<p>如果非常在意这些小的性能差异，我们可以约定一个 <code>type</code> 格式： 类型为字符串，第一个字母为大写，并与第二个字母用 <code>&#39;-&#39;</code> 分割。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> LISTVIEW = &#123;</span><br><span class="line">    load_init: <span class="string">'L-load_init'</span>,</span><br><span class="line">    load_more: <span class="string">'L-load_more'</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>此时 reducer 改为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = init_state, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (action.type[<span class="number">0</span>] === <span class="string">'L'</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> action.newState(state, init_state) || state;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样基本没什么性能消耗了（滑稽 →_→）。</p>
+<p>或者在 action 里使用一个 key 来限制，这样连 type 都省了 （滑稽 →_→）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = init_state, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (action.key === <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> action.newState(state, init_state) || state;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="types"><a href="#types" class="headerlink" title="types"></a>types</h2><p><code>types.js</code> 主要是为了集中管理 action.type，常见如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 登录</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> LOGIN = &#123;</span><br><span class="line">    reset_state: <span class="string">'LOGIN-RESET-STATE'</span>,</span><br><span class="line">    update_from: <span class="string">'LOGIN-UPDATE-FROM'</span>,</span><br><span class="line">    submit_from: <span class="string">'LOGIN-SUBMIT-FROM'</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>后来发现了需要写很多 <code>_success</code> 这种状态 type，感觉这是一种重复做功运动。</p>
+<p>为了解决这个问题，编写一个自动扩展函数，扩展类型。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 扩展状态类型</span></span><br><span class="line"><span class="keyword">const</span> extendState = <span class="function">(<span class="params">obj, extendType = [<span class="string">'in'</span>, <span class="string">'fail'</span>, <span class="string">'success'</span>, <span class="string">'complete'</span>]</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">Object</span>.keys(obj).forEach(<span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">        extendType.forEach(<span class="function"><span class="params">i</span> =&gt;</span> &#123;</span><br><span class="line">            obj[key + <span class="string">'_'</span> + i] = obj[key] + <span class="string">'-'</span> + i.toLocaleUpperCase();</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> LOGIN = extendState(&#123;</span><br><span class="line">    reset_state: <span class="string">'LOGIN-RESET-STATE'</span>,</span><br><span class="line">    update_from: <span class="string">'LOGIN-UPDATE-FROM'</span>,</span><br><span class="line">    submit_from: <span class="string">'LOGIN-SUBMIT-FROM'</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="精减代码"><a href="#精减代码" class="headerlink" title="精减代码"></a>精减代码</h2><p>精减代码，去除复杂的 reducer 结构，去除 types 文件，此时文件变得非常少，代码量也少了很多。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">├── redux</span><br><span class="line">│   ├── home.js       <span class="comment">// action</span></span><br><span class="line">│   ├── about.js      <span class="comment">// action</span></span><br><span class="line">|   ├── reducers.js   <span class="comment">// 所有 reducer 的集合</span></span><br><span class="line">│   └── store.js</span><br><span class="line">│</span><br><span class="line">├── views</span><br><span class="line">│   ├── home.js</span><br><span class="line">│   └── about.js</span><br></pre></td></tr></table></figure>
+<p><code>reducer</code>、<code>action</code> 写在一个文件里，比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// home.js</span></span><br><span class="line"><span class="keyword">const</span> init_state = &#123;</span><br><span class="line">    list: [],</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// reducer</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = init_state, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (!!~action.type.indexOf(<span class="string">'LISTVIEW'</span>) &amp;&amp; isFunction(action.newState)) &#123;</span><br><span class="line">        <span class="keyword">return</span> action.newState(state, init_state) || state;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// action</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> loadInit = <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">async</span> (dispatch, getState) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> res = <span class="keyword">await</span> api.getList();</span><br><span class="line">    dispatch(&#123;</span><br><span class="line">        type: <span class="string">'LISTVIEW.load_init'</span>,</span><br><span class="line">        newState: <span class="function">(<span class="params">state, action</span>) =&gt;</span> (&#123; ...state, <span class="attr">list</span>: res.data &#125;),</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 reducers.js 文件里主要把 reducer 的分支进行合并，类似的有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> root_state_init = &#123;</span><br><span class="line">    app: <span class="string">'xxx'</span>,</span><br><span class="line">    version: <span class="string">'1.0.0'</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = root_state_init, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> home &#125; <span class="keyword">from</span> <span class="string">'./home'</span>;</span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> about &#125; <span class="keyword">from</span> <span class="string">'./about'</span>;</span><br></pre></td></tr></table></figure>
+<p>好了，到这里已经做了很多代码精减了（其实还有很多还可以精减的）。</p>
+<h2 id="中间件"><a href="#中间件" class="headerlink" title="中间件"></a>中间件</h2><p>有时候，一些累赘的代码，我们可以像 Express / Koa 一样，把它们编写成中间件。在 Redux 里，也同样支持中间件，它是存在于 action 到 reducer 之间的一段道路中。</p>
+<p>那么如何编写中间件呢？Redux 的中间件是一个多层的闭包函数，每一层都有不同的接收参数，下面是一个 logger 的中间件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> logger = <span class="function"><span class="params">store</span> =&gt;</span> <span class="function"><span class="params">next</span> =&gt;</span> <span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(action);</span><br><span class="line">    <span class="keyword">const</span> result = next(action);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'next state'</span>, store.getState());</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中 next(action) 类似于 store.dispatch(action)。next 的作用是能让当前的中间件传递给下一个中间件，所以 next(action) 只能说是类似于 dispatch(action)。</p>
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>去掉 switch 后，还有一个好处就是可以很方便的写一个统一接口进行调试。</p>
+<p>在总的 reducers 里添加一个调试接口，显示当前 redux 操作时间。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (action.note) &#123;</span><br><span class="line">    <span class="keyword">const</span> start = <span class="built_in">Date</span>.now();</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(</span><br><span class="line">            <span class="string">'%c%s %c%s'</span>,</span><br><span class="line">            <span class="string">'color: #36f'</span>, <span class="string">`[<span class="subst">$&#123;(<span class="keyword">new</span> <span class="built_in">Date</span>()).toString().replace(<span class="regexp">/.*(\d&#123;2&#125;:\d&#123;2&#125;:\d&#123;2&#125;).*/</span>, <span class="string">'$1'</span>)&#125;</span> | <span class="subst">$&#123;<span class="built_in">Date</span>.now() - start&#125;</span> ms]`</span>,</span><br><span class="line">            <span class="string">'color: #f45'</span>, <span class="string">`note: <span class="subst">$&#123;action.note&#125;</span>`</span></span><br><span class="line">        );</span><br><span class="line">    &#125;, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中利用的是把输出的信息放到当前的 tick 的末尾去，这样就可以等到 redux 广播完毕才输出 log（这里的时间是包括了 redux 和 react 渲染两部分）。</p>
+<p>这里的 note 是自己手动添加的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dispatch(&#123;</span><br><span class="line">    type: <span class="string">"MUSIC"</span>,</span><br><span class="line">    node: <span class="string">"音乐列表 - 初始化"</span></span><br><span class="line">    newState: <span class="function"><span class="params">state</span> =&gt;</span> state,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="面临一些问题"><a href="#面临一些问题" class="headerlink" title="面临一些问题"></a>面临一些问题</h2><p>做任何事情都是有代价的，代码是精简了不少，但是面临着许多问题。比如：</p>
+<ul>
+<li>如果需要做跨组件数据通信，可能指定几个 action.type 即可，现在可不一样了。</li>
+<li>精简之后，日志不好查看，可以使用 <code>redux-diff-logger</code>。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logger <span class="keyword">from</span> <span class="string">'redux-diff-logger'</span>;</span><br><span class="line"><span class="keyword">import</span> Store <span class="keyword">from</span> <span class="string">'redux-store-init'</span>;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Store(&#123; ...reducers &#125;, [logger]);</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>要记住 reducer 只是一个函数，对 reducer 的优化，这只是冰山一角。在 reducer 里除了 switch 语句，还可以使用条件逻辑，切片函数，对象组合等方式，也可以调用其他函数，这完全取决于你的设计能力。<br>在社区上有大量这样的优化工具，可以正在 <a href="https://github.com/markerikson/redux-ecosystem-links" target="_blank" rel="noopener">Redux Addons</a> 目录里查看。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.894Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/01/Redux/精减 Redux 代码量/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/01/Redux/精减 Redux 代码量/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redux/">Redux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/01/Nodejs/如何在 Nodejs 里使用 ES6+ 语法？/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">如何在 Nodejs 里使用 ES6+ 语法？</h4>
+        <h4 class="summary">到目前为止 Nodejs 还是不能 100% 支持 ES6+ 语法，如果想体验 ES6+ 或者是项目是面向未来的，可以使...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">GraphQL 结合 Koa 实践体验</h4>
+        <h4 class="summary">前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 GraphQL 与 Koa...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

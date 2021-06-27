@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/05/Typescript/Typescript 类型推断黑魔法/">
+    
+    
+    <title>Typescript 类型推断黑魔法 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言大家都知道 Typescript 的类型基本都是静态的，但是有一个 keyof 的关键字，可以让我们实现一些动态的类型推断。">
+<meta name="keywords" content="Javascript,前端,学习笔记,Typescript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Typescript 类型推断黑魔法">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/05/Typescript/Typescript 类型推断黑魔法/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言大家都知道 Typescript 的类型基本都是静态的，但是有一个 keyof 的关键字，可以让我们实现一些动态的类型推断。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.897Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Typescript 类型推断黑魔法">
+<meta name="twitter:description" content="前言大家都知道 Typescript 的类型基本都是静态的，但是有一个 keyof 的关键字，可以让我们实现一些动态的类型推断。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Typescript 类型推断黑魔法</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Typescript 类型推断黑魔法</h1>
+
+        <div class="meta-rest">
+            <h1>Typescript 类型推断黑魔法</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-05-26T03:54:18.000Z" itemprop="datePublished" class="page-time">
+    2019-05-26
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Typescript/">Typescript</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#黑魔法"><span class="post-toc-number">2.</span> <span class="post-toc-text">黑魔法</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#依赖于某个对象进行推断"><span class="post-toc-number">3.</span> <span class="post-toc-text">依赖于某个对象进行推断</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#进一步推断"><span class="post-toc-number">4.</span> <span class="post-toc-text">进一步推断</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#更深层次的推断"><span class="post-toc-number">5.</span> <span class="post-toc-text">更深层次的推断</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#将必须变成可选"><span class="post-toc-number">6.</span> <span class="post-toc-text">将必须变成可选</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Typescript/Typescript 类型推断黑魔法"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Typescript 类型推断黑魔法</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 05 月 26 日 11:54" datetime="2019-05-26T03:54:18.000Z"  itemprop="datePublished">
+    2019-05-26
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Typescript/">Typescript</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1092</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>大家都知道 Typescript 的类型基本都是静态的，但是有一个 keyof 的关键字，可以让我们实现一些动态的类型推断。</p>
+<a id="more"></a>
+<h2 id="黑魔法"><a href="#黑魔法" class="headerlink" title="黑魔法"></a>黑魔法</h2><p>keyof 是一个关键字可以遍历 TS 的数据类型。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">pluck</span>&lt;<span class="title">T</span>, <span class="title">K</span> <span class="title">extends</span> <span class="title">keyof</span> <span class="title">T</span>&gt;(<span class="params">o: T, names: K</span>): <span class="title">T</span>[<span class="title">K</span>] </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> T[K];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> Person &#123;</span><br><span class="line">    name: <span class="built_in">string</span>,</span><br><span class="line">    age: <span class="built_in">number</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person: Person = &#123;</span><br><span class="line">    name: <span class="string">'Jarid'</span>,</span><br><span class="line">    age: <span class="number">35</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> str: <span class="built_in">string</span> = pluck(person, <span class="string">'name'</span>);</span><br></pre></td></tr></table></figure>
+<!-- more -->
+<p>其中，这里就是黑魔法所在：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">pluck</span>&lt;<span class="title">T</span>, <span class="title">K</span> <span class="title">extends</span> <span class="title">keyof</span> <span class="title">T</span>&gt;(<span class="params">o: T, names: K[]</span>): <span class="title">T</span>[<span class="title">K</span>] </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> T[K];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>主要体现在：</strong></p>
+<ul>
+<li>pluck 是一个泛型，因为 TS 能根据参数的位置推断泛型的类型，因此在调用时可以省略泛型，等效于：pluck<person>(person, 'name');</person></li>
+<li>pluck 有一个主动的泛型参数 T，K 是继承于 T 的 key，也就是 K 是 T 中 key 任意的一个。这里如果 T 是 Person，那么 K 可以是 'name' 或 'age'。</li>
+<li>pluck 的形式可以简化为 pluck&lt;Person, string extends keyof Person&gt;(o: Person, names: string);</li>
+<li>其中 <code>keyof Person</code> 等效于：<code>&#39;name&#39; | &#39;age&#39;</code>。</li>
+<li>于是对于约束 <code>string extends &#39;name&#39; | &#39;age&#39;</code>。</li>
+</ul>
+<h2 id="依赖于某个对象进行推断"><a href="#依赖于某个对象进行推断" class="headerlink" title="依赖于某个对象进行推断"></a>依赖于某个对象进行推断</h2><p>假设我们有一个对象是动态生成的，可以依赖于某个变量进行内容推断。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">type P&lt;T&gt; = &#123;</span><br><span class="line">    [K <span class="keyword">in</span> keyof T]?: T[K];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = &#123; <span class="attr">name</span>: <span class="string">'abc'</span>, <span class="attr">age</span>: <span class="string">'adasd'</span>, <span class="attr">id</span>: <span class="string">'aaa'</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hello</span>(<span class="params">data: P&lt;typeof obj&gt;</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="进一步推断"><a href="#进一步推断" class="headerlink" title="进一步推断"></a>进一步推断</h2><p>上面的代码，可应用于以下的场景，例如 storage 函数，我们现在 get(key) 中 key 只能是配置的白名单字符串。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Store <span class="keyword">from</span> <span class="string">'wxapp-store'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> storage = <span class="keyword">new</span> Store();</span><br><span class="line"><span class="keyword">const</span> errorMsg = <span class="string">'storage: No index exists'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> Storage&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">// 白名单</span></span><br><span class="line">    keys: T;</span><br><span class="line">    <span class="keyword">constructor</span>(<span class="params">keys: T</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.keys = keys;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">get</span>&lt;K <span class="keyword">extends</span> keyof T&gt;(k: K): <span class="built_in">Promise</span>&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.keys[k]) &#123;</span><br><span class="line">            <span class="keyword">return</span> storage.get(<span class="keyword">this</span>.keys[k] <span class="keyword">as</span> <span class="built_in">any</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(errorMsg);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">set</span>&lt;K <span class="keyword">extends</span> keyof T&gt;(k: K, value): <span class="built_in">Promise</span>&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.keys[k]) &#123;</span><br><span class="line">            <span class="keyword">return</span> storage.set(<span class="keyword">this</span>.keys[k] <span class="keyword">as</span> <span class="built_in">any</span>, value);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(errorMsg);</span><br><span class="line">    &#125;</span><br><span class="line">    remove&lt;K <span class="keyword">extends</span> keyof T&gt;(k: K): <span class="built_in">Promise</span>&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.keys[k]) &#123;</span><br><span class="line">            <span class="keyword">return</span> storage.remove(<span class="keyword">this</span>.keys[k] <span class="keyword">as</span> <span class="built_in">any</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(errorMsg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> storage = <span class="keyword">new</span> Storage(&#123;</span><br><span class="line">    TOKEN: <span class="string">'TOKEN'</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">storage.get(<span class="string">'TOKEN'</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="更深层次的推断"><a href="#更深层次的推断" class="headerlink" title="更深层次的推断"></a>更深层次的推断</h2><p>在 redux 的场景里更多的时候，我都是自己封装了 redux 的 reducers 和 action 的代码，形成了一个 modal 结构。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> IState &#123;</span><br><span class="line">    count: <span class="built_in">number</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> state: IState = &#123;</span><br><span class="line">    count: <span class="number">0</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> modal = &#123;</span><br><span class="line">    state,</span><br><span class="line">    reducers: &#123;</span><br><span class="line">        add(state: IState, payload) &#123;</span><br><span class="line">            <span class="keyword">return</span> &#123; ...state, count: payload &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    actions: &#123; &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时候，在 modal 里 state 的类型挺好写，但是有时候我们需要能够提供 rootState 的类型，这时候这么做呢？</p>
+<p>编写一个能够更加 modals 推断类型的 type。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> ModelConfig&lt;S = any, SS = S&gt; &#123;</span><br><span class="line">    name?: <span class="built_in">string</span>,</span><br><span class="line">    state: S,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> Models = &#123;</span><br><span class="line">    [key: <span class="built_in">string</span>]: ModelConfig,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// M 继承至 Models</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> FromModels&lt;M <span class="keyword">extends</span> Models&gt; = &#123;</span><br><span class="line">    <span class="comment">// 遍历 M 中 state 的 key</span></span><br><span class="line">    [modelKey <span class="keyword">in</span> keyof M]: M[modelKey][<span class="string">'state'</span>],</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> RootState&lt;M <span class="keyword">extends</span> Models&gt; = FromModels&lt;M&gt;</span><br></pre></td></tr></table></figure>
+<p>我们可以使用 RootState 进行推断。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// modals/index.ts</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> IState &#123;</span><br><span class="line">    count: <span class="built_in">number</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> state: IState = &#123;</span><br><span class="line">    count: <span class="number">0</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    state: <span class="number">0</span>,</span><br><span class="line">    reducers: &#123;</span><br><span class="line">        add(state: IState, payload) &#123;</span><br><span class="line">            state.count = state.count + payload;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    actions: &#123; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>推断 rootState 类型。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> index <span class="keyword">from</span> <span class="string">'./modals/index'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> modals = &#123;</span><br><span class="line">    index</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> IRootState = RootState&lt;modals&gt;;</span><br></pre></td></tr></table></figure>
+<p>这样就可以方便的应用在 React connect 上。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; View, Text &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; connect &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123; IRootState &#125; <span class="keyword">from</span> <span class="string">'@/stores'</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@connect</span>(<span class="function"><span class="params">state</span> =&gt;</span> (&#123; state &#125;))</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">class</span> Index <span class="keyword">extends</span> Component&lt;&#123;</span><br><span class="line">    state: IRootState[<span class="string">'index'</span>],</span><br><span class="line">&#125;&gt; &#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; count &#125; = <span class="keyword">this</span>.props.state;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View&gt;</span><br><span class="line">                &lt;Text&gt;&#123;count&#125;&lt;<span class="regexp">/Text&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="将必须变成可选"><a href="#将必须变成可选" class="headerlink" title="将必须变成可选"></a>将必须变成可选</h2><p>在写一些 redux 库的时候用户定义的类型是必选的，但是在触发 dispatch 是应该是可选的，这样就要用到将必选，变成可选的黑魔法。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> IState &#123;</span><br><span class="line">    count: <span class="built_in">number</span>,</span><br><span class="line">    name: <span class="built_in">string</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> TCommit&lt;S = <span class="built_in">any</span>&gt; = <span class="function">(<span class="params">state: S</span>) =&gt;</span> <span class="built_in">any</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用 commit 里报错，因为 name 是必须的。</span></span><br><span class="line">commit(&#123; count: count + <span class="number">1</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>用户的定义不变，在底层就行适配改成可选字段。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> IState &#123;</span><br><span class="line">    count: <span class="built_in">number</span>,</span><br><span class="line">    name: <span class="built_in">string</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> TCommit&lt;S = <span class="built_in">any</span>&gt; = (state: &#123;</span><br><span class="line">    [key <span class="keyword">in</span> keyof S]?: S[key]</span><br><span class="line">&#125;) =&gt; <span class="built_in">any</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用 commit 里报错，因为 name 是必须的。</span></span><br><span class="line">commit(&#123; count: count + <span class="number">1</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p><strong>说明：</strong></p>
+<ul>
+<li>这里的其秘籍是，使用 in keyof 遍历 S，然后在后面添加 <code>?</code> 实现可选。</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.897Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/05/Typescript/Typescript 类型推断黑魔法/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/05/Typescript/Typescript 类型推断黑魔法/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Typescript/">Typescript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/05/Redux/Rematch Typescript 使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Rematch Typescript 使用指南</h4>
+        <h4 class="summary">Rematch 是一个基于 Redux 的框架，主要是为了简化 Redux 的编程。之前写过文章介绍它（Rematch ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/05/Typescript/使用 ESLint 检查 Typescript 的代码/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">使用 ESLint 检查 Typescript 的代码</h4>
+        <h4 class="summary">ESLint 是一个代码检查工具，主要用来发现代码错误、统一代码风格，目前已被广泛的应用于各种 JavaScript 项...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

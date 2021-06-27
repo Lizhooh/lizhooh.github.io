@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/02/小程序/Taro + Redux 正确姿势/">
+    
+    
+    <title>Taro + Redux 正确姿势 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Taro 是使用 React 开发小程序的技术栈，当然也可以使用 Redux 进行管理数据。在 Taro cli 里有 Redux 的模版代码，但是本人并不推荐使用 Taro 提供的模版代码，因为这样写代码会比较多。下面来看看笔者自创的 Redux 代码写法。 初始化在创建项目时，选项 Redux 的模版代码，接着安装相关依赖包。">
+<meta name="keywords" content="前端,学习笔记,小程序">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Taro + Redux 正确姿势">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/02/小程序/Taro + Redux 正确姿势/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Taro 是使用 React 开发小程序的技术栈，当然也可以使用 Redux 进行管理数据。在 Taro cli 里有 Redux 的模版代码，但是本人并不推荐使用 Taro 提供的模版代码，因为这样写代码会比较多。下面来看看笔者自创的 Redux 代码写法。 初始化在创建项目时，选项 Redux 的模版代码，接着安装相关依赖包。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190211234402.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/2/20190211233739.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.912Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Taro + Redux 正确姿势">
+<meta name="twitter:description" content="前言Taro 是使用 React 开发小程序的技术栈，当然也可以使用 Redux 进行管理数据。在 Taro cli 里有 Redux 的模版代码，但是本人并不推荐使用 Taro 提供的模版代码，因为这样写代码会比较多。下面来看看笔者自创的 Redux 代码写法。 初始化在创建项目时，选项 Redux 的模版代码，接着安装相关依赖包。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2019/2/20190211234402.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Taro + Redux 正确姿势</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Taro + Redux 正确姿势</h1>
+
+        <div class="meta-rest">
+            <h1>Taro + Redux 正确姿势</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-02-11T15:40:36.000Z" itemprop="datePublished" class="page-time">
+    2019-02-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/小程序/">小程序</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#初始化"><span class="post-toc-number">2.</span> <span class="post-toc-text">初始化</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开发目录"><span class="post-toc-number">3.</span> <span class="post-toc-text">开发目录</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-小程序/Taro + Redux 正确姿势"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Taro + Redux 正确姿势</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 02 月 11 日 23:40" datetime="2019-02-11T15:40:36.000Z"  itemprop="datePublished">
+    2019-02-11
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/小程序/">小程序</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 520</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Taro 是使用 React 开发小程序的技术栈，当然也可以使用 Redux 进行管理数据。在 Taro cli 里有 Redux 的模版代码，但是本人并不推荐使用 Taro 提供的模版代码，因为这样写代码会比较多。下面来看看笔者自创的 Redux 代码写法。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>在创建项目时，选项 Redux 的模版代码，接着安装相关依赖包。</p>
+<a id="more"></a>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">taro init myApp</span><br><span class="line">npm install redux-store-init</span><br></pre></td></tr></table></figure>
+<h2 id="开发目录"><a href="#开发目录" class="headerlink" title="开发目录"></a>开发目录</h2><p>把 src 目录整理成以下的目录结构。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190211234402.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>在 store 目录下放置 reducers，action 相关代码。</p>
+<p>在 app.js 修改 store 的来源。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">'./store'</span>;</span><br></pre></td></tr></table></figure>
+<p>在 store/index 里放置初始化 store 代码，并且把相关函数导出。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// store/index.js</span></span><br><span class="line"><span class="keyword">import</span> Store <span class="keyword">from</span> <span class="string">'redux-store-init'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> store = Store(&#123; reducers &#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> getState = <span class="function">(<span class="params">name</span>) =&gt;</span> store.getState()[name];</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> dispatch = <span class="function">(<span class="params">...arg</span>) =&gt;</span> store.dispatch(...arg);</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> commit = <span class="function">(<span class="params">name, newState</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> newState === <span class="string">'function'</span>) &#123;</span><br><span class="line">        store.dispatch(&#123; <span class="attr">type</span>: name, newState &#125;);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> newState === <span class="string">'object'</span>) &#123;</span><br><span class="line">        store.dispatch(&#123; <span class="attr">type</span>: name, <span class="attr">newState</span>: <span class="function"><span class="params">state</span> =&gt;</span> (&#123; ...state, ...newState &#125;) &#125;);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    store.dispatch(&#123; <span class="attr">type</span>: name, <span class="attr">newState</span>: <span class="function"><span class="params">()</span> =&gt;</span> newState &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> store;</span><br></pre></td></tr></table></figure>
+<p>在 store/reducers 里放置创建 reducers 的代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// store/reducers.js</span></span><br><span class="line"><span class="comment">/* eslint-disable import/prefer-default-export */</span></span><br><span class="line"><span class="keyword">import</span> &#123; createReducer &#125; <span class="keyword">from</span> <span class="string">'redux-store-init'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> index = createReducer(<span class="string">'index'</span>, &#123;</span><br><span class="line">    count: <span class="number">1</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在 store/action 里放置创建 action 的代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; commit &#125; <span class="keyword">from</span> <span class="string">'..'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// name@注释</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> add = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    commit(<span class="string">'index@add'</span>, state =&gt; (&#123; <span class="attr">count</span>: state.count + <span class="number">1</span> &#125;));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> minus = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    commit(<span class="string">'index@minus'</span>, state =&gt; (&#123; <span class="attr">count</span>: state.count - <span class="number">1</span> &#125;));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 异步的 action</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">asyncAdd</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    setTimeout(add, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 pages/index 里进行连接和调用 action 函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Taro, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'@tarojs/taro'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; View, Button, Text &#125; <span class="keyword">from</span> <span class="string">'@tarojs/components'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; connect &#125; <span class="keyword">from</span> <span class="string">'@tarojs/redux'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; add, minus, asyncAdd &#125; <span class="keyword">from</span> <span class="string">'../../store/actions/index'</span>;</span><br><span class="line"></span><br><span class="line">@connect(<span class="function"><span class="params">state</span> =&gt;</span> (&#123; <span class="attr">state</span>: state.index &#125;))</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">Index</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; count &#125; = <span class="keyword">this</span>.props.state;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View className=<span class="string">'index'</span>&gt;</span><br><span class="line">                &lt;Button className=<span class="string">'add_btn'</span> onClick=&#123;add&#125;&gt;+&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">                &lt;Button className='dec_btn' onClick=&#123;minus&#125;&gt;-&lt;/</span>Button&gt;</span><br><span class="line">                &lt;Button className=<span class="string">'dec_btn'</span> onClick=&#123;asyncAdd&#125;&gt;<span class="keyword">async</span>&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">                &lt;View&gt;&lt;Text&gt;&#123;count&#125;&lt;/</span>Text&gt;&lt;<span class="regexp">/View&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>View&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/2/20190211233739.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>完成，代码简单明了。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.912Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/02/小程序/Taro + Redux 正确姿势/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/02/小程序/Taro + Redux 正确姿势/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/小程序/">小程序</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/02/React/Style/Linaria 使用指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">💅 Linaria 使用指南</h4>
+        <h4 class="summary">相对于 JavaScript 的突飞猛进，CSS 的发展缓慢，相对止步不前。随着前端职能扩大化成为常态，前端工程化日趋成...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/01/前端/Github 支持私有后/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Github 支持私有后</h4>
+        <h4 class="summary"></h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

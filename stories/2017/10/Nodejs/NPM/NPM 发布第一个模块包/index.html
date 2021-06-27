@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/10/Nodejs/NPM/NPM 发布第一个模块包/">
+    
+    
+    <title>NPM：发布第一个模块包 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="发布第一个 npm 包终于发布了一个 npm 包。  react-static-view，是一个 react/react-native 静态组件容器，提供渲染次数控制的功能，可以用于性能优化，减少不必要的渲染。   下面记录一下，发布一个 npm 包，需要解决的问题： 如何登录 npm 账号，创建 npm 模块，发布 npm 模块，更新 npm 模块，添加版本，下载量信息等。">
+<meta name="keywords" content="后端,Nodejs,NPM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NPM：发布第一个模块包">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/10/Nodejs/NPM/NPM 发布第一个模块包/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="发布第一个 npm 包终于发布了一个 npm 包。  react-static-view，是一个 react/react-native 静态组件容器，提供渲染次数控制的功能，可以用于性能优化，减少不必要的渲染。   下面记录一下，发布一个 npm 包，需要解决的问题： 如何登录 npm 账号，创建 npm 模块，发布 npm 模块，更新 npm 模块，添加版本，下载量信息等。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://img.shields.io/npm/v/react-static-view.svg">
+<meta property="og:image" content="https://img.shields.io/npm/dm/react-static-view.svg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171005185646.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.836Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NPM：发布第一个模块包">
+<meta name="twitter:description" content="发布第一个 npm 包终于发布了一个 npm 包。  react-static-view，是一个 react/react-native 静态组件容器，提供渲染次数控制的功能，可以用于性能优化，减少不必要的渲染。   下面记录一下，发布一个 npm 包，需要解决的问题： 如何登录 npm 账号，创建 npm 模块，发布 npm 模块，更新 npm 模块，添加版本，下载量信息等。">
+<meta name="twitter:image" content="https://img.shields.io/npm/v/react-static-view.svg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">NPM：发布第一个模块包</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">NPM：发布第一个模块包</h1>
+
+        <div class="meta-rest">
+            <h1>NPM：发布第一个模块包</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-10-06T10:38:46.000Z" itemprop="datePublished" class="page-time">
+    2017-10-06
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/NPM/">NPM</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#发布第一个-npm-包"><span class="post-toc-number">1.</span> <span class="post-toc-text">发布第一个 npm 包</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#登录-npm"><span class="post-toc-number">2.</span> <span class="post-toc-text">登录 npm</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#创建模块"><span class="post-toc-number">3.</span> <span class="post-toc-text">创建模块</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#发布包"><span class="post-toc-number">4.</span> <span class="post-toc-text">发布包</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#撤销包"><span class="post-toc-number">5.</span> <span class="post-toc-text">撤销包</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#更新模块"><span class="post-toc-number">6.</span> <span class="post-toc-text">更新模块</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#添加版本，下载量信息"><span class="post-toc-number">7.</span> <span class="post-toc-text">添加版本，下载量信息</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#遇到问题"><span class="post-toc-number">8.</span> <span class="post-toc-text">遇到问题</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/NPM/NPM 发布第一个模块包"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">NPM：发布第一个模块包</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 10 月 06 日 18:38" datetime="2017-10-06T10:38:46.000Z"  itemprop="datePublished">
+    2017-10-06
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/NPM/">NPM</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1164</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="发布第一个-npm-包"><a href="#发布第一个-npm-包" class="headerlink" title="发布第一个 npm 包"></a>发布第一个 npm 包</h2><p>终于发布了一个 npm 包。</p>
+<blockquote>
+<p><a href="https://www.npmjs.com/package/react-static-view" target="_blank" rel="noopener">react-static-view</a>，是一个 react/react-native 静态组件容器，提供渲染次数控制的功能，可以用于性能优化，减少不必要的渲染。<br><a href="https://www.npmjs.com/package/react-static-view" target="_blank" rel="noopener"><img src="https://img.shields.io/npm/v/react-static-view.svg" style="width: auto; height: auto"> <img src="https://img.shields.io/npm/dm/react-static-view.svg" style="width: auto; height: auto"></a></p>
+</blockquote>
+<p>下面记录一下，发布一个 npm 包，需要解决的问题： 如何登录 npm 账号，创建 npm 模块，发布 npm 模块，更新 npm 模块，添加版本，下载量信息等。</p>
+<a id="more"></a>
+<h2 id="登录-npm"><a href="#登录-npm" class="headerlink" title="登录 npm"></a>登录 npm</h2><p>如果没有 npm 账号，先是在 <a href="https://www.npmjs.com/" target="_blank" rel="noopener">npm</a> 上注册一个账号。<br>接着使用命令登录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm login</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>如果之前使用了 “淘宝源” 的 npm 镜像，在这里需要转回使用<strong>官方镜像</strong>，不然在发布包时会使劲报错。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> registry https://registry.npm.taobao.org/ <span class="comment"># 淘宝源</span></span><br><span class="line">npm config <span class="built_in">set</span> registry https://r.cnpmjs.org/            <span class="comment"># cnpm 源</span></span><br><span class="line">npm config <span class="built_in">set</span> registry https://registry.npmjs.org/      <span class="comment"># 官方源</span></span><br></pre></td></tr></table></figure>
+<p>登录完成后，可以使用下面命令来检测是否登录成功，它会显示出当前登录用户的名称：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm who am i  <span class="comment"># lizhooh</span></span><br></pre></td></tr></table></figure>
+<h2 id="创建模块"><a href="#创建模块" class="headerlink" title="创建模块"></a>创建模块</h2><p>创建 npm 模块，使用 <code>npm init</code> 即可。<br>npm 的包结构使用一个 package.json 来描述，实际上是一个存档文件，即一个目录直接打包为 .zip 或 tar.gz 格式的文件，安装后解压还原为目录。</p>
+<p><strong>一般来说有以下目录结构：</strong><br><code>package.json</code> 包描述文件（必须）<br><code>bin</code> 用于存放可执行二进制文件的目录（非必须）<br><code>lib</code> 用于存放 javascript 代码的目录（非必须）<br><code>doc</code> 用于存放文档的目录（非必须）<br><code>test</code> 用于存放单元测试用例的代码（非必须）</p>
+<p><strong>注意：</strong>在 package.json 里，<code>repository</code> 一定要写，可以先在 github 上创建项目之后再创建 npm 包。<code>keywords</code> 是关键词，为了方便别人搜索到你的包，建议填写准确，多个之间使用 <code>,</code> 分割。</p>
+<p>如何指定入口文件？在 package.json 里指定：<code>&quot;main&quot;: &quot;index.js&quot;</code></p>
+<h2 id="发布包"><a href="#发布包" class="headerlink" title="发布包"></a>发布包</h2><p>创建完包，之后就可以发布包了。</p>
+<p>使用 <code>npm publish</code> 命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm publish &lt;包名&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>npm 包名是唯一的，因此需要一个没有人使用过的包名。比如，test 已经有人使用了，就不能使用 test 了。（test-test4 都被人使用了，滑稽）。version 必须比上次的大，不然报错。还有一点要注意的是 npm 对包名的限制：不能有大写字母/空格/下滑线。</p>
+<p>如果报错：'xxx' is not in the npm registry，把包名去掉。</p>
+<p>发布之后可以使用命令 <code>npm info</code> 来查看发布包信息。</p>
+<h2 id="撤销包"><a href="#撤销包" class="headerlink" title="撤销包"></a>撤销包</h2><p>只有发布的包在 24 小时之内是可以撤销的，可以使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm unpublish &lt;包名&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="更新模块"><a href="#更新模块" class="headerlink" title="更新模块"></a>更新模块</h2><p>更新模块还是使用 <code>npm publish</code> 来更新。</p>
+<p>先是修改 package.json 中的 version 版本（必须比上次的大），接着使用 <code>npm publish</code> 来更新。</p>
+<p>如果不想手动修改 version，可以使用 <code>npm version &lt;update_type&gt;</code> 来更新版本。</p>
+<p>update_type 是指语义化版本管理的发布类型的一种：补丁版本（patch）、次版本（minor）或主版本（major）。此命令会更改 package.json 中的版本号。注意哦，如果你有此包的 git 仓库，那么此命令也会向 git 仓库添加此版本的一个标签。</p>
+<p><strong>更新版本号需要注意的地方：</strong></p>
+<ul>
+<li>如果项目将要与他人分享，那它的版本应该始于 1.0.0，尽管 npm 上有些项目不遵循此规则。</li>
+<li>Bug 修复和其他小版本修改：用 Patch 版本，增加最后的版本数，如：1.0.1</li>
+<li>不会破坏已有特性的新特性：用 Minor 版本，增加中间的版本数，如：1.1.0</li>
+<li>会破坏向后兼容的更改：用 Majo 版本，增加第一个版本数，如：2.0.0</li>
+</ul>
+<h2 id="添加版本，下载量信息"><a href="#添加版本，下载量信息" class="headerlink" title="添加版本，下载量信息"></a>添加版本，下载量信息</h2><p>类型下面的效果：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171005185646.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>把下面的 <code>react-router</code> 改为你的包名，添加到 readme.md 里就可以了。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://www.npmjs.com/package/react-router"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"https://img.shields.io/npm/v/react-router.svg?style=flat-square"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://www.npmjs.com/package/react-router"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"https://img.shields.io/npm/dm/react-router.svg?style=flat-square"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>具体参考：</strong> <a href="https://shields.io/" target="_blank" rel="noopener">https://shields.io/</a></p>
+<h2 id="遇到问题"><a href="#遇到问题" class="headerlink" title="遇到问题"></a>遇到问题</h2><p>说，没有限权，可能是账号没有登对，可能是包名与别人的重复了，可能是使用了淘宝源。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">no_perms Private mode <span class="built_in">enable</span>, only admin can publish this module</span><br></pre></td></tr></table></figure>
+<p>没有登录，请重新登录一次。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm publish failed put 500  unexpected status code 401</span><br></pre></td></tr></table></figure>
+<p>如果，不小心写错了，又发布了新的版本。如何撤销当前版本？<br>不能撤销版本，只能再发布一个新的版本。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.836Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/10/Nodejs/NPM/NPM 发布第一个模块包/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/10/Nodejs/NPM/NPM 发布第一个模块包/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NPM/">NPM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/10/抓包&爬虫/Phantomjs 简明的使用教程/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Phantomjs 简明的使用教程</h4>
+        <h4 class="summary">Phantomjs 是一个基于 Webkit 的 JavaScript API 。它使用 QtWebKit 作为它核心浏...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/10/Nodejs/Nodejs 里建立 ip 代理池/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs 里建立 ip 代理池</h4>
+        <h4 class="summary">ip 代理池，在写爬虫时，面对一些限制 ip 访问次数的站点非常有用，这样就可以进行代理 ip 轮转去访问目标网址。（滑...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

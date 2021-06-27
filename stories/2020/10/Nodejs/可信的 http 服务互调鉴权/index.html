@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2020/10/Nodejs/可信的 http 服务互调鉴权/">
+    
+    
+    <title>可信的 http 服务互调鉴权 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言场景，A 服务是自家服务，B 服务是合作的第三方公司的服务。现在要做的是 A 服务对 B 服务发起请求，B 服务执行完成后，会异步的进行回调，对回调的 http 地址发起回调的内容请求。这样就来了一个问题，A 和 B 怎么确保是对方发送的请求？ 可以什么都不做，这样的风险被人抓包挖出地址后不断的轰炸。当然是需要做鉴权功能。">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="可信的 http 服务互调鉴权">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2020/10/Nodejs/可信的 http 服务互调鉴权/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言场景，A 服务是自家服务，B 服务是合作的第三方公司的服务。现在要做的是 A 服务对 B 服务发起请求，B 服务执行完成后，会异步的进行回调，对回调的 http 地址发起回调的内容请求。这样就来了一个问题，A 和 B 怎么确保是对方发送的请求？ 可以什么都不做，这样的风险被人抓包挖出地址后不断的轰炸。当然是需要做鉴权功能。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.843Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="可信的 http 服务互调鉴权">
+<meta name="twitter:description" content="前言场景，A 服务是自家服务，B 服务是合作的第三方公司的服务。现在要做的是 A 服务对 B 服务发起请求，B 服务执行完成后，会异步的进行回调，对回调的 http 地址发起回调的内容请求。这样就来了一个问题，A 和 B 怎么确保是对方发送的请求？ 可以什么都不做，这样的风险被人抓包挖出地址后不断的轰炸。当然是需要做鉴权功能。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">可信的 http 服务互调鉴权</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">可信的 http 服务互调鉴权</h1>
+
+        <div class="meta-rest">
+            <h1>可信的 http 服务互调鉴权</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2020-10-07T13:01:34.000Z" itemprop="datePublished" class="page-time">
+    2020-10-07
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#异步回调"><span class="post-toc-number">2.</span> <span class="post-toc-text">异步回调</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#鉴权"><span class="post-toc-number">3.</span> <span class="post-toc-text">鉴权</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">4.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/可信的 http 服务互调鉴权"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">可信的 http 服务互调鉴权</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020 年 10 月 07 日 21:01" datetime="2020-10-07T13:01:34.000Z"  itemprop="datePublished">
+    2020-10-07
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 755</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>场景，A 服务是自家服务，B 服务是合作的第三方公司的服务。现在要做的是 A 服务对 B 服务发起请求，B 服务执行完成后，会异步的进行回调，对回调的 http 地址发起回调的内容请求。这样就来了一个问题，A 和 B 怎么确保是对方发送的请求？</p>
+<p>可以什么都不做，这样的风险被人抓包挖出地址后不断的轰炸。当然是需要做<strong>鉴权</strong>功能。</p>
+<a id="more"></a>
+<h2 id="异步回调"><a href="#异步回调" class="headerlink" title="异步回调"></a>异步回调</h2><p>有些服务是在收到请求后不能立刻处理完成，例如离线的计算任务，异步的计算任务，这种当然不能立刻告诉你结果，可能在未来几秒，几分钟后才计算完，把结果告诉你。那么具体怎么告诉法呢？当你请求时，需要携带回调的地址，计算完成后对这个地址进行请求，这样就构成了一个异步回调的形式。</p>
+<h2 id="鉴权"><a href="#鉴权" class="headerlink" title="鉴权"></a>鉴权</h2><p>首先，鉴权存在加密的过程，是一个不可逆加密，密钥双发都知道，加密内容可以是一个可刷新的动态值。</p>
+<p>这里举出 HmacSHA1 的加密形式。</p>
+<p>在 A 向 B 发起计算的请求时，在 header 里携带鉴权信息。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'x-sg-token'</span>: <span class="string">'xxxx'</span>,</span><br><span class="line"><span class="string">'x-sg-signature'</span>: <span class="string">'P76xYs3puRoSWnx4cniypoU0K6v1PeHk9bEzdRUw'</span></span><br></pre></td></tr></table></figure>
+<p>当然有一个固定 key 是不携带在 header 里的，而是写死在代码里。</p>
+<p>其中 <code>x-sg-key</code> 是固定已知值（可看 webhook 的配置得知），需要你的服务记忆住，<code>x-sg-token</code> 是可刷新值，每次发起推送请求时在 header 里携带。</p>
+<p>在加密完成后，你需要用你生成的 <code>signature</code> 与 header 里的 <code>x-sg-signature</code> 进行比较来确定是 A 服务器发送的请求。同理，在 B 执行回调请求时，A 也会做同样的鉴权操作。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'request'</span>);</span><br><span class="line"><span class="keyword">const</span> options = &#123;</span><br><span class="line">  method: <span class="string">'POST'</span>,</span><br><span class="line">  url: <span class="string">'http://xxx.com'</span>,    <span class="comment">// replyUrl 地址</span></span><br><span class="line">  headers: &#123;</span><br><span class="line">    <span class="string">'content-type'</span>: <span class="string">'application/json'</span>,</span><br><span class="line">    <span class="string">'x-sg-token'</span>: <span class="string">'xxxx'</span>,</span><br><span class="line">    <span class="string">'x-sg-signature'</span>: <span class="string">'076xYs3puuoSWnx4cniypoU0K6v1SeHk9bEzdRUw'</span></span><br><span class="line">  &#125;,</span><br><span class="line">  body: [],</span><br><span class="line">  json: <span class="literal">true</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">request(options, <span class="function"><span class="keyword">function</span> (<span class="params">error, response, body</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (error) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(error);</span><br><span class="line">  <span class="built_in">console</span>.log(body);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在 B 服务里需要对加密进行验证，怎么验证？对 <code>x-sg-key</code> 和 <code>x-sg-token</code> 进行 HmacSHA1 加密，得到了 signature 与 header 的 <code>x-sg-signature</code> 进行比较，如果相同则是受信用户，否则这个请求会被抛弃。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> hmacsha1 = <span class="built_in">require</span>(<span class="string">'hmacsha1'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> key = <span class="string">'sugo_data'</span></span><br><span class="line"><span class="keyword">const</span> token = <span class="string">'xxxx'</span></span><br><span class="line"><span class="keyword">const</span> signature = hmacsha1(key, token);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(signature)</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>当然除了这种 http 回调的方式来实现异步的消息指令，其实还可以根据 redis pub/sub 的模式来实现，在 A 发起请求时把 redis 的地址，还有监听的 key 告诉 B 服务，B 服务在计算完成后对 key 进行 pub，在 A 服务里监听到时触发，获取 key 的值得到回调内容。但是这种方式仅限于内部公司用吧，外部公司，如果不想让别人直接访问你的 redis 可不能这样干之。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.843Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2020/10/Nodejs/可信的 http 服务互调鉴权/" target="_blank" rel="external">http://me.lizhooh.com/stories/2020/10/Nodejs/可信的 http 服务互调鉴权/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2020/10/前端/高效的前端 Tree 结构渲染与读取算法/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">高效的前端 Tree 结构渲染与读取算法</h4>
+        <h4 class="summary">前端最烦的是渲染树结构了，单纯渲染树结构还行，直接一个递归渲染即可，最怕渲染之后各种修改数据，主要是麻烦。
+最后，不断渲...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2020/09/Mysql/Sequelize 解决中间表字段累赘的问题/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Sequelize 解决中间表字段累赘的问题</h4>
+        <h4 class="summary">Sequelize 如果是创建 N : M 关联，自动创建关联表就没有出现中间表字段累赘的问题，但是如果是自动创建中间关...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/03/Javascript/正则表达式/学习正则表达式/">
+    
+    
+    <title>学习 - 正则表达式 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="Javascript 中使用正则表达式在 JavaScript 中，正则表达式通常用于两个字符串方法 : search 和 replace  search(regexp) 用于检索字符串中指定的子字符串，或检索与正则表达式相匹配的子字符串，并返回子串的起始位置。   replace(regexp/substr, replacement) 用于在字符串中用一些字符替换另一些字符，或替换一个与正则表达">
+<meta name="keywords" content="Javascript,正则表达式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习 - 正则表达式">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/03/Javascript/正则表达式/学习正则表达式/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="Javascript 中使用正则表达式在 JavaScript 中，正则表达式通常用于两个字符串方法 : search 和 replace  search(regexp) 用于检索字符串中指定的子字符串，或检索与正则表达式相匹配的子字符串，并返回子串的起始位置。   replace(regexp/substr, replacement) 用于在字符串中用一些字符替换另一些字符，或替换一个与正则表达">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.825Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习 - 正则表达式">
+<meta name="twitter:description" content="Javascript 中使用正则表达式在 JavaScript 中，正则表达式通常用于两个字符串方法 : search 和 replace  search(regexp) 用于检索字符串中指定的子字符串，或检索与正则表达式相匹配的子字符串，并返回子串的起始位置。   replace(regexp/substr, replacement) 用于在字符串中用一些字符替换另一些字符，或替换一个与正则表达">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">学习 - 正则表达式</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">学习 - 正则表达式</h1>
+
+        <div class="meta-rest">
+            <h1>学习 - 正则表达式</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-03-04T08:50:26.000Z" itemprop="datePublished" class="page-time">
+    2017-03-04
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Javascript/">Javascript</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Javascript-中使用正则表达式"><span class="post-toc-number">1.</span> <span class="post-toc-text">Javascript 中使用正则表达式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#正则表达式对象-RegExp"><span class="post-toc-number">2.</span> <span class="post-toc-text">正则表达式对象 RegExp</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#修饰符"><span class="post-toc-number">3.</span> <span class="post-toc-text">修饰符</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#元字符"><span class="post-toc-number">4.</span> <span class="post-toc-text">元字符</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#字符类"><span class="post-toc-number">5.</span> <span class="post-toc-text">字符类</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#指定范围"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">指定范围</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#取反"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">取反</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#预定义类"><span class="post-toc-number">6.</span> <span class="post-toc-text">预定义类</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#边界"><span class="post-toc-number">7.</span> <span class="post-toc-text">边界</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#量词"><span class="post-toc-number">8.</span> <span class="post-toc-text">量词</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#贪婪模式"><span class="post-toc-number">9.</span> <span class="post-toc-text">贪婪模式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#非贪婪模式"><span class="post-toc-number">10.</span> <span class="post-toc-text">非贪婪模式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#分组"><span class="post-toc-number">11.</span> <span class="post-toc-text">分组</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#或"><span class="post-toc-number">11.1.</span> <span class="post-toc-text">或</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#反向引用"><span class="post-toc-number">11.2.</span> <span class="post-toc-text">反向引用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#忽略分组"><span class="post-toc-number">11.3.</span> <span class="post-toc-text">忽略分组</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前瞻，后顾"><span class="post-toc-number">12.</span> <span class="post-toc-text">前瞻，后顾</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Javascript/正则表达式/学习正则表达式"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">学习 - 正则表达式</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 03 月 04 日 16:50" datetime="2017-03-04T08:50:26.000Z"  itemprop="datePublished">
+    2017-03-04
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Javascript/">Javascript</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1671</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="Javascript-中使用正则表达式"><a href="#Javascript-中使用正则表达式" class="headerlink" title="Javascript 中使用正则表达式"></a>Javascript 中使用正则表达式</h2><p>在 JavaScript 中，正则表达式通常用于两个字符串方法 : <code>search</code> 和 <code>replace</code></p>
+<ul>
+<li><code>search(regexp)</code><ul>
+<li>用于检索字符串中指定的子字符串，或检索与正则表达式相匹配的子字符串，并返回子串的起始位置。</li>
+</ul>
+</li>
+<li><code>replace(regexp/substr, replacement)</code><ul>
+<li>用于在字符串中用一些字符替换另一些字符，或替换一个与正则表达式匹配的子串。</li>
+</ul>
+</li>
+</ul>
+<a id="more"></a>
+<h2 id="正则表达式对象-RegExp"><a href="#正则表达式对象-RegExp" class="headerlink" title="正则表达式对象 RegExp"></a>正则表达式对象 RegExp</h2><p>RegExp 对象的属性。</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global</td>
+<td>是否是全文搜索，默认 false</td>
+</tr>
+<tr>
+<td>ingoreCase</td>
+<td>执行对大小写不敏感的匹配，默认 false</td>
+</tr>
+<tr>
+<td>multiline</td>
+<td>执行多行匹配，默认 false</td>
+</tr>
+<tr>
+<td>lastIndex</td>
+<td>当前表达式匹配内容最后一个字符的下一个位置</td>
+</tr>
+<tr>
+<td>source</td>
+<td>正则表达式的文本字符串</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> exp = <span class="regexp">/\b&#123;3&#125;/</span>;</span><br><span class="line"></span><br><span class="line">exp.global;         <span class="comment">// false</span></span><br><span class="line">exp.ingoreCase;     <span class="comment">// false</span></span><br><span class="line">exp.multiline;      <span class="comment">// false</span></span><br><span class="line">exp.lastIndex;      <span class="comment">// 0</span></span><br><span class="line">exp.source;         <span class="comment">// '/\b&#123;3&#125;/'</span></span><br></pre></td></tr></table></figure>
+<p>方法：</p>
+<blockquote>
+<p>RegExp.prototype.test(str)</p>
+</blockquote>
+<p>用于测试字符串参数是否匹配这个正则表达式，匹配返回 true。</p>
+<blockquote>
+<p>RegExp.prototype.exec(str)</p>
+</blockquote>
+<p>使用正则表达式模式对字符串进行搜索，并将更新全局 RegExp 对象的属性反映到匹配结果。<br>如果有匹配则返回一个结果数组，否则返回 null。数组的第一个是原来的字符串，后面都是匹配的字符串。</p>
+<p>比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> str = <span class="string">'2015-12-07'</span>;</span><br><span class="line"><span class="keyword">const</span> reg = <span class="regexp">/(\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;)/</span>;</span><br><span class="line"><span class="keyword">const</span> result = reg.exec(str);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(result);</span><br><span class="line"><span class="comment">// ["2015-12-07", "2015", "12", "07"]</span></span><br><span class="line"><span class="comment">// 对应 [str, $1, $2, $3]</span></span><br></pre></td></tr></table></figure>
+<p>注意 exec 只返回第一个匹配结果，如需要返回多个匹配结果请使用：<br><code>String.match(reg)</code></p>
+<h2 id="修饰符"><a href="#修饰符" class="headerlink" title="修饰符"></a>修饰符</h2><p>Javascript 正则表达式里提供了三个修饰符。</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>g</td>
+<td>执行全局匹配（查找所有匹配而非在找到第一个匹配后停止），默认匹配第一个。</td>
+</tr>
+<tr>
+<td>i</td>
+<td>执行对大小写不敏感的匹配，默认敏感。</td>
+</tr>
+<tr>
+<td>m</td>
+<td>执行多行匹配，默认不执行。</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'Im like a, like b, like c'</span>.replace(<span class="regexp">/\blike\b/</span>, <span class="string">'unlike'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'Im unlike a, like b, like c'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'Im like a, like b, like c'</span>.replace(<span class="regexp">/\blike\b/g</span>, <span class="string">'unlike'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'Im unlike a, unlike b, unlike c'</span></span><br></pre></td></tr></table></figure>
+<h2 id="元字符"><a href="#元字符" class="headerlink" title="元字符"></a>元字符</h2><p>正则表达式有两种基本字符类型组成：</p>
+<ul>
+<li>原义文本字符</li>
+<li>元字符</li>
+</ul>
+<p>元字符是在正则表达式中有特殊含义的非字母字符。</p>
+<blockquote>
+<p><code>. * + ? $ ^ | \ ( ) { } [ ]</code></p>
+</blockquote>
+<p>元字符有：</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\t</td>
+<td>水平制表符</td>
+</tr>
+<tr>
+<td>\v</td>
+<td>垂直制表符</td>
+</tr>
+<tr>
+<td>\n</td>
+<td>换行符</td>
+</tr>
+<tr>
+<td>\r</td>
+<td>回车符</td>
+</tr>
+<tr>
+<td>\0</td>
+<td>空字符</td>
+</tr>
+<tr>
+<td>\f</td>
+<td>换页符</td>
+</tr>
+<tr>
+<td>\cX</td>
+<td>与 X 对应的控制字符（ctrl+X）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="字符类"><a href="#字符类" class="headerlink" title="字符类"></a>字符类</h2><p>在一般情况下，正则表达式一个字符对应字符串一个字符。<br>比如，表达式<code>ab\t</code>的含义是：<code>ab\t</code></p>
+<p>还可以使用元字符<code>[ ]</code>来构建某一个类。在<code>[ ]</code>里的逻辑是<code>或</code>。<br>比如，就会匹配 a 或 b 或 c</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'a1, b2, c3'</span>.replace(<span class="regexp">/[a,b,c]/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '-1, -2, -3'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'a1, b2, c3'</span>.replace(<span class="regexp">/[ab]/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '-1, -2, c3'</span></span><br></pre></td></tr></table></figure>
+<h3 id="指定范围"><a href="#指定范围" class="headerlink" title="指定范围"></a>指定范围</h3><p>使用 <code>-</code> 来指定范围。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'a1, b2, c3'</span>.replace(<span class="regexp">/[a-c]/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '-1, -2, -3'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'2013-02-12'</span>.replace(<span class="regexp">/[0-9-]/g</span>, <span class="string">'+'</span>);</span><br><span class="line"><span class="comment">// ++++++++++</span></span><br></pre></td></tr></table></figure>
+<h3 id="取反"><a href="#取反" class="headerlink" title="取反"></a>取反</h3><p>使用 <code>^</code> 来取反。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'a1, b2, c3'</span>.replace(<span class="regexp">/[^a-c]/</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'a-, b-, c-'</span></span><br></pre></td></tr></table></figure>
+<h2 id="预定义类"><a href="#预定义类" class="headerlink" title="预定义类"></a>预定义类</h2><p>预定义类是，正则表达式给我们预定义好的表达式。</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>等价类</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.</td>
+<td>[^\r\n]</td>
+<td>除了回车符和换行符之外的所有字符</td>
+</tr>
+<tr>
+<td>\d</td>
+<td>[0-9]</td>
+<td>数字字符</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>[^0-9]</td>
+<td>非数字字符</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>[\t\n\x0B\f\r]</td>
+<td>空白字符</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>[^\t\n\x0B\f\r]</td>
+<td>非空白字符</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>[a-zA-Z_0-9]</td>
+<td>单词字符（字母，下划线，数字）</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>[^a-zA-Z_0-9]</td>
+<td>非单词字符（字母，下划线，数字）</td>
+</tr>
+<tr>
+<td>\b</td>
+<td></td>
+<td>单词边界（空格）</td>
+</tr>
+<tr>
+<td>\B</td>
+<td></td>
+<td>非单词边界（空格）</td>
+</tr>
+</tbody>
+</table>
+<p>比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'123abac'</span>.replace(<span class="regexp">/\d/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '---abac'</span></span><br></pre></td></tr></table></figure>
+<h2 id="边界"><a href="#边界" class="headerlink" title="边界"></a>边界</h2><p>正则表达式提供几个常用的边界字符。</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>^</td>
+<td>匹配开头，以 xxx 开头</td>
+</tr>
+<tr>
+<td>$</td>
+<td>匹配结尾，以 xxx 结尾</td>
+</tr>
+<tr>
+<td>\b</td>
+<td>单词边界（空格）</td>
+</tr>
+<tr>
+<td>\B</td>
+<td>非单词边界（空格）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="量词"><a href="#量词" class="headerlink" title="量词"></a>量词</h2><table>
+<thead>
+<tr>
+<th>字符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>?</td>
+<td>出现零次或一次（最多出现一次）</td>
+</tr>
+<tr>
+<td>+</td>
+<td>出现一次或多次（最少出现一次）</td>
+</tr>
+<tr>
+<td>*</td>
+<td>出现零次或多次（任意次）</td>
+</tr>
+<tr>
+<td>{n}</td>
+<td>出现 n 次，如 \d{2}，出现2次数字</td>
+</tr>
+<tr>
+<td>{n,m}</td>
+<td>出现 n 到 m 次</td>
+</tr>
+<tr>
+<td>{n,}</td>
+<td>最少出现 n 次</td>
+</tr>
+<tr>
+<td>{0,n}</td>
+<td>最多出现 n 次</td>
+</tr>
+</tbody>
+</table>
+<p>比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'123-345-2312'</span>.replace(<span class="regexp">/^\d&#123;3&#125;-\d&#123;3&#125;-\d&#123;4&#125;$/g</span>, <span class="string">'s'</span>);</span><br><span class="line"><span class="comment">// =&gt; 's'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'123-345-2312'</span>.replace(<span class="regexp">/^\d&#123;3&#125;/g</span>, <span class="string">'s'</span>);</span><br><span class="line"><span class="comment">// =&gt; 's-345-2312'</span></span><br></pre></td></tr></table></figure>
+<h2 id="贪婪模式"><a href="#贪婪模式" class="headerlink" title="贪婪模式"></a>贪婪模式</h2><p>Javascript 默认正则表达式是贪婪模式。</p>
+<p>比如，下面匹配就会贪婪的匹配到了 123456，也就是尽可能的使用到了 <code>\d{6}</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'12345abc'</span>.replace(<span class="regexp">/\d&#123;3,6&#125;/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '-abc'</span></span><br></pre></td></tr></table></figure>
+<h2 id="非贪婪模式"><a href="#非贪婪模式" class="headerlink" title="非贪婪模式"></a>非贪婪模式</h2><p>在量词后面加上<code>?</code>，就是使用非贪婪模式，也就是尽可能的使用 <code>\d{3}</code><br>一般有：<code>\d{3}?</code>，<code>(.*?)</code>，<code>(.+?)</code>这些都是非贪婪模式。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'12345abc'</span>.replace(<span class="regexp">/\d&#123;3,6&#125;?/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '-45abc'</span></span><br></pre></td></tr></table></figure>
+<h2 id="分组"><a href="#分组" class="headerlink" title="分组"></a>分组</h2><p>分组在正则匹配中是非常有用的。<br>使用 <code>( )</code> 指定分组，第一组的内容会被存放到<code>$1</code>里面，如此类推。($n, n &lt; 10)。<br>看下面的例子就知道，首先它匹配到了第6条链接，再把整个链接替换成分组内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">var</span> str =</span><br><span class="line"><span class="string">"http://123.com/image/dasddasdas.png"</span>  +  <span class="string">'\n'</span> +</span><br><span class="line"><span class="string">"http://123.com/image/dasdadass.png"</span>   +  <span class="string">'\n'</span> +</span><br><span class="line"><span class="string">"https://123.com/image/dasdasdas.jpg"</span>  +  <span class="string">'\n'</span> +</span><br><span class="line"><span class="string">"http://123.com/image/dasda1232s.png"</span>  +  <span class="string">'\n'</span> +</span><br><span class="line"><span class="string">"https://123.com/image/dasdadasds.jpg"</span> +  <span class="string">'\n'</span> +</span><br><span class="line"><span class="string">"http://123.com/image/dasdasdas.jpg"</span>   +  <span class="string">'\n'</span> +</span><br><span class="line"><span class="string">"http://123.com/image/dasdaasds.png"</span>   ;</span><br><span class="line"></span><br><span class="line">str.replace(<span class="regexp">/http:.+image\/(.+\.jpg)/gm</span>, <span class="string">'$1'</span>);</span><br><span class="line"><span class="comment">// =&gt; dasdasdas.jpg</span></span><br></pre></td></tr></table></figure>
+<p>在使用量词，有时会有歧义，需要使用到分组：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/body&#123;<span class="number">3</span>&#125;/           <span class="comment">// 指的是 y 重复 3 次</span></span><br><span class="line">/(body)&#123;<span class="number">3</span>&#125;/         <span class="comment">// 指的是 body 重复 3 次</span></span><br></pre></td></tr></table></figure>
+<h3 id="或"><a href="#或" class="headerlink" title="或"></a>或</h3><p>使用 <code>|</code> 可以达到或的效果。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'Byr(on|cn)sy'</span>.replace(<span class="regexp">/on|cn/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'Byr(-|-)sy'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'Byronsy'</span>.replace(<span class="regexp">/on|cn/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'Byr-sy'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'Byrcnsy Byronsy'</span>.replace(<span class="regexp">/Byr(on|cn)sy/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '- -'</span></span><br></pre></td></tr></table></figure>
+<h3 id="反向引用"><a href="#反向引用" class="headerlink" title="反向引用"></a>反向引用</h3><p>主要使用 <code>$n</code><br>比如：<code>2015-12-07 =&gt; 07/12/2015</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'2015-12-07'</span>.replace(<span class="regexp">/(\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;)/</span>, <span class="string">'$3/$2/$1'</span>);</span><br><span class="line"><span class="comment">// =&gt; '07/12/2015'</span></span><br></pre></td></tr></table></figure>
+<h3 id="忽略分组"><a href="#忽略分组" class="headerlink" title="忽略分组"></a>忽略分组</h3><p>忽略分组后，它并不会自动填充到<code>$n</code>里面。<br>这时候，只需要加上 <code>?:</code></p>
+<p>比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'a-bc-edf'</span>.replace(<span class="regexp">/(?:b)/g</span>, <span class="string">'$1'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'a-$1c-edf'</span></span><br></pre></td></tr></table></figure>
+<h2 id="前瞻，后顾"><a href="#前瞻，后顾" class="headerlink" title="前瞻，后顾"></a>前瞻，后顾</h2><p>正则表达式从文本头部向尾部开始解析，文本的尾部方向称为“前瞻”。<br>前瞻就是在正则表达式匹配到规则的时候，向前检查是否符合断言。<br>后顾就是与前缀相反的。<code>但是，Javascript 不支持后顾</code></p>
+<p>对于符号要求的断言称为：正向/肯定匹配，反之为：负向/否定匹配。</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>正则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正向前瞻</td>
+<td>exp(?=assert)</td>
+</tr>
+<tr>
+<td>负向前瞻</td>
+<td>exp(?!assert)</td>
+</tr>
+</tbody>
+</table>
+<p>比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'a2*3'</span>.replace(<span class="regexp">/\w(?=\d)/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; "-2*3", 要求，单词字符前面接数字</span></span><br><span class="line"></span><br><span class="line"><span class="string">'ab*3'</span>.replace(<span class="regexp">/\w(?=\d)/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'ab*3'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'a2*3'</span>.replace(<span class="regexp">/\w(?!\d)/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; 'a-*-'</span></span><br><span class="line"></span><br><span class="line"><span class="string">'ab*3'</span>.replace(<span class="regexp">/\w(?!\d)/g</span>, <span class="string">'-'</span>);</span><br><span class="line"><span class="comment">// =&gt; '--*-'</span></span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.825Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/03/Javascript/正则表达式/学习正则表达式/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/03/Javascript/正则表达式/学习正则表达式/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/正则表达式/">正则表达式</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/03/React Native/Animated/React Native 超简单的布局动画/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 超简单的布局动画</h4>
+        <h4 class="summary">LayoutAnimationLayoutAnimation 是一个用于在下一个绘制或者布局周期 （render/lay...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/03/HTML5/学习笔记/Web Ajax 框架/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Web Ajax 框架</h4>
+        <h4 class="summary">axios , reqwest , fetch
+axios: Promise based HTTP client for...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

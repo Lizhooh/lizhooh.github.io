@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/12/React Native/Socket/如何在 React Native 里优雅的使用 Socket.io？/">
+    
+    
+    <title>如何在 React Native 里优雅的使用 Socket.io？ | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Socket.io 是纯的 Javascript 库，理论上是可以在 React Native 上使用的，React Native 也支持 Websocket 的 API。 但是实际表明不行，试了一下 Socket.id 最新版本和 RN 0.55.4，发现一直都显示无法连接，在 stackoverflow 与 github 上查找问题，一些奇荡技巧都用过了，还是不行。无果，有人也反应了，这个">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在 React Native 里优雅的使用 Socket.io？">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/12/React Native/Socket/如何在 React Native 里优雅的使用 Socket.io？/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Socket.io 是纯的 Javascript 库，理论上是可以在 React Native 上使用的，React Native 也支持 Websocket 的 API。 但是实际表明不行，试了一下 Socket.id 最新版本和 RN 0.55.4，发现一直都显示无法连接，在 stackoverflow 与 github 上查找问题，一些奇荡技巧都用过了，还是不行。无果，有人也反应了，这个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.869Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何在 React Native 里优雅的使用 Socket.io？">
+<meta name="twitter:description" content="前言Socket.io 是纯的 Javascript 库，理论上是可以在 React Native 上使用的，React Native 也支持 Websocket 的 API。 但是实际表明不行，试了一下 Socket.id 最新版本和 RN 0.55.4，发现一直都显示无法连接，在 stackoverflow 与 github 上查找问题，一些奇荡技巧都用过了，还是不行。无果，有人也反应了，这个">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">如何在 React Native 里优雅的使用 Socket.io？</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">如何在 React Native 里优雅的使用 Socket.io？</h1>
+
+        <div class="meta-rest">
+            <h1>如何在 React Native 里优雅的使用 Socket.io？</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-12-08T06:44:59.000Z" itemprop="datePublished" class="page-time">
+    2018-12-08
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实施方案"><span class="post-toc-number">2.</span> <span class="post-toc-text">实施方案</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义通信协议"><span class="post-toc-number">3.</span> <span class="post-toc-text">自定义通信协议</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#问题"><span class="post-toc-number">4.</span> <span class="post-toc-text">问题</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Socket/如何在 React Native 里优雅的使用 Socket.io？"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">如何在 React Native 里优雅的使用 Socket.io？</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 12 月 08 日 14:44" datetime="2018-12-08T06:44:59.000Z"  itemprop="datePublished">
+    2018-12-08
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1262</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Socket.io 是纯的 Javascript 库，理论上是可以在 React Native 上使用的，React Native 也支持 Websocket 的 API。</p>
+<p>但是实际表明不行，试了一下 Socket.id 最新版本和 RN 0.55.4，发现一直都显示无法连接，在 stackoverflow 与 github 上查找问题，一些奇荡技巧都用过了，还是不行。无果，有人也反应了，这个问题，Socket.io 官方也没说能完全支持 React Native，总的来说，坑粑粑的。</p>
+<a id="more"></a>
+<p>没办法了，业务要用到，这时候这么办呢？只能退一步操作，使用万能的大法，降级方案，就是使用 WebView 作为桥接层，下面会详细说道实施的过程。</p>
+<p><strong>补充：重现代码</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!<span class="built_in">window</span>.location) &#123;</span><br><span class="line">    <span class="comment">// App is running in simulator</span></span><br><span class="line">    <span class="built_in">window</span>.navigator.userAgent = <span class="string">'ReactNative'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io-client'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试你 http(s) 和 ws(s) 协议都不行</span></span><br><span class="line"><span class="keyword">const</span> socket = io(<span class="string">'ws://192.168.1.111:3000'</span>, &#123;</span><br><span class="line">    jsonp: <span class="literal">false</span>,</span><br><span class="line">    transports: [<span class="string">'websocket'</span>]</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(<span class="string">'connect'</span>, () =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'connected!'</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(<span class="string">'connect_error'</span>, (e) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.error(e);</span><br><span class="line">    <span class="comment">// 一直都得到 timeout，具体测试后端是没问题的，Σ( ° △ °|||)︴</span></span><br><span class="line">    <span class="comment">//  h5 端可以正确连接上</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="实施方案"><a href="#实施方案" class="headerlink" title="实施方案"></a>实施方案</h2><p>首先，使用 WebView 组件作为连接层，在 h5 里可以成功的连接上，其后 H5 通过 <strong>通信接口，把接收到的数据传回 React Native</strong>。</p>
+<p><strong>消息传递路径：</strong></p>
+<ul>
+<li>发送消息：RN -&gt; H5 -&gt; 后端</li>
+<li>接收消息：后端 -&gt; H5 -&gt; RN</li>
+</ul>
+<p><strong>要点：</strong></p>
+<ul>
+<li>WebView 全局长期存在，无高度和宽度，不可见状态。</li>
+<li>H5 端只做消息的中转站。</li>
+<li>通过 postMessage 通信，包括发消息和接消息。</li>
+<li>通过 redux 管理通信消息数据。</li>
+</ul>
+<p>方案想好了，那就开始实施吧，先摆上测试用的后端代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> app = <span class="built_in">require</span>(<span class="string">'express'</span>)();</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>).Server(app);</span><br><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(http);</span><br><span class="line"><span class="keyword">const</span> colors = <span class="built_in">require</span>(<span class="string">'colors'</span>);</span><br><span class="line"><span class="keyword">const</span> port = process.env.PORT || <span class="number">3000</span>;</span><br><span class="line"></span><br><span class="line">app.get(<span class="string">'/'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    res.sendFile(__dirname + <span class="string">'/index.html'</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">io.on(<span class="string">'connection'</span>, socket =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'welcome'</span>, socket.id.yellow);</span><br><span class="line">    socket.on(<span class="string">'chat message'</span>, msg =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'message:'</span>, msg.green);</span><br><span class="line">        io.emit(<span class="string">'chat message'</span>, <span class="string">'回复'</span> + msg);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">http.listen(port, () =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'listening on *: '</span> + port);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>index.html</code> 就是本方案的主角，最为<strong>中转站的角色</strong>。</p>
+<p>下面来看看它的初始化代码。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!doctype <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"X-UA-Compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>test<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.socket.io/socket.io-1.2.0.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">        <span class="keyword">var</span> socket = io(<span class="string">'http://192.168.1.111:3000'</span>, &#123;</span></span><br><span class="line"><span class="actionscript">            transports: [<span class="string">'websocket'</span>],</span></span><br><span class="line">        &#125;);</span><br><span class="line"><span class="actionscript">        <span class="comment">// 监听消息（传给 RN） 后端 -&gt; h5 -&gt; RN</span></span></span><br><span class="line"><span class="actionscript">        socket.on(<span class="string">'chat message'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(msg)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">            <span class="built_in">window</span>.postMessage(msg);</span></span><br><span class="line">        &#125;);</span><br><span class="line"><span class="actionscript">        <span class="comment">// 发送消息（来自 RN） -&gt; 后端</span></span></span><br><span class="line"><span class="javascript">        <span class="built_in">window</span>.addEventListener(<span class="string">'message'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span></span><br><span class="line"><span class="actionscript">            <span class="keyword">const</span> msg = e.data;</span></span><br><span class="line"><span class="actionscript">            socket.send(<span class="string">'chat message'</span>, msg);</span></span><br><span class="line">        &#125;);</span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>不要出现 let，const，() =&gt; {}，等 ES6 语法，不然运行不起来，毕竟 android 的 webview 不太支持。</p>
+<p>在 React Native 上你需要这样做。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;WebView</span><br><span class="line">    style=&#123;&#123; <span class="attr">width</span>: <span class="number">0</span>, <span class="attr">height</span>: <span class="number">0</span> &#125;&#125;</span><br><span class="line">    ref=&#123;r =&gt; <span class="keyword">this</span>.h5 = r&#125;</span><br><span class="line">    source=&#123;&#123; <span class="attr">uri</span>: <span class="string">'http://192.168.1.111:3000'</span>, <span class="attr">baseUrl</span>: <span class="string">''</span> &#125;&#125;</span><br><span class="line">    domStorageEnabled=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">    javaScriptEnabled=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    <span class="comment">// 接收消息</span></span><br><span class="line">    onMessage=&#123;e =&gt; &#123;</span><br><span class="line">        <span class="keyword">const</span> data = e.nativeEvent.data</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;&#125;</span><br><span class="line">/&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 发送消息 -&gt; h5 -&gt; 后端</span></span><br><span class="line"><span class="keyword">this</span>.h5.postMessage(<span class="string">'hello'</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="自定义通信协议"><a href="#自定义通信协议" class="headerlink" title="自定义通信协议"></a>自定义通信协议</h2><p>实际业务的自定义通信协议比较复杂，这里只讲最简单的消息发送与消息接收。</p>
+<p>因为 postMessage 只能接收 string 的数据，为了能传递更多的数据，因此，这里用 JSON 最为序列化与反序列化操作。</p>
+<p>定义通信的对象为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    event: <span class="string">''</span>,    <span class="comment">// 指定监听的事件名</span></span><br><span class="line">    data: &#123; &#125;,    <span class="comment">// 携带的数据域</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，这只是非常简单的代码，还不算是完全的封装。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> WebViewBridge <span class="keyword">from</span> <span class="string">'react-native-webview-bridge'</span>;</span><br><span class="line"><span class="keyword">import</span> events <span class="keyword">from</span> <span class="string">'events'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> h5 = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接收消息</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">onBridgeMessage</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> res = <span class="built_in">JSON</span>.parse(data);</span><br><span class="line">    io.emit(res.event, res.data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">myEvent</span> <span class="keyword">extends</span> <span class="title">events</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 发送消息</span></span><br><span class="line">    send(event, data) &#123;</span><br><span class="line">        <span class="keyword">if</span> (h5) &#123;</span><br><span class="line">            <span class="keyword">const</span> res = <span class="built_in">JSON</span>.stringify(&#123; event, data &#125;);</span><br><span class="line">            h5.sendToBridge(res);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> io = <span class="keyword">new</span> myEvent();</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; (</span><br><span class="line">    &lt;WebViewBridge</span><br><span class="line">        style=&#123;&#123; <span class="attr">flex</span>: <span class="number">1</span>, &#125;&#125;</span><br><span class="line">        ref=&#123;r =&gt; h5 = r&#125;</span><br><span class="line">        onBridgeMessage=&#123;<span class="keyword">this</span>.onBridgeMessage&#125;</span><br><span class="line">        source=&#123;&#123; <span class="attr">uri</span>: <span class="string">'http://192.168.1.111:3000'</span>, <span class="attr">baseUrl</span>: <span class="string">''</span> &#125;&#125;</span><br><span class="line">        domStorageEnabled=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">        javaScriptEnabled=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    /&gt;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>在 h5 里的中转代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> socket = io(<span class="string">'ws://192.168.1.111:3000'</span>, &#123;</span><br><span class="line">    transports: [<span class="string">'websocket'</span>],</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.on(<span class="string">'msg'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> data === <span class="string">'string'</span>) &#123;</span><br><span class="line">        data = <span class="built_in">JSON</span>.parse(data);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'来自服务器'</span>, data);</span><br><span class="line">    <span class="comment">// 后端 -&gt; h5 -&gt; RN</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">window</span>.WebViewBridge) &#123;</span><br><span class="line">        WebViewBridge.send(<span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">            event: data.event,</span><br><span class="line">            data: data,</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// RN -&gt; h5 -&gt; 后端</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">window</span>.WebViewBridge) &#123;</span><br><span class="line">    WebViewBridge.onMessage = <span class="function"><span class="keyword">function</span> (<span class="params">str</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> res = <span class="built_in">JSON</span>.parse(str);</span><br><span class="line">        socket.emit(res.event, res);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>服务器上注意 data 要把 event 名称也有传。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// data = &#123;</span></span><br><span class="line"><span class="comment">//    event: '',</span></span><br><span class="line"><span class="comment">//    data: &#123; &#125;,</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line">socket.on(<span class="string">'msg'</span>, data =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'message:'</span>, data);</span><br><span class="line">    io.emit(<span class="string">'msg'</span>, data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>这样使用 WebView 作为中间站会不会有问题？的确在具体的测试，中会有一点小小的性能问题，特别是消息发送/接收频繁的时候，总的来说，还是平安的实现了需求。Σ( ° △ °|||)︴还有一点就是代码比较繁琐。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.869Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/12/React Native/Socket/如何在 React Native 里优雅的使用 Socket.io？/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/12/React Native/Socket/如何在 React Native 里优雅的使用 Socket.io？/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/12/React/Hooks/React 利用 Hooks 轻松缓存数据/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React 利用 Hooks 轻松缓存数据</h4>
+        <h4 class="summary">在 React Native 的 App 开发里，有时候会有一些需要做本地数据持久化的功能，比如搜索页的搜索历史记录，表...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/12/Redux/Redux 自定义异步操作/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Redux 自定义异步操作</h4>
+        <h4 class="summary">Redux 是一个全局的状态数据管理框架，在大多数情况下，我们都会有多多少少的异步请求，也就是所谓的“异步流程控制”。
+...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

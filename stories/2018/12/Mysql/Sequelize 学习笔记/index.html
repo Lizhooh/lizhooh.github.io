@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/12/Mysql/Sequelize 学习笔记/">
+    
+    
+    <title>Sequelize 学习笔记 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Sequelize 是 Nodejs 的一个关系式数据库的 ROM，支持 Postgres、MySQL、SQLite 和 Microsoft SQL Server. 它具有强大的事务支持，关联关系，读取和复制等功能。 值得高兴的是 Sequelize 有中文文档，本文也是根据中文文档进行介绍与学习。下面是根据 v4 版本的，因为 v5，v6 删除了很多 api。">
+<meta name="keywords" content="Nodejs,数据库,Mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sequelize 学习笔记">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/12/Mysql/Sequelize 学习笔记/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Sequelize 是 Nodejs 的一个关系式数据库的 ROM，支持 Postgres、MySQL、SQLite 和 Microsoft SQL Server. 它具有强大的事务支持，关联关系，读取和复制等功能。 值得高兴的是 Sequelize 有中文文档，本文也是根据中文文档进行介绍与学习。下面是根据 v4 版本的，因为 v5，v6 删除了很多 api。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/12/20181223221545.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/12/20181224200230.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/12/20181224200214.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/12/20181224201138.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.829Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sequelize 学习笔记">
+<meta name="twitter:description" content="前言Sequelize 是 Nodejs 的一个关系式数据库的 ROM，支持 Postgres、MySQL、SQLite 和 Microsoft SQL Server. 它具有强大的事务支持，关联关系，读取和复制等功能。 值得高兴的是 Sequelize 有中文文档，本文也是根据中文文档进行介绍与学习。下面是根据 v4 版本的，因为 v5，v6 删除了很多 api。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/12/20181223221545.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Sequelize 学习笔记</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Sequelize 学习笔记</h1>
+
+        <div class="meta-rest">
+            <h1>Sequelize 学习笔记</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-12-24T14:05:29.000Z" itemprop="datePublished" class="page-time">
+    2018-12-24
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#模型"><span class="post-toc-number">3.</span> <span class="post-toc-text">模型</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#创建（Create）"><span class="post-toc-number">4.</span> <span class="post-toc-text">创建（Create）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#更新（Update）"><span class="post-toc-number">5.</span> <span class="post-toc-text">更新（Update）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#查询（Review）"><span class="post-toc-number">6.</span> <span class="post-toc-text">查询（Review）</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#返回字段名"><span class="post-toc-number">6.1.</span> <span class="post-toc-text">返回字段名</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#查询操作符"><span class="post-toc-number">6.2.</span> <span class="post-toc-text">查询操作符</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分组，排序"><span class="post-toc-number">6.3.</span> <span class="post-toc-text">分组，排序</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#聚合函数"><span class="post-toc-number">6.4.</span> <span class="post-toc-text">聚合函数</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#删除（Delete）"><span class="post-toc-number">7.</span> <span class="post-toc-text">删除（Delete）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#关联（Associations）"><span class="post-toc-number">8.</span> <span class="post-toc-text">关联（Associations）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#事务（Transaction）"><span class="post-toc-number">9.</span> <span class="post-toc-text">事务（Transaction）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#钩子（Hooks）"><span class="post-toc-number">10.</span> <span class="post-toc-text">钩子（Hooks）</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Mysql/Sequelize 学习笔记"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Sequelize 学习笔记</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 12 月 24 日 22:05" datetime="2018-12-24T14:05:29.000Z"  itemprop="datePublished">
+    2018-12-24
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2108</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  22.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="https://demopark.github.io/sequelize-docs-Zh-CN/" target="_blank" rel="noopener">Sequelize</a> 是 Nodejs 的一个关系式数据库的 ROM，支持 Postgres、MySQL、SQLite 和 Microsoft SQL Server. 它具有强大的事务支持，关联关系，读取和复制等功能。</p>
+<p>值得高兴的是 Sequelize 有中文文档，本文也是根据中文文档进行介绍与学习。下面是根据 v4 版本的，因为 v5，v6 删除了很多 api。</p>
+<a id="more"></a>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>下面的内容是使用 Mysql，需要安装 Sequelize 和 Mysql。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yarn add sequelize mysql2</span><br><span class="line">yarn add @types/sequelize <span class="comment"># 智能提示</span></span><br></pre></td></tr></table></figure>
+<p>安装完成后看看基本的初始代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Sequelize = <span class="built_in">require</span>(<span class="string">'sequelize'</span>);</span><br><span class="line"><span class="keyword">const</span> sequelize = <span class="keyword">new</span> Sequelize(<span class="string">'test'</span>, <span class="string">'root'</span>, <span class="string">'root'</span>, &#123;</span><br><span class="line">    host: <span class="string">'localhost'</span>,</span><br><span class="line">    dialect: <span class="string">'mysql'</span>,</span><br><span class="line"></span><br><span class="line">    pool: &#123;</span><br><span class="line">        max: <span class="number">5</span>,</span><br><span class="line">        min: <span class="number">0</span>,</span><br><span class="line">        acquire: <span class="number">30000</span>,</span><br><span class="line">        idle: <span class="number">10000</span>,</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    operatorsAliases: <span class="literal">false</span>,</span><br><span class="line">    timezone: <span class="string">'+08:00'</span>,         <span class="comment">// 配置时区，默认是 0 时区</span></span><br><span class="line">    charset: <span class="string">'utf8'</span>,            <span class="comment">// 配置字符集（默认会中文乱码）</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> User = sequelize.define(<span class="string">'user'</span>, &#123;</span><br><span class="line">    username: Sequelize.STRING,</span><br><span class="line">    birthday: Sequelize.DATE</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">sequelize.sync()</span><br><span class="line">    .then(<span class="function"><span class="params">()</span> =&gt;</span> User.create(&#123;</span><br><span class="line">        username: <span class="string">'janedoe'</span>,</span><br><span class="line">        birthday: <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2018</span>, <span class="number">6</span>, <span class="number">20</span>)</span><br><span class="line">    &#125;))</span><br><span class="line">    .then(<span class="function"><span class="params">jane</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(jane.toJSON());</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>这里，大致的意思时连接的数据库为：<code>test</code>，用户名为 <code>root</code>，用户密码为：<code>root</code>。</p>
+<p>然后定义一个数据模型为：<code>User</code>。接着创建一个用户，并且获取创建完成后的信息。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/12/20181223221545.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>运行之后可以看到有输出 SQL 信息，可以在配置项里添加 <code>logging: false</code> 关闭 SQL 日志信息。</p>
+<h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p>如果使用过 Mongoose 一定对模型不模式，在 Sequelize 里模型也同样非常重要，它对应的是 Mysql 表的数据结构。</p>
+<p>模型使用 <code>sequelize.define(&#39;name&#39;, { attributes }, { options })</code> 来定义。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> User = sequelize.define(<span class="string">'user'</span>, &#123;</span><br><span class="line">    firstName: &#123;</span><br><span class="line">        type: Sequelize.STRING</span><br><span class="line">    &#125;,</span><br><span class="line">    lastName: &#123;</span><br><span class="line">        type: Sequelize.STRING</span><br><span class="line">    &#125;,</span><br><span class="line">    flag: &#123;</span><br><span class="line">        type: Sequelize.BOOLEAN,</span><br><span class="line">        allowNull: <span class="literal">false</span>,                   <span class="comment">// 不运行 null</span></span><br><span class="line">        defaultValue: <span class="literal">true</span>                  <span class="comment">// 如果没有提供值，则设置为 true</span></span><br><span class="line">        unique: <span class="literal">true</span>,                       <span class="comment">// 唯一索引</span></span><br><span class="line">        primaryKey: <span class="literal">true</span>,                   <span class="comment">// 定义主键</span></span><br><span class="line">        field: <span class="string">'field_with_underscores'</span>,    <span class="comment">// 自定义字段名称，否则就是 flag</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// 这可以创建一个外键:</span></span><br><span class="line">    bar_id: &#123;</span><br><span class="line">        type: Sequelize.INTEGER,</span><br><span class="line">        references: &#123;</span><br><span class="line">            <span class="comment">// 这是引用另一个模型</span></span><br><span class="line">            model: Bar,</span><br><span class="line">            <span class="comment">// 这是引用模型的列名称</span></span><br><span class="line">            key: <span class="string">'id'</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>Sequelize 的模型默认是自带 id，createAt，updateAt 字段的。id 为主键，并且是自增主键。</p>
+<p>这里可以查看具体的数据类型，已经相关的配置项：<a href="https://demopark.github.io/sequelize-docs-Zh-CN/models-definition.html" target="_blank" rel="noopener">Model definition - 模型定义</a></p>
+<h2 id="创建（Create）"><a href="#创建（Create）" class="headerlink" title="创建（Create）"></a>创建（Create）</h2><ul>
+<li><code>create</code> - 在数据库中的插入新的项。</li>
+<li><code>bulkCreate</code> - 批量在数据库中的插入新的项。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">User.create(&#123;</span><br><span class="line">    username: <span class="string">'janedoe'</span>,</span><br><span class="line">    birthday: <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2018</span>, <span class="number">6</span>, <span class="number">20</span>),</span><br><span class="line">&#125;);</span><br><span class="line">User.bulkCreate([</span><br><span class="line">    &#123; <span class="attr">username</span>: <span class="string">'barfooz'</span>, <span class="attr">isAdmin</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">username</span>: <span class="string">'foo'</span>, <span class="attr">isAdmin</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">username</span>: <span class="string">'bar'</span>, <span class="attr">isAdmin</span>: <span class="literal">false</span> &#125;</span><br><span class="line">]);</span><br></pre></td></tr></table></figure>
+<h2 id="更新（Update）"><a href="#更新（Update）" class="headerlink" title="更新（Update）"></a>更新（Update）</h2><ul>
+<li><code>update</code> - 更新数据库中的符合条件的项。</li>
+<li><code>insertOrUpdate</code> - 如果存在则更新，不存在则插入数据。相当于 save 功能。</li>
+<li><code>upsert</code> - 与 insertOrUpdate 相同，新替换 api。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Post.update(&#123;</span><br><span class="line">    updatedAt: <span class="literal">null</span>,    <span class="comment">// 这里是更新的内容</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">    where: &#123;            <span class="comment">// 查询的内容</span></span><br><span class="line">        deletedAt: &#123; [Op.ne]: <span class="literal">null</span> &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// UPDATE post SET updatedAt = null WHERE deletedAt NOT NULL;</span></span><br></pre></td></tr></table></figure>
+<h2 id="查询（Review）"><a href="#查询（Review）" class="headerlink" title="查询（Review）"></a>查询（Review）</h2><ul>
+<li><code>findAll</code> - 搜索数据库中的符合条件的所有项。</li>
+<li><code>findById</code> - 根据 id，搜索数据库中的一个特定项。</li>
+<li><code>findOne</code> - 搜索数据库中的一个特定项。</li>
+<li><code>findOrCreate</code> - 如果找到则返回，找不到则先创建再返回。</li>
+<li><code>findAndCountAll</code> - 在数据库中搜索多个元素，返回数据和总计数。</li>
+</ul>
+<p>这些函数都返回 Promise 对象，查找不打时获取的值是 null，查找成功之后是一个复杂的描述对象，使用 <code>toJSON</code> 转为数据对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">User.findAll(&#123; <span class="attr">where</span>: &#123; <span class="attr">id</span>: [<span class="number">1</span> ,<span class="number">2</span>, <span class="number">3</span>] &#125; &#125;);</span><br><span class="line">User.findById(<span class="number">123</span>);</span><br><span class="line">User.findOne(&#123;</span><br><span class="line">    where: &#123; <span class="attr">title</span>: <span class="string">'aProject'</span> &#125;,               <span class="comment">// 查找条件</span></span><br><span class="line">    attributes: [<span class="string">'id'</span>, [<span class="string">'name'</span>, <span class="string">'title'</span>]],      <span class="comment">// 返回的字段，并且（name as title）</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 相当于查找 title 为 aProject 的，没有指定 attributes 时为返回全部字段</span></span><br><span class="line"><span class="comment">// Select User from * Where title = 'aProject'</span></span><br><span class="line"></span><br><span class="line">User.findOrCreate(&#123;</span><br><span class="line">    where: &#123; <span class="attr">username</span>: <span class="string">'sdepold'</span> &#125;,</span><br><span class="line">    defaults: &#123; <span class="attr">job</span>: <span class="string">'Technical Lead JavaScript'</span> &#125;&#125;</span><br><span class="line">).spread(<span class="function">(<span class="params">user, created</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(user.get(&#123; <span class="attr">plain</span>: <span class="literal">true</span> &#125;));</span><br><span class="line">    <span class="built_in">console</span>.log(created);   <span class="comment">// 布尔值</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 找不到时，则会创建这么一个东西</span></span><br><span class="line"><span class="comment">/* &#123;</span></span><br><span class="line"><span class="comment">    username: 'sdepold',</span></span><br><span class="line"><span class="comment">    job: 'Technical Lead JavaScript',</span></span><br><span class="line"><span class="comment">    id: 1,</span></span><br><span class="line"><span class="comment">    createdAt: Fri Mar 22 2013 21: 28: 34 GMT + 0100(CET),</span></span><br><span class="line"><span class="comment">    updatedAt: Fri Mar 22 2013 21: 28: 34 GMT + 0100(CET)</span></span><br><span class="line"><span class="comment">&#125; */</span></span><br><span class="line"></span><br><span class="line">User.findAndCountAll(&#123;</span><br><span class="line">    where: &#123;</span><br><span class="line">        <span class="comment">// 模糊查询，使用操作符 like</span></span><br><span class="line">        title: &#123; [Sequelize.Op.like]: <span class="string">'foo%'</span> &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    offset: <span class="number">10</span>,</span><br><span class="line">    limit: <span class="number">2</span></span><br><span class="line">&#125;).then(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(result.count);</span><br><span class="line">    <span class="built_in">console</span>.log(result.rows);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="返回字段名"><a href="#返回字段名" class="headerlink" title="返回字段名"></a>返回字段名</h3><p>使用 <code>attributes</code> 控制返回的字段名。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">User.findAll(&#123;</span><br><span class="line">    attributes: [<span class="string">'id'</span>, <span class="string">'title'</span>],             <span class="comment">// Select id, title from ...</span></span><br><span class="line">    attributes: [<span class="string">'id'</span>, [<span class="string">'title'</span>, <span class="string">'name'</span>],    <span class="comment">// Select id, title as name from ...</span></span><br><span class="line">    attributes: &#123;                            <span class="comment">// Select id, title from ...</span></span><br><span class="line">        <span class="comment">// include: [],</span></span><br><span class="line">        <span class="comment">// 因为默认是 include 操作，你可以使用 exclude 来做相反操作</span></span><br><span class="line">        exclude: [],</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="查询操作符"><a href="#查询操作符" class="headerlink" title="查询操作符"></a>查询操作符</h3><p>使用操作符，进行查询：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Op = Sequelize.Op;</span><br><span class="line">User.findAll(&#123;</span><br><span class="line">    where: &#123;</span><br><span class="line">        id: &#123;</span><br><span class="line">            [Op.and]: &#123;<span class="attr">a</span>: <span class="number">5</span>&#125;,           <span class="comment">// 且 (a = 5)</span></span><br><span class="line">            [Op.or]: [&#123;<span class="attr">a</span>: <span class="number">5</span>&#125;, &#123;<span class="attr">a</span>: <span class="number">6</span>&#125;],  <span class="comment">// (a = 5 或 a = 6)</span></span><br><span class="line">            [Op.gt]: <span class="number">6</span>,                 <span class="comment">// id &gt; 6</span></span><br><span class="line">            [Op.gte]: <span class="number">6</span>,                <span class="comment">// id &gt;= 6</span></span><br><span class="line">            [Op.lt]: <span class="number">10</span>,                <span class="comment">// id &lt; 10</span></span><br><span class="line">            [Op.lte]: <span class="number">10</span>,               <span class="comment">// id &lt;= 10</span></span><br><span class="line">            [Op.ne]: <span class="number">20</span>,                <span class="comment">// id != 20</span></span><br><span class="line">            [Op.between]: [<span class="number">6</span>, <span class="number">10</span>],      <span class="comment">// 在 6 和 10 之间</span></span><br><span class="line">            [Op.notBetween]: [<span class="number">11</span>, <span class="number">15</span>],  <span class="comment">// 不在 11 和 15 之间</span></span><br><span class="line">            [Op.in]: [<span class="number">1</span>, <span class="number">2</span>],            <span class="comment">// 在 [1, 2] 之中</span></span><br><span class="line">            [Op.notIn]: [<span class="number">1</span>, <span class="number">2</span>],         <span class="comment">// 不在 [1, 2] 之中</span></span><br><span class="line">            [Op.like]: <span class="string">'%hat'</span>,          <span class="comment">// 包含 '%hat'</span></span><br><span class="line">            [Op.notLike]: <span class="string">'%hat'</span>,       <span class="comment">// 不包含 '%hat'</span></span><br><span class="line">            [Op.iLike]: <span class="string">'%hat'</span>,         <span class="comment">// 包含 '%hat' (不区分大小写)  (仅限 PG)</span></span><br><span class="line">            [Op.notILike]: <span class="string">'%hat'</span>,      <span class="comment">// 不包含 '%hat'  (仅限 PG)</span></span><br><span class="line">            [Op.overlap]: [<span class="number">1</span>, <span class="number">2</span>],       <span class="comment">// &amp;&amp; [1, 2] (PG数组重叠运算符)</span></span><br><span class="line">            [Op.contains]: [<span class="number">1</span>, <span class="number">2</span>],      <span class="comment">// @&gt; [1, 2] (PG数组包含运算符)</span></span><br><span class="line">            [Op.contained]: [<span class="number">1</span>, <span class="number">2</span>],     <span class="comment">// &lt;@ [1, 2] (PG数组包含于运算符)</span></span><br><span class="line">            [Op.any]: [<span class="number">2</span>,<span class="number">3</span>],            <span class="comment">// 任何数组[2, 3]::INTEGER (仅限 PG)</span></span><br><span class="line">        &#125;,</span><br><span class="line">        status: &#123;</span><br><span class="line">            [Op.not]: <span class="literal">false</span>,           <span class="comment">// status 不为 FALSE</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="分组，排序"><a href="#分组，排序" class="headerlink" title="分组，排序"></a>分组，排序</h3><p>分页，偏移量，分组，排序等操作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">User.findAll(&#123; <span class="attr">order</span>: <span class="string">'title DESC'</span> &#125;);</span><br><span class="line">User.findAll(&#123; <span class="attr">group</span>: <span class="string">'name'</span> &#125;);</span><br><span class="line">User.findAll(&#123; <span class="attr">offset</span>: <span class="number">10</span>, <span class="attr">limit</span>: <span class="number">2</span> &#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h3><ul>
+<li><code>count</code> - 计算数据库中元素的出现次数。</li>
+<li><code>max</code> - 获取特定表中特定属性的最大值。</li>
+<li><code>min</code> - 获取特定表中特定属性的最小值。</li>
+<li><code>sum</code> - 特定属性的值求和。</li>
+<li><code>decrement</code> - 增加/减少指定的值。</li>
+</ul>
+<h2 id="删除（Delete）"><a href="#删除（Delete）" class="headerlink" title="删除（Delete）"></a>删除（Delete）</h2><ul>
+<li><code>destroy</code> - 在数据库里删除符合条件的项。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Post.destroy(&#123;</span><br><span class="line">    where: &#123; <span class="attr">status</span>: <span class="string">'inactive'</span> &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// DELETE FROM post WHERE status = 'inactive';</span></span><br></pre></td></tr></table></figure>
+<h2 id="关联（Associations）"><a href="#关联（Associations）" class="headerlink" title="关联（Associations）"></a>关联（Associations）</h2><p>关联有几个内容：</p>
+<ul>
+<li>BelongsTo（属于）</li>
+<li>HasOne（有一个）</li>
+<li>HasMany（有很多）</li>
+<li>BelongsToMany（属于很多）</li>
+</ul>
+<p>举一个例子：假设有文章表，用户表。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> User = sequelize.define(<span class="string">'user'</span>, &#123;</span><br><span class="line">    name: Sequelize.STRING,</span><br><span class="line">    birthday: Sequelize.DATE,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Article = sequelize.define(<span class="string">'article'</span>, &#123;</span><br><span class="line">    content: Sequelize.STRING,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将会添加 userId 到 Article 模型里</span></span><br><span class="line"><span class="comment">// 因此 Article 的字段应该是 id, concent, userId</span></span><br><span class="line">Article.belongsTo(User);</span><br><span class="line"></span><br><span class="line">+ <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">await</span> sequelize.sync();</span><br><span class="line">    <span class="keyword">await</span> User.bulkCreate([&#123;</span><br><span class="line">        id: <span class="number">1</span>,</span><br><span class="line">        name: <span class="string">'小明'</span>,</span><br><span class="line">        birthday: <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2018</span>, <span class="number">6</span>, <span class="number">20</span>),</span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        id: <span class="number">2</span>,</span><br><span class="line">        name: <span class="string">'小美'</span>,</span><br><span class="line">        birthday: <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2018</span>, <span class="number">4</span>, <span class="number">12</span>),</span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        id: <span class="number">3</span>,</span><br><span class="line">        name: <span class="string">'小东'</span>,</span><br><span class="line">        birthday: <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2017</span>, <span class="number">12</span>, <span class="number">12</span>),</span><br><span class="line">    &#125;]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> Article.bulkCreate([</span><br><span class="line">        &#123; <span class="attr">id</span>: <span class="number">1</span>, <span class="attr">content</span>: <span class="string">'今天吃什么？'</span>, <span class="attr">userId</span>: <span class="number">1</span> &#125;,</span><br><span class="line">        &#123; <span class="attr">id</span>: <span class="number">2</span>, <span class="attr">content</span>: <span class="string">'吃鸡腿。'</span>, <span class="attr">userId</span>: <span class="number">1</span> &#125;,</span><br><span class="line">        &#123; <span class="attr">id</span>: <span class="number">3</span>, <span class="attr">content</span>: <span class="string">'吃龙虾。'</span>, <span class="attr">userId</span>: <span class="number">2</span> &#125;,</span><br><span class="line">        &#123; <span class="attr">id</span>: <span class="number">4</span>, <span class="attr">content</span>: <span class="string">'明天吃什么？'</span>, <span class="attr">userId</span>: <span class="number">2</span> &#125;,</span><br><span class="line">        &#123; <span class="attr">id</span>: <span class="number">5</span>, <span class="attr">content</span>: <span class="string">'吃麻辣烫。'</span>, <span class="attr">userId</span>: <span class="number">3</span> &#125;,</span><br><span class="line">    ]);</span><br><span class="line"></span><br><span class="line">    process.exit(<span class="number">0</span>);</span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/12/20181224200230.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/12/20181224200214.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>现在为了获取文章列表，需要包含用户信息，整理出来的数据格式要求是：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    id: <span class="number">1</span>,</span><br><span class="line">    content: <span class="string">'今天吃什么？'</span>,</span><br><span class="line">    user: &#123;</span><br><span class="line">        id: <span class="number">1</span>,</span><br><span class="line">        name: <span class="string">'小明'</span>,</span><br><span class="line">        birthday: <span class="string">'2018-07-19 16:00:00'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>怎么搞？先来看看原始的做法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> a.id, a.content, b.userId, b.userName</span><br><span class="line">    <span class="keyword">from</span> article a <span class="keyword">Join</span> <span class="keyword">user</span> b <span class="keyword">On</span> a.userId == b.id</span><br></pre></td></tr></table></figure>
+<p>再来看看 sequelize 的做法：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里的关系是，article 与 user 进行连接查询</span></span><br><span class="line"><span class="comment">// 连接的条件是：user.state === article.state</span></span><br><span class="line"><span class="keyword">const</span> res = <span class="keyword">await</span> Article.findAll(&#123;</span><br><span class="line">    attributes: &#123;</span><br><span class="line">        exclude: [<span class="string">'createdAt'</span>, <span class="string">'updatedAt'</span>],</span><br><span class="line">    &#125;,</span><br><span class="line">    include: [&#123;</span><br><span class="line">        model: User, <span class="comment">// 这里的 where 是 User 的条件</span></span><br><span class="line">        where: &#123; <span class="attr">id</span>: Sequelize.col(<span class="string">'Article.userId'</span>) &#125;,</span><br><span class="line">        attributes: &#123;</span><br><span class="line">            exclude: [<span class="string">'createdAt'</span>, <span class="string">'updatedAt'</span>],</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;],</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">const</span> list = res.map(<span class="function"><span class="params">i</span> =&gt;</span> i.toJSON());</span><br><span class="line"><span class="built_in">console</span>.log(list[<span class="number">0</span>]);</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/12/20181224201138.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="事务（Transaction）"><a href="#事务（Transaction）" class="headerlink" title="事务（Transaction）"></a>事务（Transaction）</h2><p>仅有需要事务功能的操作，才使用事务，否则就是多此一举。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">sequelize.transaction(<span class="function"><span class="params">t</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 在这里链接您的所有查询。确保你返回他们。</span></span><br><span class="line">    <span class="keyword">return</span> User.create(&#123;</span><br><span class="line">        firstName: <span class="string">'Abraham'</span>,</span><br><span class="line">        lastName: <span class="string">'Lincoln'</span></span><br><span class="line">    &#125;, &#123; <span class="attr">transaction</span>: t &#125;).then(<span class="function"><span class="params">user</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> user.setShooter(&#123;</span><br><span class="line">            firstName: <span class="string">'John'</span>,</span><br><span class="line">            lastName: <span class="string">'Boothe'</span></span><br><span class="line">        &#125;, &#123; <span class="attr">transaction</span>: t &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;).then(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 事务已被提交</span></span><br><span class="line">    <span class="comment">// result 是 promise 链返回到事务回调的结果</span></span><br><span class="line">&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 事务已被回滚</span></span><br><span class="line">    <span class="comment">// err 是拒绝 promise 链返回到事务回调的错误</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="钩子（Hooks）"><a href="#钩子（Hooks）" class="headerlink" title="钩子（Hooks）"></a>钩子（Hooks）</h2><p>Hooks 就是在特定时机发生的生命函数，创建 Hooks 有两种方式，可以在模型创建时创建，也可以使用方法创建。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法 1：在创建模式时指定</span></span><br><span class="line"><span class="keyword">const</span> User = sequelize.define(<span class="string">'user'</span>, &#123;</span><br><span class="line">    username: DataTypes.STRING,</span><br><span class="line">    mood: &#123;</span><br><span class="line">        type: DataTypes.ENUM,</span><br><span class="line">        values: [<span class="string">'happy'</span>, <span class="string">'sad'</span>, <span class="string">'neutral'</span>]</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;, &#123;</span><br><span class="line">    hooks: &#123;</span><br><span class="line">        beforeValidate(user, options) &#123;</span><br><span class="line">            user.mood = <span class="string">'happy'</span>;</span><br><span class="line">        &#125;,</span><br><span class="line">        afterValidate(user, options) &#123;</span><br><span class="line">            user.username = <span class="string">'Toni'</span>;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 方法 2：通过 .hook() 方法</span></span><br><span class="line">User.hook(<span class="string">'beforeValidate'</span>, (user, options) =&gt; &#123;</span><br><span class="line">    user.mood = <span class="string">'happy'</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 方法 3：通过直接方法</span></span><br><span class="line">User.beforeCreate(<span class="function">(<span class="params">user, options</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> hashPassword(user.password).then(<span class="function"><span class="params">hashedPw</span> =&gt;</span> &#123;</span><br><span class="line">        user.password = hashedPw;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>移除 Hooks 使用 <code>removeHook</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">User.removeHook(<span class="string">'afterCreate'</span>, <span class="string">'notifyUsers'</span>);</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.829Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/12/Mysql/Sequelize 学习笔记/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/12/Mysql/Sequelize 学习笔记/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mysql/">Mysql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/12/React Native/React Native 实现在 Web 端打开 App/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 实现在 Web 端打开 App</h4>
+        <h4 class="summary">在 React Native 里，实现类似微博或者知乎的在 App 中打开的功能，从 Web 端唤起 App。 前言在 ...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/12/React/Hooks/轻松使用 Hooks 和 Redux 管理全局数据/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">🎉轻松使用 Hooks 和 Redux 管理全局数据</h4>
+        <h4 class="summary">在上个星期写了一个简单的全局数据管理 🎉：react-use-store，其核心是利用 React 16+ 的 con...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2016/03/Style/Sass 学习笔记/">
+    
+    
+    <title>Sass 学习笔记 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="简介Sass 是一款强化 CSS 的辅助工具，它在 CSS 语法的基础上增加了变量 (variables)、嵌套 (nested rules)、混合 (mixins)、导入 (inline imports) 等高级功能，这些拓展令 CSS 更加强大与优雅。 导入12@import &quot;reset.css&quot;; // css@import &quot;index&quot;;     // sass">
+<meta name="keywords" content="前端,Sass">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sass 学习笔记">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2016/03/Style/Sass 学习笔记/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="简介Sass 是一款强化 CSS 的辅助工具，它在 CSS 语法的基础上增加了变量 (variables)、嵌套 (nested rules)、混合 (mixins)、导入 (inline imports) 等高级功能，这些拓展令 CSS 更加强大与优雅。 导入12@import &quot;reset.css&quot;; // css@import &quot;index&quot;;     // sass">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.895Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sass 学习笔记">
+<meta name="twitter:description" content="简介Sass 是一款强化 CSS 的辅助工具，它在 CSS 语法的基础上增加了变量 (variables)、嵌套 (nested rules)、混合 (mixins)、导入 (inline imports) 等高级功能，这些拓展令 CSS 更加强大与优雅。 导入12@import &quot;reset.css&quot;; // css@import &quot;index&quot;;     // sass">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Sass 学习笔记</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Sass 学习笔记</h1>
+
+        <div class="meta-rest">
+            <h1>Sass 学习笔记</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2016-03-19T15:05:35.000Z" itemprop="datePublished" class="page-time">
+    2016-03-19
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Sass/">Sass</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#简介"><span class="post-toc-number">1.</span> <span class="post-toc-text">简介</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#导入"><span class="post-toc-number">2.</span> <span class="post-toc-text">导入</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#变量"><span class="post-toc-number">3.</span> <span class="post-toc-text">变量</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#插值"><span class="post-toc-number">4.</span> <span class="post-toc-text">插值</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#跳出嵌套"><span class="post-toc-number">5.</span> <span class="post-toc-text">跳出嵌套</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#混合-mixin"><span class="post-toc-number">6.</span> <span class="post-toc-text">混合(mixin)</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#content"><span class="post-toc-number">6.1.</span> <span class="post-toc-text">@content</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#继承"><span class="post-toc-number">7.</span> <span class="post-toc-text">继承</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#占位选择器"><span class="post-toc-number">7.1.</span> <span class="post-toc-text">占位选择器 %</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#函数"><span class="post-toc-number">8.</span> <span class="post-toc-text">函数</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#if-判断"><span class="post-toc-number">9.</span> <span class="post-toc-text">@if 判断</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三目判断"><span class="post-toc-number">10.</span> <span class="post-toc-text">三目判断</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#for-循环"><span class="post-toc-number">11.</span> <span class="post-toc-text">for 循环</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#each-循环"><span class="post-toc-number">12.</span> <span class="post-toc-text">@each 循环</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Style/Sass 学习笔记"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Sass 学习笔记</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2016 年 03 月 19 日 23:05" datetime="2016-03-19T15:05:35.000Z"  itemprop="datePublished">
+    2016-03-19
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Sass/">Sass</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1002</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Sass 是一款强化 CSS 的辅助工具，它在 CSS 语法的基础上增加了变量 (variables)、嵌套 (nested rules)、混合 (mixins)、导入 (inline imports) 等高级功能，这些拓展令 CSS 更加强大与优雅。</p>
+<h2 id="导入"><a href="#导入" class="headerlink" title="导入"></a>导入</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@<span class="keyword">import</span> <span class="string">"reset.css"</span>; <span class="comment">// css</span></span><br><span class="line">@<span class="keyword">import</span> <span class="string">"index"</span>;     <span class="comment">// sass</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 普通变量</span></span><br><span class="line">$fontSize: <span class="number">12</span>px;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 默认变量</span></span><br><span class="line">$baseLineHeight: <span class="number">1.5</span> !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 覆盖默认变量，需要写在 !default 前面</span></span><br><span class="line">$baseLineHeight: <span class="number">1.7</span>;</span><br><span class="line">$baseLineHeight: <span class="number">1.5</span> !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一维 list</span></span><br><span class="line">$px: (<span class="number">5</span>px <span class="number">10</span>px <span class="number">20</span>px <span class="number">30</span>px);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 二维 list</span></span><br><span class="line">$px: (<span class="number">5</span>px <span class="number">10</span>px)</span><br><span class="line">     (<span class="number">20</span>px <span class="number">30</span>px);</span><br><span class="line"><span class="comment">// 或者</span></span><br><span class="line">$pxs: <span class="number">5</span>px <span class="number">10</span>px, <span class="number">20</span>px <span class="number">30</span>px;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Map 类似对象</span></span><br><span class="line">$heading: (</span><br><span class="line">    h1: <span class="number">2</span>em,</span><br><span class="line">    h2: <span class="number">1.5</span>em,</span><br><span class="line">    h3: <span class="number">1.2</span>em</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h2 id="插值"><a href="#插值" class="headerlink" title="插值"></a>插值</h2><p>插值使用 #{}</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Variables</span></span><br><span class="line">$mySelector: banner;</span><br><span class="line"></span><br><span class="line"><span class="comment">// .banner</span></span><br><span class="line">.#&#123;<span class="selector-tag">mySelector</span>&#125; &#123;</span><br><span class="line">    <span class="attribute">font-weight</span>: bold;</span><br><span class="line">    <span class="attribute">line-height</span>: <span class="number">40px</span>;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="number">0</span> auto;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="跳出嵌套"><a href="#跳出嵌套" class="headerlink" title="跳出嵌套"></a>跳出嵌套</h2><blockquote>
+<p> @at-root (without: rule| all | media)</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 跳出普通的嵌套</span></span><br><span class="line">.demo &#123;</span><br><span class="line">    animation: motion <span class="number">3</span>s infinite;</span><br><span class="line"></span><br><span class="line">    @at-root &#123;</span><br><span class="line">        @keyframes motion &#123;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 跳出 media 嵌套</span></span><br><span class="line">@media print &#123;</span><br><span class="line">    .parent2&#123;</span><br><span class="line">        color:#f00;</span><br><span class="line"></span><br><span class="line">        @at-root (without: media) &#123;</span><br><span class="line">            .child2 &#123;</span><br><span class="line">                width:<span class="number">200</span>px;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="混合-mixin"><a href="#混合-mixin" class="headerlink" title="混合(mixin)"></a>混合(mixin)</h2><p>使用 @mixin 声明混合，可以传递参数，参数名以$符号开始，多个参数以逗号分开，也可以给参数设置默认值。<br>@mixin 通过 @include 来调用。<br>混合器中不仅可以包含属性，也可以包含 css 规则，包含选择器和选择器中的属性，也可以使用 &amp; 上下文。</p>
+<p><strong>为便于书写，@mixin 可以用 = 表示，而 @include 可以用 + 表示</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 无参数</span></span><br><span class="line">@mixin block &#123;</span><br><span class="line">    display: block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// css 规则，注意上下文</span></span><br><span class="line">@mixin no-bullets &#123;</span><br><span class="line">    list-style: none;</span><br><span class="line">    li &#123;</span><br><span class="line">        list-style-image: none;</span><br><span class="line">        list-style-type: none;</span><br><span class="line">        margin-left: <span class="number">0</span>px;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 带参数</span></span><br><span class="line">@mixin opacity($opacity: <span class="number">50</span>) &#123;</span><br><span class="line">    opacity: $opacity / <span class="number">100</span>;</span><br><span class="line">    filter: alpha(opacity=$opacity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 多个参数</span></span><br><span class="line">@mixin horizontal-line($border: 1px dashed #ccc, $padding: 10px)&#123;</span><br><span class="line">    border-bottom: $border;</span><br><span class="line">    padding-top: $padding;</span><br><span class="line">    padding-bottom: $padding;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@include horizontal-line($padding: <span class="number">15</span>px);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 多组值参数</span></span><br><span class="line">@mixin box-shadow($shadow...) &#123;</span><br><span class="line">    -webkit-box-shadow:$shadow;</span><br><span class="line">    box-shadow:$shadow;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@include box-shadow(</span><br><span class="line">    <span class="number">0</span> <span class="number">2</span>px <span class="number">2</span>px rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.3</span>),</span><br><span class="line">    <span class="number">0</span> <span class="number">3</span>px <span class="number">3</span>px rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.2</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="content"><a href="#content" class="headerlink" title="@content"></a>@content</h3><p>@content 它可以使 @mixin 接受一整块样式，接受的样式从 @content 开始。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@mixin max-screen($res) &#123;</span><br><span class="line">    @media only screen and ( max-width: $res ) &#123;</span><br><span class="line">        @content; <span class="comment">// body &#123; color: red &#125;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@include max-screen(<span class="number">480</span>px) &#123;</span><br><span class="line">    body &#123; <span class="attr">color</span>: red &#125; <span class="comment">// 这里就i @content 引用的内容</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h2><p>选择器继承可以让选择器继承另一个选择器的所有样式，并联合声明。使用选择器的继承，要使用关键词 @extend，后面紧跟需要继承的选择器。<br>继承可以继承默认的元素属性，比如让一个<code>div</code>继承<code>a</code>，那么这 div 看起来就好像 a 一样。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 继承现有的标签，或类</span></span><br><span class="line">h1&#123;</span><br><span class="line">    border: 4px solid #ff9aa9;</span><br><span class="line">&#125;</span><br><span class="line">.speaker&#123;</span><br><span class="line">    @extend h1;</span><br><span class="line">    border-width: <span class="number">2</span>px;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="占位选择器"><a href="#占位选择器" class="headerlink" title="占位选择器 %"></a>占位选择器 %</h3><p>可以定义占位选择器 %，如果不调用则不会有任何多余的 css 代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">%block &#123;</span><br><span class="line">    display: block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.box &#123;</span><br><span class="line">    @extend %block;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><p>sass定义了很多函数可供使用，当然你也可以自己定义函数，以@fuction开始。</p>
+<p>使用最多的是颜色函数：<br>颜色函数中又以 lighten 减淡和 darken 加深为最，<br>其调用方法为 lighten($color, $amount) 和 darken($color, $amount)<br>它们的第一个参数都是颜色值，第二个参数都是百分比。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@<span class="function"><span class="keyword">function</span> <span class="title">pxToRem</span>(<span class="params">$px</span>) </span>&#123;</span><br><span class="line">    @<span class="keyword">return</span> $px / $baseFontSize * <span class="number">1</span>rem;</span><br><span class="line">&#125;</span><br><span class="line">body &#123;</span><br><span class="line">    color: lighten($gray, <span class="number">10</span>%); <span class="comment">// 直接使用</span></span><br><span class="line">&#125;</span><br><span class="line">div &#123;</span><br><span class="line">    font-size: pxToRem(<span class="number">16</span>px);</span><br><span class="line">    color: darken($gray, <span class="number">10</span>%);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="if-判断"><a href="#if-判断" class="headerlink" title="@if 判断"></a>@if 判断</h2><p>@if 可一个条件单独使用，也可以和 @else 结合多条件使用</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$big: <span class="literal">false</span>;</span><br><span class="line">p &#123;</span><br><span class="line">    @<span class="keyword">if</span> $big == <span class="literal">false</span> &#123;</span><br><span class="line">        margin: <span class="number">10</span>px;</span><br><span class="line">    &#125;</span><br><span class="line">    @<span class="keyword">else</span> &#123;</span><br><span class="line">        margin: <span class="number">10</span>px auto;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="三目判断"><a href="#三目判断" class="headerlink" title="三目判断"></a>三目判断</h2><p>语法为：if($condition, $if_true, $if_false) 。三个参数分别表示：条件，条件为真的值，条件为假的值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$min: <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line">p &#123;</span><br><span class="line">    color: <span class="keyword">if</span>($min &gt; <span class="number">10</span>, red, blue); <span class="comment">// blue</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="for-循环"><a href="#for-循环" class="headerlink" title="for 循环"></a>for 循环</h2><p>for 循环有两种形式，分别为：@for $var from [start] through [end] 和 @for $var from [start] to [end]。<br>关键字through表示包括end这个数，而to则不包括end这个数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@<span class="keyword">for</span> $i <span class="keyword">from</span> <span class="number">1</span> through <span class="number">3</span> &#123;</span><br><span class="line">    .item-#&#123;$i&#125; &#123; width: 2em * $i; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="each-循环"><a href="#each-循环" class="headerlink" title="@each 循环"></a>@each 循环</h2><p>语法为：@each $var in [list or map]</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$headings: (h1: <span class="number">2</span>em, <span class="attr">h2</span>: <span class="number">1.5</span>em, <span class="attr">h3</span>: <span class="number">1.2</span>em);</span><br><span class="line">@each $header, $size <span class="keyword">in</span> $headings &#123;</span><br><span class="line">    #&#123;$header&#125; &#123;</span><br><span class="line">        font-size: $size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.895Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2016/03/Style/Sass 学习笔记/" target="_blank" rel="external">http://me.lizhooh.com/stories/2016/03/Style/Sass 学习笔记/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Sass/">Sass</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2016/08/Nodejs/Nodejs 文件上传/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Nodejs 文件上传</h4>
+        <h4 class="summary">文件上传Nodejs 文件上传，最原始的是利用 req.body 来实现，但是这样非常不好扩展。
+对于复合表单处理，目前...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2016/01/Javascript/JavaScript 知识整理/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">JavaScript 知识整理</h4>
+        <h4 class="summary">对象的引用如果不同的变量名指向同一个对象，那么它们都是这个对象的引用，也就是说指向同一个内存地址。修改其中一个变量，会影...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/01/React/Universal 同构/React 服务端渲染实践记录/">
+    
+    
+    <title>React 服务端渲染实践记录 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言SSR 是一个比 SPA 更上一层，并且难度更大的一个应用模式。国内很多大厂都渐渐的使用了 SSR 的架构，比如知乎，bilibili 等网站。SSR 它很直接的继承了 SPA 的特点，并且弥补了 SPA 缺点，可以说是一个非常值得尝试的选择。 本文旨在研究 React SSR 并且说明如何与 React-Router、Redux、styled-components 结合使用，并且写了一个仿知">
+<meta name="keywords" content="Javascript,React,服务端渲染">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 服务端渲染实践记录">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/01/React/Universal 同构/React 服务端渲染实践记录/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言SSR 是一个比 SPA 更上一层，并且难度更大的一个应用模式。国内很多大厂都渐渐的使用了 SSR 的架构，比如知乎，bilibili 等网站。SSR 它很直接的继承了 SPA 的特点，并且弥补了 SPA 缺点，可以说是一个非常值得尝试的选择。 本文旨在研究 React SSR 并且说明如何与 React-Router、Redux、styled-components 结合使用，并且写了一个仿知">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180124224750.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180124224435.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180126203114.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.887Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 服务端渲染实践记录">
+<meta name="twitter:description" content="前言SSR 是一个比 SPA 更上一层，并且难度更大的一个应用模式。国内很多大厂都渐渐的使用了 SSR 的架构，比如知乎，bilibili 等网站。SSR 它很直接的继承了 SPA 的特点，并且弥补了 SPA 缺点，可以说是一个非常值得尝试的选择。 本文旨在研究 React SSR 并且说明如何与 React-Router、Redux、styled-components 结合使用，并且写了一个仿知">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/1/20180124224750.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 服务端渲染实践记录</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 服务端渲染实践记录</h1>
+
+        <div class="meta-rest">
+            <h1>React 服务端渲染实践记录</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-01-28T02:33:26.000Z" itemprop="datePublished" class="page-time">
+    2018-01-28
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#SSR-原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">SSR 原理</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实践-Demo"><span class="post-toc-number">3.</span> <span class="post-toc-text">实践 Demo</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开发配置"><span class="post-toc-number">4.</span> <span class="post-toc-text">开发配置</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#getInitialPropsState"><span class="post-toc-number">5.</span> <span class="post-toc-text">getInitialPropsState</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结合-styled-components"><span class="post-toc-number">6.</span> <span class="post-toc-text">结合 styled-components</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结合-react-router-4"><span class="post-toc-number">7.</span> <span class="post-toc-text">结合 react-router 4</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结合-redux"><span class="post-toc-number">8.</span> <span class="post-toc-text">结合 redux</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">9.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">10.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Universal 同构/React 服务端渲染实践记录"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 服务端渲染实践记录</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 01 月 28 日 10:33" datetime="2018-01-28T02:33:26.000Z"  itemprop="datePublished">
+    2018-01-28
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1835</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>SSR 是一个比 SPA 更上一层，并且难度更大的一个应用模式。国内很多大厂都渐渐的使用了 SSR 的架构，比如知乎，bilibili 等网站。<br>SSR 它很直接的继承了 SPA 的特点，并且弥补了 SPA 缺点，可以说是一个非常值得尝试的选择。</p>
+<p>本文旨在研究 React SSR 并且说明如何与 React-Router、Redux、styled-components 结合使用，并且写了一个仿知乎专栏 React SSR 的 Demo。</p>
+<a id="more"></a>
+<h2 id="SSR-原理"><a href="#SSR-原理" class="headerlink" title="SSR 原理"></a>SSR 原理</h2><p>SSR 原理以及注意事项，参考之前写的一篇：<a href="/2017/05/12/React/Universal%20同构/React%20服务端渲染/">React 服务端渲染</a><br>特别说一下是： renderToString 需要的是前端的 React 代码，因为需要渲染出来的结构统一，所以 SSR 基本可以说是一个同构应用。</p>
+<h2 id="实践-Demo"><a href="#实践-Demo" class="headerlink" title="实践 Demo"></a>实践 Demo</h2><p>下面是的代码，绝大部分都来自于这个 demo：<a href="https://github.com/Lizhooh/react-ssr-zhuanlan-demo" target="_blank" rel="noopener">仿知乎专栏 React SSR Demo</a><br>有兴趣的同学，可以去运行一下应用，看看 React SSR 的效果。</p>
+<h2 id="开发配置"><a href="#开发配置" class="headerlink" title="开发配置"></a>开发配置</h2><p>因为我个人比较懒，不想写 Webpack 的配置，而是使用比较简单零配置的 <code>Parcel</code> 进行代码打包。</p>
+<p>在后端里使用 <code>babel-polyfill</code> 配置 ES6+ 环境，而前端代码使用 <code>Parcel</code> 编译。</p>
+<blockquote>
+<p>Parcel 配置 ES6 环境的一个神奇错误：<a href="https://github.com/parcel-bundler/parcel/issues/867" target="_blank" rel="noopener">🐛 Can't get rid of “Missing class properties” error</a>，解决的方案是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"presets"</span>: [<span class="string">"env"</span>, <span class="string">"react"</span>, <span class="string">"stage-2"</span>],</span><br><span class="line">    <span class="string">"plugins"</span>: [</span><br><span class="line">        <span class="string">"transform-class-properties"</span>,</span><br><span class="line">        <span class="string">"transform-es2015-classes"</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>对于前端 React 的配置，可以参考官网的配置：<a href="https://parceljs.org/recipes.html" target="_blank" rel="noopener">https://parceljs.org/recipes.html</a><br>对于后端 Nodejs 的配置，可以参考本博客的一篇文章：<a href="/2018/01/21/Nodejs/如何在%20Nodejs%20里使用%20ES6+%20语法？/">如何在 Nodejs 里使用 ES6+ 语法？</a></p>
+<h2 id="getInitialPropsState"><a href="#getInitialPropsState" class="headerlink" title="getInitialPropsState"></a>getInitialPropsState</h2><p>参考 Next.js 的做法，为 React 声明周期提供了一个 getInitialProps 静态函数，这个函数仅用于 page 组件上，提供一些上下文数据。</p>
+<p>在这里我简单的定义一个 <code>getInitialPropsState</code> 函数，这个函数的作用是会自动活动 <code>window.__INIT_STATE__</code> 的数据，并将返回的对象嵌进组件的 <code>this.props.state</code> 里。</p>
+<p>并且它会在组件装载之前被调用，比 constructor 还先调用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pages/views/index.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">IndexView</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> getInitialPropsState(&#123; state &#125;) &#123;</span><br><span class="line">        <span class="keyword">return</span> state;</span><br><span class="line">    &#125;</span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.props.state);  <span class="comment">// 与上面的 state 相同</span></span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;p&gt;Hello&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么如何实现这个功能呢？主要是在组件之外包装一层函数，这样就可以形成一个闭包类。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// /pages/main.js</span></span><br><span class="line"><span class="comment">// 调用 getInitialPropsState 函数</span></span><br><span class="line"><span class="keyword">const</span> C = item.component;</span><br><span class="line"><span class="keyword">const</span> initProps = isFunction(C.getInitialPropsState) ? C.getInitialPropsState(data) : &#123;&#125;;</span><br><span class="line"><span class="comment">// 有返回值</span></span><br><span class="line"><span class="keyword">if</span> (initProps) &#123;</span><br><span class="line">    <span class="keyword">const</span> newC = <span class="function"><span class="params">p</span> =&gt;</span> <span class="xml"><span class="tag">&lt;<span class="name">C</span> &#123;<span class="attr">...p</span>&#125; <span class="attr">state</span>=<span class="string">&#123;initProps&#125;</span> /&gt;</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">key</span>=<span class="string">&#123;</span>`<span class="attr">route-</span>$&#123;<span class="attr">index</span>&#125;`&#125; &#123;<span class="attr">...item</span>&#125; <span class="attr">component</span>=<span class="string">&#123;newC&#125;</span> /&gt;</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">key</span>=<span class="string">&#123;</span>`<span class="attr">route-</span>$&#123;<span class="attr">index</span>&#125;`&#125; &#123;<span class="attr">...item</span>&#125; <span class="attr">component</span>=<span class="string">&#123;C&#125;</span> /&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>首先，判断 getInitialPropsState 是否是函数，之后调用它并获取返回值，接着把返回值嵌入组件里，再构造一个新的组件。</p>
+<h2 id="结合-styled-components"><a href="#结合-styled-components" class="headerlink" title="结合 styled-components"></a>结合 styled-components</h2><p>结合 styled-components 做服务端渲染，需要在 <code>&lt;App /&gt;</code> 外包裹一层，最后获取到了 style 再插入 html 模版里即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// render.js</span></span><br><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; renderToString &#125; <span class="keyword">from</span> <span class="string">'react-dom/server'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; ServerStyleSheet &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">const</span> App = <span class="built_in">require</span>(<span class="string">'./pages/main.js'</span>).default;</span><br><span class="line"><span class="keyword">const</span> sheet = <span class="keyword">new</span> ServerStyleSheet();</span><br><span class="line"><span class="keyword">const</span> body = renderToString(</span><br><span class="line">    &#123;sheet.collectStyles(</span><br><span class="line">        &lt;App data=&#123;&#123; <span class="attr">state</span>: ctx.state &#125;&#125; /&gt;</span><br><span class="line">    )&#125;</span><br><span class="line">);</span><br><span class="line"><span class="comment">// 渲染 html 模版</span></span><br><span class="line"><span class="keyword">const</span> html = replaces(ctx.app.cache.get(<span class="string">'page-index'</span>), &#123;</span><br><span class="line">    style:  sheet.getStyleTags(),</span><br><span class="line">    body: body,</span><br><span class="line">    sctipt: <span class="string">`/static/main.js`</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="结合-react-router-4"><a href="#结合-react-router-4" class="headerlink" title="结合 react-router 4"></a>结合 react-router 4</h2><p>对于路由来说，分为前端路和后端路由。当用户在浏览器上输入地址访问时，后端会根据 url 初始化前端需要的数据，之后的路由将由前端接管。</p>
+<p>具体的流程如下：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180124224750.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>在服务端渲染使用 React-Router，则需要在 <code>&lt;App /&gt;</code> 外面使用 <code>&lt;StaticRouter&gt;</code> 包裹，并把 url 传递给 location 属性。这样 React-Router 才会知道渲染的是哪个 view。<br>初始路由是在服务端初始化数据，之后的路由管理移交给前端管理。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// /render.js</span></span><br><span class="line"><span class="keyword">const</span> body = renderToString(</span><br><span class="line">    &lt;StaticRouter context=&#123;&#123;&#125;&#125; location=&#123;ctx.url&#125;&gt;</span><br><span class="line">        &#123;sheet.collectStyles(</span><br><span class="line">            &lt;App data=&#123;&#123;ctx.state&#125; /&gt;</span><br><span class="line">        )&#125;</span><br><span class="line">    &lt;<span class="regexp">/StaticRouter&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 渲染 html 模版</span></span><br><span class="line"><span class="regexp">const html = replaces(ctx.app.cache.get('page-index'), &#123;</span></span><br><span class="line"><span class="regexp">    style: sheet.getStyleTags(),</span></span><br><span class="line"><span class="regexp">    body: body,</span></span><br><span class="line"><span class="regexp">    sctipt: `/</span><span class="keyword">static</span>/main.js<span class="string">`,</span></span><br><span class="line"><span class="string">&#125;);</span></span><br></pre></td></tr></table></figure>
+<h2 id="结合-redux"><a href="#结合-redux" class="headerlink" title="结合 redux"></a>结合 redux</h2><p>如果要使用 redux 那就更麻烦了，实际上单独使用 React 做 SSR 没什么难道，要加上 react-router 会难一点，但是还要使用 redux 的话那就会上升到另一个难度。</p>
+<p>结合 redux 一起使用需要创建一个 store，然后在 <code>&lt;App /&gt;</code> 之外包裹一层 <code>&lt;Provider /&gt;</code>。</p>
+<p>需要在做以下处理。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// /pages/app.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; Provider &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span>;</span><br><span class="line"><span class="keyword">import</span> reducers <span class="keyword">from</span> <span class="string">'./redux/reducers'</span>;</span><br><span class="line"><span class="keyword">import</span> Store <span class="keyword">from</span> <span class="string">'redux-store-init'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> isEnv <span class="keyword">from</span> <span class="string">'is-env'</span>;</span><br><span class="line"><span class="keyword">import</span> routes <span class="keyword">from</span> <span class="string">'./routes'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> App = <span class="function">(<span class="params">&#123; data &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;Provider store=&#123;Store(&#123; <span class="attr">reducers</span>: reducers(data) &#125;)&#125;&gt;</span><br><span class="line">        &lt;Switch&gt;&#123;</span><br><span class="line">            <span class="comment">// 根据路由表动态渲染路由</span></span><br><span class="line">            routes.map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="comment">// ... 忽略中间的代码</span></span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">        &lt;<span class="regexp">/Switch&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>Provider&gt;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> App;</span><br></pre></td></tr></table></figure>
+<p>这样大致的组件结构是：<code>&lt;BrowserRouter&gt; -&gt; &lt;Provider&gt; -&gt; &lt;Switch&gt; -&gt; &lt;Route&gt; -&gt; &lt;View&gt;</code>。</p>
+<p>Store 的初始化数据统一在 App 组件的 data 属性里获取，而 data 属性在服务端时的赋值为 ctx.state，在客户端时赋值为 <code>window.__INIT_STATE__</code>（数据是一样的）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// /pages/main.js</span></span><br><span class="line">hydrate(</span><br><span class="line">    &lt;BrowserRouter&gt;</span><br><span class="line">        &lt;App data=&#123;<span class="built_in">window</span>.__INIT_STATE__&#125; /&gt;</span><br><span class="line">    &lt;<span class="regexp">/BrowserRouter&gt;,</span></span><br><span class="line"><span class="regexp">    document.getElementById('app')</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ /</span>render.js</span><br><span class="line"><span class="keyword">const</span> body = renderToString(</span><br><span class="line">    &lt;StaticRouter context=&#123;&#123;&#125;&#125; location=&#123;ctx.url&#125;&gt;</span><br><span class="line">        &#123;sheet.collectStyles(</span><br><span class="line">            &lt;App data=&#123;ctx.state&#125; /&gt;    <span class="comment">// 数据源</span></span><br><span class="line">        )&#125;</span><br><span class="line">    &lt;<span class="regexp">/StaticRouter&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 渲染 html 模版</span></span><br><span class="line"><span class="regexp">const html = replaces(ctx.app.cache.get('page-index'), &#123;</span></span><br><span class="line"><span class="regexp">    style: sheet.getStyleTags(),</span></span><br><span class="line"><span class="regexp">    body: body,</span></span><br><span class="line"><span class="regexp">    state: JSON.stringify(ctx.state),   /</span><span class="regexp">/ 这里就是 window.__INIT_STATE__</span></span><br><span class="line"><span class="regexp">    sctipt: `/</span><span class="keyword">static</span>/main.js<span class="string">`,</span></span><br><span class="line"><span class="string">&#125;);</span></span><br></pre></td></tr></table></figure>
+<p>而 reducers.js 里的代码长成这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> isFunction <span class="keyword">from</span> <span class="string">'is-function'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化 reducers</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (INIT_STATE) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> index_init_state = INIT_STATE.index || &#123;&#125;;</span><br><span class="line">    <span class="keyword">const</span> detail_init_state = INIT_STATE.detail || &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="comment">// 主页</span></span><br><span class="line">        index: <span class="function">(<span class="params">state = index_init_state, action</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (action.type = <span class="string">'index'</span> &amp;&amp; isFunction(action.newState)) &#123;</span><br><span class="line">                <span class="keyword">return</span> action.newState(state, index_init_state) || state;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> state;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 详细页</span></span><br><span class="line">        detail: <span class="function">(<span class="params">state = detail_init_state, action</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (action.type = <span class="string">'detail'</span> &amp;&amp; isFunction(action.newState)) &#123;</span><br><span class="line">                <span class="keyword">return</span> action.newState(state, detail_init_state) || state;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> state;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ctx.state</code> 在 Koa 处进行初始化赋值：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">router</span><br><span class="line">    .get(<span class="string">'/'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">        <span class="comment">// 初始化数据首页数据</span></span><br><span class="line">        <span class="keyword">const</span> [info, list] = <span class="keyword">await</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">            api.any(<span class="string">'/api/columns/qianduanzhidian'</span>),</span><br><span class="line">            api.any(<span class="string">'/api/columns/qianduanzhidian/posts'</span>),</span><br><span class="line">        ]);</span><br><span class="line">        <span class="comment">// 专栏信息, 专栏文章列表</span></span><br><span class="line">        ctx.state.index = &#123; info, list &#125;;</span><br><span class="line">        <span class="keyword">await</span> next(); <span class="comment">// 流到下一个中间件也就是 get('/*')</span></span><br><span class="line">    &#125;)</span><br><span class="line">    .get(<span class="string">'/*'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">        <span class="keyword">const</span> html = render(ctx, <span class="string">'main'</span>);</span><br><span class="line">        ctx.body = html;</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>数据的流动如下：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180124224435.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>路由部分的路线如下：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180126203114.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以亲身经历来述说：</p>
+<ul>
+<li>SSR 需要共用一套代码，这就意味着需要前后端环境的判断。我使用的是我之前写一个 npm 包：<code>is-env</code> 来判断环境。</li>
+<li>React 组件在服务端渲染只有 componentDidMount 之前的生命周期方法会被执行。所以注意一些声明周期里判断以下环境。</li>
+<li>SSR 开发起来并不简单，特别是几个框架一起使用的时候，同时也给服务端带来一定的压力。</li>
+<li>SSR 所带来的好处除了 SEO 外，还有一个很明显的特征那就是减少了客户端初始化的时间，从而提供用户体验。</li>
+<li>除了自己手动写基础 SSR 框架外，更推荐使用第三方的，比如 <a href="https://github.com/zeit/next.js" target="_blank" rel="noopener">Next.js</a>、<a href="https://github.com/jaredpalmer/after.js" target="_blank" rel="noopener">After.js</a>。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://reacttraining.cn/web/guides/server-rendering" target="_blank" rel="noopener">http://reacttraining.cn/web/guides/server-rendering</a></li>
+<li><a href="https://www.styled-components.com/docs/advanced#server-side-rendering" target="_blank" rel="noopener">https://www.styled-components.com/docs/advanced#server-side-rendering</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.887Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/01/React/Universal 同构/React 服务端渲染实践记录/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/01/React/Universal 同构/React 服务端渲染实践记录/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/服务端渲染/">服务端渲染</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/02/CSS/深入学习 CSS 网格布局（Grid）/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">深入学习 CSS 网格布局（Grid）</h4>
+        <h4 class="summary">CSS 网格布局可以使我们能够比以往任何时候都可以更灵活构建和控制自定义网格，甚至是比 Flexbox 布局还有灵活以及...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/01/Nodejs/如何在 Nodejs 里使用 ES6+ 语法？/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">如何在 Nodejs 里使用 ES6+ 语法？</h4>
+        <h4 class="summary">到目前为止 Nodejs 还是不能 100% 支持 ES6+ 语法，如果想体验 ES6+ 或者是项目是面向未来的，可以使...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

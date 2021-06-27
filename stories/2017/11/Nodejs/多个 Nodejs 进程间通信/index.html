@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/11/Nodejs/多个 Nodejs 进程间通信/">
+    
+    
+    <title>多个 Nodejs 进程间通信 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Nodejs 是单线程运行的，有时候不得不启动多个 Nodejs 进程去分别做不同类型的任务。但是带来的问题是：不同的 Nodejs 进程如何通信？ 常见的多进程通信进程间通信方式：  共享内存, 信号量。 消息队列，信号。 文件，匿名管道/命名管道，套接字。">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多个 Nodejs 进程间通信">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/11/Nodejs/多个 Nodejs 进程间通信/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Nodejs 是单线程运行的，有时候不得不启动多个 Nodejs 进程去分别做不同类型的任务。但是带来的问题是：不同的 Nodejs 进程如何通信？ 常见的多进程通信进程间通信方式：  共享内存, 信号量。 消息队列，信号。 文件，匿名管道/命名管道，套接字。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.844Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="多个 Nodejs 进程间通信">
+<meta name="twitter:description" content="前言Nodejs 是单线程运行的，有时候不得不启动多个 Nodejs 进程去分别做不同类型的任务。但是带来的问题是：不同的 Nodejs 进程如何通信？ 常见的多进程通信进程间通信方式：  共享内存, 信号量。 消息队列，信号。 文件，匿名管道/命名管道，套接字。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">多个 Nodejs 进程间通信</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">多个 Nodejs 进程间通信</h1>
+
+        <div class="meta-rest">
+            <h1>多个 Nodejs 进程间通信</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-11-24T15:06:55.000Z" itemprop="datePublished" class="page-time">
+    2017-11-24
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#常见的多进程通信"><span class="post-toc-number">2.</span> <span class="post-toc-text">常见的多进程通信</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#net-socket"><span class="post-toc-number">3.</span> <span class="post-toc-text">net.socket</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#socket-io"><span class="post-toc-number">4.</span> <span class="post-toc-text">socket.io</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#socket-io-redis"><span class="post-toc-number">5.</span> <span class="post-toc-text">socket.io-redis</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#错误处理"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">错误处理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#API"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">API</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">6.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/多个 Nodejs 进程间通信"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">多个 Nodejs 进程间通信</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 11 月 24 日 23:06" datetime="2017-11-24T15:06:55.000Z"  itemprop="datePublished">
+    2017-11-24
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1339</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Nodejs 是单线程运行的，有时候不得不启动多个 Nodejs 进程去分别做不同类型的任务。但是带来的问题是：不同的 Nodejs 进程如何通信？</p>
+<h2 id="常见的多进程通信"><a href="#常见的多进程通信" class="headerlink" title="常见的多进程通信"></a>常见的多进程通信</h2><p>进程间通信方式：</p>
+<ol>
+<li>共享内存, 信号量。</li>
+<li>消息队列，信号。</li>
+<li>文件，匿名管道/命名管道，套接字。</li>
+</ol>
+<a id="more"></a>
+<h2 id="net-socket"><a href="#net-socket" class="headerlink" title="net.socket"></a>net.socket</h2><p>Nodejs 有 socket 相关的 api，可以使用 net 模块创建 TCP 连接。与 http 相比它实在是轻小很多。</p>
+<p>下面创建一个 tcp 服务端，接收客户端的数据，并反馈给对方。</p>
+<blockquote>
+<p>server.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> net = <span class="built_in">require</span>(<span class="string">'net'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> server = net.createServer(&#123;</span><br><span class="line">    allowHalfOpen: <span class="literal">true</span>,</span><br><span class="line">&#125;, socket =&gt; &#123;</span><br><span class="line">    <span class="comment">// 'connection' listener</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'socket connected'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> data = [];</span><br><span class="line">    socket.on(<span class="string">'data'</span>, (chunk) =&gt; &#123;</span><br><span class="line">        data.push(chunk);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    socket.write(<span class="string">':'</span>);</span><br><span class="line">    socket.on(<span class="string">'end'</span>, () =&gt; &#123;</span><br><span class="line">        socket.end(<span class="string">'Hello '</span> + data.toString());</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'socket disconnected'</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;)</span><br><span class="line">    .on(<span class="string">'error'</span>, (err) =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(err);</span><br><span class="line">        <span class="keyword">throw</span> err;</span><br><span class="line">    &#125;)</span><br><span class="line">    .listen(<span class="number">8124</span>, () =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'server bound: 8124.'</span>);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>client.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> net = <span class="built_in">require</span>(<span class="string">'net'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> client = net.createConnection(&#123; <span class="attr">host</span>: <span class="string">'localhost'</span>, <span class="attr">port</span>: <span class="number">8124</span> &#125;, () =&gt; &#123;</span><br><span class="line">    <span class="comment">//'connect' listener</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'connected to server!'</span>);</span><br><span class="line">    client.write(<span class="string">'world!'</span>);</span><br><span class="line">&#125;)</span><br><span class="line">    .on(<span class="string">'data'</span>, (data) =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data.toString());</span><br><span class="line">        client.end();</span><br><span class="line">    &#125;)</span><br><span class="line">    .on(<span class="string">'end'</span>, () =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'disconnected from server'</span>);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>在客户端可以看到输出 <code>Hello world!</code>。</p>
+<p>使用 net.Socket 可以很灵活的自己设计数据传输协议，不过开发难度比较大。</p>
+<h2 id="socket-io"><a href="#socket-io" class="headerlink" title="socket.io"></a>socket.io</h2><p>单单使用 Nodejs 的 net 模块还是比较不好控制。下面就是使用 socket.io 来进行多个 Nodejs 进程之间的通信。</p>
+<blockquote>
+<p>server.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(<span class="number">3000</span>);</span><br><span class="line"></span><br><span class="line">io.on(<span class="string">'connection'</span>, socket =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(socket.id);</span><br><span class="line"></span><br><span class="line">    socket.emit(<span class="string">'news'</span>, <span class="string">'Hello'</span>);</span><br><span class="line">    socket.on(<span class="string">'news'</span>, data =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>client.js</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io-client'</span>);</span><br><span class="line"><span class="keyword">const</span> socket = io(<span class="string">'http://localhost:3000'</span>);</span><br><span class="line"></span><br><span class="line">socket.on(<span class="string">'news'</span>, data =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">    socket.emit(<span class="string">'news'</span>, <span class="string">'Hi'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种模式是一个 Nodejs 进程作为 Server，其余的  Nodejs 进程作为 Client，所有的数据广播都在 Server 里完成。</p>
+<h2 id="socket-io-redis"><a href="#socket-io-redis" class="headerlink" title="socket.io-redis"></a>socket.io-redis</h2><p>在 Socket.io 文档里有提到：</p>
+<blockquote>
+<p>通过使用 <code>socket.io-redis</code> 适配器运行 socket.io，您可以在不同的进程或服务器上运行多个 socket.io 实例，这些进程或服务器可以相互广播和发送事件。<br>如果您需要从 nonsocket.io 进程向 socket.io 实例发送事件，则应该使用 <code>socket.io-emitter</code>。</p>
+</blockquote>
+<p>这两个话非常重要，一句告诉你可以使用 socket.io-redis 进行多进程通信，但是问题是需要 socket.io 服务。另一句告诉你，也可以从非 socket.io 向 socket.io 发送消息。<br>但是它们都需要 <code>redis</code> 作为中间层处理。</p>
+<p>在这之前先启动 Redis 服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server</span><br></pre></td></tr></table></figure>
+<p>与上面的 Server - Client 模式相比，socket.io-redis 使用 Redis 作为中间层，这样就没有了 Server 与 Client 的概念，因为每个 Nodejs 进程都是属于同一个层次的。但是每个进程都需要监听一个端口。</p>
+<p>假设现在有两个 Nodejs 进程 A、B，对应 a.js，b.js。</p>
+<blockquote>
+<p>a.js 监听 3000 端口</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(<span class="number">3000</span>);</span><br><span class="line"><span class="keyword">const</span> redis = <span class="built_in">require</span>(<span class="string">'socket.io-redis'</span>);</span><br><span class="line">io.adapter(redis(&#123;</span><br><span class="line">    host: <span class="string">'localhost'</span>,</span><br><span class="line">    port: <span class="number">6379</span>,</span><br><span class="line">&#125;));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 需要使用 adapter</span></span><br><span class="line">io.of(<span class="string">'/'</span>).adapter.on(<span class="string">'time'</span>, time =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(time);</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 广播消息</span></span><br><span class="line">    io.of(<span class="string">'/'</span>).adapter.customRequest(<span class="string">'你好小明'</span>, (err, replies) =&gt; &#123;</span><br><span class="line">        <span class="comment">// 应答</span></span><br><span class="line">        <span class="built_in">console</span>.log(replies);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>b.js 监听 3001 端口</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(<span class="number">3001</span>);</span><br><span class="line"><span class="keyword">const</span> redis = <span class="built_in">require</span>(<span class="string">'socket.io-redis'</span>);</span><br><span class="line">io.adapter(redis(&#123;</span><br><span class="line">    host: <span class="string">'localhost'</span>,</span><br><span class="line">    port: <span class="number">6379</span>,</span><br><span class="line">&#125;));</span><br><span class="line"></span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 接收消息</span></span><br><span class="line">    io.of(<span class="string">'/'</span>).adapter.customHook = <span class="function">(<span class="params">data, reply</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">        <span class="comment">// 回复</span></span><br><span class="line">        reply(<span class="string">'早上好，小美'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
+<p>分别运行两个 Nodejs 进程运行后看到：</p>
+<ul>
+<li>在 a.js 输出 <code>[ null, &#39;早上好，小美&#39; ]</code></li>
+<li>在 b.js 输出 <code>你好小明</code></li>
+</ul>
+<p>那么就这样简单的完成了两个 Nodejs 进程的通信。</p>
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><p>错误处理，给对应的适配器添加错误事件即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(<span class="number">3000</span>);</span><br><span class="line"><span class="keyword">const</span> redis = <span class="built_in">require</span>(<span class="string">'socket.io-redis'</span>);</span><br><span class="line"><span class="keyword">const</span> adapter = redis(<span class="string">'localhost:6379'</span>);</span><br><span class="line"></span><br><span class="line">adapter.pubClient.on(<span class="string">'error'</span>, (err) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;);</span><br><span class="line">adapter.subClient.on(<span class="string">'error'</span>, (err) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;);</span><br><span class="line">io.of(<span class="string">'/'</span>).adapter.on(<span class="string">'error'</span>, (err) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><p>socket.io-redis 有以下的 API：</p>
+<ul>
+<li><code>adp.clients(rooms: Array, fn: Function)</code> 返回连接到 rooms 所有 Nodejs 的客户端 id 的列表。</li>
+<li><code>adp.clientRooms(id: String, fn: Function)</code> 返回包含给定 id 的客户端加入的房间列表。</li>
+<li><code>adp.allRooms(fn: Function)</code> 返回所有房间的列表。</li>
+<li><code>adp.remoteJoin(id: String, room: String, fn: Function)</code> 使给定 id 的 socket.io 加入房间，回调将在 socket.io 加入房间时调用。</li>
+<li><code>adp.remoteLeave(id: String, room: String, fn: Function)</code> 使给定 id 的 socket.io 离开房间，回调将在 socket.io 离开房间时调用。</li>
+<li><code>adp.remoteDisconnect(id: String, close: Boolean, fn: Function)</code> 使给定 id 的 socket.io 断开连接，回调将在 socket.io 断开连接时被调用。如果 close 设置为 true，它将关闭底层套接字。</li>
+<li><code>adp.customRequest(data: Object, fn: Function)</code> 向每个节点发送一个请求消息，这个请求将通过该 customHook 方法进行应答。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>多个 Nodejs 进程之间进行通信，有多种方式：</p>
+<ul>
+<li>使用<strong>共享内存，信号量</strong>。这种方式可以通过 child_process 模块实现。</li>
+<li>使用<strong>套接</strong>。这种方式可以使用 net，http，websocket 模块实现，还可以使用 socket.io 来实现（推荐）。</li>
+<li>使用<strong>共享文件</strong>。这种方式通过监听文件的变化来实现，不过效率不理想（不推荐）。</li>
+<li>使用<strong>订阅发布</strong>，响应式数据库。通过 Redis 这些数据库，并利用它们的特性进行多进程通信。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://socket.io/docs/rooms-and-namespaces/" target="_blank" rel="noopener">https://socket.io/docs/rooms-and-namespaces/</a></li>
+<li><a href="https://github.com/socketio/socket.io-redis" target="_blank" rel="noopener">https://github.com/socketio/socket.io-redis</a></li>
+<li><a href="https://github.com/socketio/socket.io-emitter" target="_blank" rel="noopener">https://github.com/socketio/socket.io-emitter</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.844Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/11/Nodejs/多个 Nodejs 进程间通信/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/11/Nodejs/多个 Nodejs 进程间通信/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/11/Electron/把 Electron-Vue 配置成 React 项目/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">把 Electron-Vue 配置成 React 项目</h4>
+        <h4 class="summary">Electron-Vue 是一个很好的 Electron + Vue 脚手架。在之前已经介绍过它了：使用 Electro...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/11/MobX/在 React 里使用 Mobx/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">在 React 里使用 Mobx</h4>
+        <h4 class="summary">Mobx 是一个简单、可扩展的状态管理框架，它通过透明的函数响应式编程使得应用状态管理变得简单和可扩展，Mobx 实现的...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

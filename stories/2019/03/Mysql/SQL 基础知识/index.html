@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/03/Mysql/SQL 基础知识/">
+    
+    
+    <title>SQL 基础知识 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言SQL 是用于访问和处理数据库的标准的计算机语言，具有结构化查询语言，是多种关系式数据库中通用语言。 对于 SQL 的基础知识，可分为对数据库的操作以及对数据表的操作。这些操作都可以分为：数据的插入，数据的更新，数据的查询，数据的删除，也就是所谓的：CURD 操作。">
+<meta name="keywords" content="数据库,MongoDB,Mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL 基础知识">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/03/Mysql/SQL 基础知识/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言SQL 是用于访问和处理数据库的标准的计算机语言，具有结构化查询语言，是多种关系式数据库中通用语言。 对于 SQL 的基础知识，可分为对数据库的操作以及对数据表的操作。这些操作都可以分为：数据的插入，数据的更新，数据的查询，数据的删除，也就是所谓的：CURD 操作。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/3/20190317225123.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.829Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SQL 基础知识">
+<meta name="twitter:description" content="前言SQL 是用于访问和处理数据库的标准的计算机语言，具有结构化查询语言，是多种关系式数据库中通用语言。 对于 SQL 的基础知识，可分为对数据库的操作以及对数据表的操作。这些操作都可以分为：数据的插入，数据的更新，数据的查询，数据的删除，也就是所谓的：CURD 操作。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2019/3/20190317225123.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">SQL 基础知识</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">SQL 基础知识</h1>
+
+        <div class="meta-rest">
+            <h1>SQL 基础知识</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-03-17T14:20:50.000Z" itemprop="datePublished" class="page-time">
+    2019-03-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#插入"><span class="post-toc-number">2.</span> <span class="post-toc-text">插入</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#查询"><span class="post-toc-number">3.</span> <span class="post-toc-text">查询</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#条件"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">条件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#子查询"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">子查询</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#排序"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">排序</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#连接"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#聚合"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">聚合</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#更新"><span class="post-toc-number">4.</span> <span class="post-toc-text">更新</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#删除"><span class="post-toc-number">5.</span> <span class="post-toc-text">删除</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">6.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Mysql/SQL 基础知识"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">SQL 基础知识</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 03 月 17 日 22:20" datetime="2019-03-17T14:20:50.000Z"  itemprop="datePublished">
+    2019-03-17
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1439</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>SQL 是用于访问和处理数据库的标准的计算机语言，具有结构化查询语言，是多种关系式数据库中通用语言。</p>
+<p>对于 SQL 的基础知识，可分为对数据库的操作以及对数据表的操作。这些操作都可以分为：数据的插入，数据的更新，数据的查询，数据的删除，也就是所谓的：<code>CURD</code> 操作。</p>
+<a id="more"></a>
+<h2 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h2><p><code>Insert Into</code> 语句用于向表中插入新记录。在插入的过程中，某些列没有提供则会使用默认数据（null）。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Insert</span> <span class="keyword">Into</span> post (<span class="keyword">name</span>, <span class="keyword">url</span>, alexa, country)</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 指定 test 数据库的 post 表</span></span><br><span class="line"><span class="keyword">Insert</span> <span class="keyword">Into</span> test.post (<span class="keyword">name</span>, <span class="keyword">url</span>, alexa, country)</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 不指定列名，要求插入所有列的数据</span></span><br><span class="line"><span class="keyword">Insert</span> <span class="keyword">Into</span> post</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 一次性插入多行</span></span><br><span class="line"><span class="keyword">Insert</span> <span class="keyword">Into</span> post</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>),</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>),</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>),</span><br><span class="line"><span class="keyword">values</span> (<span class="string">'谷歌'</span>, <span class="string">'https://www.google.com/'</span>, <span class="number">3</span>, <span class="string">'EN'</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><p>语法：<code>Select 字段名, 字段名 From 表名</code>。</p>
+<p>From 可以查询多个表，使用逗号分隔，可以使用 <code>as</code> 给表起别名。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> user.name <span class="keyword">From</span> <span class="keyword">user</span></span><br><span class="line"><span class="keyword">Select</span> <span class="keyword">name</span> <span class="keyword">From</span> <span class="keyword">user</span></span><br><span class="line"><span class="keyword">Select</span> <span class="keyword">name</span> <span class="keyword">From</span> <span class="keyword">user</span> <span class="keyword">as</span> u</span><br><span class="line"><span class="keyword">Select</span> u.name <span class="keyword">From</span> <span class="keyword">user</span> <span class="keyword">as</span> u</span><br><span class="line"></span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+<h3 id="条件"><a href="#条件" class="headerlink" title="条件"></a>条件</h3><p>使用 <code>Where</code> 可以进行条件控制。Where 有以下的操作符：<code>=</code>，<code>&lt;&gt;</code>，<code>&gt;</code>，<code>&lt;</code>，<code>&gt;=</code>，<code>&lt;=</code>，<code>BETWEEN</code>，<code>LIKE</code>，<code>IN</code>。还包括了一些原语的使用 <code>not</code>，<code>in</code>，<code>like</code>，<code>is</code>，<code>or</code>。</p>
+<p>Where 不仅可以使用在查询，也可以使用到 Update，Delete，Join 等操作里。</p>
+<p>使用 <code>Distinct</code> 可以过滤重复的行数据。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> post <span class="keyword">Where</span> country = <span class="string">'CN'</span>;</span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> emp <span class="keyword">Where</span> sal &gt; <span class="number">2000</span> <span class="keyword">and</span> sal &lt; <span class="number">3000</span>;</span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> emp <span class="keyword">Where</span> sal <span class="keyword">between</span> <span class="number">1500</span> <span class="keyword">and</span> <span class="number">3000</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h3><p>在 Where，Having 等条件查询里都可以进行嵌套的子查询，子查询可以进行多维度的嵌套，子查询也可以拆分为具体的单个查询。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查询所有比 '小明' 工资高的人的信息，利用子查询，在 Where 里进一步查询得到小明的工资</span></span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> emp</span><br><span class="line"><span class="keyword">Where</span> sal &gt; (<span class="keyword">Select</span> sal <span class="keyword">From</span> emp <span class="keyword">Where</span> <span class="keyword">name</span> = <span class="string">'小明'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询所有比职位是 'GM' 并且年龄比 'boss' 的工资高的人的信息</span></span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> emp</span><br><span class="line"><span class="keyword">Where</span> sal &gt; (</span><br><span class="line">    <span class="keyword">Select</span> sal <span class="keyword">From</span> emp <span class="keyword">Where</span> office = <span class="string">'GM'</span> <span class="keyword">And</span> age &gt;= (</span><br><span class="line">        <span class="keyword">Select</span> age <span class="keyword">From</span> emp <span class="keyword">Where</span> <span class="keyword">name</span> = <span class="string">'boss'</span></span><br><span class="line">    )</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h3><p><code>Order By</code> 关键字用于对结果集进行排序，默认是升序（ASC）对记录进行排序。</p>
+<p><code>Desc</code> 或者 <code>Asc</code> 只对它紧跟着的第一个列名有效，其他不受影响，仍然是默认的升序。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> post <span class="keyword">Order</span> <span class="keyword">By</span> country, alexa;</span><br><span class="line"><span class="comment">-- 降序</span></span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> post <span class="keyword">Order</span> <span class="keyword">By</span> country <span class="keyword">Desc</span>;</span><br><span class="line"><span class="comment">-- 一个降序，一个升序</span></span><br><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> post <span class="keyword">Order</span> <span class="keyword">By</span> country <span class="keyword">Desc</span>, alexa <span class="keyword">Asc</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h3><p>使用 <code>Left Join（左连接）、Right Join（右连接）、Inner Join（内连接）、Full Join（全连接）</code> 关键字，可以实现多个表之间的连接查询。</p>
+<p>其语法结构为：<code>Select ... From ... Join ... On</code>。<code>On</code> 是指定连接的条件，可以是单个条件也可以是多个条件，可以是模糊的条件。默认 Join 使用的是 Inner 连接。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/3/20190317225123.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>对于左连接，可以实现查询：① 属于 A 且属于 A 交 B 的数据， ② 属于 A 但不属于 A 交 B 的数据。<br>对于右连接，可以实现查询：① 属于 B 且属于 A 交 B 的数据， ② 属于 B 但不属于 A 交 B 的数据。<br>对于内连接，可以实现查询：① 属于 A 交 B 的数据。<br>对于全连接，可以实现查询：① 属于 A 且属于 B 的数据。② 属于 A 和 B，但不属于 A 交 B 的数据。</p>
+<p><code>Inner Join</code>：如果表中有至少一个匹配，则返回行。<br><code>Left Join</code>：即使右表中没有匹配，也从左表返回所有的行。<br><code>Right Join</code>：即使左表中没有匹配，也从右表返回所有的行。<br><code>Full Join</code>：只要其中一个表中存在匹配，则返回行。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> a.id, a.name, b.count, b.date</span><br><span class="line"><span class="keyword">From</span> post <span class="keyword">as</span> a <span class="keyword">Inner</span> <span class="keyword">Join</span> <span class="keyword">logs</span> <span class="keyword">as</span> b</span><br><span class="line"><span class="keyword">On</span> a.id=b.postId;</span><br></pre></td></tr></table></figure>
+<p>关于 SQL 连接的一些深度理解，可以查阅这篇文章：<a href="/stories/2017/07/Mysql/图解%20SQL%20JOIN/">图解 SQL JOIN</a></p>
+<h3 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h3><p>SQL 里提供了许多聚合函数，可用于统计，计数方面。</p>
+<p>比较常见的使用有：<code>Group By</code>，<code>Having</code>，<code>count</code>，<code>max/min</code>，<code>avg</code>，<code>sum</code>。</p>
+<p>Group By 语句用于结合聚合函数，根据一个或多个列对结果集进行分组。Group By 在 Select 之后使用，对查询的结果进行分组，因此也在 Join 之后使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">+-----+---------+-------+------------+</span><br><span class="line">| aid | siteId  | count | date       |</span><br><span class="line">+-----+---------+-------+------------+</span><br><span class="line">|   <span class="number">1</span> |       <span class="number">1</span> |    <span class="number">45</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-10</span> |</span><br><span class="line">|   <span class="number">2</span> |       <span class="number">3</span> |   <span class="number">100</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-13</span> |</span><br><span class="line">|   <span class="number">3</span> |       <span class="number">1</span> |   <span class="number">230</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-14</span> |</span><br><span class="line">|   <span class="number">4</span> |       <span class="number">2</span> |    <span class="number">10</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-14</span> |</span><br><span class="line">|   <span class="number">5</span> |       <span class="number">5</span> |   <span class="number">205</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-14</span> |</span><br><span class="line">|   <span class="number">6</span> |       <span class="number">4</span> |    <span class="number">13</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-15</span> |</span><br><span class="line">|   <span class="number">7</span> |       <span class="number">3</span> |   <span class="number">220</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-15</span> |</span><br><span class="line">|   <span class="number">8</span> |       <span class="number">5</span> |   <span class="number">545</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-16</span> |</span><br><span class="line">|   <span class="number">9</span> |       <span class="number">3</span> |   <span class="number">201</span> | <span class="number">2016</span><span class="number">-05</span><span class="number">-17</span> |</span><br><span class="line">+-----+---------+-------+------------+</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 统计 log 各个 siteId 的访问量</span></span><br><span class="line"><span class="keyword">Select</span> siteId <span class="keyword">as</span> <span class="keyword">ID</span>, <span class="keyword">sum</span>(log.count) <span class="keyword">as</span> 访问量 <span class="keyword">From</span> <span class="keyword">log</span></span><br><span class="line"><span class="keyword">Group</span> <span class="keyword">By</span> siteId;</span><br></pre></td></tr></table></figure>
+<p>Having 子句可以让我们筛选分组后的各组数据。Group By 之后不能使用 Where 进行条件的筛选，只能使用 Having。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 统计 log 各个 siteId 的访问量，过来小于 100 的行</span></span><br><span class="line"><span class="keyword">Select</span> siteId <span class="keyword">as</span> <span class="keyword">ID</span>, <span class="keyword">sum</span>(log.count) <span class="keyword">as</span> 访问量 <span class="keyword">From</span> <span class="keyword">log</span></span><br><span class="line"><span class="keyword">Group</span> <span class="keyword">By</span> siteId</span><br><span class="line"><span class="keyword">Having</span> <span class="keyword">sum</span>(log.count) &gt; <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h2><p><code>Update ... Set ...Where</code> 语句用于更新表中的记录。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 更新 name 为 谷歌的，行数据</span></span><br><span class="line"><span class="keyword">Update</span> post <span class="keyword">Set</span> alexa=<span class="number">5</span>, country=<span class="string">'EN'</span></span><br><span class="line"><span class="keyword">Where</span> <span class="keyword">name</span>=<span class="string">'谷歌'</span>;</span><br></pre></td></tr></table></figure>
+<p>注意：如果忽略了 Where，则会更新所有的行数据。</p>
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h2><p><code>Delete</code> 语句用于删除表中的记录。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 在表里删除某一行</span></span><br><span class="line"><span class="keyword">Delete</span> <span class="keyword">From</span> post</span><br><span class="line"><span class="keyword">Where</span> <span class="keyword">name</span>=<span class="string">'谷歌'</span> <span class="keyword">and</span> country=<span class="string">'EN'</span>;</span><br><span class="line"><span class="comment">-- 删除表所有行</span></span><br><span class="line"><span class="keyword">Delete</span> * <span class="keyword">From</span> table_name;</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>好了，SQL 的基础就这么多，其他的可以使用可视化的 SQL 界面进行操作。实际上在日常的使用了，很多操作都可以使用可视化的界面操作进行。SQL 的编写可以是很简单，也可以是</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.829Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/03/Mysql/SQL 基础知识/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/03/Mysql/SQL 基础知识/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MongoDB/">MongoDB</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mysql/">Mysql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/03/React Native/React Native Config 解决方案/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native Config 解决方案</h4>
+        <h4 class="summary">在 React Native 里可能会有许多的开发配置项，例如在开发的时候使用的是开发的 api，在上线的时候使用的是线...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/03/React/React/Create-React-App 自定义配置/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Create-React-App 自定义配置（重写 Webpack）</h4>
+        <h4 class="summary">在使用 Create-React-App 创建的项目，文件结构非常的简洁，但是有时候我们需要自己添加或修改一些 Webp...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

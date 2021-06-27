@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/08/React Native/React Native 目录结构最佳实践/">
+    
+    
+    <title>React Native 目录结构最佳实践 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言经过无数次研究与挖掘，终于探索出比较好的 React Native 开发目录结构。一个好的目录结构，是一个好的开始，它可以把代码进一步的分离，提供维护性。 在这之间，看过：https://www.zhihu.com/question/50750032/answer/136384653 个人感觉还是比较乱。下面是我总结出来的 React Native 开发代码目录结构。 此外，React Nat">
+<meta name="keywords" content="Javascript,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 目录结构最佳实践">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/08/React Native/React Native 目录结构最佳实践/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言经过无数次研究与挖掘，终于探索出比较好的 React Native 开发目录结构。一个好的目录结构，是一个好的开始，它可以把代码进一步的分离，提供维护性。 在这之间，看过：https://www.zhihu.com/question/50750032/answer/136384653 个人感觉还是比较乱。下面是我总结出来的 React Native 开发代码目录结构。 此外，React Nat">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/8/20170807191806.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.865Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 目录结构最佳实践">
+<meta name="twitter:description" content="前言经过无数次研究与挖掘，终于探索出比较好的 React Native 开发目录结构。一个好的目录结构，是一个好的开始，它可以把代码进一步的分离，提供维护性。 在这之间，看过：https://www.zhihu.com/question/50750032/answer/136384653 个人感觉还是比较乱。下面是我总结出来的 React Native 开发代码目录结构。 此外，React Nat">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/8/20170807191806.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 目录结构最佳实践</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 目录结构最佳实践</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 目录结构最佳实践</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-08-08T12:53:21.000Z" itemprop="datePublished" class="page-time">
+    2017-08-08
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开始"><span class="post-toc-number">2.</span> <span class="post-toc-text">开始</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#说明"><span class="post-toc-number">3.</span> <span class="post-toc-text">说明</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#api"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">api</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#components"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">components</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#config"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">config</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#lib"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">lib</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#redux"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">redux</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#resource"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">resource</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#storage"><span class="post-toc-number">3.7.</span> <span class="post-toc-text">storage</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#test"><span class="post-toc-number">3.8.</span> <span class="post-toc-text">test</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#views"><span class="post-toc-number">3.9.</span> <span class="post-toc-text">views</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#应用入口"><span class="post-toc-number">3.10.</span> <span class="post-toc-text">应用入口</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#navigator"><span class="post-toc-number">3.11.</span> <span class="post-toc-text">navigator</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#总结"><span class="post-toc-number">4.</span> <span class="post-toc-text">总结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/React Native 目录结构最佳实践"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 目录结构最佳实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 08 月 08 日 20:53" datetime="2017-08-08T12:53:21.000Z"  itemprop="datePublished">
+    2017-08-08
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1553</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>经过无数次<strong>研究</strong>与<strong>挖掘</strong>，终于探索出比较好的 React Native 开发目录结构。<br>一个好的目录结构，是一个好的开始，它可以把代码进一步的分离，提供维护性。</p>
+<p>在这之间，看过：<a href="https://www.zhihu.com/question/50750032/answer/136384653" target="_blank" rel="noopener">https://www.zhihu.com/question/50750032/answer/136384653</a> 个人感觉还是比较乱。<br>下面是我总结出来的 React Native 开发代码目录结构。</p>
+<p>此外，React Native 已经可以指定项目版本了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">react-native init myApp --version 0.45</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><p>假设现在有页面：<code>home, user, about</code>，组件<code>topbar, loading, make</code> 等。</p>
+<p>下面就是一个推荐的目录结构：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/8/20170807191806.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">App</span><br><span class="line">├── api               <span class="comment">// 网络请求，后端接口</span></span><br><span class="line">│   ├── http          <span class="comment">// 对 get, post 进行封装</span></span><br><span class="line">│   └── index.js      <span class="comment">// 导出所有 api</span></span><br><span class="line">├── common            <span class="comment">// 公共模块</span></span><br><span class="line">├── components        <span class="comment">// 组件</span></span><br><span class="line">│   ├── index.js      <span class="comment">// 用来导出部分组件</span></span><br><span class="line">│   ├── topbar.js     <span class="comment">// 顶端栏组件</span></span><br><span class="line">│   ├── loading.js    <span class="comment">// 加载器组件</span></span><br><span class="line">│   └── make.js       <span class="comment">// 标签组件</span></span><br><span class="line">├── config            <span class="comment">// 用来放置应用的配置项，比如主题颜色</span></span><br><span class="line">├── functions         <span class="comment">// 自定义的一些功能函数，算法</span></span><br><span class="line">├── lib               <span class="comment">// 第三方库</span></span><br><span class="line">├── redux             <span class="comment">// 数据状态管理框架 - redux 相关</span></span><br><span class="line">│   ├── actions       <span class="comment">// 所有 view 的 action 集中管理</span></span><br><span class="line">│   ├── reducers      <span class="comment">// 所有 view 的 reducer 集中管理</span></span><br><span class="line">│   ├── types.js      <span class="comment">// 所有的 action type 集中管理</span></span><br><span class="line">│   └── store.js      <span class="comment">// create store</span></span><br><span class="line">├── resource          <span class="comment">// 资源文件目录</span></span><br><span class="line">├── storage           <span class="comment">// 本地数据储存相关</span></span><br><span class="line">├── test              <span class="comment">// 测试代码</span></span><br><span class="line">├── views             <span class="comment">// 所有视图代码</span></span><br><span class="line">│   ├── home.js       <span class="comment">// 主页</span></span><br><span class="line">│   ├── user.js       <span class="comment">// 用户页</span></span><br><span class="line">│   └── about.js      <span class="comment">// 关于页</span></span><br><span class="line">├── index.js          <span class="comment">// 应用入口</span></span><br><span class="line">├── main.js           <span class="comment">// 主要文件</span></span><br><span class="line">└── navigator.js      <span class="comment">// 导航文件</span></span><br></pre></td></tr></table></figure>
+<h3 id="api"><a href="#api" class="headerlink" title="api"></a>api</h3><p>在 api 文件里通常是放置与后端交互的函数，在 http 文件里对 get, post 进行封装。</p>
+<p>比如说，封装一个 post 请求：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http/index.js</span></span><br><span class="line"><span class="keyword">import</span> qs <span class="keyword">from</span> <span class="string">'qs'</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> post = <span class="function">(<span class="params">url, data, query = <span class="literal">null</span></span>) =&gt;</span> &#123;</span><br><span class="line">    query &amp;&amp; (url += <span class="string">`?<span class="subst">$&#123;qs.stringify(query)&#125;</span>`</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> fetch(url, &#123;</span><br><span class="line">        method: <span class="string">'post'</span>,</span><br><span class="line">        headers: &#123;</span><br><span class="line">            <span class="string">'Content-Type'</span>: <span class="string">'application/json;charset=utf-8'</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        body: <span class="built_in">JSON</span>.stringify(data)</span><br><span class="line">    &#125;).then(<span class="function"><span class="params">res</span> =&gt;</span> res.json()).then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (res.error &amp;&amp; res.error.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">console</span>.error(<span class="string">`get: <span class="subst">$&#123;url&#125;</span>, Error: <span class="subst">$&#123;res.error&#125;</span>.`</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(res.error);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">`post: <span class="subst">$&#123;url&#125;</span> error. `</span>, err);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="components"><a href="#components" class="headerlink" title="components"></a>components</h3><p>在 components 里应该放置一些组件，比如 tapbar 等。index 文件应该作为总汇导出作用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// components/index.js</span></span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> Make &#125; <span class="keyword">from</span> <span class="string">'./make'</span>;</span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> Topbar &#125; <span class="keyword">from</span> <span class="string">'./topbar'</span>;</span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> LoadMing &#125; <span class="keyword">from</span> <span class="string">'./loading'</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="config"><a href="#config" class="headerlink" title="config"></a>config</h3><p>在 config 文件里应该放置应用的配置文件，比如应用的主题颜色等。</p>
+<p>类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// config/index.js</span></span><br><span class="line"><span class="keyword">import</span> blob <span class="keyword">from</span> <span class="string">'react-native-fetch-blob'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主题颜色</span></span><br><span class="line"><span class="keyword">const</span> _color = <span class="string">'rgba(30, 155, 255, 0.95)'</span>;</span><br><span class="line"><span class="comment">// 应用名称</span></span><br><span class="line"><span class="keyword">const</span> _appname = <span class="string">'wx store'</span>;</span><br><span class="line"><span class="comment">// 二维码存储文件目录</span></span><br><span class="line"><span class="keyword">const</span> _qrcodedir = blob.fs.dirs.DCIMDir + <span class="string">'/wxStore'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    color: _color,</span><br><span class="line">    appname: _appname,</span><br><span class="line">    qrcodedir: _qrcodedir,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> color = _color;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> appname = _appname;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> qrcodedir = _qrcodedir;</span><br></pre></td></tr></table></figure>
+<h3 id="lib"><a href="#lib" class="headerlink" title="lib"></a>lib</h3><p>在 lib 里放置一些库文件。</p>
+<h3 id="redux"><a href="#redux" class="headerlink" title="redux"></a>redux</h3><p>在 redux 里放置 redux 的文件，action，reducer 的文件名称应该与视图（views 里）名称一一对应。</p>
+<p>types.js 里放置所有的 action type 定义，类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// typse.js</span></span><br><span class="line"><span class="comment">/** 扩展状态类型 */</span></span><br><span class="line"><span class="keyword">const</span> extendState = <span class="function">(<span class="params">obj</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">Object</span>.keys(obj).forEach(<span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">        obj[key + <span class="string">'_in'</span>] = obj[key] + <span class="string">'_in'</span>;                <span class="comment">// 进行中</span></span><br><span class="line">        obj[key + <span class="string">'_fail'</span>] = obj[key] + <span class="string">'_fail'</span>;            <span class="comment">// 失败了</span></span><br><span class="line">        obj[key + <span class="string">'_success'</span>] = obj[key] + <span class="string">'_success'</span>;      <span class="comment">// 成功了</span></span><br><span class="line">        obj[key + <span class="string">'_complete'</span>] = obj[key] + <span class="string">'_complete'</span>;    <span class="comment">// 完成了</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 用户列表 */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> USER = extendState(&#123;           <span class="comment">// 扩展 type</span></span><br><span class="line">    init: <span class="string">'USER_init'</span>,                      <span class="comment">// 初次加载</span></span><br><span class="line">    refresh: <span class="string">'USER_refresh'</span>,                <span class="comment">// 刷新</span></span><br><span class="line">    loadmore: <span class="string">'USER_loadmore'</span>,              <span class="comment">// 加载更多</span></span><br><span class="line">    follow: <span class="string">'USER_follow'</span>,                  <span class="comment">// 关注列表</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>actions 文件夹里放置的所有 action 文件，而 index.js 文件负责汇总导出，类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// actions/index.js</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> _home <span class="keyword">from</span> <span class="string">'./home'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> _user <span class="keyword">from</span> <span class="string">'./user'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> homeActions = _home;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> userActions = _user;</span><br></pre></td></tr></table></figure>
+<p>reducers 文件夹里放置所有 reducers 文件，而 index.js 文件负责汇总导出，类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// reducers/index.js</span></span><br><span class="line"><span class="comment">// 全局初始状态数据</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> ROOT_INIT_STATE = &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (state = ROOT_INIT_STATE, action) =&gt; &#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">return</span> state;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// state 树分支</span></span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> home &#125; <span class="keyword">from</span> <span class="string">'./home'</span>;</span><br><span class="line"><span class="keyword">export</span> &#123; <span class="keyword">default</span> <span class="keyword">as</span> user &#125; <span class="keyword">from</span> <span class="string">'./user'</span>;</span><br></pre></td></tr></table></figure>
+<p>store.js 里进行 store 的创建，类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redux/stroe.js</span></span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    createStore,</span><br><span class="line">    combineReducers,</span><br><span class="line">    compose,</span><br><span class="line">    applyMiddleware,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"><span class="keyword">import</span> thunk <span class="keyword">from</span> <span class="string">'redux-thunk'</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> store = createStore(</span><br><span class="line">    combineReducers(&#123;</span><br><span class="line">        ...reducers</span><br><span class="line">    &#125;),</span><br><span class="line">    compose(</span><br><span class="line">        applyMiddleware(thunk),</span><br><span class="line">    )</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="resource"><a href="#resource" class="headerlink" title="resource"></a>resource</h3><p>在 resource 里主要是放置一些图片资源，JSON 资源等文件。</p>
+<h3 id="storage"><a href="#storage" class="headerlink" title="storage"></a>storage</h3><p>在 storage 里放置本地存储相关的函数，类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// storage/index.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; AsyncStorage &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> stroe = &#123;</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">get</span>(key) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">JSON</span>.parse(<span class="keyword">await</span> AsyncStorage.getItem(key));</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">set</span>(key, value) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> AsyncStorage.setItem(key, <span class="built_in">JSON</span>.stringify(value));</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">async</span> remove(key) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> AsyncStorage.removeItem(key);</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="test"><a href="#test" class="headerlink" title="test"></a>test</h3><p>在 test 目录里放置一些测试代码。</p>
+<h3 id="views"><a href="#views" class="headerlink" title="views"></a>views</h3><p>在 views 放置页面的代码。</p>
+<h3 id="应用入口"><a href="#应用入口" class="headerlink" title="应用入口"></a>应用入口</h3><p>应用入口类似下面的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; StyleSheet &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Provider &#125; <span class="keyword">from</span> <span class="string">'react-redux'</span>;</span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">'./redux/store'</span>;</span><br><span class="line"><span class="keyword">import</span> Navigator <span class="keyword">from</span> <span class="string">'./navigator'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'./functions'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 入口点</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;Provider store=&#123;store&#125;&gt;</span><br><span class="line">                &lt;Navigator /&gt;</span><br><span class="line">            &lt;<span class="regexp">/Provider&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="navigator"><a href="#navigator" class="headerlink" title="navigator"></a>navigator</h3><p>在 navigator 里维持着一个导航器。</p>
+<p>看过别人的代码，在使用 navigator.push 时，会把 view 传递过去。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Home <span class="keyword">from</span> <span class="string">'./home'</span>;</span><br><span class="line">navigator.push(&#123; <span class="attr">component</span>: Home, <span class="attr">data</span>: <span class="literal">null</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>但是发现，这样并不明智，其中就需要在 A 页面上 import B 页面，导致页面的引入不集中。</p>
+<p>在 navigator.push 时，应该不传递组件而是<strong>传递组件名称或者唯一的 id</strong>，类似的代码有：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// navigator.js</span></span><br><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; StyleSheet, View &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Navigator &#125; <span class="keyword">from</span> <span class="string">'react-native-deprecated-custom-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> Main <span class="keyword">from</span> <span class="string">'./main'</span>;</span><br><span class="line"><span class="keyword">import</span> About <span class="keyword">from</span> <span class="string">'./views/about'</span>;</span><br><span class="line"><span class="keyword">import</span> User <span class="keyword">from</span> <span class="string">'./views/user'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 导航类</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">MyNavigatior</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 页面表</span></span><br><span class="line">    views = &#123;</span><br><span class="line">        <span class="string">'Main'</span>: Main,</span><br><span class="line">        <span class="string">'User'</span>: User,</span><br><span class="line">        <span class="string">'About'</span>: About,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 导航动画</span></span><br><span class="line">    configureScene = <span class="function">(<span class="params">route, navigator</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> (route.animated) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'top'</span>:</span><br><span class="line">                <span class="keyword">return</span> Navigator.SceneConfigs.FloatFromBottomAndroid;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'bottom'</span>:</span><br><span class="line">                <span class="keyword">return</span> Navigator.SceneConfigs.VerticalDownSwipeJump;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'left'</span>:</span><br><span class="line">                <span class="keyword">return</span> Navigator.SceneConfigs.PushFromLeft;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">'right'</span>:</span><br><span class="line">                <span class="keyword">return</span> Navigator.SceneConfigs.FloatFromRight;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> Navigator.SceneConfigs.PushFromRight;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 大导航</span></span><br><span class="line">    renderScene = <span class="function">(<span class="params">route, navigator</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.navigator = navigator;</span><br><span class="line">        <span class="keyword">const</span> Views = <span class="keyword">this</span>.views[route.name];</span><br><span class="line">        <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">Views</span> <span class="attr">data</span>=<span class="string">&#123;route.data&#125;</span> <span class="attr">navigator</span>=<span class="string">&#123;navigator&#125;</span> /&gt;</span></span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;$.container&#125;&gt;</span><br><span class="line">                &lt;Navigator</span><br><span class="line">                    <span class="comment">// 初始化是 main.js</span></span><br><span class="line">                    initialRoute=&#123;&#123; <span class="attr">name</span>: <span class="string">'Main'</span>, <span class="attr">data</span>: <span class="literal">null</span> &#125;&#125;</span><br><span class="line">                    renderScene=&#123;<span class="keyword">this</span>.renderScene&#125;</span><br><span class="line">                    configureScene=&#123;<span class="keyword">this</span>.configureScene&#125;</span><br><span class="line">                    /&gt;</span><br><span class="line">            &lt;<span class="regexp">/View&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这样做的好处是，所有的页面引入，可以集中管理。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>目录结构的组织形式并不需要最好的，而是需要最适合自己的，更多的还是要根据业务逻辑进行抽象分离。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.865Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/08/React Native/React Native 目录结构最佳实践/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/08/React Native/React Native 目录结构最佳实践/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">使用 Electron-vue 构建桌面应用</h4>
+        <h4 class="summary">对于 Electron 开发来说，它并没有提供类似 vue-cli 的搭手架工具，然而早在之前就有人开发了Electro...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 文件操作 - fetch-blob</h4>
+        <h4 class="summary">文件操作之前使用react-native-fs来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/01/Go/小谈 Go 中闭包与回调/">
+    
+    
+    <title>小谈 Go 中闭包与回调 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Javascript 里都有一个非常明显的特性，那就是闭包与回调。在 Go 里也有这种特性，它通过灵活的方式进行展示。 闭包闭包是一个特殊的结构，通常在一个函数（A）内返回另一个函数（B），这个返回的函数（A）引用了它所在的函数（B）里的变量。那么就构成了一个闭包结构。">
+<meta name="keywords" content="后端,Go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小谈 Go 中闭包与回调">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/01/Go/小谈 Go 中闭包与回调/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Javascript 里都有一个非常明显的特性，那就是闭包与回调。在 Go 里也有这种特性，它通过灵活的方式进行展示。 闭包闭包是一个特殊的结构，通常在一个函数（A）内返回另一个函数（B），这个返回的函数（A）引用了它所在的函数（B）里的变量。那么就构成了一个闭包结构。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.819Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="小谈 Go 中闭包与回调">
+<meta name="twitter:description" content="前言Javascript 里都有一个非常明显的特性，那就是闭包与回调。在 Go 里也有这种特性，它通过灵活的方式进行展示。 闭包闭包是一个特殊的结构，通常在一个函数（A）内返回另一个函数（B），这个返回的函数（A）引用了它所在的函数（B）里的变量。那么就构成了一个闭包结构。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">小谈 Go 中闭包与回调</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">小谈 Go 中闭包与回调</h1>
+
+        <div class="meta-rest">
+            <h1>小谈 Go 中闭包与回调</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-01-05T11:35:19.000Z" itemprop="datePublished" class="page-time">
+    2018-01-05
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Go/">Go</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#闭包"><span class="post-toc-number">2.</span> <span class="post-toc-text">闭包</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#回调"><span class="post-toc-number">3.</span> <span class="post-toc-text">回调</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#回调列表"><span class="post-toc-number">4.</span> <span class="post-toc-text">回调列表</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#扩展"><span class="post-toc-number">5.</span> <span class="post-toc-text">扩展</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Go/小谈 Go 中闭包与回调"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">小谈 Go 中闭包与回调</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 01 月 05 日 19:35" datetime="2018-01-05T11:35:19.000Z"  itemprop="datePublished">
+    2018-01-05
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Go/">Go</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1107</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Javascript 里都有一个非常明显的特性，那就是闭包与回调。在 Go 里也有这种特性，它通过灵活的方式进行展示。</p>
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>闭包是一个特殊的结构，通常在一个函数（A）内返回另一个函数（B），这个返回的函数（A）引用了它所在的函数（B）里的变量。那么就构成了一个闭包结构。</p>
+<a id="more"></a>
+<p>例如 Javascript 中的闭包：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Adder</span>(<span class="params">n</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> sum = n;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">x</span>) </span>&#123;</span><br><span class="line">        sum += x;</span><br><span class="line">        <span class="keyword">return</span> sum;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> adder = Adder(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">adder(<span class="number">1</span>);   <span class="comment">// 1</span></span><br><span class="line">adder(<span class="number">2</span>);   <span class="comment">// 3</span></span><br><span class="line">adder(<span class="number">3</span>);   <span class="comment">// 6</span></span><br><span class="line">adder(<span class="number">4</span>);   <span class="comment">// 10</span></span><br></pre></td></tr></table></figure>
+<p>在上面，定义了一个 Adder 闭包函数，这个函数返回了一个新的函数，新的函数不断修改闭包里面的值。<br>闭包所带来的好处很明显，就是提供一个封闭的空间，在上面 n 就是一个<code>私有变量</code>，外部不能访问，仅靠闭包返回的函数进行修改。<br>往往在 Javascript 里定义类结构，都会看到闭包的身影，因为它实在太重要了。</p>
+<p>那么来看看 Go 里如何定义闭包，实际上结构是一样的。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Adder</span><span class="params">(n <span class="keyword">int</span>)</span> <span class="title">func</span><span class="params">(x <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> sum = n</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">        sum += n</span><br><span class="line">        <span class="keyword">return</span> sum</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">adder := Adder(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">adder(<span class="number">1</span>);   <span class="comment">// 1</span></span><br><span class="line">adder(<span class="number">2</span>);   <span class="comment">// 3</span></span><br><span class="line">adder(<span class="number">3</span>);   <span class="comment">// 6</span></span><br><span class="line">adder(<span class="number">4</span>);   <span class="comment">// 10</span></span><br></pre></td></tr></table></figure>
+<p>Go 的闭包与 Javascript 不同的是，在 Go 里需要指定参数类型，返回类，因为它是强类型语言，除此之外，闭包的结构几乎是一样的。</p>
+<p>但是有一点需要注意的，Go 只允许返回匿名函数，也就是说不能在函数内定义函数声明。</p>
+<p>比如，上面的代码改为：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Adder</span><span class="params">(n <span class="keyword">int</span>)</span> <span class="title">func</span><span class="params">(<span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> sum = n</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">add</span><span class="params">(x <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">        sum += x</span><br><span class="line">        <span class="keyword">return</span> sum</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> add</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种结构在 Javascript 里是没有问题的，但是在 Go 里会报错，原因在于 Go 不能写嵌套函数。</p>
+<h2 id="回调"><a href="#回调" class="headerlink" title="回调"></a>回调</h2><p>回调（callback）模式是一个非常好的模式，它可以让在一个函数里嵌入另一个函数。</p>
+<p>比如在 Javascript 里，我们可以轻易的利用回调函数来计算某个函数的运行时间。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">runTime</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> start = <span class="built_in">Date</span>.now();</span><br><span class="line">    <span class="keyword">typeof</span> callback === <span class="string">'function'</span> &amp;&amp; callback();</span><br><span class="line">    <span class="keyword">const</span> end = <span class="built_in">Date</span>.now();</span><br><span class="line">    <span class="built_in">console</span>.log((end - start) + <span class="string">' ms'</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 Go 里同样也可以利用回调函数实现这种功能，那么来看看如何实现。</p>
+<p>非常简单的在参数里指定是函数类型，因为 Go 是强类型语言，所以不能像 Javascript 那样只写一个参数名称即可，而是需要指明回调函数类型。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">runTime</span><span class="params">(callback <span class="keyword">func</span>()</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> start = time.Now()</span><br><span class="line">    callback()</span><br><span class="line">    fmt.Println(time.Since(start))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    runTime(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1e8</span>; i++ &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在整个形式结构上基本和 Javascript 差不多，唯一不同的是需要指定回调参数类型。<br>下面就为通过回调的方式定义一个类似 Javascript 中的 filter 函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">runTime</span><span class="params">(callback <span class="keyword">func</span>()</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> start = time.Now()</span><br><span class="line">    callback()</span><br><span class="line">    fmt.Println(time.Since(start))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">filter</span><span class="params">(arr []<span class="keyword">int</span>, callback <span class="keyword">func</span>(item <span class="keyword">int</span>, index <span class="keyword">int</span>, list []<span class="keyword">int</span>)</span> <span class="title">bool</span>) []<span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> _arr = <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(arr); i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> callback(arr[i], i, arr) &#123;</span><br><span class="line">            _arr = <span class="built_in">append</span>(_arr, arr[i])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> _arr</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    arr := []<span class="keyword">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>&#125;</span><br><span class="line">    arr = filter(arr, <span class="function"><span class="keyword">func</span><span class="params">(item <span class="keyword">int</span>, index <span class="keyword">int</span>, list []<span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">        <span class="keyword">return</span> item % <span class="number">3</span> == <span class="number">0</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    fmt.Println(arr) <span class="comment">// [3, 6, 9]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为 Go 是强类型语言，所有回调函数参数需要指定类型，返回值（如果有）也需要指定类型才可以。<br>目前 Go 还没有泛型，所有对于不同类型的数组类型还是自己定义 filter 好。</p>
+<h2 id="回调列表"><a href="#回调列表" class="headerlink" title="回调列表"></a>回调列表</h2><p>在 Go 里和 ES6 一样可以使用 <code>...</code> 表示多参数列表。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> HandlerFunc <span class="function"><span class="keyword">func</span><span class="params">(*Context)</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">get</span><span class="params">(handlers ...HandlerFunc)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(handlers); i++ &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>我们可以利用闭包与回调，在 Go 上定义一个类型 promise 的结构。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Any <span class="keyword">interface</span>&#123;&#125;          <span class="comment">// 接口</span></span><br><span class="line"><span class="keyword">type</span> Callback <span class="function"><span class="keyword">func</span><span class="params">(any Any)</span>   // 回调函数</span></span><br><span class="line"><span class="keyword">type</span> Promise <span class="keyword">struct</span>&#123;&#125;         <span class="comment">// promise</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// this 不是 this，this 只是一个参数名称</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(this *Promise)</span> <span class="title">new</span><span class="params">(cb <span class="keyword">func</span>(p *Promise)</span>) *<span class="title">Promise</span></span> &#123;</span><br><span class="line">    cb(this)</span><br><span class="line">    <span class="keyword">return</span> this</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(this *Promise)</span> <span class="title">resolve</span><span class="params">(any Any, cb Callback)</span> *<span class="title">Promise</span></span> &#123;</span><br><span class="line">    cb(any)</span><br><span class="line">    <span class="keyword">return</span> this</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(this *Promise)</span> <span class="title">reject</span><span class="params">(any Any, cb Callback)</span> *<span class="title">Promise</span></span> &#123;</span><br><span class="line">    cb(any)</span><br><span class="line">    <span class="keyword">return</span> this</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> p = <span class="built_in">new</span>(Promise)</span><br><span class="line"></span><br><span class="line">    p.<span class="built_in">new</span>(<span class="function"><span class="keyword">func</span><span class="params">(this *Promise)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="number">1</span> &gt; <span class="number">2</span> &#123;</span><br><span class="line">            this.resolve(<span class="literal">true</span>, <span class="function"><span class="keyword">func</span><span class="params">(any Any)</span></span> &#123;</span><br><span class="line">                fmt.Println(<span class="string">"resolve"</span>, any)</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            this.reject(<span class="literal">false</span>, <span class="function"><span class="keyword">func</span><span class="params">(any Any)</span></span> &#123;</span><br><span class="line">                fmt.Println(<span class="string">"reject"</span>, any)</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.819Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/01/Go/小谈 Go 中闭包与回调/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/01/Go/小谈 Go 中闭包与回调/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Go/">Go</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">GraphQL 结合 Koa 实践体验</h4>
+        <h4 class="summary">前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 GraphQL 与 Koa...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/01/Go/小谈 Go 中的包与模块/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">小谈 Go 中的包与模块</h4>
+        <h4 class="summary">任何包系统设计的目的都是为了简化大型程序的设计和维护工作，通过将一组相关的特性放进一个独立的单元以便于理解和更新，在每个...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

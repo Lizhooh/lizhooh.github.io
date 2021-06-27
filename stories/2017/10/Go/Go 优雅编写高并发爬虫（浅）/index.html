@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/10/Go/Go 优雅编写高并发爬虫（浅）/">
+    
+    
+    <title>Go 优雅编写高并发爬虫（浅） | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Go 语言是一种并发编程语言，在 Go 里有一个非常重要的关键字 go（goroutine），一般我们可以用它做一些异步，并发的任务。下面记录着如何使用 Go 来优雅的编写爬虫，其中有些内容使用 Nodejs 来类比。">
+<meta name="keywords" content="后端,Go,爬虫">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 优雅编写高并发爬虫（浅）">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/10/Go/Go 优雅编写高并发爬虫（浅）/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Go 语言是一种并发编程语言，在 Go 里有一个非常重要的关键字 go（goroutine），一般我们可以用它做一些异步，并发的任务。下面记录着如何使用 Go 来优雅的编写爬虫，其中有些内容使用 Nodejs 来类比。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171010144435.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171010145722.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171010163331.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171010155857.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.817Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 优雅编写高并发爬虫（浅）">
+<meta name="twitter:description" content="前言Go 语言是一种并发编程语言，在 Go 里有一个非常重要的关键字 go（goroutine），一般我们可以用它做一些异步，并发的任务。下面记录着如何使用 Go 来优雅的编写爬虫，其中有些内容使用 Nodejs 来类比。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/10/20171010144435.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Go 优雅编写高并发爬虫（浅）</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Go 优雅编写高并发爬虫（浅）</h1>
+
+        <div class="meta-rest">
+            <h1>Go 优雅编写高并发爬虫（浅）</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-10-10T06:40:07.000Z" itemprop="datePublished" class="page-time">
+    2017-10-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Query"><span class="post-toc-number">2.</span> <span class="post-toc-text">Query</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小说列表数据"><span class="post-toc-number">3.</span> <span class="post-toc-text">小说列表数据</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#尝试一次"><span class="post-toc-number">4.</span> <span class="post-toc-text">尝试一次</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小说详细信息"><span class="post-toc-number">5.</span> <span class="post-toc-text">小说详细信息</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#并发控制"><span class="post-toc-number">6.</span> <span class="post-toc-text">并发控制</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#多核并行化"><span class="post-toc-number">7.</span> <span class="post-toc-text">多核并行化</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#数据存储"><span class="post-toc-number">8.</span> <span class="post-toc-text">数据存储</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Nodejs-与-Go-通信"><span class="post-toc-number">9.</span> <span class="post-toc-text">Nodejs 与 Go 通信</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#child-process"><span class="post-toc-number">9.1.</span> <span class="post-toc-text">child_process</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HTTP-Server"><span class="post-toc-number">9.2.</span> <span class="post-toc-text">HTTP Server</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">10.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Go/Go 优雅编写高并发爬虫（浅）"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Go 优雅编写高并发爬虫（浅）</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 10 月 10 日 14:40" datetime="2017-10-10T06:40:07.000Z"  itemprop="datePublished">
+    2017-10-10
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2662</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  27.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Go 语言是一种并发编程语言，在 Go 里有一个非常重要的关键字 <code>go</code>（goroutine），一般我们可以用它做一些异步，并发的任务。下面记录着如何使用 Go 来优雅的编写爬虫，其中有些内容使用 Nodejs 来类比。</p>
+<a id="more"></a>
+<p>整个爬虫，都围绕着一个小说网站：<a href="https://www.readnovel.com/" target="_blank" rel="noopener">https://www.readnovel.com/</a></p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171010144435.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<blockquote>
+<p>!! 注意，小说阅读网的 CSS 大改了一次，已经不适合笔者在编写此文章时的爬虫。</p>
+</blockquote>
+<h2 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h2><p>在 Nodejs 里我们可以使用<code>Cheerio</code>来解析 HTML。而在 Go 里，我们可以使用<code>goquery</code>来解析 HTML，它同样有类似<code>JQuery</code>的语法，而且解析速度非常快。</p>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/PuerkitoBio/goquery</span><br></pre></td></tr></table></figure>
+<p>其基本使用与 JQuery 无异。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// goquery.NewDocumentFromReader(strings.NewReader(s))</span></span><br><span class="line">doc, _ := goquery.NewDocument(<span class="string">"http://metalsucks.net"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 go 里，不能用带有 $ 作为变量名</span></span><br><span class="line">doc.Find(<span class="string">".sidebar-reviews article .content-block"</span>).Each(</span><br><span class="line">    <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>, s *goquery.Selection)</span></span> &#123;</span><br><span class="line">        band := s.Find(<span class="string">"a"</span>).Text()</span><br><span class="line">        title := s.Find(<span class="string">"i"</span>).Text()</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>Go 里变量定义了不使用会报错，<code>_</code>是一个占位符。<br>一般来说，Go 会以 obj.NewXXX 命名的函数名为构造函数。<br>goquery.NewDocument 是一个多步骤函数，它包括了 http 请求和 doc 解析数据两部分。<br>等价于 Nodejs 这两步：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> html = <span class="keyword">await</span> fetch(url).then(<span class="function"><span class="params">res</span> =&gt;</span> res.text());</span><br><span class="line"><span class="keyword">const</span> $ = cheerio.load(html);</span><br></pre></td></tr></table></figure>
+<h2 id="小说列表数据"><a href="#小说列表数据" class="headerlink" title="小说列表数据"></a>小说列表数据</h2><p>接下来，获取小说列表的数据。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171010145722.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>在 Nodejs 里，我们可以轻易的使用 Object 来定义一个数据对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Book = &#123;</span><br><span class="line">    id: <span class="string">''</span>,          <span class="comment">// id</span></span><br><span class="line">    name: <span class="string">''</span>,        <span class="comment">// 书名</span></span><br><span class="line">    author: <span class="string">''</span>,      <span class="comment">// 作者</span></span><br><span class="line">    tag: <span class="string">''</span>,         <span class="comment">// 类型</span></span><br><span class="line">    status: <span class="string">''</span>,      <span class="comment">// 状态</span></span><br><span class="line">    words: <span class="string">''</span>,       <span class="comment">// 字数</span></span><br><span class="line">    summary: <span class="string">''</span>,     <span class="comment">// 介绍</span></span><br><span class="line">    image: <span class="string">''</span>,       <span class="comment">// 配图</span></span><br><span class="line">    url: <span class="string">''</span> ,        <span class="comment">// 链接</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而在 Go 里只能使用<strong>结构体</strong>来定义数据对象。<br>下面定义了一个数据类型为 <code>Book</code>，用来存储每本书的基础数据。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义数据类型</span></span><br><span class="line"><span class="keyword">type</span> Book <span class="keyword">struct</span> &#123;</span><br><span class="line">    Id      <span class="keyword">string</span>   <span class="comment">// id</span></span><br><span class="line">    Name    <span class="keyword">string</span>   <span class="comment">// 书名</span></span><br><span class="line">    Author  <span class="keyword">string</span>   <span class="comment">// 作者</span></span><br><span class="line">    Tag     <span class="keyword">string</span>   <span class="comment">// 类型</span></span><br><span class="line">    Status  <span class="keyword">string</span>   <span class="comment">// 状态</span></span><br><span class="line">    Words   <span class="keyword">string</span>   <span class="comment">// 字数</span></span><br><span class="line">    Summary <span class="keyword">string</span>   <span class="comment">// 介绍</span></span><br><span class="line">    Image   <span class="keyword">string</span>   <span class="comment">// 配图</span></span><br><span class="line">    Url     <span class="keyword">string</span>   <span class="comment">// 链接</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>属性名大写开头，JSON 序列化需要大写开头。</p>
+<blockquote>
+<p>在 Go 里，小写开头的属性/方法都会视为私有属性/方法，大写开头表示是公有的属性/方法、</p>
+</blockquote>
+<p>实际上 Go 把<strong>结构体</strong>当成了类来使用，但它没有构造函数，可以使用 new 来实例化一个对象，得到是一个<strong>指针</strong>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">book1 := <span class="built_in">new</span>(Book)  <span class="comment">// book1 是指针</span></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"><span class="keyword">var</span> book2 Book      <span class="comment">// book2 不是指针</span></span><br></pre></td></tr></table></figure>
+<p>接着编写一个函数，主要负责<strong>解析 HTML</strong>，获取数据。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">pageListData</span><span class="params">(url <span class="keyword">string</span>, bookList *[]Book)</span></span> &#123;</span><br><span class="line">    html, _ := goquery.NewDocument(url)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 出错了</span></span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Println(<span class="string">"error:"</span>, url, err)</span><br><span class="line">        c &lt;- <span class="number">1</span>  <span class="comment">// 发消息：我执行完啦！</span></span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    html.Find(<span class="string">"div.right-book-list li"</span>).Each(</span><br><span class="line">        <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>, s *goquery.Selection)</span></span> &#123;</span><br><span class="line">            book := <span class="built_in">new</span>(Book) <span class="comment">// 实例化，book 是指针</span></span><br><span class="line"></span><br><span class="line">            book.Name = s.Find(<span class="string">".book-info &gt; h3 &gt; a"</span>).Text()</span><br><span class="line">            book.Author = s.Find(<span class="string">".book-info &gt; h4 &gt; a"</span>).Text()</span><br><span class="line">            book.Tag = s.Find(<span class="string">".book-info &gt; .tag &gt; .org"</span>).Text()</span><br><span class="line">            book.Status = s.Find(<span class="string">".book-info &gt; .tag &gt; .red"</span>).Text()</span><br><span class="line">            book.Words = s.Find(<span class="string">".book-info &gt; .tag &gt; .blue"</span>).Text()</span><br><span class="line">            book.Summary = s.Find(<span class="string">".book-info &gt; .intro"</span>).Text()</span><br><span class="line">            book.Image, _ = s.Find(<span class="string">".book-img &gt; a &gt; img"</span>).Attr(<span class="string">"src"</span>)</span><br><span class="line">            book.Image = <span class="string">"https:"</span> + book.Image</span><br><span class="line">            book.Url, _ = s.Find(<span class="string">".book-img &gt; a"</span>).Attr(<span class="string">"href"</span>)</span><br><span class="line">            book.Url = HOST + book.Url</span><br><span class="line">            book.Id = regexp.MustCompile(<span class="string">`\d+`</span>).FindString(Book.Url)</span><br><span class="line"></span><br><span class="line">            *bookList = <span class="built_in">append</span>(*bookList, *book)</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">    c &lt;- <span class="number">1</span>      <span class="comment">// 发消息：我执行完啦！</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 pageListData 里，传递 url 与 bookList 。因为后面需要使用 <code>goroutine</code>，所以不同通过 return 来接收数据，只能通过引用传递来接收数据。</p>
+<p>在<code>Go</code>里的指针与<code>C++</code>差不多，在参数列表里 <code>*</code> 代表着传递地址，也就是说参数 bookList 是一个数组的地址，想要获取它的值则是 <code>*bookList</code>。<code>[]Book</code> 代表着这是一个类型为 Book 的数组，<code>*[]Book</code>代表传递的是一个数组的地址。</p>
+<p>c 是一个信号量，用于控制异步流程。HOST 就是域名，它们在<strong>全局定义</strong>着：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> HOST <span class="keyword">string</span> = <span class="string">"https://www.readnovel.com"</span></span><br><span class="line"><span class="keyword">var</span> c <span class="keyword">chan</span> <span class="keyword">int</span>              <span class="comment">// 信号量</span></span><br></pre></td></tr></table></figure>
+<h2 id="尝试一次"><a href="#尝试一次" class="headerlink" title="尝试一次"></a>尝试一次</h2><p>在 main 函数里编写：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>) <span class="comment">// 缓冲 10 个</span></span><br><span class="line">    start := time.Now()</span><br><span class="line">    bookList := <span class="built_in">make</span>([]Book, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">go</span> pageListData(<span class="string">"https://www.readnovel.com/all?"</span>, &amp;bookList)</span><br><span class="line">    &lt;-c                    <span class="comment">// 等待异步完成</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输出数据</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(bookList); i++ &#123;</span><br><span class="line">        book := bookList[i]</span><br><span class="line">        fmt.Printf(<span class="string">"%02d %s - %s\n"</span>, i + <span class="number">1</span>, book.Name, book.Words)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fmt.Println(<span class="string">"[完成]"</span>, time.Since(start))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面，通过使用 <code>&amp;</code> 来获取数组的地址（引用传递），最后输出小说的书名与字数。</p>
+<blockquote>
+<p><code>&lt;-</code> 操作符用来接受和发送消息 <code>ch &lt;- 48</code>，发送 48 进入管道，<code>&lt;-ch</code> 从管道接收消息。</p>
+</blockquote>
+<p><strong>结果：</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">01</span> 重生八零俏佳妻 - <span class="number">175.73</span>万</span><br><span class="line"><span class="number">02</span> 首席的独宠新娘 - <span class="number">429.11</span>万</span><br><span class="line"><span class="number">03</span> 农媳V5：军长别上瘾 - <span class="number">168.97</span>万</span><br><span class="line"><span class="number">04</span> 新婚无爱，替罪前妻 - <span class="number">235.18</span>万</span><br><span class="line"><span class="number">05</span> 国民男神爱上我 - <span class="number">299.05</span>万</span><br><span class="line"><span class="number">06</span> 腹黑总裁要抱抱 - <span class="number">322.17</span>万</span><br><span class="line"><span class="number">07</span> 重生之嫡女谋嫁 - <span class="number">224.7</span>万</span><br><span class="line"><span class="number">08</span> 贵女种田忙 - <span class="number">311.97</span>万</span><br><span class="line"><span class="number">09</span> 绝色狂医：魔神大人，轻点撩 - <span class="number">260.02</span>万</span><br><span class="line"><span class="number">10</span> 豪门暖婚蜜爱 - <span class="number">501.3</span>万</span><br><span class="line">[完成] <span class="number">284.0185</span>ms</span><br></pre></td></tr></table></figure>
+<h2 id="小说详细信息"><a href="#小说详细信息" class="headerlink" title="小说详细信息"></a>小说详细信息</h2><p>当获取完小说列表数据项时，就可以根据 url 继续获取小说的详细信息，实现原理类似，这里略过。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171010163331.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="并发控制"><a href="#并发控制" class="headerlink" title="并发控制"></a>并发控制</h2><p>Go 里高并发，非 <code>goroutine</code> 莫属，每次使用 go 关键件时，都会创建一个<strong>协程</strong>来执行指定的函数。</p>
+<p>先在<code>func main</code>里定义一些变量来辅佐流程控制：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// func main</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> MAXNUM <span class="keyword">int</span> = <span class="number">200</span>       <span class="comment">// 最大并发</span></span><br><span class="line"><span class="keyword">const</span> MAXPAGE <span class="keyword">int</span> = <span class="number">2957</span>     <span class="comment">// 最大页码</span></span><br><span class="line"><span class="keyword">const</span> pageSize <span class="keyword">int</span> = <span class="number">30</span>      <span class="comment">// 每页的列表项个数</span></span><br><span class="line"><span class="keyword">var</span> num <span class="keyword">int</span> = <span class="number">0</span>              <span class="comment">// 当前并发个数</span></span><br><span class="line"><span class="keyword">var</span> page <span class="keyword">int</span> = <span class="number">1</span>             <span class="comment">// 当前页码位置</span></span><br><span class="line"></span><br><span class="line">c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10000</span>)    <span class="comment">// 1w 个缓冲量</span></span><br><span class="line">bookList := <span class="built_in">make</span>([]Book, <span class="number">0</span>)</span><br><span class="line">timeAll := time.Now()        <span class="comment">// 计算总时间</span></span><br></pre></td></tr></table></figure>
+<p>上面，设定了并发数量最大为 200 <code>\\(&quot;▔□▔)\/</code>（Go 说，一点压力也没有）。一共预计 30 * 2975 = 89250 本小说。</p>
+<p>接着，使用一个<strong>死循环</strong>，结合  goroutine + channel 完美的实现异步流程控制。（在 Go 里没有 while，用 for { } 就可以表示死循环了）</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// func main</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="comment">// 开始时间</span></span><br><span class="line">    start := time.Now()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Go 没有三元运算符</span></span><br><span class="line">    <span class="keyword">if</span> MAXPAGE - page &gt; MAXNUM &#123;</span><br><span class="line">        num = MAXNUM</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        num = MAXPAGE - page</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 结束标志</span></span><br><span class="line">    <span class="keyword">if</span> num &lt;= <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 并发任务</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= num; i++ &#123;</span><br><span class="line">        <span class="comment">// 使用 strconv 把 int 转为 string</span></span><br><span class="line">        url := <span class="string">"https://www.readnovel.com/all?pageNum="</span> +</span><br><span class="line">            strconv.Itoa(i + page) + <span class="string">"&amp;pageSize="</span> +</span><br><span class="line">            strconv.Itoa(pageSize)</span><br><span class="line">        <span class="keyword">go</span> pageListData(url, &amp;bookList)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等待</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; num; i++ &#123;</span><br><span class="line">        &lt;-c</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输出信息</span></span><br><span class="line">    fmt.Println(<span class="string">"[完成]"</span>, page, <span class="string">"-"</span>, page + num, time.Since(start), <span class="string">"并发数："</span>, num)</span><br><span class="line"></span><br><span class="line">    page += num</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(<span class="string">"[全部完成] 总共用时："</span>, time.Since(timeAll), <span class="string">"，一共："</span>, <span class="built_in">len</span>(bookList), <span class="string">"本书"</span>)</span><br></pre></td></tr></table></figure>
+<p>goroutine <code>200</code>并发量，满网速（20 M）的抓取，其中没有出现过错误。（果然”够浪”）</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171010155857.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[完成] <span class="number">1</span> - <span class="number">201</span> <span class="number">3.5732044</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">201</span> - <span class="number">401</span> <span class="number">2.2411282</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">401</span> - <span class="number">601</span> <span class="number">2.2151267</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">601</span> - <span class="number">801</span> <span class="number">2.3481343</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">801</span> - <span class="number">1001</span> <span class="number">2.5131437</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">1001</span> - <span class="number">1201</span> <span class="number">2.5111436</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">1201</span> - <span class="number">1401</span> <span class="number">2.7531575</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">1401</span> - <span class="number">1601</span> <span class="number">1.9311105</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">1601</span> - <span class="number">1801</span> <span class="number">2.8741644</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">1801</span> - <span class="number">2001</span> <span class="number">2.3231328</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">2001</span> - <span class="number">2201</span> <span class="number">2.3701356</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">2201</span> - <span class="number">2401</span> <span class="number">3.3451913</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">2401</span> - <span class="number">2601</span> <span class="number">2.3931368</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">2601</span> - <span class="number">2801</span> <span class="number">2.2741301</span>s 并发数： <span class="number">200</span></span><br><span class="line">[完成] <span class="number">2801</span> - <span class="number">2957</span> <span class="number">2.0871193</span>s 并发数： <span class="number">156</span></span><br><span class="line">[全部完成] 总共用时： <span class="number">37.7601598</span>s ，一共： <span class="number">88093</span> 本书</span><br></pre></td></tr></table></figure>
+<h2 id="多核并行化"><a href="#多核并行化" class="headerlink" title="多核并行化"></a>多核并行化</h2><p>默认情况下，Go 只会使用一个 CPU 内核来执行 goroutine。</p>
+<p>可以使用<code>runtime</code>模块，开启多核运行来实现多核并行化。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cpuNummber := runtime.NumCPU()  <span class="comment">// cpu 个数</span></span><br><span class="line">runtime.GOMAXPROCS(<span class="number">2</span>)           <span class="comment">// 最多使用 2 个核</span></span><br></pre></td></tr></table></figure>
+<p>不过，200 并发量只占用了 CPU（20% - 30%），更多出现的情况是网速满了，导致 CPU 更多的是在等待网络 IO。<br>所以，开启多核并行化并没有什么明显提升的效果，一般只有单个 CPU 出现瓶颈时才考虑使用多核并行化。</p>
+<h2 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h2><p>在 Go 里数据存储方面还是比较复杂的，特别是对 JSON 的支持不好。这里只是把数据存储为 json 文件。</p>
+<p>需要对类型添加 <code>tag</code>，告诉<code>json.Marshal</code>，序列化映射的内容。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Go 的 json 的序列化有病，如果是小写名称，就不能序列化，如果想显示小写，就需要写 `tag`</span></span><br><span class="line"><span class="keyword">type</span> Book <span class="keyword">struct</span> &#123;</span><br><span class="line">    Id      <span class="keyword">string</span>  <span class="string">`json:"id"`</span></span><br><span class="line">    Name    <span class="keyword">string</span>  <span class="string">`json:"name"`</span></span><br><span class="line">    Author  <span class="keyword">string</span>  <span class="string">`json:"author"`</span></span><br><span class="line">    Tag     <span class="keyword">string</span>  <span class="string">`json:"tag"`</span></span><br><span class="line">    Status  <span class="keyword">string</span>  <span class="string">`json:"status"`</span></span><br><span class="line">    Words   <span class="keyword">string</span>  <span class="string">`json:"words"`</span></span><br><span class="line">    Summary <span class="keyword">string</span>  <span class="string">`json:"summary"`</span></span><br><span class="line">    Image   <span class="keyword">string</span>  <span class="string">`json:"image"`</span></span><br><span class="line">    Url     <span class="keyword">string</span>  <span class="string">`json:"url"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用来存储数组</span></span><br><span class="line"><span class="keyword">type</span> BList <span class="keyword">struct</span> &#123;</span><br><span class="line">    List []Book  <span class="string">`json:"list"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后，通过文件读写，把数据写进 data.json 里：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// func main</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// var blist BList</span></span><br><span class="line"><span class="comment">// blist.List = bookList[0:3]      // 这里只取 0,1,2,3</span></span><br><span class="line"></span><br><span class="line">data, _ := json.Marshal(&amp;bookList[<span class="number">0</span>:<span class="number">3</span>]) <span class="comment">// 序列化</span></span><br><span class="line"></span><br><span class="line">file, err := os.Create(<span class="string">"./data.json"</span>)</span><br><span class="line">file.WriteString(<span class="keyword">string</span>(data))</span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"><span class="comment">// err := ioutil.WriteFile("./data.json", data, 0)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Println(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后看到的 json 文件结构应该类似：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">    <span class="attr">"id"</span>: <span class="string">"6233251403829601"</span>,</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"重生八零俏佳妻"</span>,</span><br><span class="line">    <span class="attr">"author"</span>: <span class="string">"江山一顾"</span>,</span><br><span class="line">    <span class="attr">"tag"</span>: <span class="string">"现代言情"</span>,</span><br><span class="line">    <span class="attr">"status"</span>: <span class="string">"连载中"</span>,</span><br><span class="line">    <span class="attr">"words"</span>: <span class="string">"175.73万"</span>,</span><br><span class="line">    <span class="attr">"summary"</span>: <span class="string">"前世，盛宁懵懂无知，是从小背负不堪名声的'坏人'。（省略了）"</span>,</span><br><span class="line">    <span class="attr">"image"</span>: <span class="string">"https://qidian.qpic.cn/qdbimg/349573/c_6233251403829601/90"</span>,</span><br><span class="line">    <span class="attr">"url"</span>: <span class="string">"https://www.readnovel.com/book/6233251403829601"</span></span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+<p>读取 json 文件：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bytes, _ := ioutil.ReadFile(<span class="string">"./data.json"</span>)</span><br><span class="line">json.Unmarshal(bytes, &amp;bookList)</span><br></pre></td></tr></table></figure>
+<h2 id="Nodejs-与-Go-通信"><a href="#Nodejs-与-Go-通信" class="headerlink" title="Nodejs 与 Go 通信"></a>Nodejs 与 Go 通信</h2><p>有时候，只想把<strong>密集的计算</strong>任务交给 Go 去处理，而 Nodejs 处理负责发起任务，接收任务结果，处理后序事情。比如，爬虫部分由 Go 来完成，数据处理由 Nodejs 去完成。</p>
+<p>这里就涉及了一个 Nodejs 与 Go 通信的问题。Nodejs 与 Go 通信的方式有很多中，大多数都是通过网络协议或者进程信道来传递。</p>
+<h3 id="child-process"><a href="#child-process" class="headerlink" title="child_process"></a>child_process</h3><p>在 Nodejs 里，可以通过 <code>child_process</code> 模块创建子进程来运行 Go 编译后的程序，通过 <code>stdout</code> 来传递数据，这种方式不推荐，调试起来非常困难。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> exec = <span class="built_in">require</span>(<span class="string">'child_process'</span>).exec;</span><br><span class="line">exec(<span class="string">`./go-spider.exe --arg1 a --arg2 b`</span>, (err, stdout, stderr) =&gt; &#123;</span><br><span class="line">    err &amp;&amp; <span class="built_in">console</span>.log(<span class="string">'err'</span>, err);</span><br><span class="line">    stdout &amp;&amp; <span class="built_in">console</span>.log(<span class="string">'stdout'</span>, stdout);</span><br><span class="line">    stderr &amp;&amp; <span class="built_in">console</span>.log(<span class="string">'stderr'</span>, stderr);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="HTTP-Server"><a href="#HTTP-Server" class="headerlink" title="HTTP Server"></a>HTTP Server</h3><p>另外的方式是在 Go 里创建一个 HTTP 服务，之后 Nodejs 向相关发起任务请求等待 Go 完成任务后响应数据，这种方式是比较好的。</p>
+<p>除了 HTTP 外，还可以建立 TCP/Websocket。大概意思差不多，都是通过网络协议来通信。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">index</span><span class="params">(res http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    fmt.Fprintf(res, <span class="string">"Hello Wrold!"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">spider</span><span class="params">(res http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 爬虫任务</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">"/"</span>, index)              <span class="comment">// 路由</span></span><br><span class="line">    http.HandleFunc(<span class="string">"/spider"</span>, spider)</span><br><span class="line">    fmt.Println(<span class="string">"Server run in 5000 "</span>)</span><br><span class="line">    err := http.ListenAndServe(<span class="string">":5000"</span>, <span class="literal">nil</span>) <span class="comment">// 监听</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">"ListenAndServe: "</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果 Go 与 Nodejs 需要双向通信，那么使用 <code>socket.io</code> 也是不错的选择。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/PuerkitoBio/goquery" target="_blank" rel="noopener">https://github.com/PuerkitoBio/goquery</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.817Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/10/Go/Go 优雅编写高并发爬虫（浅）/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/10/Go/Go 优雅编写高并发爬虫（浅）/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Go/">Go</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/10/React/Ant-design/React 中使用 Ant Design 轻指南/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React 中使用 Ant Design 轻指南</h4>
+        <h4 class="summary">Ant DesignAnt Design 不止是一种设计语言，更是一个优秀的 UI 库，并且是 React 技术栈的。
+...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/10/抓包&爬虫/Phantomjs 简明的使用教程/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Phantomjs 简明的使用教程</h4>
+        <h4 class="summary">Phantomjs 是一个基于 Webkit 的 JavaScript API 。它使用 QtWebKit 作为它核心浏...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

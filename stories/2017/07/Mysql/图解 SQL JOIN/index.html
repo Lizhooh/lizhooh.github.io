@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/07/Mysql/图解 SQL JOIN/">
+    
+    
+    <title>图解 SQL JOIN | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言由于 SQL Join 似乎被默认为基础，同时利用文氏图表来解释它，乍一看似乎是很自然的选择。我喜欢这个概念，不过让我们先来看看这是否会在实际中发挥作用。假设我们有以下的两个表格，表 A 在左边，表 B 在右边，我们将它们填充每个四条记录。">
+<meta name="keywords" content="数据库,MongoDB,Mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图解 SQL JOIN">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/07/Mysql/图解 SQL JOIN/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言由于 SQL Join 似乎被默认为基础，同时利用文氏图表来解释它，乍一看似乎是很自然的选择。我喜欢这个概念，不过让我们先来看看这是否会在实际中发挥作用。假设我们有以下的两个表格，表 A 在左边，表 B 在右边，我们将它们填充每个四条记录。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://sfault-image.b0.upaiyun.com/4c/8a/4c8a3e931824dd9808673a1762e51210_articlex">
+<meta property="og:image" content="https://sfault-image.b0.upaiyun.com/69/58/69582a70a0ae7f0754a787fceb90610e_articlex">
+<meta property="og:image" content="https://sfault-image.b0.upaiyun.com/fb/01/fb01c36586029cd913e8c0b257f3b80d_articlex">
+<meta property="og:image" content="https://sfault-image.b0.upaiyun.com/38/d0/38d0d3ac74d01a0020fd5f87519bbdb6_articlex">
+<meta property="og:image" content="https://sfault-image.b0.upaiyun.com/f0/e5/f0e56ee87c929a8a10e948c285b231d7_articlex">
+<meta property="og:image" content="https://sfault-image.b0.upaiyun.com/9b/1f/9b1f4687d0f24caad4eac942d8207391_articlex">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.830Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="图解 SQL JOIN">
+<meta name="twitter:description" content="前言由于 SQL Join 似乎被默认为基础，同时利用文氏图表来解释它，乍一看似乎是很自然的选择。我喜欢这个概念，不过让我们先来看看这是否会在实际中发挥作用。假设我们有以下的两个表格，表 A 在左边，表 B 在右边，我们将它们填充每个四条记录。">
+<meta name="twitter:image" content="https://sfault-image.b0.upaiyun.com/4c/8a/4c8a3e931824dd9808673a1762e51210_articlex">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">图解 SQL JOIN</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">图解 SQL JOIN</h1>
+
+        <div class="meta-rest">
+            <h1>图解 SQL JOIN</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-07-15T14:53:38.000Z" itemprop="datePublished" class="page-time">
+    2017-07-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Inner-join（内连接）"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">Inner join（内连接）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Full-outer-join（全外连接）"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">Full outer join（全外连接）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Left-outer-join（左外连接）"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">Left outer join（左外连接）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Cross-Join（交差集）"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">Cross Join（交差集）</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">2.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Mysql/图解 SQL JOIN"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">图解 SQL JOIN</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 07 月 15 日 22:53" datetime="2017-07-15T14:53:38.000Z"  itemprop="datePublished">
+    2017-07-15
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 794</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于 SQL Join 似乎被默认为基础，同时利用文氏图表来解释它，乍一看似乎是很自然的选择。<br>我喜欢这个概念，不过让我们先来看看这是否会在实际中发挥作用。假设我们有以下的两个表格，表 A 在左边，表 B 在右边，我们将它们填充每个四条记录。</p>
+<a id="more"></a>
+<p>下面是，初始化 SQL 语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Create</span> <span class="keyword">Table</span> tablea(</span><br><span class="line">    <span class="keyword">id</span> <span class="built_in">int</span> Primary <span class="keyword">Key</span>,</span><br><span class="line">    <span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">20</span>)</span><br><span class="line">) <span class="keyword">default</span> <span class="keyword">charset</span>=utf8;</span><br><span class="line"></span><br><span class="line"><span class="keyword">Create</span> <span class="keyword">Table</span> tableb(</span><br><span class="line">    <span class="keyword">id</span> <span class="built_in">int</span> Primary <span class="keyword">Key</span>,</span><br><span class="line">    <span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">20</span>)</span><br><span class="line">) <span class="keyword">default</span> <span class="keyword">charset</span>=utf8;</span><br><span class="line"></span><br><span class="line"><span class="keyword">Insert</span> <span class="keyword">Into</span> test.tablea(<span class="keyword">id</span>, <span class="keyword">name</span>) <span class="keyword">Values</span></span><br><span class="line">    (<span class="number">1</span>, <span class="string">'Pirate'</span>),</span><br><span class="line">    (<span class="number">2</span>, <span class="string">'Monkey'</span>),</span><br><span class="line">    (<span class="number">3</span>, <span class="string">'Ninja'</span>),</span><br><span class="line">    (<span class="number">4</span>, <span class="string">'Spaghetti'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">Insert</span> <span class="keyword">Into</span> test.tableb(<span class="keyword">id</span>, <span class="keyword">name</span>) <span class="keyword">Values</span></span><br><span class="line">    (<span class="number">1</span>, <span class="string">'Rutabaga'</span>),</span><br><span class="line">    (<span class="number">2</span>, <span class="string">'Pirate'</span>),</span><br><span class="line">    (<span class="number">3</span>, <span class="string">'Darth Vader'</span>),</span><br><span class="line">    (<span class="number">4</span>, <span class="string">'Ninja'</span>);</span><br></pre></td></tr></table></figure>
+<p>他们看起来就像这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">id name       id  name</span><br><span class="line">-- ----       --  ----</span><br><span class="line"><span class="number">1</span>  Pirate     <span class="number">1</span>   Rutabaga</span><br><span class="line"><span class="number">2</span>  Monkey     <span class="number">2</span>   Pirate</span><br><span class="line"><span class="number">3</span>  Ninja      <span class="number">3</span>   Darth Vader</span><br><span class="line"><span class="number">4</span>  Spaghetti  <span class="number">4</span>   Ninja</span><br></pre></td></tr></table></figure>
+<h3 id="Inner-join（内连接）"><a href="#Inner-join（内连接）" class="headerlink" title="Inner join（内连接）"></a>Inner join（内连接）</h3><p>通过 name 字段以几个不同的方式连接这些表，看看是否会得到一个概念上匹配那些漂亮的维恩图。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> tablea</span><br><span class="line">    <span class="keyword">Inner</span> <span class="keyword">Join</span> tableb</span><br><span class="line">    <span class="keyword">On</span> tablea.name = tableb.name</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果</span></span><br><span class="line"><span class="keyword">id</span>  <span class="keyword">name</span>       <span class="keyword">id</span>   <span class="keyword">name</span></span><br><span class="line"><span class="comment">--  ----       --   ----</span></span><br><span class="line"><span class="number">1</span>   Pirate     <span class="number">2</span>    Pirate</span><br><span class="line"><span class="number">3</span>   Ninja      <span class="number">4</span>    Ninja</span><br></pre></td></tr></table></figure>
+<p>Inner join 产生的结果集中，是 A 和 B 的交集。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://sfault-image.b0.upaiyun.com/4c/8a/4c8a3e931824dd9808673a1762e51210_articlex" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="Full-outer-join（全外连接）"><a href="#Full-outer-join（全外连接）" class="headerlink" title="Full outer join（全外连接）"></a>Full outer join（全外连接）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> tablea</span><br><span class="line">    <span class="keyword">Full</span> <span class="keyword">Outer</span> <span class="keyword">Join</span> tableb</span><br><span class="line">    <span class="keyword">On</span> tablea.name = tableb.name</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果</span></span><br><span class="line"><span class="keyword">id</span>  <span class="keyword">name</span>       <span class="keyword">id</span>    <span class="keyword">name</span></span><br><span class="line"><span class="comment">--  ----       --    ----</span></span><br><span class="line"><span class="number">1</span>   Pirate     <span class="number">2</span>     Pirate</span><br><span class="line"><span class="number">2</span>   Monkey     <span class="literal">null</span>  <span class="literal">null</span></span><br><span class="line"><span class="number">3</span>   Ninja      <span class="number">4</span>     Ninja</span><br><span class="line"><span class="number">4</span>   Spaghetti  <span class="literal">null</span>  <span class="literal">null</span></span><br></pre></td></tr></table></figure>
+<p>Full outer join 产生 A 和 B 的并集。但是需要注意的是，对于没有匹配的记录，则会以 null 做为值。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://sfault-image.b0.upaiyun.com/69/58/69582a70a0ae7f0754a787fceb90610e_articlex" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> tablea</span><br><span class="line">    <span class="keyword">Full</span> <span class="keyword">Outer</span> <span class="keyword">Join</span> tableb</span><br><span class="line">    <span class="keyword">On</span> tablea.name = tableb.name</span><br><span class="line">    <span class="keyword">Where</span> tablea.id <span class="keyword">Is</span> <span class="literal">Null</span> <span class="keyword">Or</span> tableb.id <span class="keyword">Is</span> <span class="literal">Null</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果</span></span><br><span class="line"><span class="keyword">id</span>    <span class="keyword">name</span>       <span class="keyword">id</span>    <span class="keyword">name</span></span><br><span class="line"><span class="comment">--    ----       --    ----</span></span><br><span class="line"><span class="number">2</span>     Monkey     <span class="literal">null</span>  <span class="literal">null</span></span><br><span class="line"><span class="number">4</span>     Spaghetti  <span class="literal">null</span>  <span class="literal">null</span></span><br><span class="line"><span class="literal">null</span>  <span class="literal">null</span>       <span class="number">1</span>     Rutabaga</span><br><span class="line"><span class="literal">null</span>  <span class="literal">null</span>       <span class="number">3</span>     Darth Vader</span><br></pre></td></tr></table></figure>
+<p>要生成的记录集独特的表A和表B，我们执行相同的 full outer join ，然后通过一个 where 子句排除我们不从双方想要的记录。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://sfault-image.b0.upaiyun.com/fb/01/fb01c36586029cd913e8c0b257f3b80d_articlex" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="Left-outer-join（左外连接）"><a href="#Left-outer-join（左外连接）" class="headerlink" title="Left outer join（左外连接）"></a>Left outer join（左外连接）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> tablea</span><br><span class="line">    <span class="keyword">Left</span> <span class="keyword">Outer</span> <span class="keyword">Join</span> tableb</span><br><span class="line">    <span class="keyword">On</span> tablea.name = tableb.name</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果</span></span><br><span class="line"><span class="keyword">id</span>  <span class="keyword">name</span>       <span class="keyword">id</span>    <span class="keyword">name</span></span><br><span class="line"><span class="comment">--  ----       --    ----</span></span><br><span class="line"><span class="number">1</span>   Pirate     <span class="number">2</span>     Pirate</span><br><span class="line"><span class="number">2</span>   Monkey     <span class="literal">null</span>  <span class="literal">null</span></span><br><span class="line"><span class="number">3</span>   Ninja      <span class="number">4</span>     Ninja</span><br><span class="line"><span class="number">4</span>   Spaghetti  <span class="literal">null</span>  <span class="literal">null</span></span><br></pre></td></tr></table></figure>
+<p>Left outer join 产生表 A 的完全集，而表 B 中匹配的则有值，没有匹配的则以 null 值取代。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://sfault-image.b0.upaiyun.com/38/d0/38d0d3ac74d01a0020fd5f87519bbdb6_articlex" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> tablea</span><br><span class="line">    <span class="keyword">Left</span> <span class="keyword">Outer</span> <span class="keyword">Join</span> tableb</span><br><span class="line">    <span class="keyword">On</span> tablea.name = tableb.name</span><br><span class="line">    <span class="keyword">Where</span> tableb.id <span class="keyword">Is</span> <span class="literal">Null</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结果</span></span><br><span class="line"><span class="keyword">id</span>  <span class="keyword">name</span>       <span class="keyword">id</span>     <span class="keyword">name</span></span><br><span class="line"><span class="comment">--  ----       --     ----</span></span><br><span class="line"><span class="number">2</span>   Monkey     <span class="literal">null</span>   <span class="literal">null</span></span><br><span class="line"><span class="number">4</span>   Spaghetti  <span class="literal">null</span>   <span class="literal">null</span></span><br></pre></td></tr></table></figure>
+<p>为了产生一套只在表 A 记录，而不是在表 B 中，我们执行相同的 Left outer join ，然后通过一个 where 子句排除我们不想要的右侧记录。<br>（如果改成<code>Is Not Null</code>则变成 A 与 B 的交集，也就是<code>Inner Json</code>的结果）</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://sfault-image.b0.upaiyun.com/f0/e5/f0e56ee87c929a8a10e948c285b231d7_articlex" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="Cross-Join（交差集）"><a href="#Cross-Join（交差集）" class="headerlink" title="Cross Join（交差集）"></a>Cross Join（交差集）</h3><p>还需要注册的是我们还有一个是“交差集” cross join, 这种 Join 没有办法用文式图表示，因为其就是把表 A 和表 B 的数据进行一个 N * M 的组合，即笛卡尔积。表达式如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> * <span class="keyword">From</span> TableA</span><br><span class="line"><span class="keyword">Cross</span> <span class="keyword">Join</span> TableB</span><br></pre></td></tr></table></figure>
+<p>这个笛卡尔乘积会产生 4 x 4 = 16 条记录，一般来说，我们很少用到这个语法。但是我们得小心，如果不是使用嵌套的select语句，一般系统都会产生笛卡尔乘积然再做过滤。这是对于性能来说是非常危险的，尤其是表很大的时候。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://sfault-image.b0.upaiyun.com/9b/1f/9b1f4687d0f24caad4eac942d8207391_articlex" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://blog.codinghorror.com/a-visual-explanation-of-sql-joins/" target="_blank" rel="noopener">http://blog.codinghorror.com/a-visual-explanation-of-sql-joins/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.830Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/07/Mysql/图解 SQL JOIN/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/07/Mysql/图解 SQL JOIN/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MongoDB/">MongoDB</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mysql/">Mysql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/07/Nodejs/Nodejs 基于 Mongodb 的 Session 管理/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Nodejs 基于 Mongodb 的 Session 会话管理</h4>
+        <h4 class="summary">Mongodb 存储 SessionSession又称为会话状态，是 Web 系统中最常用的状态，用于维护和当前浏览器实...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/React/Style/Styled-Components 最佳使用方式/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">💅 Styled-Components 最佳使用方式</h4>
+        <h4 class="summary">现在基本都是使用 Sass 来编写 React 组件的样式。使用的结构是类名作用域控制的方式，比如有一个 model 组...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

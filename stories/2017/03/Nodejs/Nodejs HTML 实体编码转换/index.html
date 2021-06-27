@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/03/Nodejs/Nodejs HTML 实体编码转换/">
+    
+    
+    <title>Nodejs HTML 实体编码转换 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="实体编码如果你看到的字符就行这样的Bill &amp;amp; &amp;amp;#039;Tarzan&amp;amp;#039;，有很多都是&amp;amp;#xxxxx的类型。那么这种就是 HTML 的实体编码。 比如说这几种：    结果 描述 实体名称 实体编号     &amp;quot; quotation-mark &amp;amp;quot; &amp;amp;#34;   &amp;#39; apostrophe &amp;amp;apos; &amp;a">
+<meta name="keywords" content="后端,Nodejs,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs HTML 实体编码转换">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/03/Nodejs/Nodejs HTML 实体编码转换/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="实体编码如果你看到的字符就行这样的Bill &amp;amp; &amp;amp;#039;Tarzan&amp;amp;#039;，有很多都是&amp;amp;#xxxxx的类型。那么这种就是 HTML 的实体编码。 比如说这几种：    结果 描述 实体名称 实体编号     &amp;quot; quotation-mark &amp;amp;quot; &amp;amp;#34;   &amp;#39; apostrophe &amp;amp;apos; &amp;a">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.836Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs HTML 实体编码转换">
+<meta name="twitter:description" content="实体编码如果你看到的字符就行这样的Bill &amp;amp; &amp;amp;#039;Tarzan&amp;amp;#039;，有很多都是&amp;amp;#xxxxx的类型。那么这种就是 HTML 的实体编码。 比如说这几种：    结果 描述 实体名称 实体编号     &amp;quot; quotation-mark &amp;amp;quot; &amp;amp;#34;   &amp;#39; apostrophe &amp;amp;apos; &amp;a">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs HTML 实体编码转换</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs HTML 实体编码转换</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs HTML 实体编码转换</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-03-10T07:21:14.000Z" itemprop="datePublished" class="page-time">
+    2017-03-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实体编码"><span class="post-toc-number">1.</span> <span class="post-toc-text">实体编码</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#html-entities"><span class="post-toc-number">2.</span> <span class="post-toc-text">html-entities</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用"><span class="post-toc-number">3.</span> <span class="post-toc-text">使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#其他"><span class="post-toc-number">4.</span> <span class="post-toc-text">其他</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Nodejs HTML 实体编码转换"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs HTML 实体编码转换</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 03 月 10 日 15:21" datetime="2017-03-10T07:21:14.000Z"  itemprop="datePublished">
+    2017-03-10
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 315</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  2.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="实体编码"><a href="#实体编码" class="headerlink" title="实体编码"></a>实体编码</h2><p>如果你看到的字符就行这样的<code>Bill &amp; &amp;#039;Tarzan&amp;#039;</code>，有很多都是<code>&amp;#xxxxx</code>的类型。那么这种就是 HTML 的实体编码。</p>
+<p>比如说这几种：</p>
+<table>
+<thead>
+<tr>
+<th>结果</th>
+<th>描述</th>
+<th>实体名称</th>
+<th>实体编号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&quot;</code></td>
+<td>quotation-mark</td>
+<td><code>&amp;quot;</code></td>
+<td><code>&amp;#34;</code></td>
+</tr>
+<tr>
+<td><code>&#39;</code></td>
+<td>apostrophe</td>
+<td><code>&amp;apos;</code></td>
+<td><code>&amp;#39;</code></td>
+</tr>
+<tr>
+<td><code>&amp;</code></td>
+<td>ampersand</td>
+<td><code>&amp;amp;</code></td>
+<td><code>&amp;#38;</code></td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>less-than</td>
+<td><code>&amp;lt;</code></td>
+<td><code>&amp;#60;</code></td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td>greater-than</td>
+<td><code>&amp;gt;</code></td>
+<td><code>&amp;#62;</code></td>
+</tr>
+</tbody>
+</table>
+<p>这时候无论是使用<code>utf8</code>转换还是使用其他转换都是没用的。</p>
+<a id="more"></a>
+<h2 id="html-entities"><a href="#html-entities" class="headerlink" title="html-entities"></a>html-entities</h2><p>这时候需要使用到一个库，<code>html-entities</code> 是专门来解决这些问题的编码转换库。</p>
+<p>安装它：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save html-entities</span><br></pre></td></tr></table></figure>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>使用起来也非常简单。</p>
+<p>正向解码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> entities = <span class="keyword">new</span> <span class="built_in">require</span>(<span class="string">'html-entities'</span>).XmlEntities;</span><br><span class="line"><span class="keyword">const</span> htmlent  = (<span class="keyword">new</span> entities()).decode;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> html = <span class="string">'&lt;a href="/tupian/qita/"&gt;&amp;#x5176;&amp;#x4ED6;&amp;#x7C7B;&amp;#x522B;&lt;/a&gt;'</span>;</span><br><span class="line"><span class="built_in">console</span>.log(htmlent(html));</span><br><span class="line"><span class="comment">// &lt;a href="/tupian/qita/"&gt;其他类别&lt;/a&gt;</span></span><br></pre></td></tr></table></figure>
+<p>反向编码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> entities = <span class="keyword">new</span> <span class="built_in">require</span>(<span class="string">'html-entities'</span>).XmlEntities;</span><br><span class="line"><span class="keyword">const</span> htmlent  = (<span class="keyword">new</span> entities()).undecode;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> html = <span class="string">'&lt;a href="/tupian/qita/"&gt;其他类别&lt;/a&gt;'</span>;</span><br><span class="line"><span class="built_in">console</span>.log(htmlent(html));</span><br><span class="line"><span class="comment">// &lt;a href="/tupian/qita/"&gt;&amp;#x5176;&amp;#x4ED6;&amp;#x7C7B;&amp;#x522B;&lt;/a&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>如果你想对 Url 进行编码与解码，请使用<code>encodeURI(str); 编码</code> 和 <code>decodeURI(str); 解码</code></p>
+<p>比如说：<code>花 =&gt; %E8%8A%B1</code>，<code>%E8%8A%B1 =&gt; 花</code></p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.836Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/03/Nodejs/Nodejs HTML 实体编码转换/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/03/Nodejs/Nodejs HTML 实体编码转换/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/03/Vue/Vue 解决闪现 {{ }} 的问题/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Vue 解决闪现 {{ }} 的问题</h4>
+        <h4 class="summary"></h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/03/Javascript/正则表达式/正则函数的理解/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">正则函数的理解</h4>
+        <h4 class="summary">正则函数Javascript 中与正则表达式有关的匹配字符串的函数主要有：RegExp 类的方法 exec(string...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

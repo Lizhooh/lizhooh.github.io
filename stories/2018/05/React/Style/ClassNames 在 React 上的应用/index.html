@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/05/React/Style/ClassNames 在 React 上的应用/">
+    
+    
+    <title>💅 ClassNames 在 React 上的应用 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在 Vue 里有一个动态的 class 语法，很好的根据条件动态设置 class。例如： 1&amp;lt;div class=&quot;button&quot; :class=&quot;&amp;#123; active: show &amp;#125;&quot;&amp;gt;&amp;lt;/div&amp;gt; 就是当 show 为 true 时，此标签被赋予 active 样式。 在 React 要实现这样功能，可能会这样做： 1&amp;lt;div classNam">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="💅 ClassNames 在 React 上的应用">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/05/React/Style/ClassNames 在 React 上的应用/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在 Vue 里有一个动态的 class 语法，很好的根据条件动态设置 class。例如： 1&amp;lt;div class=&quot;button&quot; :class=&quot;&amp;#123; active: show &amp;#125;&quot;&amp;gt;&amp;lt;/div&amp;gt; 就是当 show 为 true 时，此标签被赋予 active 样式。 在 React 要实现这样功能，可能会这样做： 1&amp;lt;div classNam">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.884Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="💅 ClassNames 在 React 上的应用">
+<meta name="twitter:description" content="前言在 Vue 里有一个动态的 class 语法，很好的根据条件动态设置 class。例如： 1&amp;lt;div class=&quot;button&quot; :class=&quot;&amp;#123; active: show &amp;#125;&quot;&amp;gt;&amp;lt;/div&amp;gt; 就是当 show 为 true 时，此标签被赋予 active 样式。 在 React 要实现这样功能，可能会这样做： 1&amp;lt;div classNam">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">💅 ClassNames 在 React 上的应用</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">💅 ClassNames 在 React 上的应用</h1>
+
+        <div class="meta-rest">
+            <h1>💅 ClassNames 在 React 上的应用</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-05-09T02:13:25.000Z" itemprop="datePublished" class="page-time">
+    2018-05-09
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#动态属性名"><span class="post-toc-number">3.</span> <span class="post-toc-text">动态属性名</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#去重-dedupe"><span class="post-toc-number">4.</span> <span class="post-toc-text">去重 dedupe</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#映射-bind"><span class="post-toc-number">5.</span> <span class="post-toc-text">映射 bind</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#在-React-上使用"><span class="post-toc-number">6.</span> <span class="post-toc-text">在 React 上使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#扩展"><span class="post-toc-number">7.</span> <span class="post-toc-text">扩展</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">8.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Style/ClassNames 在 React 上的应用"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">💅 ClassNames 在 React 上的应用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 05 月 09 日 10:13" datetime="2018-05-09T02:13:25.000Z"  itemprop="datePublished">
+    2018-05-09
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 801</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 Vue 里有一个动态的 class 语法，很好的根据条件动态设置 class。例如：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"button"</span> <span class="attr">:class</span>=<span class="string">"&#123; active: show &#125;"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>就是当 show 为 true 时，此标签被赋予 active 样式。</p>
+<p>在 React 要实现这样功能，可能会这样做：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;div className=&#123;<span class="string">`button <span class="subst">$&#123;show ? <span class="string">'active'</span> : <span class="string">''</span>&#125;</span>`</span>&#125;&gt;&lt;<span class="regexp">/div&gt;</span></span><br></pre></td></tr></table></figure>
+<p>注意到，这里只有一个属性判断，如果有多个时会显得非常麻烦，那么现在使用 <a href="https://github.com/JedWatson/classnames" target="_blank" rel="noopener">ClassNames</a> 这个库来解决这个问题。</p>
+<a id="more"></a>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p><code>ClassNames</code> 是一个高性能、简便的用户根据条件动态设置 className 的 Javascript 库。</p>
+<p>它的使用非常简单，来看看下面的几种使用方式。（自己也可以开发一个类似的库，不过没必要再造轮子）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> classNames <span class="keyword">from</span> <span class="string">'classnames'</span>;</span><br><span class="line"></span><br><span class="line">classNames(<span class="string">'foo'</span>, <span class="string">'bar'</span>);                   <span class="comment">// =&gt; 'foo bar'</span></span><br><span class="line">classNames(<span class="string">'foo'</span>, &#123; <span class="attr">bar</span>: <span class="literal">true</span> &#125;);           <span class="comment">// =&gt; 'foo bar'</span></span><br><span class="line">classNames(&#123; <span class="string">'foo-bar'</span>: <span class="literal">true</span> &#125;);            <span class="comment">// =&gt; 'foo-bar'</span></span><br><span class="line">classNames(&#123; <span class="string">'foo-bar'</span>: <span class="literal">false</span> &#125;);           <span class="comment">// =&gt; ''</span></span><br><span class="line">classNames(&#123; <span class="attr">foo</span>: <span class="literal">true</span> &#125;, &#123; <span class="attr">bar</span>: <span class="literal">true</span> &#125;);   <span class="comment">// =&gt; 'foo bar'</span></span><br><span class="line">classNames(&#123; <span class="attr">foo</span>: <span class="literal">true</span>, <span class="attr">bar</span>: <span class="literal">true</span> &#125;);       <span class="comment">// =&gt; 'foo bar'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 多级嵌套，多参数</span></span><br><span class="line">classNames(<span class="string">'foo'</span>, &#123; <span class="attr">bar</span>: <span class="literal">true</span>, <span class="attr">duck</span>: <span class="literal">false</span> &#125;, <span class="string">'baz'</span>, &#123; <span class="attr">quux</span>: <span class="literal">true</span> &#125;);</span><br><span class="line"><span class="comment">// =&gt; 'foo bar baz quux'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// !! 为 false 的将被忽略</span></span><br><span class="line">classNames(<span class="literal">null</span>, <span class="literal">false</span>, <span class="string">'bar'</span>, <span class="literal">undefined</span>, <span class="number">0</span>, <span class="number">1</span>, &#123; <span class="attr">baz</span>: <span class="literal">null</span> &#125;, <span class="string">''</span>);</span><br><span class="line"><span class="comment">// =&gt; 'bar 1'</span></span><br></pre></td></tr></table></figure>
+<p>好了到这里基本已经学会如何使用了，但是还有更多的高级内容等待着。</p>
+<h2 id="动态属性名"><a href="#动态属性名" class="headerlink" title="动态属性名"></a>动态属性名</h2><p>在 ES6 下，可以使用动态对象 key，来设置跟强大的动态 className。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buttonType = <span class="string">'primary'</span>;</span><br><span class="line">classNames(&#123; [<span class="string">`btn-<span class="subst">$&#123;buttonType&#125;</span>`</span>]: <span class="literal">true</span> &#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="去重-dedupe"><a href="#去重-dedupe" class="headerlink" title="去重 dedupe"></a>去重 dedupe</h2><p>使用 dedupe 版本的 classNames 可以正确地对类进行重复数据删除，并确保在后面的参数中指定的错误类从结果集中排除。dedupe 会慢（约5倍），因此它是作为选择提供的（在默认是不会去重的）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> classNames <span class="keyword">from</span> <span class="string">'classnames/dedupe'</span>;</span><br><span class="line"></span><br><span class="line">classNames(<span class="string">'foo'</span>, <span class="string">'foo'</span>, <span class="string">'bar'</span>);                <span class="comment">// =&gt; 'foo bar'</span></span><br><span class="line">classNames(<span class="string">'foo'</span>, &#123; <span class="attr">foo</span>: <span class="literal">false</span>, <span class="attr">bar</span>: <span class="literal">true</span> &#125;);   <span class="comment">// =&gt; 'bar'</span></span><br></pre></td></tr></table></figure>
+<h2 id="映射-bind"><a href="#映射-bind" class="headerlink" title="映射 bind"></a>映射 bind</h2><p>如果您使用 css-modules 或类似的方法来抽象类“名称”以及 className 实际输出到 DOM 的真实值，那么要使用 bind 版本。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> classNames <span class="keyword">from</span> <span class="string">'classnames/bind'</span>;</span><br><span class="line"><span class="comment">// 映射关系</span></span><br><span class="line"><span class="keyword">const</span> styles = &#123;</span><br><span class="line">    foo: <span class="string">'abc'</span>,</span><br><span class="line">    bar: <span class="string">'def'</span>,</span><br><span class="line">    baz: <span class="string">'xyz'</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cx = classNames.bind(styles);</span><br><span class="line"><span class="keyword">const</span> className = cx(<span class="string">'foo'</span>, [<span class="string">'bar'</span>], &#123; <span class="attr">baz</span>: <span class="literal">true</span> &#125;);  <span class="comment">//（1） =&gt; "abc def xyz"</span></span><br><span class="line"><span class="comment">// const className = cx('abc', ['def'], &#123; xyz: true &#125;); （2）</span></span><br></pre></td></tr></table></figure>
+<p>这里什么意思呢？实际上就是把 foo 与 abc 产生映射，也就是说 （1） 和 （2） 两条语句是等效的，好处就像是定义一些常量一样。</p>
+<h2 id="在-React-上使用"><a href="#在-React-上使用" class="headerlink" title="在 React 上使用"></a>在 React 上使用</h2><p>摘自 antd 的源码，通常会附带 prefix 定义 class。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> prefixCls = <span class="string">'alter'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> classs = classNames(prefixCls, &#123;</span><br><span class="line">    [<span class="string">`<span class="subst">$&#123;prefixCls&#125;</span>-<span class="subst">$&#123;type&#125;</span>`</span>]: <span class="literal">true</span>,</span><br><span class="line">    [<span class="string">`<span class="subst">$&#123;prefixCls&#125;</span>-close`</span>]: !<span class="keyword">this</span>.state.closing,</span><br><span class="line">    [<span class="string">`<span class="subst">$&#123;prefixCls&#125;</span>-with-description`</span>]: !!description,</span><br><span class="line">    [<span class="string">`<span class="subst">$&#123;prefixCls&#125;</span>-no-icon`</span>]: !showIcon,</span><br><span class="line">    [<span class="string">`<span class="subst">$&#123;prefixCls&#125;</span>-banner`</span>]: !!banner,</span><br><span class="line">&#125;, className);</span><br></pre></td></tr></table></figure>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>此外还有同类的库：<a href="https://www.npmjs.com/package/classcat" target="_blank" rel="noopener">classcat</a>。这是一个类似 ClassNames 的轻量级实现，因为少了一些功能，性能还不错。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Classcat – Strings × <span class="number">11</span>,<span class="number">992</span>,<span class="number">788</span> ops/sec</span><br><span class="line">classNames – Strings × <span class="number">3</span>,<span class="number">615</span>,<span class="number">118</span> ops/sec</span><br><span class="line">Fastest is Classcat – Strings</span><br><span class="line"></span><br><span class="line">Classcat – Objects × <span class="number">15</span>,<span class="number">036</span>,<span class="number">351</span> ops/sec</span><br><span class="line">classNames – Objects × <span class="number">3</span>,<span class="number">631</span>,<span class="number">691</span> ops/sec</span><br><span class="line">Fastest is Classcat – Objects</span><br><span class="line"></span><br><span class="line">Classcat – Strings &amp; Objects × <span class="number">9</span>,<span class="number">677</span>,<span class="number">306</span> ops/sec</span><br><span class="line">classNames – Strings &amp; Objects × <span class="number">3</span>,<span class="number">405</span>,<span class="number">325</span> ops/sec</span><br><span class="line">Fastest is Classcat – Strings &amp; Objects</span><br><span class="line"></span><br><span class="line">Classcat – Mixed × <span class="number">5</span>,<span class="number">186</span>,<span class="number">675</span> ops/sec</span><br><span class="line">classNames – Mixed × <span class="number">2</span>,<span class="number">487</span>,<span class="number">460</span> ops/sec</span><br><span class="line">Fastest is Classcat – Mixed</span><br><span class="line"></span><br><span class="line">Classcat – Arrays × <span class="number">3</span>,<span class="number">225</span>,<span class="number">468</span> ops/sec</span><br><span class="line">classNames – Arrays × <span class="number">818</span>,<span class="number">056</span> ops/sec</span><br><span class="line">Fastest is Classcat – Arrays</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/JedWatson/classnames" target="_blank" rel="noopener">https://github.com/JedWatson/classnames</a></li>
+<li><a href="https://www.npmjs.com/package/classcat" target="_blank" rel="noopener">https://www.npmjs.com/package/classcat</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.884Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/05/React/Style/ClassNames 在 React 上的应用/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/05/React/Style/ClassNames 在 React 上的应用/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/05/React/React/图片懒加载的实现/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">图片懒加载（lazyload）模式的实现</h4>
+        <h4 class="summary">往往在大型 Web 应用里图片资源加载是非常影响性能的，当一个页面有许多图片时，就不应该一次性把它所有的加载，这样一来会...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/04/小程序/笔记 · 小程序开发杂记/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">笔记 · 小程序开发杂记</h4>
+        <h4 class="summary">记录微信小程序开发的一些杂笔记 ……
+本地数据持久化本地数据持久化（storage），小程序提供了异步（storage）...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

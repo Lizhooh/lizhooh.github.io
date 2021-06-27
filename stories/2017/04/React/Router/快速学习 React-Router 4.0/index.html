@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/04/React/Router/快速学习 React-Router 4.0/">
+    
+    
+    <title>快速学习 React-Router 4.0 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="新机制React-Router 4.0相比之前的React-Router 3.0来说 API 变了不少啊，为了快速的从 v3 过渡到 v4。下面以已经学会了v3为前提，通过类比的方法快速学习React-Router 4.0">
+<meta name="keywords" content="Javascript,前端,学习笔记,React-Router">
+<meta property="og:type" content="article">
+<meta property="og:title" content="快速学习 React-Router 4.0">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/04/React/Router/快速学习 React-Router 4.0/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="新机制React-Router 4.0相比之前的React-Router 3.0来说 API 变了不少啊，为了快速的从 v3 过渡到 v4。下面以已经学会了v3为前提，通过类比的方法快速学习React-Router 4.0">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/20170313162215.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.883Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="快速学习 React-Router 4.0">
+<meta name="twitter:description" content="新机制React-Router 4.0相比之前的React-Router 3.0来说 API 变了不少啊，为了快速的从 v3 过渡到 v4。下面以已经学会了v3为前提，通过类比的方法快速学习React-Router 4.0">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/3/20170313162215.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">快速学习 React-Router 4.0</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">快速学习 React-Router 4.0</h1>
+
+        <div class="meta-rest">
+            <h1>快速学习 React-Router 4.0</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-04-02T15:16:12.000Z" itemprop="datePublished" class="page-time">
+    2017-04-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#新机制"><span class="post-toc-number">1.</span> <span class="post-toc-text">新机制</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用的不同"><span class="post-toc-number">2.</span> <span class="post-toc-text">基本使用的不同</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#嵌套路由的不同"><span class="post-toc-number">3.</span> <span class="post-toc-text">嵌套路由的不同</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#默认路由的不同"><span class="post-toc-number">4.</span> <span class="post-toc-text">默认路由的不同</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#未匹配-404"><span class="post-toc-number">5.</span> <span class="post-toc-text">未匹配 404</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#多视图路由"><span class="post-toc-number">6.</span> <span class="post-toc-text">多视图路由</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#过渡动画的不同"><span class="post-toc-number">7.</span> <span class="post-toc-text">过渡动画的不同</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#唯一匹配"><span class="post-toc-number">8.</span> <span class="post-toc-text">唯一匹配</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#路由配置"><span class="post-toc-number">9.</span> <span class="post-toc-text">路由配置</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#路由切换事件"><span class="post-toc-number">10.</span> <span class="post-toc-text">路由切换事件</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#最后"><span class="post-toc-number">11.</span> <span class="post-toc-text">最后</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">12.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Router/快速学习 React-Router 4.0"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">快速学习 React-Router 4.0</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 04 月 02 日 23:16" datetime="2017-04-02T15:16:12.000Z"  itemprop="datePublished">
+    2017-04-02
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2335</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  27.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="新机制"><a href="#新机制" class="headerlink" title="新机制"></a>新机制</h2><p><code>React-Router 4.0</code>相比之前的<code>React-Router 3.0</code>来说 API 变了不少啊，为了快速的从 v3 过渡到 v4。<br>下面以已经学会了<code>v3</code>为前提，通过类比的方法快速学习<code>React-Router 4.0</code></p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/3/20170313162215.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="基本使用的不同"><a href="#基本使用的不同" class="headerlink" title="基本使用的不同"></a>基本使用的不同</h2><blockquote>
+<p>在 v3 的时候一般是这样写的：</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Router</span> <span class="attr">history</span>=<span class="string">&#123;hashHistory&#125;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/'</span>  <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/about'</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span>&gt;</span><span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/topics'</span> <span class="attr">component</span>=<span class="string">&#123;Topics&#125;</span>&gt;</span><span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在 v4 里变成这样：</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    BrowserRouter,</span><br><span class="line">    Route,</span><br><span class="line">    Link</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-router-dom'</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">BrowserRouter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/"</span>&gt;</span>首页<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/about"</span>&gt;</span>关于<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/topics"</span>&gt;</span>主题列表<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">hr</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">exact</span> <span class="attr">path</span>=<span class="string">"/"</span> <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/about"</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/topics"</span> <span class="attr">component</span>=<span class="string">&#123;Topics&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">BrowserRouter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其中，<code>&lt;Route&gt;</code>也可以这样写，手动注入<code>match</code>（包含路由相关的属性）</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Route</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Topics</span> <span class="attr">match</span>=<span class="string">&#123;&#123;</span> <span class="attr">params:</span> &#123; <span class="attr">id:</span> <span class="attr">0</span> &#125;, <span class="attr">url:</span> '/<span class="attr">topics</span>' &#125;&#125; /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>主要的变化：</strong></p>
+<ul>
+<li>结构上，v4 更友好的体验和组件的思想，<code>Route</code>更像是一个容器。并不像 v3 那样死板。</li>
+<li>props 上的变化，v3 <code>props.router</code> 变成了 v4 的是<code>props.match</code>  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// v3</span></span><br><span class="line"><span class="keyword">this</span>.props.router.params.id;</span><br><span class="line"></span><br><span class="line"><span class="comment">// v4</span></span><br><span class="line"><span class="keyword">this</span>.props.match.params.id;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="嵌套路由的不同"><a href="#嵌套路由的不同" class="headerlink" title="嵌套路由的不同"></a>嵌套路由的不同</h2><p>v4 整个设计的机制不同</p>
+<blockquote>
+<p>v3 的嵌套路由</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">const home = () =&gt; (</span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h2</span>&gt;</span>Hello home<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line">        &#123;this.props.children&#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">Router</span> <span class="attr">history</span>=<span class="string">&#123;hashHistory&#125;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/'</span>  <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/about'</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span>&gt;</span><span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">'/topics'</span> <span class="attr">component</span>=<span class="string">&#123;Topics&#125;</span>&gt;</span><span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>v4 的嵌套路由</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">BrowserRouter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/"</span>&gt;</span>首页<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/about"</span>&gt;</span>关于<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/topics"</span>&gt;</span>主题列表<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">hr</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">exact</span> <span class="attr">path</span>=<span class="string">"/"</span> <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/about"</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/topics"</span> <span class="attr">component</span>=<span class="string">&#123;Topics&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">BrowserRouter</span>&gt;</span></span><br><span class="line"></span><br><span class="line">const Topics = (&#123; match &#125;) =&gt; (</span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">&#123;</span>`$&#123;<span class="attr">match.url</span>&#125;/<span class="attr">:topicId</span>`&#125; <span class="attr">component</span>=<span class="string">&#123;Topic&#125;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Route</span> <span class="attr">exact</span> <span class="attr">path</span>=<span class="string">&#123;match.url&#125;</span> <span class="attr">render</span>=<span class="string">&#123;()</span> =&gt;</span> (</span><br><span class="line">            <span class="tag">&lt;<span class="name">h3</span>&gt;</span>请选择一个主题。<span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line">        )&#125; /&gt;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>注意：<code>exact</code>的作用是完全匹配。</p>
+<p><strong>主要的变化：</strong></p>
+<ul>
+<li>v3 需要使用<code>{this.props.children}</code>来指定<strong>子路由页面</strong>的存放位置，而 v4 则可以在组件里使用<code>&lt;Route&gt;</code>（容器）来指定子路由，这看起来更清晰了。</li>
+<li>v3 受<code>{this.props.children}</code>的限制只能在某个地方放置<strong>子路由页面</strong>的位置，而 v4 可以在多个地方放置<code>&lt;Route&gt;</code>（容器）来指定不同的路由。</li>
+</ul>
+<h2 id="默认路由的不同"><a href="#默认路由的不同" class="headerlink" title="默认路由的不同"></a>默认路由的不同</h2><p>主要的不同，是在 v4 里废除了一些 API。</p>
+<blockquote>
+<p>v3 的默认路由</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;Route path=<span class="string">"/"</span> component=&#123;App&#125;&gt;</span><br><span class="line">    &lt;IndexRoute component=&#123;Home&#125; /&gt;</span><br><span class="line">    &lt;Route path=<span class="string">"accounts"</span> component=&#123;Accounts&#125; /&gt;</span><br><span class="line">&lt;<span class="regexp">/Route&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>v4 的默认路由</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;BrowserRouter&gt;</span><br><span class="line">    &lt;Route path=<span class="string">"/topics"</span> component=&#123;Topics&#125; /&gt;</span><br><span class="line">&lt;<span class="regexp">/BrowserRouter&gt;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">const Topics = (&#123; match &#125;) =&gt; (</span></span><br><span class="line"><span class="regexp">    &lt;div&gt;</span></span><br><span class="line"><span class="regexp">        &#123;/</span>* 这里就默认路由，注意需要添加 exact=&#123;<span class="literal">true</span>&#125; 表示精准配置，这里配置到了 /topics *<span class="regexp">/&#125;</span></span><br><span class="line"><span class="regexp">        &lt;Route exact path=&#123;match.url&#125; component=&#123;Default&#125; /</span>&gt;</span><br><span class="line">        &lt;Route path=&#123;<span class="string">`<span class="subst">$&#123;match.url&#125;</span>/:topicId`</span>&#125; component=&#123;Topic&#125; /&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">)</span></span><br></pre></td></tr></table></figure>
+<p><strong>主要的变化：</strong></p>
+<ul>
+<li>v3 里使用<code>&lt;IndexRoute&gt;</code>来指定默认路由，而在 v4 里找不到这个 API，而是 使用<code>&lt;Route exact path={match.url} /&gt;</code>的方式来指定默认路由</li>
+<li><code>exact={true}</code>指的是完全精确的匹配</li>
+</ul>
+<h2 id="未匹配-404"><a href="#未匹配-404" class="headerlink" title="未匹配 404"></a>未匹配 404</h2><p>有时候，可以需要一种类似 404 路由效果，在 v3 里一般都是使用<code>&lt;IndexRedirect&gt;</code>（默认重定向）来解决，而 v4 里找不到这个 API。</p>
+<blockquote>
+<p>v3 的 404</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/"</span> <span class="attr">component</span>=<span class="string">&#123;App&#125;</span>&gt;</span></span><br><span class="line">    &#123;/* 匹配不到，会重定向到 /welcome */&#125;</span><br><span class="line">    ＜IndexRedirect to="/404" /&gt;</span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"welcome"</span> <span class="attr">component</span>=<span class="string">&#123;Welcome&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"about"</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Route</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>v4 的 404</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Switch</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/"</span> <span class="attr">exact</span> <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Redirect</span> <span class="attr">from</span>=<span class="string">"/old-match"</span> <span class="attr">to</span>=<span class="string">"/will-match"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/will-match"</span> <span class="attr">component</span>=<span class="string">&#123;WillMatch&#125;</span> /&gt;</span></span><br><span class="line">    &#123;/* 上面都没有匹配到 */&#125;</span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">component</span>=<span class="string">&#123;NoMatch&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Switch</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>主要的变化：</strong></p>
+<ul>
+<li>v3 里使用<code>&lt;IndexRedirect&gt;</code>来指定默认重定向解决未匹配 404 的问题，而在 v4 里这个 API 被废除了，而是使用<code>&lt;Switch&gt;</code>的机制，</li>
+<li><code>&lt;Switch&gt;</code>会渲染它里面的第一个可以匹配的<code>&lt;Route&gt;</code>，而且一个没有<code>path</code>的<code>&lt;Route&gt;</code>会满足任何匹配。一般来说在末尾放置一个没有<code>path</code>的<code>&lt;Route&gt;</code>来处理 404</li>
+</ul>
+<h2 id="多视图路由"><a href="#多视图路由" class="headerlink" title="多视图路由"></a>多视图路由</h2><p>在 v3 很难实现这个路由，就不写了。</p>
+<blockquote>
+<p>v4 多视图路由</p>
+</blockquote>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">import <span class="string">'./style.css'</span>;</span><br><span class="line">import React from <span class="string">'react'</span></span><br><span class="line">import &#123;</span><br><span class="line">    BrowserRouter <span class="keyword">as</span> Router,</span><br><span class="line">    Route,</span><br><span class="line">    Link</span><br><span class="line">&#125; from <span class="string">'react-router-dom'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 每一个逻辑路由都包含两个组件，一个负责显示 sidebar 另一个则是显示主区域</span></span><br><span class="line"><span class="comment">// 只要当前的 URL 匹配，我们希望这两个部分都能被渲染出来。</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> routes = [</span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/'</span>,</span><br><span class="line">        exact: <span class="keyword">true</span>,</span><br><span class="line">        sidebar: () =&gt; &lt;div&gt;主页!&lt;/div&gt;,</span><br><span class="line">        main: () =&gt; &lt;h2&gt;主页&lt;/h2&gt;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/about'</span>,</span><br><span class="line">        sidebar: () =&gt; &lt;div&gt;关于我们!&lt;/div&gt;,</span><br><span class="line">        main: () =&gt; &lt;h2&gt;关于我们&lt;/h2&gt;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/contact'</span>,</span><br><span class="line">        sidebar: () =&gt; &lt;div&gt;联系我们!&lt;/div&gt;,</span><br><span class="line">        main: () =&gt; &lt;h2&gt;联系我们&lt;/h2&gt;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">const SidebarExample = () =&gt; (</span><br><span class="line">    <span class="tag">&lt;<span class="name">Router</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;&#123;</span> <span class="attr">display:</span> '<span class="attr">flex</span>' &#125;&#125;&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span></span></span><br><span class="line"><span class="tag">                <span class="attr">style</span>=<span class="string">&#123;&#123;</span></span></span><br><span class="line"><span class="tag">                    <span class="attr">padding:</span> '<span class="attr">10px</span>',</span></span><br><span class="line"><span class="tag">                    <span class="attr">width:</span> '<span class="attr">40</span>%',</span></span><br><span class="line"><span class="tag">                    <span class="attr">background:</span> '#<span class="attr">f0f0f0</span>'</span></span><br><span class="line"><span class="tag">                &#125;&#125;</span></span><br><span class="line"><span class="tag">                &gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">ul</span> <span class="attr">style</span>=<span class="string">&#123;&#123;</span> <span class="attr">listStyleType:</span> '<span class="attr">none</span>', <span class="attr">padding:</span> <span class="attr">0</span> &#125;&#125;&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/"</span>&gt;</span>主页<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/about"</span>&gt;</span>关于我们<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/contact"</span>&gt;</span>联系我们<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                <span class="tag">&lt;<span class="name">div</span>&gt;</span>&#123;</span><br><span class="line">                    routes.map((route, index) =&gt; (</span><br><span class="line">                        // 这里渲染 sidebar</span><br><span class="line">                        // 在一个 app 里，你可以加入多个 <span class="tag">&lt;<span class="name">Route</span>&gt;</span> ，这些 <span class="tag">&lt;<span class="name">Route</span>&gt;</span> 都能正常渲染，</span><br><span class="line">                        // 只要你的 URL 是匹配的。也就是说在一个给定的 URL 下，渲染多个组件</span><br><span class="line">                        // （例如 sidebar 或者是 breadcrumb），不管组件是什么，只要放入多个</span><br><span class="line">                        // <span class="tag">&lt;<span class="name">Route</span>&gt;</span> 组件，就可以被正常渲染出来。</span><br><span class="line"></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Route</span></span></span><br><span class="line"><span class="tag">                            <span class="attr">key</span>=<span class="string">&#123;index&#125;</span></span></span><br><span class="line"><span class="tag">                            <span class="attr">path</span>=<span class="string">&#123;route.path&#125;</span></span></span><br><span class="line"><span class="tag">                            <span class="attr">exact</span>=<span class="string">&#123;route.exact&#125;</span></span></span><br><span class="line"><span class="tag">                            <span class="attr">component</span>=<span class="string">&#123;route.sidebar&#125;</span></span></span><br><span class="line"><span class="tag">                            /&gt;</span></span><br><span class="line">                    ))</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;&#123;</span> <span class="attr">flex:</span> <span class="attr">1</span>, <span class="attr">padding:</span> '<span class="attr">10px</span>' &#125;&#125;&gt;</span>&#123;</span><br><span class="line">                routes.map((route, index) =&gt; (</span><br><span class="line">                    // 这里渲染 main</span><br><span class="line">                    // 像上面这样在一个给定的路径下渲染多个 <span class="tag">&lt;<span class="name">Route</span>&gt;</span> ，而且每个</span><br><span class="line">                    // <span class="tag">&lt;<span class="name">Route</span>&gt;</span> 的 component 属性都不相同。</span><br><span class="line">                    <span class="tag">&lt;<span class="name">Route</span></span></span><br><span class="line"><span class="tag">                        <span class="attr">key</span>=<span class="string">&#123;index&#125;</span></span></span><br><span class="line"><span class="tag">                        <span class="attr">path</span>=<span class="string">&#123;route.path&#125;</span></span></span><br><span class="line"><span class="tag">                        <span class="attr">exact</span>=<span class="string">&#123;route.exact&#125;</span></span></span><br><span class="line"><span class="tag">                        <span class="attr">component</span>=<span class="string">&#123;route.main&#125;</span></span></span><br><span class="line"><span class="tag">                        /&gt;</span></span><br><span class="line">                ))</span><br><span class="line">            &#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">export default SidebarExample</span><br></pre></td></tr></table></figure>
+<h2 id="过渡动画的不同"><a href="#过渡动画的不同" class="headerlink" title="过渡动画的不同"></a>过渡动画的不同</h2><p>主要的不同是指，v4 里不再使用<code>{this.props.children}</code>来指定<strong>子路由视图</strong>的位置。</p>
+<blockquote>
+<p>v3 过渡动画</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ReactCSSTransitionGroup</span></span></span><br><span class="line"><span class="tag">    <span class="attr">component</span>=<span class="string">"div"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">transitionName</span>=<span class="string">"transitionWrapper"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">className</span>=<span class="string">&#123;style.transitionWrapper&#125;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">transitionEnterTimeout</span>=<span class="string">&#123;300&#125;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">transitionLeaveTimeout</span>=<span class="string">&#123;300&#125;</span></span></span><br><span class="line"><span class="tag">    &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">key</span>=<span class="string">&#123;this.props.location.pathname&#125;</span> <span class="attr">style</span>=<span class="string">&#123;&#123;position:</span>"<span class="attr">absolute</span>", <span class="attr">width:</span> "<span class="attr">100</span>%"&#125;&#125;&gt;</span></span><br><span class="line">        &#123;this.props.children&#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ReactCSSTransitionGroup</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>v4 过渡动画</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ReactCSSTransitionGroup</span></span></span><br><span class="line"><span class="tag">    <span class="attr">transitionName</span>=<span class="string">"fade"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">transitionEnterTimeout</span>=<span class="string">&#123;300&#125;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">transitionLeaveTimeout</span>=<span class="string">&#123;300&#125;</span></span></span><br><span class="line"><span class="tag">    &gt;</span></span><br><span class="line">    &#123;/*</span><br><span class="line">        这里和使用 ReactCSSTransitionGroup 没有区别，</span><br><span class="line">        唯一需要注意的是要把你的地址（location）传入</span><br><span class="line">        「Route」里使它可以在动画切换的时候匹配之前的</span><br><span class="line">        地址。</span><br><span class="line">    */&#125;</span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span></span></span><br><span class="line"><span class="tag">        <span class="attr">location</span>=<span class="string">&#123;location&#125;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">key</span>=<span class="string">&#123;location.key&#125;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">path</span>=<span class="string">"/:h/:s/:l"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">component</span>=<span class="string">&#123;HSL&#125;</span></span></span><br><span class="line"><span class="tag">    /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ReactCSSTransitionGroup</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="唯一匹配"><a href="#唯一匹配" class="headerlink" title="唯一匹配"></a>唯一匹配</h2><p>主要是讲述，在 v4 里<code>&lt;Switch&gt;</code>的作用。在 v4 里默认是唯一匹配。</p>
+<p><code>&lt;Switch&gt;</code> 渲染匹配地址<code>location</code>的第一个<code>&lt;Route&gt;</code>或者<code>&lt;Redirect&gt;</code></p>
+<blockquote>
+<p>添加了<code>&lt;Switch&gt;</code> 里面的匹配就变成了唯一，匹配了<code>/about</code>就不会匹配<code>/:user</code></p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Switch</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/about"</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/company"</span> <span class="attr">component</span>=<span class="string">&#123;Company&#125;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/:user"</span> <span class="attr">component</span>=<span class="string">&#123;User&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Switch</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>假如，不添加<code>&lt;Switch&gt;</code>， 匹配<code>/about</code>时，同时又会匹配<code>/:user</code>，就会显示两个视图（多视图路由）</p>
+</blockquote>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/about"</span> <span class="attr">component</span>=<span class="string">&#123;About&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/company"</span> <span class="attr">component</span>=<span class="string">&#123;Company&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/:user"</span> <span class="attr">component</span>=<span class="string">&#123;User&#125;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="路由配置"><a href="#路由配置" class="headerlink" title="路由配置"></a>路由配置</h2><p>一些程序员喜欢把路由配置集中到一个地方，要知道路由的配置其实只是普通的数据。<br>在把数据映射到组件上这方面，React 非常强大，并且，这里的 <route> 就是一个普通的组件。</route></p>
+<p><strong>补充：</strong>这个与 Vue-Router 的路由配置类似。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> routes = [</span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/redbull'</span>,</span><br><span class="line">        component: Redbull</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        path: <span class="string">'/snacks'</span>,</span><br><span class="line">        component: Snacks,</span><br><span class="line">        routes: [</span><br><span class="line">            &#123;</span><br><span class="line">                path: <span class="string">'/snacks/spicy'</span>,</span><br><span class="line">                component: Spicy</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                path: <span class="string">'/snacks/chips'</span>,</span><br><span class="line">                component: Chips</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>通过 map 来遍历：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Router</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/snacks"</span>&gt;</span>小吃<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">Link</span> <span class="attr">to</span>=<span class="string">"/redbull"</span>&gt;</span>红牛<span class="tag">&lt;/<span class="name">Link</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        &#123;routes.map((route, i) =&gt; (</span><br><span class="line">            <span class="tag">&lt;<span class="name">RouteWithSubRoutes</span> <span class="attr">key</span>=<span class="string">&#123;i&#125;</span> &#123;<span class="attr">...route</span>&#125; /&gt;</span></span><br><span class="line">        ))&#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="路由切换事件"><a href="#路由切换事件" class="headerlink" title="路由切换事件"></a>路由切换事件</h2><p>在 v3 里有 onEnter 的事件来确定什么时候进入某个路径。而在 v4 里没有了这些事件，而是提供一个 history 对象。history 对象里有个 listen 方法，提供监听路由变化。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.props.history.listen(<span class="function"><span class="params">state</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(state);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>最后，请忘记 v3 拥抱 v4。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://reacttraining.com/react-router/" target="_blank" rel="noopener">https://reacttraining.com/react-router/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.883Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/04/React/Router/快速学习 React-Router 4.0/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/04/React/Router/快速学习 React-Router 4.0/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Router/">React-Router</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/04/React/React/前端路由守护与后端用户认证/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">前端路由守护 与 后端用户认证</h4>
+        <h4 class="summary">前端路由守护为了实现在未认证用户试图进入被保护页面时转跳到首页的功能，这里使用的是React-Router 4.0来设置...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/04/Javascript/创建固定长度的数组/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">创建固定长度的数组</h4>
+        <h4 class="summary">如果向创建固定长度的数组（内容无关紧要），可能你会想到，使用Array的构造函数。
+1let list = new Ar...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

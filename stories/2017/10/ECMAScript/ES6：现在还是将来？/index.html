@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/10/ECMAScript/ES6：现在还是将来？/">
+    
+    
+    <title>ES6：现在还是将来？ | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="事件循环 很多时候我都在想，现在还是将来？这是关于 Javascript（ES6）现在与将来的话题。  异步编程是 Javascript 比较常见的方式，程序中现在运行的部分和将来运行的部分之间的关系就是异步编程的核心。">
+<meta name="keywords" content="Javascript,前端,学习笔记,ES6(ES2015)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES6：现在还是将来？">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/10/ECMAScript/ES6：现在还是将来？/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="事件循环 很多时候我都在想，现在还是将来？这是关于 Javascript（ES6）现在与将来的话题。  异步编程是 Javascript 比较常见的方式，程序中现在运行的部分和将来运行的部分之间的关系就是异步编程的核心。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171008091018.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171016221916.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171016221907.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171008113023.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/10/20171008162428.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.812Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES6：现在还是将来？">
+<meta name="twitter:description" content="事件循环 很多时候我都在想，现在还是将来？这是关于 Javascript（ES6）现在与将来的话题。  异步编程是 Javascript 比较常见的方式，程序中现在运行的部分和将来运行的部分之间的关系就是异步编程的核心。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/10/20171008091018.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">ES6：现在还是将来？</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">ES6：现在还是将来？</h1>
+
+        <div class="meta-rest">
+            <h1>ES6：现在还是将来？</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-10-18T14:17:39.000Z" itemprop="datePublished" class="page-time">
+    2017-10-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/ES6/">ES6</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#事件循环"><span class="post-toc-number">1.</span> <span class="post-toc-text">事件循环</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#异步，并行，并发"><span class="post-toc-number">2.</span> <span class="post-toc-text">异步，并行，并发</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#任务队列"><span class="post-toc-number">3.</span> <span class="post-toc-text">任务队列</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#回调函数"><span class="post-toc-number">4.</span> <span class="post-toc-text">回调函数</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Promise"><span class="post-toc-number">5.</span> <span class="post-toc-text">Promise</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Promise-与-任务队列"><span class="post-toc-number">6.</span> <span class="post-toc-text">Promise 与 任务队列</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#async，await"><span class="post-toc-number">7.</span> <span class="post-toc-text">async，await</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">8.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">9.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-ECMAScript/ES6：现在还是将来？"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">ES6：现在还是将来？</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 10 月 18 日 22:17" datetime="2017-10-18T14:17:39.000Z"  itemprop="datePublished">
+    2017-10-18
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/ES6/">ES6</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 3181</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  30  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="事件循环"><a href="#事件循环" class="headerlink" title="事件循环"></a>事件循环</h2><blockquote>
+<p>很多时候我都在想，<strong>现在</strong>还是<strong>将来</strong>？这是关于 Javascript（ES6）现在与将来的话题。</p>
+</blockquote>
+<p><strong>异步编程</strong>是 Javascript 比较常见的方式，程序中<strong>现在</strong>运行的部分和<strong>将来</strong>运行的部分之间的关系就是异步编程的核心。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171008091018.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>Javascript 程序总是有两个块：第一块是现在运行，下一块是将来运行。对于某个时刻来说，只有一个是<strong>现在</strong>执行，其余的则会在<strong>将来</strong>执行。这种关系会在下一个时刻发生变化，将来执行的终将会变为现在执行。</p>
+<p>从<strong>现在</strong>到<strong>将来</strong>的“等待”，最简单的方法是使用一个通常称为<strong>回调函数</strong>的函数，等待将来的某个时刻来临时，就会调用执行这个函数，这也是最普遍的做法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 现在执行</span></span><br><span class="line">$.<span class="keyword">get</span>('http://127.0.0.1:3000/api/user', function(res) &#123;</span><br><span class="line">    <span class="comment">// 将来执行</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>要想表示<strong>将来</strong>，只需要把一段代码包装成一个函数，并指定它在响应某个事件（定时器，点击事件，Ajax 等）时执行，这样这个函数就会变成一个将来执行的函数，也就是说它<strong>“异步”</strong>了。</p>
+<p>对于 Javascript 引擎来说，它并不是独立运行的，它运行在宿主环境中（浏览器，V8 等）。这些环境都有一个特点，即它们都提供一种机制来处理程序中多个块的执行，这种机制被称为<strong>事件循环</strong>（event loop）<br>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171016221916.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    </p>
+<p>事件循环它的结构类似队列，一旦有事件需要运行，事件循环就会启动，直到队列清空。事件循环的每一轮称为一个 <code>tick</code>。对于每个 tick 来说，在被添加时它会从队列尾进入，被调用时从队列头出去，而调用的函数就是每个将来块的“回调函数”。</p>
+<p>可以使用下面的简单代码来表示事件循环：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> eventLoop = [];   <span class="comment">// 事件队列</span></span><br><span class="line"><span class="keyword">let</span> event;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 事件循环</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="comment">// 队列非空</span></span><br><span class="line">    <span class="keyword">if</span> (eventLoop.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 出队</span></span><br><span class="line">        event = eventLoop.shift();</span><br><span class="line">        <span class="comment">// 调用</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            event();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span>(err) &#123;</span><br><span class="line">            reportError(err);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由此看来，事件循环以排队的方式调用每一个 <code>tick</code>，把自身的工作分成一个个任务并顺序执行。</p>
+<p>下面代码真的会在 1000 ms 输出时间吗？ 实际上输出了 <code>1520 ms</code>，并没有如期的在 1000 ms 输出。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 现在执行</span></span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 将来执行</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">2e9</span>; i++) &#123; &#125;</span><br><span class="line">&#125;, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 现在执行</span></span><br><span class="line"><span class="keyword">const</span> start = <span class="built_in">Date</span>.now();</span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 将来执行</span></span><br><span class="line">    <span class="keyword">const</span> end = <span class="built_in">Date</span>.now();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;end - start&#125;</span> ms`</span>);</span><br><span class="line">&#125;, <span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+<p>上面的第一个 setTimeout 占用了整个线程 500+ms，让整个事件循环推迟了 500+ms。</p>
+<p>从微观的角度看，Javascript 一次只能处理一个事件，如果在队列中有等待的 tick，那么就会从队列头中取出下一个 tick 并执行，并且会等 tick 执行完成。通常没有<code>抢占式</code>的方式支持直接将其排到队首。</p>
+<p><strong>有一点要清楚的是：</strong>像 setTimeout（类似的还有点击事件，Ajax 等）一开始并没有把你的回调函数挂在事件循环队列中。它所做的是设定一个定时器，当定时器到时后，再把你的回调函数放在事件循环中，等待被调用执行。</p>
+<blockquote>
+<p>使用 setTimeout(cb, 0) 进行异步调度，基本上的意思就是“把这个函数插入到当前事件循环队列的结尾处”。</p>
+</blockquote>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171016221907.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="异步，并行，并发"><a href="#异步，并行，并发" class="headerlink" title="异步，并行，并发"></a>异步，并行，并发</h2><p>术语<code>异步</code>，<code>并行</code>，<code>并发</code>经常被混为一谈，实际上它们的意义完全不同。<br><strong>异步</strong>是关于现在和将来的时间间隙，<strong>并行</strong>是关于能够同时发送的事情，<strong>并发</strong>是关于两个或更多事件链随时间的发展而交替执行。</p>
+<p>并行与并发的区别，看起来像这样：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171008113023.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>两个队列，一个<code>Coffee</code>机器，那是<strong>并发</strong>。<br>两个队列，两个<code>Coffee</code>机器，那是<strong>并行</strong>。</p>
+<p>并行最常见的工具就是进程与线程。进程和线程独立运行，并可能同时运行。</p>
+<p>在 Javascript 里，单线程的事件循环是实现并发的一种形式。<br>在 Nodejs 里 cluster 是实现并行的一种形式。（它让 Nodejs 运行在不同 CPU 上，从而实现了并行）</p>
+<h2 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h2><p>任务？在 <code>ES6</code> 中，有一个新的概念建立在事件循环队列之上，它就是：<strong>“任务队列”</strong>（task queue）。</p>
+<p><strong>任务队列</strong>，它是挂在事件循环队列中的每一个 <code>tick</code> 之后（尾部）的一个队列。通俗点说，事件循环队列类似于一个游乐园游戏，玩过了一个游戏之后，你需要重新排队才能再玩一次。而任务队列类似于玩过了游戏之后，插队接着继续玩（滑稽）。</p>
+<p>这个特性带来的影响是 <code>Promise</code> 的异步特性，因为 Promise 的异步特性是基于任务队列而实现的。（后面会通过代码说明）</p>
+<h2 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h2><p>在没有 Promise 的时代，回调是 Javascript 中最基础的异步模式。</p>
+<p>但是人们渐渐的发现使用回调会带来很多问题，比如回调地狱，毁灭金字塔，难以调试等。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">doA(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    doB();</span><br><span class="line">    doC(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        doD(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            doE();</span><br><span class="line">        &#125;);</span><br><span class="line">        doF();</span><br><span class="line">    &#125;);</span><br><span class="line">    doG();</span><br><span class="line">&#125;);</span><br><span class="line">doF();</span><br></pre></td></tr></table></figure>
+<p>上面的代码，你可以第一眼就能知道运行顺序吗？（假设每个回调都是异步进行的）<br>它的调用顺序是 <code>A -&gt; F -&gt; B -&gt; C -&gt; G -&gt; D -&gt; F -&gt; E</code>，这种嵌套代码，使得阅读起来非常困难，同时也带来了调试的困难。</p>
+<p>其中很大的原因是，我们的大脑对于事情的计划是线性的，阻塞的，单线程的。但是回调表达异步流程的方式是非线性的，非顺序的，两者处于相反的方向，使得阅读起来非常困难。</p>
+<h2 id="Promise"><a href="#Promise" class="headerlink" title="Promise"></a>Promise</h2><p><code>Promise</code>的出生就是为了解决回调函数的痛点。那么什么是 Promise？ Promise 是一种对象类型，是 ES6 新增加的规范，目的是为异步操作提供统一接口。</p>
+<p>在 Promise 里只有三种状态：</p>
+<ul>
+<li>pending    （等待）</li>
+<li>fulfilled  （完成）</li>
+<li>rejected   （失败）</li>
+</ul>
+<p>通过 <code>new Promise</code> 来创建一个 Promise 对象，这个 Promise 对象是具有 then 方法的鸭子类型。</p>
+<p>在没有使用 Promise 之前，我们还是要写<strong>回调嵌套</strong>，代码看起来像是这样。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">doA(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    doB(<span class="function"><span class="keyword">function</span>(<span class="params">a</span>) </span>&#123;</span><br><span class="line">        doC(<span class="function"><span class="keyword">function</span>(<span class="params">b</span>) </span>&#123;</span><br><span class="line">            doD(c);</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>现在，使用 Promise 可以以顺序的方式来处理异步问题，一切都变得非常自然。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">doA</span><br><span class="line">    .then(<span class="function">(<span class="params">a</span>) =&gt;</span> doB(a))</span><br><span class="line">    .then(<span class="function">(<span class="params">b</span>) =&gt;</span> doC(b))</span><br><span class="line">    .then(<span class="function">(<span class="params">c</span>) =&gt;</span> doD(c))</span><br></pre></td></tr></table></figure>
+<p>在 Promise 里可以使用它的构造函数创建一个 Promise 对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> readFile = <span class="function">(<span class="params">path</span>) =&gt;</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    fs.readFile(path, (err, data) =&gt; &#123;</span><br><span class="line">        err ? reject(err) : resolve(data);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">readFile(<span class="string">'./test.js'</span>).then(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data.toString());</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>在上面，封装了一个 readFile 函数用来读取文件，调用它的时候将返回一个 Promise 对象。</p>
+<p>Promise 的构造函数接收一个<strong>回调函数</strong>，很多时候看到回调函数就给人一种直觉认为它是将来时的。但是这个回调函数并不是将来时，它会<strong>立即执行并且阻塞当前线程</strong>的，它只是给你提供 resolve，reject 的上下文。</p>
+<p>不信？试一下下面的代码，看看多久才输出 hello。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">3e9</span>; i++) &#123; &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'hello'</span>);</span><br></pre></td></tr></table></figure>
+<p>除了构造函数外，原生 Promise 还提供了一些方法：</p>
+<ul>
+<li>Promise.reject() 直接返回一个 reject 了的 Promise 对象</li>
+<li>Promise.resolve() 直接返回一个 resolve 了的 Promise 对象</li>
+<li>Promise.all([]) 接收一个数组，内容通常由 Promise 对象组成，并发的执行每个 Promise，顺序与开始指定的顺序一致，只有全部完成了才 resolve，否则 reject</li>
+<li>Promise.race([]) 接收一个数组，内容通常由 Promise 对象组成，并发的执行每个 Promise，顺序与开始指定的顺序一致，最快完成的就 resolve，有错误则 reject</li>
+</ul>
+<p>除此之外，想要更多的功能，可以使用 <a href="http://bluebirdjs.com/docs/getting-started.html" target="_blank" rel="noopener">Bluebird</a>，一个高性能的 Promise 库。</p>
+<h2 id="Promise-与-任务队列"><a href="#Promise-与-任务队列" class="headerlink" title="Promise 与 任务队列"></a>Promise 与 任务队列</h2><p>在 Promise 里，它的构造函数的回调是同步进行的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    resolve();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">1e9</span>; i++) &#123; &#125;</span><br><span class="line">&#125;).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>上面的代码输出 1，3，2。表明 Promise 构造函数的回调函数是同步的，其次是，resolve() 并不会立刻执行 then，而是把 then 放入了当前 tick 的<strong>末尾</strong>，等待当前 tick 执行完成后再调用。</p>
+<p>Promise 一旦决议，它就永远保持在这个状态。当 Promise 决议后，每一个 then 代表着一个 task，多个 then 组成了一个<strong>任务队列</strong>（task queue）。并且在合适的时候添加到<strong>当前</strong> tick 的末尾。</p>
+<p>下面的代码有两个块，一块是现在时（<code>tick1</code>），另一块是将来时（<code>tick2</code>），同时有两个任务队列（分别为 <code>taskq1，taskq2</code>）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="number">1</span>), <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    resolve();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="number">10</span>), <span class="number">0</span>);</span><br><span class="line">&#125;).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">3</span>);</span><br><span class="line">&#125;).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="number">5</span>), <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">6</span>);</span><br><span class="line">    resolve();</span><br><span class="line">&#125;).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">7</span>);</span><br><span class="line">&#125;).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">8</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">9</span>);</span><br></pre></td></tr></table></figure>
+<p>在这里是不是觉得会是输出：2、6、9、3、4、7、8、1、10、5。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/10/20171008162428.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>正确的是：2、6、9、3、7、4、8、1、10、5。</p>
+<p>可以看出，在一个<code>tick</code>里如果有多个任务队列，这时并不会等待某个任务队列执行完成后，再去执行其他任务队列。而是多个任务队列之间进行<strong>交替执行</strong>。</p>
+<p>因此，可以利用 Promise 实现<strong>并发任务</strong>。</p>
+<h2 id="async，await"><a href="#async，await" class="headerlink" title="async，await"></a>async，await</h2><p><code>async，await</code> 是 ES7 新增的内容，可以说是一个比较完美的异步流程解决方案（在 Nodejs v7.6 得到原生的支持）。</p>
+<p>async，await 通常需要与 Promise 配合使用，await 需要等待一个 Promise，而 async 一个函数后，这个函数就会变成返回 Promise 对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面只是一个很普通的 add 函数，但是给它添加了 <code>async</code> 之后就变得不普通了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 无法以平常的方式输出</span></span><br><span class="line"><span class="built_in">console</span>.log(add(<span class="number">1</span>, <span class="number">2</span>));                  <span class="comment">// Promise</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 要使用 then</span></span><br><span class="line">add(<span class="number">1</span>, <span class="number">2</span>).then(<span class="function"><span class="params">res</span> =&gt;</span> <span class="built_in">console</span>.log(res)); <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 或者</span></span><br><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">await</span> add(<span class="number">1</span>, <span class="number">2</span>));        <span class="comment">// 3</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>因此，<code>async</code> 被誉为最快让一个函数变为 Promise 函数的语法。</p>
+<p><code>await</code> 常用来等待某个异步函数的完成。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="comment">// 现在</span></span><br><span class="line">    <span class="keyword">await</span> add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="comment">// 将来</span></span><br><span class="line">    <span class="keyword">await</span> add(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">    <span class="comment">// 将来的将来</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p><code>await</code> 让你以顺序的思维写异步代码，同时也容易带来错觉。<code>await</code> 能够之后的代码块都将变成将来时，看起来就好像阻塞当前代码运行一样，实际上它是异步进行的。</p>
+<p>使用 <code>await</code> 某个函数之后，这个函数将被添加到当前 tick 之后（尾部）的添加一个队列（每个 await 都是一个队列）。在等式左边 await 总是等待 Promise 的结果。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="comment">// 现在</span></span><br><span class="line">    <span class="keyword">const</span> res = <span class="keyword">await</span> add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        .then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'a'</span>);</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        &#125;).then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'b'</span>);</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(res);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>上面代码输出的是 <code>a b 3</code>，可以看出 <code>await</code> 左边的结果最后才返回。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>Javascript 程序总是分为两个块：第一块现在运行，下一块将来运行，以响应某个时间。</li>
+<li>在任意时刻，事件循环一次只能从队列中处理一个事件，在执行时有可能直接或间接的引发一个或多个后续事件，这些事件将被添加到队列末尾。</li>
+<li>并发是指两个或多个事件链随时间发展交替执行。从更高的层次来看，就像是同时在运行一样。</li>
+<li>回调函数是 Javascript 异步编程的基本单元，现在已有更好的方式取代回调。</li>
+<li>每个 Promise 链都是一个任务队列，并且添加到当前 tick 的末尾，它的 then 会在多个任务队列之间进行交替执行。</li>
+<li>Async，Await 是目前最好的异步编程语法，它提供顺序的思维来编写异步代码。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://book.douban.com/subject/26854244/" target="_blank" rel="noopener">《你不知道的 Javascript 中卷》</a>[美] Kyle Simpson，第二部分：异步与性能</li>
+<li><a href="https://book.douban.com/subject/25768396/" target="_blank" rel="noopener">《Nodejs 深入浅出》</a>朴灵</li>
+<li><a href="https://book.douban.com/subject/24319975/" target="_blank" rel="noopener">《JavaScript异步编程：设计快速响应的网络应用》</a> (美) 伯纳姆</li>
+<li><a href="http://www.ruanyifeng.com/blog/2014/10/event-loop.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2014/10/event-loop.html</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/25407758" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/25407758</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.812Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/10/ECMAScript/ES6：现在还是将来？/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/10/ECMAScript/ES6：现在还是将来？/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6-ES2015/">ES6(ES2015)</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/10/Go/Go 在数据持久化方面的知识/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Go 在数据持久化方面的知识</h4>
+        <h4 class="summary">数据持久化几乎是每个编程语言必备的知识，当然 Go 也不例外。Go 在数据持久化方面，包括了 Mysql，Mongodb...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/10/Nodejs/深入理解 Socket.io 中的 Room 与 Namespace/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">深入理解 Socket.io 中的 Room 与 Namespace</h4>
+        <h4 class="summary">房间与命名空间的关系在 Socket.io 里有房间与命名空间这么两个概念与结构。房间与命名空间都能实现 websock...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

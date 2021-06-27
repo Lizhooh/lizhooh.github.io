@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/03/React Native/Animated/React Native 超简单的布局动画/">
+    
+    
+    <title>React Native 超简单的布局动画 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="LayoutAnimationLayoutAnimation 是一个用于在下一个绘制或者布局周期 （render/layout cycle) 里处理界面中全部视图的动画的。比较精细的动画可以用Animated来控制。但是，在一些简单的界面切换、更新的时候所做的动画里再去计算开始值、结束值和插值器如何运作绝对是浪费时间。 LayoutAnimation 提供了布局动画，比如在 &amp;lt;listvie">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 超简单的布局动画">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/03/React Native/Animated/React Native 超简单的布局动画/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="LayoutAnimationLayoutAnimation 是一个用于在下一个绘制或者布局周期 （render/layout cycle) 里处理界面中全部视图的动画的。比较精细的动画可以用Animated来控制。但是，在一些简单的界面切换、更新的时候所做的动画里再去计算开始值、结束值和插值器如何运作绝对是浪费时间。 LayoutAnimation 提供了布局动画，比如在 &amp;lt;listvie">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/3/1453913-82b2cc162beef0af.gif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.853Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 超简单的布局动画">
+<meta name="twitter:description" content="LayoutAnimationLayoutAnimation 是一个用于在下一个绘制或者布局周期 （render/layout cycle) 里处理界面中全部视图的动画的。比较精细的动画可以用Animated来控制。但是，在一些简单的界面切换、更新的时候所做的动画里再去计算开始值、结束值和插值器如何运作绝对是浪费时间。 LayoutAnimation 提供了布局动画，比如在 &amp;lt;listvie">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/3/1453913-82b2cc162beef0af.gif">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 超简单的布局动画</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 超简单的布局动画</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 超简单的布局动画</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-03-06T12:24:37.000Z" itemprop="datePublished" class="page-time">
+    2017-03-06
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#LayoutAnimation"><span class="post-toc-number">1.</span> <span class="post-toc-text">LayoutAnimation</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三种动画"><span class="post-toc-number">2.</span> <span class="post-toc-text">三种动画</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义动画"><span class="post-toc-number">3.</span> <span class="post-toc-text">自定义动画</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Animated/React Native 超简单的布局动画"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 超简单的布局动画</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 03 月 06 日 20:24" datetime="2017-03-06T12:24:37.000Z"  itemprop="datePublished">
+    2017-03-06
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 563</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="LayoutAnimation"><a href="#LayoutAnimation" class="headerlink" title="LayoutAnimation"></a>LayoutAnimation</h2><p><code>LayoutAnimation</code> 是一个用于在下一个绘制或者布局周期 （render/layout cycle) 里处理界面中全部视图的动画的。<br>比较精细的动画可以用Animated来控制。但是，在一些简单的界面切换、更新的时候所做的动画里再去计算开始值、结束值和插值器如何运作绝对是浪费时间。</p>
+<p><code>LayoutAnimation</code> 提供了布局动画，比如在 <code>&lt;listview&gt;</code> 做一些动画元素逐渐加载，那么它就派上用途了。</p>
+<a id="more"></a>
+<p><strong>下面看一个例子：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLayoutAnimation</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            width: <span class="number">100</span>,</span><br><span class="line">            height: <span class="number">100</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">this</span>._onPress = <span class="keyword">this</span>._onPress.bind(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentWillMount() &#123;</span><br><span class="line">        LayoutAnimation.spring();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _onPress() &#123;</span><br><span class="line">        LayoutAnimation.spring();</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            width: <span class="keyword">this</span>.state.width + <span class="number">20</span>,</span><br><span class="line">            height: <span class="keyword">this</span>.state.height + <span class="number">20</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">        &lt;View style=&#123;styles.container&#125;&gt;</span><br><span class="line">            &lt;View style=&#123;[styles.box, &#123;</span><br><span class="line">                width: <span class="keyword">this</span>.state.width,</span><br><span class="line">                height: <span class="keyword">this</span>.state.height</span><br><span class="line">            &#125;]&#125;</span><br><span class="line">            /&gt;</span><br><span class="line">            &lt;TouchableOpacity onPress=&#123;<span class="keyword">this</span>._onPress&#125;&gt;</span><br><span class="line">            &lt;View style=&#123;styles.button&#125;&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.buttonText&#125;&gt;Press me!&lt;<span class="regexp">/Text&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>View&gt;</span><br><span class="line">            &lt;<span class="regexp">/TouchableOpacity&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>结果是这样的：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/3/1453913-82b2cc162beef0af.gif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>使用的时候也非常简单，只需要在更新State之前调用一下 LayoutAnimation.sprint() 这么一行代码。</p>
+<h2 id="三种动画"><a href="#三种动画" class="headerlink" title="三种动画"></a>三种动画</h2><p><code>LayoutAnimation</code>默认的提供了三种动画：</p>
+<ul>
+<li>linear</li>
+<li>spring</li>
+<li>easeInEaseOut</li>
+</ul>
+<h2 id="自定义动画"><a href="#自定义动画" class="headerlink" title="自定义动画"></a>自定义动画</h2><p>当然，RN 也留出了自定义的接口。你可以按照自己需要的自定义动画效果。</p>
+<p><strong>下面看看如何自定义：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="comment">//...略...</span></span><br><span class="line"><span class="keyword">const</span> customAnim = &#123;</span><br><span class="line">    customSpring: &#123;</span><br><span class="line">        duration: <span class="number">400</span>,  <span class="comment">// 持续时间</span></span><br><span class="line">        create: &#123;       <span class="comment">// 发生在创建动画时</span></span><br><span class="line">            type: LayoutAnimation.Types.spring,             <span class="comment">// spring</span></span><br><span class="line">            property: LayoutAnimation.Properties.scaleXY,   <span class="comment">// XY 放缩</span></span><br><span class="line">            springDamping: <span class="number">0.6</span>                              <span class="comment">// spring 阻力</span></span><br><span class="line">        &#125;,</span><br><span class="line">        update: &#123;       <span class="comment">// 发生在更新动画时</span></span><br><span class="line">            type: LayoutAnimation.Types.spring,</span><br><span class="line">            springDamping: <span class="number">0.6</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    customLinear: &#123;</span><br><span class="line">        duration: <span class="number">200</span>,</span><br><span class="line">        create: &#123;</span><br><span class="line">            type: LayoutAnimation.Types.linear,</span><br><span class="line">            property: LayoutAnimation.Properties.opacity,</span><br><span class="line">        &#125;,</span><br><span class="line">        update: &#123;</span><br><span class="line">            type: LayoutAnimation.Types.easeInEaseOut</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLayoutAnimation</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    componentWillUpdate() &#123;</span><br><span class="line">        <span class="comment">// 使用自定义的动画效果</span></span><br><span class="line">        LayoutAnimation.configureNext(customAnim.customLinear);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _onPress() &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            width: <span class="keyword">this</span>.state.width + <span class="number">20</span>,</span><br><span class="line">            height: <span class="keyword">this</span>.state.height + <span class="number">20</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...略...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>自定义非常简单，当然限制也不少。只需要指定动画的 duration、create 和 update。<br>另外一个本例与上例不同的地方在于 LayoutAnimation 可以只在 componentWillUpdate() 方法里指定，不需要在点击事件里指定。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://facebook.github.io/react-native/docs/layoutanimation.html" target="_blank" rel="noopener">http://facebook.github.io/react-native/docs/layoutanimation.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.853Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/03/React Native/Animated/React Native 超简单的布局动画/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/03/React Native/Animated/React Native 超简单的布局动画/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/03/React Native/Media/React Native Video 视频播放/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native Video 视频播放</h4>
+        <h4 class="summary">Video如果你想要嵌入一个视频播放，那么使用react-native-video就没错了。react-native-v...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/03/Javascript/正则表达式/学习正则表达式/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">学习 - 正则表达式</h4>
+        <h4 class="summary">Javascript 中使用正则表达式在 JavaScript 中，正则表达式通常用于两个字符串方法 : search ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

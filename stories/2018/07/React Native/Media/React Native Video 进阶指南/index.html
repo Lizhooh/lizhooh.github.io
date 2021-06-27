@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/07/React Native/Media/React Native Video 进阶指南/">
+    
+    
+    <title>React Native Video 进阶指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言在本节是是 react-native-video 的进阶指南。react-native-video 是一个 RN 上的视频库，它比较基础，不涉及太多 UI 控制层。在实际的开发中如果使用 react-native-video 做视频播放，那就要自己实现播放的控制栏，已经全屏播放等。 本文主要围绕着如何在 react-native-video 里做定制播放器界面。">
+<meta name="keywords" content="Javascript,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native Video 进阶指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/07/React Native/Media/React Native Video 进阶指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言在本节是是 react-native-video 的进阶指南。react-native-video 是一个 RN 上的视频库，它比较基础，不涉及太多 UI 控制层。在实际的开发中如果使用 react-native-video 做视频播放，那就要自己实现播放的控制栏，已经全屏播放等。 本文主要围绕着如何在 react-native-video 里做定制播放器界面。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Lizhooh/react-native-ivideo/HEAD/image/index.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180716221052.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180716221955.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.856Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native Video 进阶指南">
+<meta name="twitter:description" content="前言在本节是是 react-native-video 的进阶指南。react-native-video 是一个 RN 上的视频库，它比较基础，不涉及太多 UI 控制层。在实际的开发中如果使用 react-native-video 做视频播放，那就要自己实现播放的控制栏，已经全屏播放等。 本文主要围绕着如何在 react-native-video 里做定制播放器界面。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Lizhooh/react-native-ivideo/HEAD/image/index.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native Video 进阶指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native Video 进阶指南</h1>
+
+        <div class="meta-rest">
+            <h1>React Native Video 进阶指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-07-16T12:57:15.000Z" itemprop="datePublished" class="page-time">
+    2018-07-16
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#开源"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">开源</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义控制栏"><span class="post-toc-number">2.</span> <span class="post-toc-text">自定义控制栏</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义播放控制"><span class="post-toc-number">3.</span> <span class="post-toc-text">自定义播放控制</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#全屏播放"><span class="post-toc-number">4.</span> <span class="post-toc-text">全屏播放</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Media/React Native Video 进阶指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native Video 进阶指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 07 月 16 日 20:57" datetime="2018-07-16T12:57:15.000Z"  itemprop="datePublished">
+    2018-07-16
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 928</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在本节是是 react-native-video 的进阶指南。react-native-video 是一个 RN 上的视频库，它比较基础，不涉及太多 UI 控制层。在实际的开发中如果使用 react-native-video 做视频播放，那就要自己实现播放的控制栏，已经全屏播放等。</p>
+<p>本文主要围绕着如何在 react-native-video 里做定制播放器界面。</p>
+<a id="more"></a>
+<h3 id="开源"><a href="#开源" class="headerlink" title="开源"></a>开源</h3><p><a href="https://github.com/Lizhooh/react-native-ivideo" target="_blank" rel="noopener">react-native-ivideo</a> 是笔者写的一个 React Native 视频播放组件，现在已经开源出来了。<br>
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="https://raw.githubusercontent.com/Lizhooh/react-native-ivideo/HEAD/image/index.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    </p>
+<p>有以下特性：</p>
+<ul>
+<li>基本的播放功能，友好的界面，进度控制，渐出动画，简洁的风格。</li>
+<li>细粒度优化，播放时 UI 线程能保持 60 FPS，JS 线程能保持 60 ~ 55 FPS。</li>
+<li>提供全屏播放的功能。</li>
+<li>支持 MP4，M4A，FMP4，WebM，MKV，MP3，Ogg，WAV，MPEG-TS，MPEG-PS，FLV 和 ADTS（AAC）等格式。</li>
+<li>支持 DASH，HlS 和 SmoothStreaming 自适应流。</li>
+</ul>
+<h2 id="自定义控制栏"><a href="#自定义控制栏" class="headerlink" title="自定义控制栏"></a>自定义控制栏</h2><p>在 react-native-video 里可以使用 <code>onProcess</code> 事件，它在每次视频进度改变时都会触发。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    currentTime: <span class="number">5.2</span>,           <span class="comment">// 当前播放长度</span></span><br><span class="line">    playableDuration: <span class="number">34.6</span>,     <span class="comment">// 已经缓冲的长度</span></span><br><span class="line">    seekableDuration: <span class="number">888</span>       <span class="comment">// 播放长度</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有的播放的位置之后，可以使用 Slider 作为控制栏的进度拖动模块。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;View style=&#123;styles.toolbar&#125;&gt;</span><br><span class="line">    &lt;Slider</span><br><span class="line">        minimumTrackTintColor=<span class="string">'#f90'</span></span><br><span class="line">        maximumTrackTintColor=<span class="string">'rgba(1, 1, 1, 0)'</span></span><br><span class="line">        thumbTintColor=&#123;showToolbar ? <span class="string">'#f90'</span> : <span class="string">'rgba(1, 1, 1, 0)'</span>&#125;</span><br><span class="line">        maximumValue=&#123;seekableDuration&#125;</span><br><span class="line">        value=&#123;currentTime&#125;</span><br><span class="line">        onTouchStart=&#123;e =&gt; &#123;</span><br><span class="line">            <span class="keyword">this</span>.sliderTouch = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">this</span>.setState(&#123; <span class="attr">showToolbar</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">        &#125;&#125;</span><br><span class="line">        onTouchEnd=&#123;e =&gt; &#123;</span><br><span class="line">            <span class="keyword">this</span>.sliderTouch = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">if</span> (showToolbar) &#123;</span><br><span class="line">                setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">this</span>.setState(&#123; <span class="attr">showToolbar</span>: <span class="literal">false</span> &#125;), <span class="number">1000</span> * <span class="number">5</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;&#125;</span><br><span class="line">        onSlidingComplete=&#123;val =&gt; &#123;</span><br><span class="line">            <span class="keyword">this</span>.setState(&#123; <span class="attr">currentTime</span>: val &#125;);</span><br><span class="line">            <span class="keyword">this</span>.video.seek(val);                   <span class="comment">// 拖动位置</span></span><br><span class="line">        &#125;&#125;</span><br><span class="line">        style=&#123;&#123; <span class="attr">width</span>: <span class="built_in">window</span>.width + <span class="number">20</span>, <span class="attr">left</span>: <span class="number">-10</span> &#125;&#125;</span><br><span class="line">    /&gt;</span><br><span class="line">&lt;<span class="regexp">/View&gt;</span></span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180716221052.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="自定义播放控制"><a href="#自定义播放控制" class="headerlink" title="自定义播放控制"></a>自定义播放控制</h2><p>也就是添加一个播放与暂停的功能，大致实现的方式是在 video 里利用 absolute 添加一个浮层当点击播放时，浮层完全透明，当点击暂时时，浮层显示。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;Touch</span><br><span class="line">    style=&#123;[styles.mask, !play &amp;&amp; styles.maskc]&#125;</span><br><span class="line">    activeOpacity=&#123;<span class="number">0.9</span>&#125;</span><br><span class="line">    onPress=&#123;e =&gt; <span class="keyword">this</span>.setState(&#123; <span class="attr">play</span>: !play &#125;)&#125;&gt;</span><br><span class="line">    &lt;Icon name=<span class="string">'play-circle-outline'</span> size=&#123;<span class="number">48</span>&#125; color=<span class="string">'#efefef'</span> /&gt;</span><br><span class="line">&lt;<span class="regexp">/Touch&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="全屏播放"><a href="#全屏播放" class="headerlink" title="全屏播放"></a>全屏播放</h2><p>react-native-video 是支持全屏播放的，但是它的 api 只适用于 IOS，并且全屏播放没有自定义 UI 的空间。下面是我实现的全屏播放效果，大致原理是使用控制应用方向和利用元素出界不可见的形式，也就是 <code>overflow: hidden</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    StyleSheet,</span><br><span class="line">    Text, View,</span><br><span class="line">    StatusBar,</span><br><span class="line">    TouchableOpacity <span class="keyword">as</span> Touch,</span><br><span class="line">    Slider,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">import</span> Video <span class="keyword">from</span> <span class="string">'react-native-video'</span>;</span><br><span class="line"><span class="keyword">import</span> Orientation <span class="keyword">from</span> <span class="string">'react-native-orientation'</span>;</span><br><span class="line"><span class="keyword">import</span> Icon <span class="keyword">from</span> <span class="string">'react-native-vector-icons/MaterialIcons'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.currentTime = <span class="number">0</span>;       <span class="comment">// 播放位置</span></span><br><span class="line">        <span class="keyword">this</span>.state = &#123; <span class="attr">fullscreen</span>: <span class="literal">false</span> &#125;;</span><br><span class="line">        <span class="keyword">this</span>.src = <span class="string">'http://vd3.bdstatic.com/mda-igdqvqu5yt17xp89/mda-igdqvqu5yt17xp89.mp4'</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; fullscreen &#125; = <span class="keyword">this</span>.state;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (fullscreen) &#123;   <span class="comment">// 全屏</span></span><br><span class="line">            Orientation.lockToLandscape();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            Orientation.unlockAllOrientations();</span><br><span class="line">            Orientation.lockToPortrait();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.container&#125;&gt;</span><br><span class="line">                &lt;StatusBar</span><br><span class="line">                    animated=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">                    barStyle=<span class="string">"light-content"</span></span><br><span class="line">                    translucent=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">                    backgroundColor=<span class="string">'rgba(1, 1, 1, 0)'</span></span><br><span class="line">                    StatusBarAnimation=<span class="string">'fade'</span></span><br><span class="line">                /&gt;</span><br><span class="line">                &lt;Video</span><br><span class="line">                    source=&#123;&#123; <span class="attr">uri</span>: <span class="keyword">this</span>.src &#125;&#125;</span><br><span class="line">                    style=&#123;fullscreen ? styles.fullscreen : styles.defaults&#125;</span><br><span class="line">                    resizeMode=<span class="string">'cover'</span></span><br><span class="line">                    ref=&#123;r =&gt; <span class="keyword">this</span>.video = r&#125;</span><br><span class="line">                    <span class="comment">// paused=&#123;true&#125;</span></span><br><span class="line">                    onProgress=&#123;d =&gt; <span class="keyword">this</span>.currentTime = d.currentTime&#125;</span><br><span class="line">                /&gt;</span><br><span class="line"></span><br><span class="line">                &lt;View style=&#123;styles.toolbar&#125;&gt;</span><br><span class="line">                    &lt;Icon name=<span class="string">'play'</span> /&gt;</span><br><span class="line">                &lt;<span class="regexp">/View&gt;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">                &lt;Touch</span></span><br><span class="line"><span class="regexp">                    activeOpacity=&#123;0.75&#125;</span></span><br><span class="line"><span class="regexp">                    onPress=&#123;e =&gt; this.setState(&#123; fullscreen: !fullscreen &#125;)&#125;</span></span><br><span class="line"><span class="regexp">                    style=&#123;styles.touch1&#125;&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;Icon name='fullscreen' size=&#123;24&#125; /</span>&gt;</span><br><span class="line">                &lt;<span class="regexp">/Touch&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    container: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        backgroundColor: <span class="string">'#fff'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    defaults: &#123;</span><br><span class="line">        width: <span class="string">'100%'</span>,</span><br><span class="line">        backgroundColor: <span class="string">'#012'</span>,</span><br><span class="line">        height: <span class="number">240</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    fullscreen: &#123;</span><br><span class="line">        width: <span class="string">'100%'</span>,              <span class="comment">// 填充满</span></span><br><span class="line">        height: <span class="string">'100%'</span>,</span><br><span class="line">        backgroundColor: <span class="string">'#000'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    touch1: &#123;</span><br><span class="line">        position: <span class="string">'absolute'</span>,</span><br><span class="line">        bottom: <span class="number">20</span>,</span><br><span class="line">        right: <span class="number">20</span>,</span><br><span class="line">        backgroundColor: <span class="string">'#ced'</span>,</span><br><span class="line">        padding: <span class="number">6</span>,</span><br><span class="line">        paddingHorizontal: <span class="number">12</span>,</span><br><span class="line">        borderRadius: <span class="number">2</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    touch2: &#123;</span><br><span class="line">        position: <span class="string">'absolute'</span>,</span><br><span class="line">        bottom: <span class="number">20</span>,</span><br><span class="line">        right: <span class="number">20</span>,</span><br><span class="line">        backgroundColor: <span class="string">'#fff'</span>,</span><br><span class="line">        padding: <span class="number">6</span>,</span><br><span class="line">        paddingHorizontal: <span class="number">12</span>,</span><br><span class="line">        borderRadius: <span class="number">2</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>下面是全屏的效果图。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180716221955.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.856Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/07/React Native/Media/React Native Video 进阶指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/07/React Native/Media/React Native Video 进阶指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/07/Typescript/谈谈 Typescript 中 type 与 interface 的区别/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">谈谈 Typescript 中 type 与 interface 的区别</h4>
+        <h4 class="summary">因为在 Typescript 里 type 和 interface 都能实现类型的定义，因此在一些使用方面他们都很像。前...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/07/后端/利用 WebHooks 进行自动化构建/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">利用 WebHooks 进行自动化构建</h4>
+        <h4 class="summary">Webhooks 是一个 API 概念，在某件事情发生时，它都会进行消息的推送，在 Github、Gitlab 等代码管...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

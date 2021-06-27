@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2020/07/Mysql/关于 Sequelize 关联 N：M 的问题/">
+    
+    
+    <title>关于 Sequelize 关联 N：M 的问题 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言关于 Sequelize 关联 N：M 的问题，以一个业务示例来讲解。 业务需求模型：用户，角色，部门  在创建用户时可以选择多个角色，可以选择一个部门。 在创建角色时可以选择多个部门，需要记录创建者用户。 在创建部门时，需要记录创建者用户。">
+<meta name="keywords" content="Nodejs,数据库,MongoDB,Mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于 Sequelize 关联 N：M 的问题">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2020/07/Mysql/关于 Sequelize 关联 N：M 的问题/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言关于 Sequelize 关联 N：M 的问题，以一个业务示例来讲解。 业务需求模型：用户，角色，部门  在创建用户时可以选择多个角色，可以选择一个部门。 在创建角色时可以选择多个部门，需要记录创建者用户。 在创建部门时，需要记录创建者用户。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.830Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于 Sequelize 关联 N：M 的问题">
+<meta name="twitter:description" content="前言关于 Sequelize 关联 N：M 的问题，以一个业务示例来讲解。 业务需求模型：用户，角色，部门  在创建用户时可以选择多个角色，可以选择一个部门。 在创建角色时可以选择多个部门，需要记录创建者用户。 在创建部门时，需要记录创建者用户。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">关于 Sequelize 关联 N：M 的问题</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">关于 Sequelize 关联 N：M 的问题</h1>
+
+        <div class="meta-rest">
+            <h1>关于 Sequelize 关联 N：M 的问题</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2020-07-25T13:42:14.000Z" itemprop="datePublished" class="page-time">
+    2020-07-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#业务需求"><span class="post-toc-number">2.</span> <span class="post-toc-text">业务需求</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#代码实现"><span class="post-toc-number">3.</span> <span class="post-toc-text">代码实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建模型"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">创建模型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#设置关联关系"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">设置关联关系</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#逻辑代码实现"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">逻辑代码实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#部门"><span class="post-toc-number">3.3.1.</span> <span class="post-toc-text">部门</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#角色"><span class="post-toc-number">3.3.2.</span> <span class="post-toc-text">角色</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#用户"><span class="post-toc-number">3.3.3.</span> <span class="post-toc-text">用户</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">4.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Mysql/关于 Sequelize 关联 N：M 的问题"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">关于 Sequelize 关联 N：M 的问题</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020 年 07 月 25 日 21:42" datetime="2020-07-25T13:42:14.000Z"  itemprop="datePublished">
+    2020-07-25
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Mysql/">Mysql</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1481</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>关于 Sequelize 关联 N：M 的问题，以一个业务示例来讲解。</p>
+<h2 id="业务需求"><a href="#业务需求" class="headerlink" title="业务需求"></a>业务需求</h2><p>模型：<code>用户</code>，<code>角色</code>，<code>部门</code></p>
+<ul>
+<li>在创建用户时可以选择多个角色，可以选择一个部门。</li>
+<li>在创建角色时可以选择多个部门，需要记录创建者用户。</li>
+<li>在创建部门时，需要记录创建者用户。</li>
+</ul>
+<a id="more"></a>
+<blockquote>
+<p>ps: 部门是用于控制权限的。</p>
+</blockquote>
+<p>那么总结来说：</p>
+<ul>
+<li>一个用户对应着多个角色，对应者一个部门。</li>
+<li>一个角色关联着多个使用者，对应一个创建者。</li>
+<li>一个部门关联着多个使用者，对应一个创建者。</li>
+</ul>
+<p>这是典型的 N：M 超级多对多关系。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>下面来看看如何用 Sequelize 实现逻辑代码。</p>
+<h3 id="创建模型"><a href="#创建模型" class="headerlink" title="创建模型"></a>创建模型</h3><p>首先创建模型：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用户</span></span><br><span class="line"><span class="keyword">const</span> User = sequelize.define(<span class="string">'user'</span>, &#123;</span><br><span class="line">    name: DataTypes.STRING,</span><br><span class="line">&#125;, config);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 角色</span></span><br><span class="line"><span class="keyword">const</span> Role = sequelize.define(<span class="string">'role'</span>, &#123;</span><br><span class="line">    title: DataTypes.STRING,</span><br><span class="line">&#125;, config);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 部门</span></span><br><span class="line"><span class="keyword">const</span> Agency = sequelize.define(<span class="string">'agency'</span>, &#123;</span><br><span class="line">    title: DataTypes.STRING,</span><br><span class="line">&#125;, config);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用户与角色多对多，之间的中间层</span></span><br><span class="line"><span class="keyword">const</span> UserRole = sequelize.define(<span class="string">'userRole'</span>, &#123;&#125;, config);</span><br></pre></td></tr></table></figure>
+<h3 id="设置关联关系"><a href="#设置关联关系" class="headerlink" title="设置关联关系"></a>设置关联关系</h3><p>关联用户与角色之间的关系（多对多）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一个角色对应着有多个使用者</span></span><br><span class="line">User.belongsToMany(Role, &#123; <span class="attr">through</span>: UserRole &#125;);</span><br><span class="line">Role.belongsToMany(User, &#123; <span class="attr">through</span>: UserRole &#125;);</span><br></pre></td></tr></table></figure>
+<p>关联角色与创建者的关系（一对一）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一个角色对应着一个创建者</span></span><br><span class="line"><span class="keyword">const</span> RoleCreator = Role.belongsTo(User, &#123; <span class="attr">as</span>: <span class="string">'creator'</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>关联角色与部门之间的关系（一对多）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//（一对多）一个角色对应着多个部门</span></span><br><span class="line">Role.hasMany(Agency);</span><br></pre></td></tr></table></figure>
+<p>关联部门与创建者的关系（一对一）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一个部门对应着一个创建者</span></span><br><span class="line"><span class="keyword">const</span> AgencyCreator = Agency.belongsTo(User, &#123; <span class="attr">as</span>: <span class="string">'creator'</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>一个新用户需要选择一个部门：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// （一对一）一个用户对应着一个机构，一个机构被多个用户对应（无操作）</span></span><br><span class="line">User.hasOne(Agency);</span><br></pre></td></tr></table></figure>
+<h3 id="逻辑代码实现"><a href="#逻辑代码实现" class="headerlink" title="逻辑代码实现"></a>逻辑代码实现</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 去掉不必要的字段</span></span><br><span class="line"><span class="keyword">const</span> through = &#123; <span class="attr">attributes</span>: [] &#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="部门"><a href="#部门" class="headerlink" title="部门"></a>部门</h4><p>创建部门：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> agency1 = <span class="keyword">await</span> Agency.create(&#123; <span class="attr">title</span>: <span class="string">'事业部'</span> &#125;);</span><br><span class="line"><span class="keyword">const</span> agency2 = <span class="keyword">await</span> Agency.create(&#123; <span class="attr">title</span>: <span class="string">'产品部'</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>这样就创建的部门了，接下来添加部门的创建者：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user1 = <span class="keyword">await</span> User.create(&#123; <span class="attr">name</span>: <span class="string">'小品'</span> &#125;);</span><br><span class="line"><span class="keyword">const</span> user2 = <span class="keyword">await</span> User.create(&#123; <span class="attr">name</span>: <span class="string">'小盘'</span> &#125;);</span><br><span class="line"><span class="comment">// 部门的创建者</span></span><br><span class="line"><span class="keyword">await</span> agency1.setCreator(user1);</span><br><span class="line"><span class="keyword">await</span> agency2.setCreator(user2);</span><br></pre></td></tr></table></figure>
+<p>单个部门的查询：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 单个部门</span></span><br><span class="line"><span class="keyword">const</span> agency = <span class="keyword">await</span> Agency.findOne(&#123;</span><br><span class="line">    where: &#123; <span class="attr">id</span>: <span class="number">1</span> &#125;,</span><br><span class="line">    include: [AgencyCreator],</span><br><span class="line">    through: through,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>返回的结果数据：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"title"</span>: <span class="string">"事业部"</span>,</span><br><span class="line">    <span class="attr">"roleId"</span>: <span class="number">2</span>,</span><br><span class="line">    <span class="attr">"userId"</span>: <span class="number">5</span>,</span><br><span class="line">    <span class="attr">"creatorId"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"creator"</span>: &#123;</span><br><span class="line">        <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="attr">"name"</span>: <span class="string">"小品"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>部门列表查询：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> agencyList = <span class="keyword">await</span> Agency.findOne(&#123;</span><br><span class="line">    offset: <span class="number">0</span>, <span class="attr">limit</span>: <span class="number">10</span>,</span><br><span class="line">    include: [AgencyCreator],</span><br><span class="line">    through: through,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>返回的结果数据：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">    <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"title"</span>: <span class="string">"事业部"</span>,</span><br><span class="line">    <span class="attr">"roleId"</span>: <span class="number">2</span>,</span><br><span class="line">    <span class="attr">"userId"</span>: <span class="number">5</span>,</span><br><span class="line">    <span class="attr">"creatorId"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"creator"</span>: &#123;</span><br><span class="line">        <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="attr">"name"</span>: <span class="string">"小品"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;, &#123;</span><br><span class="line">    <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">    <span class="attr">"title"</span>: <span class="string">"产品部"</span>,</span><br><span class="line">    <span class="attr">"roleId"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"userId"</span>: <span class="number">6</span>,</span><br><span class="line">    <span class="attr">"creatorId"</span>: <span class="number">2</span>,</span><br><span class="line">    <span class="attr">"creator"</span>: &#123;</span><br><span class="line">        <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">        <span class="attr">"name"</span>: <span class="string">"小盘"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+<p>更新/删除部门，更新部门一般不会更新创建者，删除时需要检查是否有引用关系。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除时，检查 userId 和 roleId 是否为空</span></span><br></pre></td></tr></table></figure>
+<h4 id="角色"><a href="#角色" class="headerlink" title="角色"></a>角色</h4><p>创建角色：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> role1 = <span class="keyword">await</span> Role.create(&#123; <span class="attr">title</span>: <span class="string">'研发权限'</span> &#125;);</span><br><span class="line"><span class="keyword">const</span> role2 = <span class="keyword">await</span> Role.create(&#123; <span class="attr">title</span>: <span class="string">'产品权限'</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>接下来添加角色的创建者：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user1 = <span class="keyword">await</span> User.create(&#123; <span class="attr">name</span>: <span class="string">'小赵'</span> &#125;);</span><br><span class="line"><span class="keyword">const</span> user2 = <span class="keyword">await</span> User.create(&#123; <span class="attr">name</span>: <span class="string">'小瓶'</span> &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关键的一步（记录角色的创建者）</span></span><br><span class="line"><span class="keyword">await</span> role1.setCreator(user1);</span><br><span class="line"><span class="keyword">await</span> role2.setCreator(user2);</span><br></pre></td></tr></table></figure>
+<p>接下来添加部门：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建角色时，需要选择多个部门</span></span><br><span class="line"><span class="keyword">await</span> role1.addAgency([agency1, agency2]);</span><br><span class="line"><span class="keyword">await</span> role2.addAgency([agency1]);</span><br></pre></td></tr></table></figure>
+<p>角色列表查询：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 主要显示时要求把机构，创建者，关联的用户带出来</span></span><br><span class="line"><span class="keyword">const</span> role = <span class="keyword">await</span> Role.findAll(&#123;</span><br><span class="line">    offset: <span class="number">0</span>, <span class="attr">limit</span>: <span class="number">10</span>,</span><br><span class="line">    include: [&#123;</span><br><span class="line">        model: User,</span><br><span class="line">        include: [&#123;</span><br><span class="line">            model: Role,</span><br><span class="line">            through: through,</span><br><span class="line">            include: [RoleCreator]</span><br><span class="line">        &#125;, Agency],</span><br><span class="line">        through: through,</span><br><span class="line">    &#125;, Agency, RoleCreator],</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>返回的结果数据：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">  <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">  <span class="attr">"title"</span>: <span class="string">"产品权限"</span>,</span><br><span class="line">  <span class="attr">"creatorId"</span>: <span class="number">4</span>,</span><br><span class="line">  <span class="attr">"users"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">5</span>,</span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"小明"</span>,</span><br><span class="line">      <span class="attr">"roles"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">          <span class="attr">"title"</span>: <span class="string">"研发权限"</span>,</span><br><span class="line">          <span class="attr">"creatorId"</span>: <span class="number">3</span>,</span><br><span class="line">          <span class="attr">"creator"</span>: &#123;</span><br><span class="line">            <span class="attr">"id"</span>: <span class="number">3</span>,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"小赵"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">          <span class="attr">"title"</span>: <span class="string">"产品权限"</span>,</span><br><span class="line">          <span class="attr">"creatorId"</span>: <span class="number">4</span>,</span><br><span class="line">          <span class="attr">"creator"</span>: &#123;</span><br><span class="line">            <span class="attr">"id"</span>: <span class="number">4</span>,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"小瓶"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"agency"</span>: &#123;</span><br><span class="line">        <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="attr">"title"</span>: <span class="string">"事业部"</span>,</span><br><span class="line">        <span class="attr">"roleId"</span>: <span class="number">2</span>,</span><br><span class="line">        <span class="attr">"userId"</span>: <span class="number">5</span>,</span><br><span class="line">        <span class="attr">"creatorId"</span>: <span class="number">1</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">6</span>,</span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"小花"</span>,</span><br><span class="line">      <span class="attr">"roles"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">          <span class="attr">"title"</span>: <span class="string">"研发权限"</span>,</span><br><span class="line">          <span class="attr">"creatorId"</span>: <span class="number">3</span>,</span><br><span class="line">          <span class="attr">"creator"</span>: &#123;</span><br><span class="line">            <span class="attr">"id"</span>: <span class="number">3</span>,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"小赵"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">          <span class="attr">"title"</span>: <span class="string">"产品权限"</span>,</span><br><span class="line">          <span class="attr">"creatorId"</span>: <span class="number">4</span>,</span><br><span class="line">          <span class="attr">"creator"</span>: &#123;</span><br><span class="line">            <span class="attr">"id"</span>: <span class="number">4</span>,</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"小瓶"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"agency"</span>: &#123;</span><br><span class="line">        <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">        <span class="attr">"title"</span>: <span class="string">"产品部"</span>,</span><br><span class="line">        <span class="attr">"roleId"</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="attr">"userId"</span>: <span class="number">6</span>,</span><br><span class="line">        <span class="attr">"creatorId"</span>: <span class="number">2</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"agencys"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">      <span class="attr">"title"</span>: <span class="string">"事业部"</span>,</span><br><span class="line">      <span class="attr">"roleId"</span>: <span class="number">2</span>,</span><br><span class="line">      <span class="attr">"userId"</span>: <span class="number">5</span>,</span><br><span class="line">      <span class="attr">"creatorId"</span>: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"creator"</span>: &#123;</span><br><span class="line">    <span class="attr">"id"</span>: <span class="number">4</span>,</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"小瓶"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+<p>更新/删除角色，更新角色一般不会更新创建者，删除时需要检查是否有引用关系。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除时，检查 agencys 数组和 users 数组是否为空</span></span><br></pre></td></tr></table></figure>
+<h4 id="用户"><a href="#用户" class="headerlink" title="用户"></a>用户</h4><p>创建用户：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> user1 = <span class="keyword">await</span> User.create(&#123; <span class="attr">name</span>: <span class="string">'小明'</span> &#125;);</span><br><span class="line"><span class="keyword">const</span> user2 = <span class="keyword">await</span> User.create(&#123; <span class="attr">name</span>: <span class="string">'小花'</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>创建用户时可以选择多个角色：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用户创建时，可以选择关联多个角色</span></span><br><span class="line"><span class="keyword">await</span> user1.addRole([role1, role2]);</span><br><span class="line"><span class="keyword">await</span> user2.addRole([role1, role2]);</span><br></pre></td></tr></table></figure>
+<p>创建用户时可以选择单个机构：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用户创建时，可以选择单个机构</span></span><br><span class="line"><span class="keyword">await</span> user1.setAgency(agency1);</span><br><span class="line"><span class="keyword">await</span> user2.setAgency(agency2);</span><br></pre></td></tr></table></figure>
+<p>用户列表查询：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> userList = <span class="keyword">await</span> User.findAll(&#123;</span><br><span class="line">    offset: <span class="number">0</span>, <span class="attr">limit</span>: <span class="number">10</span>,</span><br><span class="line">    include: [&#123;</span><br><span class="line">        model: Role,</span><br><span class="line">        through: through,</span><br><span class="line">    &#125;, Agency],</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">  <span class="attr">"id"</span>: <span class="number">5</span>,</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"小明"</span>,</span><br><span class="line">  <span class="attr">"roles"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">      <span class="attr">"title"</span>: <span class="string">"研发权限"</span>,</span><br><span class="line">      <span class="attr">"creatorId"</span>: <span class="number">3</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">      <span class="attr">"title"</span>: <span class="string">"产品权限"</span>,</span><br><span class="line">      <span class="attr">"creatorId"</span>: <span class="number">4</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"agency"</span>: &#123;</span><br><span class="line">    <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"title"</span>: <span class="string">"事业部"</span>,</span><br><span class="line">    <span class="attr">"roleId"</span>: <span class="number">2</span>,</span><br><span class="line">    <span class="attr">"userId"</span>: <span class="number">5</span>,</span><br><span class="line">    <span class="attr">"creatorId"</span>: <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Sequelize 提供关联查询还是挺方便的，但是发现如果很复杂时，Sequelize 帮不了你，你可能需要写原生的 SQL 语句查询。像这种多对多的关联查询，一般需要一个中间表，之后就是无限的 LEFT OUTER JOIN 了。</p>
+<p>秀出部分 SQL 原生查询语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    roles.id <span class="keyword">as</span> <span class="keyword">id</span>,</span><br><span class="line">    roles.title <span class="keyword">as</span> title,</span><br><span class="line">    agencies.id <span class="keyword">as</span> agencyId,</span><br><span class="line">    agencies.title <span class="keyword">as</span> agencyTitle,</span><br><span class="line">    users.id <span class="keyword">as</span> userId,</span><br><span class="line">    users.name <span class="keyword">as</span> userName</span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">roles</span></span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> roleRelateUser <span class="keyword">ON</span> roleRelateUserId.id = roles.roleRelateUserId</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> <span class="keyword">users</span> <span class="keyword">ON</span> roleRelateUser.userId = users.id</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> roleRelateAgency <span class="keyword">ON</span> roleRelateAgency.id = roles.roleRelateAgencyId</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> agency <span class="keyword">ON</span> roleRelateAgency.agencyId = agency.id</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://semlinker.com/node-sequelize-1vm/" target="_blank" rel="noopener">http://semlinker.com/node-sequelize-1vm/</a></li>
+<li><a href="https://sequelize.org/master/manual/creating-with-associations.html" target="_blank" rel="noopener">https://sequelize.org/master/manual/creating-with-associations.html</a></li>
+<li><a href="https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html" target="_blank" rel="noopener">https://demopark.github.io/sequelize-docs-Zh-CN/core-concepts/assocs.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.830Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2020/07/Mysql/关于 Sequelize 关联 N：M 的问题/" target="_blank" rel="external">http://me.lizhooh.com/stories/2020/07/Mysql/关于 Sequelize 关联 N：M 的问题/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MongoDB/">MongoDB</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mysql/">Mysql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2020/07/Mysql/关于 Sequelize Tree 结构的问题/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">关于 Sequelize Tree 结构的问题</h4>
+        <h4 class="summary">今天碰到关于 Sequelize Tree 结构的问题 …
+业务需求需要存储一个 Tree 结构，因为数据库是关系型数据...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2020/07/React/Router/React Router 4 关于前端守卫/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Router 4 关于前端守卫</h4>
+        <h4 class="summary">由于 React Router 4 没有事件系统，因此在前端路由守卫这里比 Vue-Router 做起来麻烦多了，因为监...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

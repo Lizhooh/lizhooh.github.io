@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/04/React/React/前端路由守护与后端用户认证/">
+    
+    
+    <title>前端路由守护 与 后端用户认证 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前端路由守护为了实现在未认证用户试图进入被保护页面时转跳到首页的功能，这里使用的是React-Router 4.0来设置前端路由守护。 一般来说，用户认证功能是这样的：  在未认证状态下访问，被保护的页面时，进行重定向到登录页面。 在认证状态下访问，被保护的页面时，进行正常的转到指定页面。">
+<meta name="keywords" content="Nodejs,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端路由守护 与 后端用户认证">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/04/React/React/前端路由守护与后端用户认证/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前端路由守护为了实现在未认证用户试图进入被保护页面时转跳到首页的功能，这里使用的是React-Router 4.0来设置前端路由守护。 一般来说，用户认证功能是这样的：  在未认证状态下访问，被保护的页面时，进行重定向到登录页面。 在认证状态下访问，被保护的页面时，进行正常的转到指定页面。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.880Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端路由守护 与 后端用户认证">
+<meta name="twitter:description" content="前端路由守护为了实现在未认证用户试图进入被保护页面时转跳到首页的功能，这里使用的是React-Router 4.0来设置前端路由守护。 一般来说，用户认证功能是这样的：  在未认证状态下访问，被保护的页面时，进行重定向到登录页面。 在认证状态下访问，被保护的页面时，进行正常的转到指定页面。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">前端路由守护 与 后端用户认证</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">前端路由守护 与 后端用户认证</h1>
+
+        <div class="meta-rest">
+            <h1>前端路由守护 与 后端用户认证</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-04-03T11:26:17.000Z" itemprop="datePublished" class="page-time">
+    2017-04-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前端路由守护"><span class="post-toc-number">1.</span> <span class="post-toc-text">前端路由守护</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#后端用户认证"><span class="post-toc-number">2.</span> <span class="post-toc-text">后端用户认证</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义-session-中间件"><span class="post-toc-number">3.</span> <span class="post-toc-text">自定义 session 中间件</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#express-session"><span class="post-toc-number">4.</span> <span class="post-toc-text">express-session</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/前端路由守护与后端用户认证"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">前端路由守护 与 后端用户认证</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 04 月 03 日 19:26" datetime="2017-04-03T11:26:17.000Z"  itemprop="datePublished">
+    2017-04-03
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1086</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前端路由守护"><a href="#前端路由守护" class="headerlink" title="前端路由守护"></a>前端路由守护</h2><p>为了实现在未认证用户试图进入被保护页面时转跳到首页的功能，这里使用的是<code>React-Router 4.0</code>来设置前端路由守护。</p>
+<p>一般来说，用户认证功能是这样的：</p>
+<ul>
+<li>在未认证状态下访问，被保护的页面时，进行重定向到登录页面。</li>
+<li>在认证状态下访问，被保护的页面时，进行正常的转到指定页面。</li>
+</ul>
+<a id="more"></a>
+<p>对于<code>React-Router 4.0</code>来说，取消了<code>onEnter</code>的 API （在 v3 的时候是使用<code>onEnter</code>来实现的），而是使用另一种方式来实现。</p>
+<p>对于 React Router 4.0 可以这样监听路由的改变。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; OnUpdate &#125; <span class="keyword">from</span> <span class="string">'rrc'</span>;</span><br><span class="line"></span><br><span class="line">&lt;OnUpdate call=&#123;e =&gt; &#123;</span><br><span class="line">    <span class="comment">// 路由改变时触发</span></span><br><span class="line">&#125;&#125; /&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/public"</span> <span class="attr">component</span>=<span class="string">&#123;Public&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/login"</span> <span class="attr">component</span>=<span class="string">&#123;Login&#125;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Route</span> <span class="attr">path</span>=<span class="string">"/protected"</span> <span class="attr">render</span>=<span class="string">&#123;props</span> =&gt;</span> &#123;</span><br><span class="line">    fakeAuth.isAuthenticated ?</span><br><span class="line">        <span class="tag">&lt;<span class="name">User</span> &#123;<span class="attr">...props</span>&#125; /&gt;</span></span><br><span class="line">        :</span><br><span class="line">        <span class="tag">&lt;<span class="name">Redirect</span> <span class="attr">to</span>=<span class="string">'/login'</span> /&gt;</span></span><br><span class="line">&#125;&#125; /&gt;</span><br></pre></td></tr></table></figure>
+<p>上面的代码，当用户访问<code>/protected</code>时，如果没有通过认证验证，那么就会重定向到<code>/login</code>；如果通过认证验证，那么就会加载<code>&lt;User&gt;</code></p>
+<h2 id="后端用户认证"><a href="#后端用户认证" class="headerlink" title="后端用户认证"></a>后端用户认证</h2><p>基于 <code>session</code> 和 <code>cookie</code> 的后端用户认证方法：</p>
+<ul>
+<li><p>在登录页面输入用户名与密码，单击按钮登录，将会把用户名和密码传给 API 服务器，服务器通过验证后就会将当前用户名（惟一）加入 <code>session.user</code> 里，并返回登录状态信息。</p>
+</li>
+<li><p>在登录时会创建一个新的 <code>session</code>，并产生一个 <code>sessionID</code>，这个 <code>sessionID</code> 将会通过请求响应存储在浏览器<code>cookie</code>的<code>sid</code>里，下次（前端）发出请求时设置 <code>cookie</code> 携带这个字段，此时服务器通过 <code>sid</code> 映射到 <code>sessionID</code> 来找到存储中的 <code>session</code> 数据关联起来。</p>
+</li>
+<li><p>在已经登录过一次后，会维持一个会话状态（一般为 30 分钟），通过 <code>sid</code> 映射到 <code>sessionID</code>，来找到 <code>session.user</code> 中的数据从而判断，用户是否登录过。如果发现会话生命周期结束了，那就把 <code>session.user</code> 置空或删除，并返回超时登录页面。</p>
+</li>
+<li><p>在注销时，也是通过 <code>sid</code> 来找到 <code>session.user</code> 信息，然后把 <code>session.user</code> 置空或删除。</p>
+</li>
+</ul>
+<h2 id="自定义-session-中间件"><a href="#自定义-session-中间件" class="headerlink" title="自定义 session 中间件"></a>自定义 session 中间件</h2><p>下面在 Nodejs 里，根据上面的方法，自定义一个简单的 session 中间件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 唯一 ID</span></span><br><span class="line"><span class="keyword">const</span> uuid = <span class="built_in">require</span>(<span class="string">'uuid'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 储存 session 的信息</span></span><br><span class="line"><span class="keyword">const</span> STROE = [];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> session = <span class="function">(<span class="params">req, res, next</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> sid = req.cookie.sid;</span><br><span class="line">    <span class="keyword">let</span> _session = &#123; <span class="attr">user</span>: <span class="literal">null</span>, <span class="attr">sessionID</span>: <span class="literal">null</span> &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (sid) &#123;</span><br><span class="line">        <span class="comment">// 如果存在 sid 着寻找 session 信息</span></span><br><span class="line">        <span class="keyword">const</span> index = STROE.find(<span class="function"><span class="params">i</span> =&gt;</span> i.sessionID === sid);</span><br><span class="line">        index &gt;= <span class="number">0</span> &amp;&amp; (_session = STROE[index]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    req.session = &#123;</span><br><span class="line">        ..._session,</span><br><span class="line">        create(user) &#123;</span><br><span class="line">            <span class="comment">// 添加 session 信息</span></span><br><span class="line">            <span class="keyword">const</span> sessionID = uuid.v4();</span><br><span class="line">            <span class="keyword">this</span>.user = user;</span><br><span class="line">            <span class="keyword">this</span>.sessionID = sessionID;</span><br><span class="line">            <span class="comment">// 添加到 cookie 里</span></span><br><span class="line">            req.cookie.sid = sessionID;</span><br><span class="line">            STROE.push(&#123; user, sessionID &#125;);</span><br><span class="line">        &#125;,</span><br><span class="line">        destroy() &#123;</span><br><span class="line">            <span class="comment">// 删除 session 信息</span></span><br><span class="line">            <span class="keyword">const</span> index = STROE.find(<span class="function"><span class="params">i</span> =&gt;</span> i.sessionID === <span class="keyword">this</span>.sessionID);</span><br><span class="line">            <span class="keyword">this</span>.user = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">this</span>.sessionID = <span class="literal">null</span>;</span><br><span class="line">            STROE.splice(index, <span class="number">1</span>);</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line">    next();</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = session;</span><br></pre></td></tr></table></figure>
+<p>相关的认证操作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 开始登录</span></span><br><span class="line">router.get(<span class="string">'/login'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> user = &#123; <span class="attr">name</span>: req.query.name &#125;;</span><br><span class="line">    <span class="comment">// 在设置 session 前，检验账号密码</span></span><br><span class="line">    req.session.create(user);</span><br><span class="line">    res.json(user);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 登录状态</span></span><br><span class="line">router.get(<span class="string">'/loadAuth'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    res.send(req.session.user || &#123;&#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 退出登录</span></span><br><span class="line">router.get(<span class="string">'/logout'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    req.session.destroy();</span><br><span class="line">    res.json(<span class="literal">null</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="express-session"><a href="#express-session" class="headerlink" title="express-session"></a>express-session</h2><p><code>express-session</code> 是 Express 官方提供的中间件，提供了很多健壮的功能。</p>
+<blockquote>
+<p><a href="https://github.com/expressjs/session" target="_blank" rel="noopener">https://github.com/expressjs/session</a></p>
+</blockquote>
+<p><strong>安装</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save express-session</span><br></pre></td></tr></table></figure>
+<p><strong>使用</strong><br>一般的使用方法，更多的去参考 github</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">app.use(session(&#123;</span><br><span class="line">    secret: <span class="string">'my session demo'</span>,   <span class="comment">// 用于签名 sessionID 的密钥</span></span><br><span class="line">    resave: <span class="literal">false</span>,               <span class="comment">// 用于强制保存 session，大多数情况下应该设置为空</span></span><br><span class="line">    saveUninitialized: <span class="literal">false</span>,    <span class="comment">// 用于强制保存未初始化的 session，</span></span><br><span class="line">                                 <span class="comment">// 如果设置为 false，新的 session 在被修改时才会生成。</span></span><br><span class="line">    cookie: &#123;                    <span class="comment">// 设置 cookie 的信息</span></span><br><span class="line">        maxAge: <span class="number">1000</span> * <span class="number">60</span> * <span class="number">30</span>   <span class="comment">// 30 min</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+<p>相关的认证操作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 开始登录</span></span><br><span class="line">router.post(<span class="string">'/login'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> user = &#123; <span class="attr">name</span>: req.body.name &#125;;</span><br><span class="line">    <span class="comment">// 在设置 session 前，检验账号密码</span></span><br><span class="line">    req.session.user = user;</span><br><span class="line">    res.json(user);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 登录状态</span></span><br><span class="line">router.get(<span class="string">'/loadAuth'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    res.send(req.session.user || &#123;&#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 退出登录</span></span><br><span class="line">router.get(<span class="string">'/logout'</span>, (req, res) =&gt; &#123;</span><br><span class="line">    req.session.destroy(<span class="function"><span class="params">_</span> =&gt;</span> req.session = <span class="literal">null</span>);</span><br><span class="line">    res.json(<span class="literal">null</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong> 关于设置 cookie sid，匹配 sid 与 sessionID，找出 session 信息，这些<code>Express-Session</code>都帮你自动完成了，你只需要使用<code>req.session</code>就可以了。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.880Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/04/React/React/前端路由守护与后端用户认证/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/04/React/React/前端路由守护与后端用户认证/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/04/MongoDB/学习 Mongoose 的使用/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">学习 Mongoose 的使用</h4>
+        <h4 class="summary">MongooseMongoose 是 MongoDB 的在 Nodejs 上的一个第三方客户端。
+Mongoose 提供...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/04/React/Router/快速学习 React-Router 4.0/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">快速学习 React-Router 4.0</h4>
+        <h4 class="summary">新机制React-Router 4.0相比之前的React-Router 3.0来说 API 变了不少啊，为了快速的从 ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

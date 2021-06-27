@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2019/04/前端/Workbox：一个离线存储神器/">
+    
+    
+    <title>Workbox：一个离线存储神器 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言GoogleChrome 曾经推出过两个用于  Service Worker （离线存储）的工具： sw-precache 和 sw-toolbox。不过因为这两个库 api 太分离，并且设计的不好，因此 GoogleChrome 在此推出了一个叫 workbox 的 Web App 静态资源和请求结果的本地存储的解决方案，该方案比起之前的使用更加简单与优雅。">
+<meta name="keywords" content="前端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Workbox：一个离线存储神器">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2019/04/前端/Workbox：一个离线存储神器/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言GoogleChrome 曾经推出过两个用于  Service Worker （离线存储）的工具： sw-precache 和 sw-toolbox。不过因为这两个库 api 太分离，并且设计的不好，因此 GoogleChrome 在此推出了一个叫 workbox 的 Web App 静态资源和请求结果的本地存储的解决方案，该方案比起之前的使用更加简单与优雅。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/4/20190421204020.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/4/20190421204238.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.904Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Workbox：一个离线存储神器">
+<meta name="twitter:description" content="前言GoogleChrome 曾经推出过两个用于  Service Worker （离线存储）的工具： sw-precache 和 sw-toolbox。不过因为这两个库 api 太分离，并且设计的不好，因此 GoogleChrome 在此推出了一个叫 workbox 的 Web App 静态资源和请求结果的本地存储的解决方案，该方案比起之前的使用更加简单与优雅。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2019/4/20190421204020.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Workbox：一个离线存储神器</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Workbox：一个离线存储神器</h1>
+
+        <div class="meta-rest">
+            <h1>Workbox：一个离线存储神器</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2019-04-21T12:24:55.000Z" itemprop="datePublished" class="page-time">
+    2019-04-21
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/前端/">前端</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#引入-Workbox"><span class="post-toc-number">2.</span> <span class="post-toc-text">引入 Workbox</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用缓存"><span class="post-toc-number">3.</span> <span class="post-toc-text">使用缓存</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">4.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-前端/Workbox：一个离线存储神器"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Workbox：一个离线存储神器</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019 年 04 月 21 日 20:24" datetime="2019-04-21T12:24:55.000Z"  itemprop="datePublished">
+    2019-04-21
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/前端/">前端</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1107</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>GoogleChrome 曾经推出过两个用于  Service Worker （离线存储）的工具： sw-precache 和 sw-toolbox。不过因为这两个库 api 太分离，并且设计的不好，因此 GoogleChrome 在此推出了一个叫 <a href="https://github.com/GoogleChrome/workbox" target="_blank" rel="noopener">workbox</a> 的 Web App 静态资源和请求结果的本地存储的解决方案，该方案比起之前的使用更加简单与优雅。</p>
+<a id="more"></a>
+<p>workbox 现在已经发布了 4.x 版本，它有以下的特性：</p>
+<ul>
+<li>不管你的站点是何种方式构建的，都可以为你的站点提供离线访问能力。</li>
+<li>就算你不考虑离线能力，也能让你的站点访问速度更加快。</li>
+<li>几乎不用考虑太多的具体实现，只用做一些配置。</li>
+<li>简单却不失灵活，可以完全自定义相关需求。</li>
+<li>针对各种应用场景的多种缓存策略。</li>
+</ul>
+<h2 id="引入-Workbox"><a href="#引入-Workbox" class="headerlink" title="引入 Workbox"></a>引入 Workbox</h2><p>在使用 Workbox 之前需要创建一个 service-worker.js 文件放在网站的根目录。</p>
+<p>在页面里添加脚本加载 service-worker.js</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">    <span class="keyword">if</span> (<span class="string">'serviceWorker'</span> <span class="keyword">in</span> navigator) &#123;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">window</span>.addEventListener(<span class="string">'load'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span></span><br><span class="line"><span class="actionscript">            navigator.serviceWorker.register(<span class="string">'/service-worker.js'</span>);</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>下面开始使用 Worker，从 cdn 里加载 Workbox。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">importScripts(<span class="string">'https://storage.googleapis.com/workbox-cdn/releases/4.2.0/workbox-sw.js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (workbox) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`Yay! Workbox is loaded 🎉`</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`Boo! Workbox didn't load 😬`</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="使用缓存"><a href="#使用缓存" class="headerlink" title="使用缓存"></a>使用缓存</h2><p>当在 sw.js 能够拿到 workbox 全局变量，表明 workbox 可以使用了，workbox 能干什么呢？</p>
+<ul>
+<li>通过 workbox.precaching 模块来处理 Service Worker 静态资源的预缓存。</li>
+<li>通过 workbox.routing 模块提供的路由控制和 workbox.strategies 模快提供的缓存策略控制帮助你做动态缓存。</li>
+<li>使用 workbox 插件做一些 Service Worker 相对独立的工作，比如 更新提醒, Background Sync 等</li>
+</ul>
+<p>在 workbox 里使用 precaching 进行预先缓存，使用 routing 进行动态的缓存。</p>
+<p>缓存的策略大致可以分为以下：</p>
+<ul>
+<li><strong>重新验证时陈旧</strong> - 如果请求可用，此策略将对请求使用缓存响应，并在后台使用网络响应更新缓存。（如果没有缓存，它将等待网络响应并使用它）。这是一种相当安全的策略，因为这意味着用户会定期更新其缓存。这种策略的缺点是它总是从网络请求资产，耗尽用户的带宽。</li>
+<li><strong>网络优先</strong> - 这将首先尝试从网络获取请求。如果收到响应，它会将其传递给浏览器并将其保存到缓存中。如果网络请求失败，将使用最后一个缓存的响应。</li>
+<li><strong>首先缓存</strong> - 此策略将首先检查缓存中的响应，如果有可用则使用该策略。如果请求不在缓存中，则将使用网络，并且在传递给浏览器之前，任何有效响应都将添加到缓存中。</li>
+<li><strong>仅限网络</strong> - 强制响应来自网络。</li>
+<li><strong>仅缓存</strong> - 强制响应来自缓存。</li>
+</ul>
+<p>而这五个策略，对应的五个函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    match,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.StaleWhileRevalidate()</span><br><span class="line">);</span><br><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    match,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.NetworkFirst()</span><br><span class="line">);</span><br><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    match,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.CacheFirst()</span><br><span class="line">);</span><br><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    match,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.NetworkOnly()</span><br><span class="line">);</span><br><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    match,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.CacheOnly()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>假如首页没有使用到 index.js，在后面的页面才有使用到 index.js，但是你希望预先缓存 index.js，可以使用 precache 进行预先缓存。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">workbox.precaching.precacheAndRoute([</span><br><span class="line">    <span class="string">'/styles/index.js'</span>,</span><br><span class="line">]);</span><br></pre></td></tr></table></figure>
+<p>缓存的文件路径可以写成正则表达式，例如下面的缓存所有 js 文件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    /.*\.js$/,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.NetworkFirst(),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p><strong>说明：</strong></p>
+<ul>
+<li>这个路由会缓存所有 js 文件。</li>
+<li>workbox.strategies.NetworkFirst 是在首次访问时进行缓存。</li>
+</ul>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/4/20190421204020.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>可以从 cache storage 里看到已经存储的 js 文件。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/4/20190421204238.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>Workbox 提供了一些可以使用的缓存策略。例如，CSS 可以首先从缓存中提供，然后在后台更新，或者您的图像可以缓存并使用，直到它为一周，之后它将需要更新。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 缓存 css</span></span><br><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    /.*\.css$/,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.StaleWhileRevalidate(&#123;</span><br><span class="line">        cacheName: <span class="string">'css-cache'</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存图像</span></span><br><span class="line">workbox.routing.registerRoute(</span><br><span class="line">    /\.(?:png|jpg|jpeg|svg|gif)$/,</span><br><span class="line">    <span class="keyword">new</span> workbox.strategies.CacheFirst(&#123;</span><br><span class="line">        cacheName: <span class="string">'image-cache'</span>,</span><br><span class="line">        plugins: [</span><br><span class="line">            <span class="keyword">new</span> workbox.expiration.Plugin(&#123;</span><br><span class="line">                maxEntries: <span class="number">30</span>,</span><br><span class="line">                maxAgeSeconds: <span class="number">3600</span> * <span class="number">24</span> * <span class="number">7</span>,</span><br><span class="line">            &#125;),</span><br><span class="line">        ],</span><br><span class="line">    &#125;),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>workbox 甚至可以缓存 html 文件，但我不建议这样做，除非你的站点是静态网站。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">workbox.precaching.preacheAndRoute([</span><br><span class="line">    &#123;</span><br><span class="line">        url: <span class="string">'/index.html'</span>,</span><br><span class="line">        revision: <span class="string">'383676'</span></span><br><span class="line">    &#125;,</span><br><span class="line">]);</span><br></pre></td></tr></table></figure>
+<p>剩下更多的了解，请参考文档。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://developers.google.cn/web/tools/workbox/guides/get-started" target="_blank" rel="noopener">https://developers.google.cn/web/tools/workbox/guides/get-started</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.904Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2019/04/前端/Workbox：一个离线存储神器/" target="_blank" rel="external">http://me.lizhooh.com/stories/2019/04/前端/Workbox：一个离线存储神器/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2019/04/抓包&爬虫/Apify：一个 Cheerio + Puppeteer 的爬虫框架/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Apify：一个 Cheerio + Puppeteer 的爬虫框架</h4>
+        <h4 class="summary">Apify.js 是一款用于 JavaScript 的可伸缩的 web 爬虫和抓取库。能通过无头（headless）Ch...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2019/04/前端/微信 H5 开发笔记/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">微信 H5 开发笔记</h4>
+        <h4 class="summary">前言前言</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

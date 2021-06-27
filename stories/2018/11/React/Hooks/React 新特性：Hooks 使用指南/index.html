@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/11/React/Hooks/React 新特性：Hooks 使用指南/">
+    
+    
+    <title>React 新特性：Hooks 使用指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言React 的更新还在继续，从今年进入 v16 版本以来，现在已经到了 v16.7 了，在 v16 版本里出现了非常多的革命性突破，比如新的异步渲染引擎，新的组件生命周期，新的组件渲染方式等，更是在 v16.7 里提出了一种钩子概念，名为 Hooks。  目前在 react v16.8.0 上可以完全的使用了 react hooks 了。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 新特性：Hooks 使用指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/11/React/Hooks/React 新特性：Hooks 使用指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言React 的更新还在继续，从今年进入 v16 版本以来，现在已经到了 v16.7 了，在 v16 版本里出现了非常多的革命性突破，比如新的异步渲染引擎，新的组件生命周期，新的组件渲染方式等，更是在 v16.7 里提出了一种钩子概念，名为 Hooks。  目前在 react v16.8.0 上可以完全的使用了 react hooks 了。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.872Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 新特性：Hooks 使用指南">
+<meta name="twitter:description" content="前言React 的更新还在继续，从今年进入 v16 版本以来，现在已经到了 v16.7 了，在 v16 版本里出现了非常多的革命性突破，比如新的异步渲染引擎，新的组件生命周期，新的组件渲染方式等，更是在 v16.7 里提出了一种钩子概念，名为 Hooks。  目前在 react v16.8.0 上可以完全的使用了 react hooks 了。">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 新特性：Hooks 使用指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 新特性：Hooks 使用指南</h1>
+
+        <div class="meta-rest">
+            <h1>React 新特性：Hooks 使用指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-11-05T13:58:23.000Z" itemprop="datePublished" class="page-time">
+    2018-11-05
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#什么是-Hooks"><span class="post-toc-number">2.</span> <span class="post-toc-text">什么是 Hooks</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Effect-Hook"><span class="post-toc-number">3.</span> <span class="post-toc-text">Effect Hook</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#useRef"><span class="post-toc-number">4.</span> <span class="post-toc-text">useRef</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#useReducer"><span class="post-toc-number">5.</span> <span class="post-toc-text">useReducer</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义-Hooks"><span class="post-toc-number">6.</span> <span class="post-toc-text">自定义 Hooks</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Hooks-规则"><span class="post-toc-number">7.</span> <span class="post-toc-text">Hooks 规则</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#优化技巧"><span class="post-toc-number">8.</span> <span class="post-toc-text">优化技巧</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">9.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Hooks/React 新特性：Hooks 使用指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 新特性：Hooks 使用指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 11 月 05 日 21:58" datetime="2018-11-05T13:58:23.000Z"  itemprop="datePublished">
+    2018-11-05
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2241</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  25  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>React 的更新还在继续，从今年进入 v16 版本以来，现在已经到了 v16.7 了，在 v16 版本里出现了非常多的革命性突破，比如新的异步渲染引擎，新的组件生命周期，新的组件渲染方式等，更是在 v16.7 里提出了一种钩子概念，名为 <a href="https://reactjs.org/docs/hooks-intro.html" target="_blank" rel="noopener">Hooks</a>。</p>
+<blockquote>
+<p>目前在 react v16.8.0 上可以完全的使用了 react hooks 了。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="什么是-Hooks"><a href="#什么是-Hooks" class="headerlink" title="什么是 Hooks"></a>什么是 Hooks</h2><p>Hooks 是一种函数，该函数允许你“勾住（hook into）”React 状态和来自函数组件的生命周期功能。Hook 在类内部不起作用，它们允许你无需类就使用 React。（不建议你马上开始重写你现有的组件，但你可以在新组件中开始使用 Hook。）</p>
+<p>React 提供了一些内置 Hook，如 useState，你也可以创建自定义 Hooks 以在不同的组件中复用有状态行为。</p>
+<p>根据 React 官方给出的文档，Hooks 主要分为以下几种：</p>
+<ul>
+<li>State Hooks</li>
+<li>Effect Hooks</li>
+<li>自定义 Hooks</li>
+</ul>
+<p>下面是有个官方的例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; useState &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// useState 就是一个 Hooks（钩子）</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Example</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// useState 接收的是初始值，返回一个数组，包含 state 和 更新 state 的函数。</span></span><br><span class="line">    <span class="comment">// 在第一次渲染时使用初始值，之后就是内存值</span></span><br><span class="line">    <span class="keyword">const</span> [count, setCount] = useState(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;p&gt;You clicked &#123;count&#125; times&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;button onClick=&#123;() =&gt; setCount(count + 1)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                Click me</span></span><br><span class="line"><span class="regexp">            &lt;/</span>button&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>在这里，useState 是一个 Hook，我们在函数组件中调用它以给它添加一些本地状态。React 将在重新渲染之会间保留这个状态（请不要被这段代码骗了）。useState 返回一对值：currentstate 值和允许你更新它的函数。</p>
+<p>可以从事件处理程序或其他位置调用该函数，这与类中的 this.setState 类似，除了其不会把旧的和新的状态合并在一起。</p>
+<blockquote>
+<p>这里有一个疑问：useState 是如何保留之前的状态的，这篇文章可以帮助你 <a href="https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e" target="_blank" rel="noopener">react-hooks-not-magic-just-arrays</a></p>
+</blockquote>
+<p>在函数组件里，可以使用多个 Hooks。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ExampleWithManyStates</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 初始值可以是，任意 javascript 类型。</span></span><br><span class="line">    <span class="keyword">const</span> [age, setAge] = useState(<span class="number">42</span>);</span><br><span class="line">    <span class="keyword">const</span> [fruit, setFruit] = useState(<span class="string">'banana'</span>);</span><br><span class="line">    <span class="keyword">const</span> [todos, setTodos] = useState([&#123; <span class="attr">text</span>: <span class="string">'Learn Hooks'</span> &#125;]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>useState 通过自建 id 来保证数据的正确性，因此，就算初始值一样，返回的值都是不同的内存。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [age, setAge] = useState(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">const</span> [count, setCount] = useState(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>age, setAge 是对返回的数组进行解构，名称是随意定义的，一般，我们会取 xxx 和 setXxx 的命名，也可以叫 xxx 和 updateXxx。</p>
+<h2 id="Effect-Hook"><a href="#Effect-Hook" class="headerlink" title="Effect Hook"></a>Effect Hook</h2><p>如果在 React 里操作 DOM，那么这就是一个副作用的玩法。因为它们会影响其他组件，并且在渲染过程中无法完成。</p>
+<p><strong>Effect Hook、useEffect，增加了从函数组件执行副作用的功能。</strong>它与 React 类中的 componentDidMount、componentDidUpdate、和 componentWillUnmount 有相同的功能，但是统一为单个 API。</p>
+<p>例如，此组件在 React 更新 DOM 后设置文档标题：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; useState, useEffect &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Example</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [count, setCount] = useState(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// componentDidMount and componentDidUpdate:</span></span><br><span class="line">    useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">document</span>.title = <span class="string">`You clicked <span class="subst">$&#123;count&#125;</span> times`</span>;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;p&gt;You clicked &#123;count&#125; times&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;button onClick=&#123;() =&gt; setCount(count + 1)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                Click me</span></span><br><span class="line"><span class="regexp">            &lt;/</span>button&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这段代码等效于：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">        <span class="keyword">this</span>.state = &#123; <span class="attr">count</span>: <span class="number">0</span> &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="built_in">document</span>.title = <span class="string">`You clicked <span class="subst">$&#123;<span class="keyword">this</span>.state.count&#125;</span> times`</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    componentDidUpdate() &#123;</span><br><span class="line">        <span class="built_in">document</span>.title = <span class="string">`You clicked <span class="subst">$&#123;<span class="keyword">this</span>.state.count&#125;</span> times`</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;p&gt;You clicked &#123;count&#125; times&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;button onClick=&#123;() =&gt;</span></span><br><span class="line"><span class="regexp">                    this.setState(&#123; count: this.state.count + 1&#125;)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                    Click me</span></span><br><span class="line"><span class="regexp">                &lt;/</span>button&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>Effect 在组件内声明，因此可以访问其 props 和 state。默认情况下，React 在每次渲染后运行 effect，包括第一次渲染。</p>
+<p>Effect 还可以通过返回一个函数来指定它们之后如何<code>清理</code>。例如，此组件使用 effect 来订阅朋友的在线状态，并通过取消订阅来清理。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> _timer = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Status</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        _timer = setInterval(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;, <span class="number">1000</span> * <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">            clearInterval(<span class="keyword">this</span>._timer);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>等效于以下的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Status</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 注册订阅</span></span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="keyword">this</span>._timer = setInterval(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;, <span class="number">1000</span> * <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 取消订阅</span></span><br><span class="line">    componentWillUnmount() &#123;</span><br><span class="line">        clearInterval(<span class="keyword">this</span>._timer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当在 effect hooks 里返回一个函数时，就会在组件卸载的时候会调用，等效于 class 的 componentWillUnmount 方法。</p>
+<p>effect hooks 还允许跳过内容，从而优化性能。在 useEffect 的第二个参数里（为数组，可以填入多个），填入检测的状态值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Example</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [count, setCount] = useState(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果 count 没有变化，则 useEffect 不会执行回调函数，尽管 Example 组件被对次渲染</span></span><br><span class="line">    useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">document</span>.title = <span class="string">`You clicked <span class="subst">$&#123;count&#125;</span> times`</span>;</span><br><span class="line">    &#125;, [count]); <span class="comment">// &lt;-- 这里</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这段代码等效于：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">componentDidUpdate(prevProps, prevState) &#123;</span><br><span class="line">    <span class="keyword">if</span> (prevState.count !== <span class="keyword">this</span>.state.count) &#123;</span><br><span class="line">        <span class="built_in">document</span>.title = <span class="string">`You clicked <span class="subst">$&#123;<span class="keyword">this</span>.state.count&#125;</span> times`</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>是的 useEffect 帮你做了很多事情。也适用于 props。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果 Example 的 props.id 没有改变，则 useEffect 的回调函数是不会执行的</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Example</span>(<span class="params">&#123; id &#125;</span>) </span>&#123;</span><br><span class="line">    useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">document</span>.title = <span class="string">`You clicked <span class="subst">$&#123;count&#125;</span> times`</span>;</span><br><span class="line">    &#125;, [id]); <span class="comment">// &lt;-- 这里</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="useRef"><a href="#useRef" class="headerlink" title="useRef"></a>useRef</h2><p>可以获取组件的 DOM 引用的 Hook。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; useRef, useEffect &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">MyComponent</span>(<span class="params">&#123; imgUrl &#125;</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> ref = useRef(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">    useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(ref.src);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div style=&#123;&#123; <span class="attr">width</span>: <span class="string">'100%'</span>, <span class="attr">height</span>: <span class="string">'100%'</span> &#125;&#125;&gt;</span><br><span class="line">           &lt;img ref=&#123;ref&#125; src=&#123;imgUrl&#125; /&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    )</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="useReducer"><a href="#useReducer" class="headerlink" title="useReducer"></a>useReducer</h2><p>React 为我们提供了 useReducer，其用法类似 redux 中的 reducer。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; useReducer &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Text, View, TouchableOpacity &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> initialState = &#123; <span class="attr">count</span>: <span class="number">0</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">reducer</span>(<span class="params">state, action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'reset'</span>: <span class="keyword">return</span> initialState;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'increment'</span>: <span class="keyword">return</span> &#123;</span><br><span class="line">            count: state.count + <span class="number">1</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'decrement'</span>: <span class="keyword">return</span> &#123;</span><br><span class="line">            count: state.count - <span class="number">1</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">DemoCounter</span>(<span class="params">&#123; initialCount &#125;</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [state, dispatch] = useReducer(reducer, &#123; <span class="attr">count</span>: initialCount &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;p&gt;Count: &#123;state.count&#125;&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;button onClick=&#123;e =&gt; dispatch(&#123; type: 'reset' &#125;)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;Reset&lt;/</span>p&gt;</span><br><span class="line">            &lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">            &lt;button onClick=&#123;e =&gt; dispatch(&#123; type: 'increment' &#125;)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;+&lt;/</span>p&gt;</span><br><span class="line">            &lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">            &lt;button onClick=&#123;e =&gt; dispatch(&#123; type: 'decrement' &#125;)&#125;&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;-&lt;/</span>p&gt;</span><br><span class="line">            &lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="自定义-Hooks"><a href="#自定义-Hooks" class="headerlink" title="自定义 Hooks"></a>自定义 Hooks</h2><p>React 为我们提供了几个基础的 Hook：useState、useEffect、useRef 等。在特定的场景里我们可能需要自定义自己的 Hook。那么改怎么自定义呢？</p>
+<p><strong>自定义 Hook 需要做到：</strong>自定义 Hook 必须是一个 JavaScript 函数（不能是类），其名称需要以 <code>use</code> 开头，可以调用其他的 Hook，其本质就是通过 <code>组合</code> 基础的 Hook，实现一个自定义的 Hook。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">usePeople</span>(<span class="params">initState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; name, setName &#125; = useState(initState.name);</span><br><span class="line">    <span class="keyword">const</span> &#123; age, setAge &#125; = useState(initState.age);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [&#123; name, age &#125;, (data) =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (data.name) setName(data.name);</span><br><span class="line">        <span class="keyword">if</span> (data.age) setAge(data.age);</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样就有了一个自定义的 Hook，这个 Hook 使用起来也非常简单。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [people, usePeople] = usePeople(&#123; <span class="attr">name</span>: <span class="string">'xxx'</span>, <span class="attr">age</span>: <span class="number">20</span> &#125;);</span><br><span class="line"></span><br><span class="line">usePeople(&#123; <span class="attr">age</span>: <span class="number">21</span> &#125;); <span class="comment">// --&gt; call useAge(21)</span></span><br></pre></td></tr></table></figure>
+<p>自定义 Hook 非常强大，它给你提供了无限的可能。例如使用 Hooks 结合 Redux，直接连接 Reducer。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义了一个 reducer Hook</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useReducer</span>(<span class="params">reducer, initialState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [state, setState] = useState(initialState);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span>(<span class="params">action</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> nextState = reducer(state, action);</span><br><span class="line">        setState(nextState);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [state, dispatch];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在我们可以在我们的组件中使用它，让 reducer 驱动它的状态管理：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">todosReducer</span>(<span class="params">state, action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'add'</span>:</span><br><span class="line">            <span class="keyword">return</span> [...state, &#123;</span><br><span class="line">                text: action.text,</span><br><span class="line">                completed: <span class="literal">false</span></span><br><span class="line">            &#125;];</span><br><span class="line">            <span class="comment">// ... other actions ...</span></span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">return</span> state;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Todos</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [todos, dispatch] = useReducer(todosReducer, []);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">handleAddClick</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">        dispatch(&#123; <span class="attr">type</span>: <span class="string">'add'</span>, text &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，也不需要使用 react-redux 来连接组件了，看起来非常方便，完美的与 redux 纯函数编程结合。</p>
+<h2 id="Hooks-规则"><a href="#Hooks-规则" class="headerlink" title="Hooks 规则"></a>Hooks 规则</h2><p>在 Hooks 里有一定的规则限制：</p>
+<ul>
+<li>只在函数的顶层使用 Hook。</li>
+<li>不要在循环，条件或嵌套函数中调用 Hook。</li>
+<li>只从 React Functions 调用 Hook。</li>
+</ul>
+<p><span style="font-size: 18px"><strong>不要在循环，条件或嵌套函数中调用 Hooks。</strong></span><br>相反，总是在 React 函数的顶层使用 Hooks。通过遵循此规则，您可以确保每次组件呈现时都以相同的顺序调用 Hooks。因为在 Hooks 内部的实现是自建 id 的。</p>
+<p><span style="font-size: 18px"><strong>只从 React Functions 调用 Hooks。</strong></span><br>不要从常规 JavaScript 函数中调用 Hook，只能从 React 函数组件调用 Hooks 或者从从自定义挂钩中调用挂钩。</p>
+<h2 id="优化技巧"><a href="#优化技巧" class="headerlink" title="优化技巧"></a>优化技巧</h2><p>如果 useEffect useCallBack useMemo 等的第二个参数是 <code>deps: DependencyList</code>，会用于在执行期间进行判断，如果改变了则会调用里面的内容。</p>
+<p>例如，只有 count 改变了才会执行 console.log，当然第一次初始化时也会执行。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'www'</span>);</span><br><span class="line">&#125;, [count]);</span><br></pre></td></tr></table></figure>
+<p>如果想实现在初始化时执行一次，之后就不执行，那么可以这样写。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'www'</span>);</span><br><span class="line">&#125;, []);</span><br></pre></td></tr></table></figure>
+<p>是的，给空了之后，无论怎么判断都是没有改变的。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/48642850?utm_source=wechat_session&amp;utm_medium=social" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/48642850?utm_source=wechat_session&amp;utm_medium=social</a></li>
+<li><a href="https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e" target="_blank" rel="noopener">https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.872Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/11/React/Hooks/React 新特性：Hooks 使用指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/11/React/Hooks/React 新特性：Hooks 使用指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/11/React/Style/Purgecss 可以自动去除未使用的 CSS 代码/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">💅 Purgecss 可以自动去除未使用的 CSS 代码</h4>
+        <h4 class="summary">Purgecss 是一个可以自动去除未使用多余的 css 代码，当前全局的样式代码它不会去除。
+你可以使用 purgec...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/10/小程序/各大小程序之间的框架差异性分析/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">各大小程序之间的框架差异性分析</h4>
+        <h4 class="summary">自从微信小程序推出之后，其他厂商也陆续的跟风推出自己的小程序框架，目前有微信小程序、支付宝小程序、百度小程序、今日头条小...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

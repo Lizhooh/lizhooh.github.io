@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/02/Python/Python  大数据分析 - Pandas/">
+    
+    
+    <title>Python  大数据分析 - Pandas | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Python 的语法简洁，成熟的库繁多，开发效率高，Python 在大数据分析领域上有非常好的优势。本文介绍 Python 在大数据分析领域的工具库，包括了以下这几个库：  数据分析利器：Numpy 数据可视化：Matplotlib 础数据分析：Pandas 高级科学计算：Scipy  础数据分析：PandasPandas 是一个提供快速，灵活和表达性数据结构的 Python 包，旨在使关系或">
+<meta name="keywords" content="学习笔记,Python,大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python  大数据分析 - Pandas">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/02/Python/Python  大数据分析 - Pandas/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Python 的语法简洁，成熟的库繁多，开发效率高，Python 在大数据分析领域上有非常好的优势。本文介绍 Python 在大数据分析领域的工具库，包括了以下这几个库：  数据分析利器：Numpy 数据可视化：Matplotlib 础数据分析：Pandas 高级科学计算：Scipy  础数据分析：PandasPandas 是一个提供快速，灵活和表达性数据结构的 Python 包，旨在使关系或">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180220122643.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180220122654.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180213105712.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/2/20180213105038.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.850Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python  大数据分析 - Pandas">
+<meta name="twitter:description" content="前言Python 的语法简洁，成熟的库繁多，开发效率高，Python 在大数据分析领域上有非常好的优势。本文介绍 Python 在大数据分析领域的工具库，包括了以下这几个库：  数据分析利器：Numpy 数据可视化：Matplotlib 础数据分析：Pandas 高级科学计算：Scipy  础数据分析：PandasPandas 是一个提供快速，灵活和表达性数据结构的 Python 包，旨在使关系或">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/2/20180220122643.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Python  大数据分析 - Pandas</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Python  大数据分析 - Pandas</h1>
+
+        <div class="meta-rest">
+            <h1>Python  大数据分析 - Pandas</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-02-09T13:48:37.000Z" itemprop="datePublished" class="page-time">
+    2018-02-09
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Python/">Python</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#础数据分析：Pandas"><span class="post-toc-number">2.</span> <span class="post-toc-text">础数据分析：Pandas</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Series"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">Series</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#创建"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">创建</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#矢量运算"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">矢量运算</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#DataFrame"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">DataFrame</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#创建-1"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">创建</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据读取"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">数据读取</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#CSV"><span class="post-toc-number">2.3.1.</span> <span class="post-toc-text">CSV</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#JSON"><span class="post-toc-number">2.3.2.</span> <span class="post-toc-text">JSON</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Excel"><span class="post-toc-number">2.3.3.</span> <span class="post-toc-text">Excel</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#属性与方法"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">属性与方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据存储"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">数据存储</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">3.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Python/Python  大数据分析 - Pandas"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Python  大数据分析 - Pandas</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 02 月 09 日 21:48" datetime="2018-02-09T13:48:37.000Z"  itemprop="datePublished">
+    2018-02-09
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Python/">Python</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2003</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Python 的语法简洁，成熟的库繁多，开发效率高，Python 在大数据分析领域上有非常好的优势。<br>本文介绍 Python 在大数据分析领域的工具库，包括了以下这几个库：</p>
+<ul>
+<li>数据分析利器：Numpy</li>
+<li>数据可视化：Matplotlib</li>
+<li>础数据分析：Pandas</li>
+<li>高级科学计算：Scipy</li>
+</ul>
+<h2 id="础数据分析：Pandas"><a href="#础数据分析：Pandas" class="headerlink" title="础数据分析：Pandas"></a>础数据分析：Pandas</h2><p>Pandas 是一个提供快速，灵活和表达性数据结构的 Python 包，旨在使<code>关系</code>或<code>标记</code>数据变得简单直观。<br>要记住在 Pandas 里只有两种数据结构：<code>Series</code>（一维） 和 <code>DataFrame</code>（二维），其他都是 Python 自带的数据结构和 Numpy 的数据结构。</p>
+<a id="more"></a>
+<h3 id="Series"><a href="#Series" class="headerlink" title="Series"></a>Series</h3><p>Series 就如同列表一样，一系列数据，每个数据对应一个索引值。当你输出 Series 的数据后，会发现它是竖着放的，没错它的数据就是竖着放的，甚至可以认为 Series 就是<code>竖起来</code>的 list。</p>
+<p>Series 的元素有三个部分组成：index、vaues、key。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180220122643.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h4 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h4><p>Series 的创建方式有非常多种，可以使用一个列表创建，默认索引是数组的下标，也可以指定索引，当然还可以使用对象的方式来创建。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pandas <span class="keyword">import</span> Series</span><br><span class="line"></span><br><span class="line">s = Series([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">s = Series([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>])</span><br><span class="line">s = Series(&#123; <span class="string">'a'</span>: <span class="number">1</span>, <span class="string">'b'</span>: <span class="number">2</span>, <span class="string">'c'</span>: <span class="number">3</span> &#125;)</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">a  1</span></span><br><span class="line"><span class="string">b  2</span></span><br><span class="line"><span class="string">c  3</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(s)</span><br><span class="line">print(s[<span class="number">0</span>])     <span class="comment"># 1</span></span><br><span class="line">print(s[<span class="string">'a'</span>])   <span class="comment"># 1</span></span><br><span class="line">print(s.values)</span><br><span class="line">print(s.keys)</span><br><span class="line">print(s.index)</span><br></pre></td></tr></table></figure>
+<p>访问 Series 的数据可以根据索引也可以根据 key 来访问。</p>
+<p>当使用对象创建时，默认会自动使用对象的 key 作为索引，如果自己手动设置索引，而索引的名称对不上就会值被设置为 <code>NaN</code>，因此可以利用这个特性来检查数据的 key。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">s = Series(&#123; <span class="string">'a'</span>: <span class="number">1</span>, <span class="string">'b'</span>: <span class="number">2</span>, <span class="string">'c'</span>: <span class="number">3</span> &#125;, index=[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'d'</span>])</span><br><span class="line">print(s.isnull)</span><br><span class="line">s.index = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>]   <span class="comment"># 重新定义</span></span><br></pre></td></tr></table></figure>
+<p>Series 有几个属性可以查看数据，它们都支持 get、set 操作：</p>
+<ul>
+<li><code>s.values</code> 查看所有的 value。</li>
+<li><code>s.keys</code> 查看所有的 key。</li>
+<li><code>s.index</code> 查看所有的 index。</li>
+<li><code>s.dtypes</code> 查看所有的数据类型。</li>
+<li><code>s[i]</code> 通过索引获取值。</li>
+<li><code>s[key]</code> 通过键获取值。</li>
+</ul>
+<h4 id="矢量运算"><a href="#矢量运算" class="headerlink" title="矢量运算"></a>矢量运算</h4><p>因为 Series 是基于 Numpy 实现的，所以对于数组数据支持矢量运算。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">s1 = Series([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">s2 = Series([<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>])</span><br><span class="line"></span><br><span class="line">print(s1 + s2)</span><br><span class="line">print(s1 - s2)</span><br><span class="line">print(s1 * s2)</span><br><span class="line">print(s1 / s2)</span><br><span class="line"></span><br><span class="line">print(s1[s1 &gt; <span class="number">2</span>])</span><br><span class="line">print(s2[s2 == <span class="number">5</span>])</span><br></pre></td></tr></table></figure>
+<h3 id="DataFrame"><a href="#DataFrame" class="headerlink" title="DataFrame"></a>DataFrame</h3><p>DataFrame 是一种二维的数据结构，非常接近于电子表格或者类似 mysql 数据库的形式。它的竖行称之为 columns，横行跟前面的 Series 一样，称之为 index，也就是说可以通过 columns 和 index 来确定一个主句的位置。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180220122654.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h4 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h4><p>对于 DataFrame 的创建有几种方式，主要是 key 和 index 需要对得上。对象的 key 要看成列数据，实际上就是列方式存储。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> pandas <span class="keyword">import</span> Series, DataFrame</span><br><span class="line"></span><br><span class="line">d = DataFrame(&#123;</span><br><span class="line">    <span class="string">'name'</span>: [<span class="string">'小明'</span>, <span class="string">'小美'</span>, <span class="string">'小东'</span>],   <span class="comment"># 一列的数据</span></span><br><span class="line">    <span class="string">'age'</span>: [<span class="number">20</span>, <span class="number">19</span>, <span class="number">21</span>],</span><br><span class="line">    <span class="string">'height'</span>: [<span class="number">182</span>, <span class="number">168</span>, <span class="number">176</span>],</span><br><span class="line">    <span class="string">'weight'</span>: [<span class="number">61</span>, <span class="number">53</span>, <span class="number">59</span>],</span><br><span class="line">&#125;)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">   age  height   name  weight</span></span><br><span class="line"><span class="string">0   20     182   小明      61</span></span><br><span class="line"><span class="string">1   19     168   小美      53</span></span><br><span class="line"><span class="string">2   21     176   小东      59</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d)</span><br></pre></td></tr></table></figure>
+<p>默认情况下使用序号作为索引，这里使用 name 作为索引。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> pandas <span class="keyword">import</span> Series, DataFrame</span><br><span class="line"></span><br><span class="line">d = DataFrame(&#123;</span><br><span class="line">    <span class="string">'age'</span>: &#123;                            <span class="comment"># 一列的数据</span></span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">20</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">19</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">21</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'height'</span>: &#123;</span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">182</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">168</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">176</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'weight'</span>: &#123;</span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">61</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">53</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">59</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">     age   height  weight</span></span><br><span class="line"><span class="string">小东   21     176      59</span></span><br><span class="line"><span class="string">小明   20     182      61</span></span><br><span class="line"><span class="string">小美   19     168      53</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d)</span><br></pre></td></tr></table></figure>
+<p>同样 DataFrame 也支持 index 属性，类似的规则和 Series 差不多。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">print(DataFrame(&#123;</span><br><span class="line">    <span class="string">'age'</span>: &#123;                       <span class="comment"># 一列的数据</span></span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">20</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">19</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">21</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'height'</span>: &#123;</span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">182</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">168</span>,                <span class="comment"># 小东为 NaN</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'weight'</span>: &#123;</span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">61</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">53</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">59</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;, index=[<span class="string">'小明'</span>, <span class="string">'小东'</span>]))         <span class="comment"># 小美将被忽略</span></span><br></pre></td></tr></table></figure>
+<p>DataFrame 有几个属性可以查看数据，它们都支持 get、set 操作：</p>
+<ul>
+<li><code>d.columns</code> 获取所有 columns。</li>
+<li><code>d.keys</code> 获取所有 key。</li>
+<li><code>d.index</code> 获取所有 index。</li>
+<li><code>d.values</code> 获取所有 values。</li>
+<li><code>d.dtypes</code> 获取所有数据类型。</li>
+<li><code>d[key]</code> 根据 key 获取值。</li>
+<li><code>d[i:j]</code> 根据数组切片，切为几行。</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">     age   height  weight</span></span><br><span class="line"><span class="string">小东   21     176      59</span></span><br><span class="line"><span class="string">小明   20     182      61</span></span><br><span class="line"><span class="string">小美   19     168      53</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d.columns)</span><br><span class="line">print(d.values)</span><br><span class="line">print(d.keys)</span><br><span class="line">print(d.index)</span><br><span class="line"></span><br><span class="line">print(d[<span class="string">'age'</span>])         <span class="comment"># 结构就是 Series</span></span><br><span class="line">print(d[<span class="string">'age'</span>].index)   <span class="comment"># ['小东', '小明', '小美']</span></span><br><span class="line">print(d[<span class="string">'age'</span>].values)  <span class="comment"># [21 20 19]</span></span><br><span class="line">print(d[<span class="string">'age'</span>][<span class="number">0</span>])      <span class="comment"># 21</span></span><br><span class="line">print(d[<span class="string">'age'</span>][<span class="string">'小明'</span>]) <span class="comment"># 21</span></span><br><span class="line"></span><br><span class="line">print(d[<span class="string">'小东'</span>])        <span class="comment"># xxx 报错，不可以这样</span></span><br><span class="line">print(d[<span class="number">0</span>])             <span class="comment"># xxx 报错，不可以这样</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">     age   height  weight</span></span><br><span class="line"><span class="string">小东   21     176      59</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d[<span class="number">0</span>:<span class="number">1</span>])           <span class="comment"># 但是可以用切片，切片之后不是数组而是 DataFrame 数据</span></span><br><span class="line">print(d[<span class="number">0</span>:<span class="number">1</span>].values)    <span class="comment"># [21, 176, 59]</span></span><br></pre></td></tr></table></figure>
+<p>实际上 DataFrame 是由 Series 组成的，因此可以把一个 Series 赋值给 DataFrame 的某列（注意索引要对得上）</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">d = DataFrame(&#123;</span><br><span class="line">    <span class="string">'age'</span>: &#123;</span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">20</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">19</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">21</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'height'</span>: &#123;</span><br><span class="line">        <span class="string">'小明'</span>: <span class="number">182</span>,</span><br><span class="line">        <span class="string">'小美'</span>: <span class="number">168</span>,</span><br><span class="line">        <span class="string">'小东'</span>: <span class="number">176</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'weight'</span>: Series(&#123; <span class="string">'小明'</span>: <span class="number">61</span>, <span class="string">'小美'</span>: <span class="number">53</span>, <span class="string">'小东'</span>: <span class="number">59</span> &#125;)</span><br><span class="line">&#125;)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">     age   height  weight</span></span><br><span class="line"><span class="string">小东   21     176      59</span></span><br><span class="line"><span class="string">小明   20     182      61</span></span><br><span class="line"><span class="string">小美   19     168      53</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d)</span><br></pre></td></tr></table></figure>
+<p>永远都要记住一切对不上索引的数据都是会自动设置为 <code>NaN</code>，所以索引非常重要。</p>
+<p>还可以这样创建数据：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">pd.DataFrame(&#123;</span><br><span class="line">    <span class="string">'A'</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="string">'B'</span>: pd.Timestamp(<span class="string">'20130102'</span>),</span><br><span class="line">    <span class="string">'C'</span>: pd.Series(np.random.rand(<span class="number">4</span>), index=list(range(<span class="number">4</span>)), dtype=<span class="string">'float32'</span>),</span><br><span class="line">    <span class="string">'D'</span>: np.array([<span class="number">3</span>] * <span class="number">4</span>, dtype=<span class="string">'int32'</span>),</span><br><span class="line">    <span class="string">'E'</span>: pd.Categorical([<span class="string">'test'</span>, <span class="string">'train'</span>, <span class="string">'test'</span>, <span class="string">'train'</span>]),</span><br><span class="line">    <span class="string">'F'</span>: <span class="string">'foo'</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>因为 Pandas 是基于 Numpy 创建的，它可以接纳 Numpy 的数据格式和自己的数据格式。</p>
+<h3 id="数据读取"><a href="#数据读取" class="headerlink" title="数据读取"></a>数据读取</h3><p><code>Pandas</code> 提供了许多的数据读取 api，包括 CSV，JSON，Excel 等数据格式，从智能提示就可以知道了。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180213105712.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h4 id="CSV"><a href="#CSV" class="headerlink" title="CSV"></a>CSV</h4><p>CSV 是一种通用的、相对简单的文件格式，在表格类型的数据中用途很广泛。<br>它的格式是，一行表示一个 row 数据，每行之间用 <code>,</code> 分割。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">name,physics,python</span><br><span class="line">Google,100,100</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/2/20180213105038.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>这种格式非常好读取，如果是用 nodejs，可以瞬间把它格式化为二维数组。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line">fs.readFild(<span class="string">'./test.csv'</span>, data =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> list = data.split(<span class="string">'\n'</span>).map(<span class="function"><span class="params">i</span> =&gt;</span> i.split(<span class="string">','</span>));</span><br><span class="line">    <span class="built_in">console</span>.log(list);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在 Python 里，有专用的库去读取 CSV 文件，当然 Pandas 也提供 api。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line">d = pd.read_csv(<span class="string">"./d.csv"</span>, encoding=<span class="string">'utf8'</span>)</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">       name  physics  python  math  english</span></span><br><span class="line"><span class="string">0    Google      100     100    25       12</span></span><br><span class="line"><span class="string">1  Facebook       45      54    44       88</span></span><br><span class="line"><span class="string">2   Twitter       54      76    13       91</span></span><br><span class="line"><span class="string">3     Yahoo       54     452    26      100</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d)</span><br></pre></td></tr></table></figure>
+<h4 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h4><p>对 JSON 的支持，可以自己用文件系统 api 先读 json 数据再解析，也可以使用 Pandas 的 api。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    "name": ["小明", "小美", "小东"],</span></span><br><span class="line"><span class="string">    "age": [20, 19, 21],</span></span><br><span class="line"><span class="string">    "height": [182, 168, 176],</span></span><br><span class="line"><span class="string">    "weight": [61, 53, 59]</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">d = pd.read_json(<span class="string">'./data.json'</span>, encoding=<span class="string">'utf8'</span>);</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">   age  height   name  weight</span></span><br><span class="line"><span class="string">0   20     182   小明      61</span></span><br><span class="line"><span class="string">1   19     168   小美      53</span></span><br><span class="line"><span class="string">2   21     176   小东      59</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">print(d)</span><br></pre></td></tr></table></figure>
+<h4 id="Excel"><a href="#Excel" class="headerlink" title="Excel"></a>Excel</h4><p>读取 Excel　数据需要安装一个模块：<code>xlrd</code>，不然会报错。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install xlrd</span><br></pre></td></tr></table></figure>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line">d = pd.read_excel(<span class="string">'./data.xls'</span>, encoding=<span class="string">'utf8'</span>);</span><br><span class="line">print(d)</span><br></pre></td></tr></table></figure>
+<h3 id="属性与方法"><a href="#属性与方法" class="headerlink" title="属性与方法"></a>属性与方法</h3><p>有一个快捷的方式可以知道对象的属性与方法。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">showKeys</span><span class="params">(obj)</span>:</span></span><br><span class="line">    func = []</span><br><span class="line">    props = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> dir(obj):</span><br><span class="line">        <span class="keyword">if</span> str(i)[<span class="number">0</span>] != <span class="string">'_'</span>:</span><br><span class="line">            <span class="keyword">if</span> hasattr(eval(<span class="string">'obj.'</span> + i), <span class="string">'__call__'</span>):</span><br><span class="line">                func.append(i)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                props.append(i)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">print</span> (<span class="string">'函数：'</span>, func)</span><br><span class="line">    <span class="keyword">print</span> (<span class="string">'属性：'</span>, props)</span><br><span class="line"></span><br><span class="line">s = Series([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">showKeys(s)</span><br></pre></td></tr></table></figure>
+<p>常用的 api：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">name</th>
+<th style="text-align:left">explain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">d.head(2)</td>
+<td style="text-align:left">获取头两行，等效于 d[0:2]。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.tail(2)</td>
+<td style="text-align:left">获取尾两行。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.describe()</td>
+<td style="text-align:left">显示数据的快速统计摘要。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.T</td>
+<td style="text-align:left">转置数据（矩阵转置）。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.sort_index(axis=1)</td>
+<td style="text-align:left">索引排序。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.sort_values(by='age')</td>
+<td style="text-align:left">列排序。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.loc['小明']</td>
+<td style="text-align:left">根据 index，获取横向数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.loc['小明', ['age', 'height']]</td>
+<td style="text-align:left">指定返回的数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.loc['小明', 'age']</td>
+<td style="text-align:left">等效于 d['age']['小明']。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.iloc[2]</td>
+<td style="text-align:left">获取索引为 2 的行数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.iloc[3:5, 0:2]</td>
+<td style="text-align:left">数组切片，获取第 3 - 5 行，第 0 - 2 列数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">pd.isnull(d)</td>
+<td style="text-align:left">返回是否是数据缺失。</td>
+</tr>
+<tr>
+<td style="text-align:left">d.mean()</td>
+<td style="text-align:left">返回一些平均数描述性信息。</td>
+</tr>
+<tr>
+<td style="text-align:left">s1 = s1.append(s2)</td>
+<td style="text-align:left">追加一个 Series 数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">d1 = d1.append(d2)</td>
+<td style="text-align:left">追加一个 DataFrame 数据。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h3><p>与读数据差不多，基本都是 <code>d.to_xxx</code> 的使用方式。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">d.to_csv(<span class="string">'./a.csv'</span>)</span><br><span class="line">d.to_json(<span class="string">'./a.json'</span>)</span><br><span class="line">d.to_excel(<span class="string">'./a.xls'</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://python.usyiyi.cn/translate/NumPy_v111/reference/index.html" target="_blank" rel="noopener">http://python.usyiyi.cn/translate/NumPy_v111/reference/index.html</a></li>
+<li><a href="https://matplotlib.org/examples/index.html" target="_blank" rel="noopener">https://matplotlib.org/examples/index.html</a></li>
+<li><a href="http://python.usyiyi.cn/translate/Pandas_0j2/index.html" target="_blank" rel="noopener">http://python.usyiyi.cn/translate/Pandas_0j2/index.html</a></li>
+<li><a href="http://python.usyiyi.cn/translate/scipy_lecture_notes/intro/scipy.html" target="_blank" rel="noopener">http://python.usyiyi.cn/translate/scipy_lecture_notes/intro/scipy.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.850Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/02/Python/Python  大数据分析 - Pandas/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/02/Python/Python  大数据分析 - Pandas/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/大数据/">大数据</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/02/React/React/React Touch 事件实践/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Touch 事件实践</h4>
+        <h4 class="summary">React Touch 事件实践，附带几个利用 Touch 系列制作的示例。
+知识准备： react
+styled-co...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/02/Python/Python  大数据分析 - Matplotlib/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Python  大数据分析 - Matplotlib</h4>
+        <h4 class="summary">Python 的语法简洁，成熟的库繁多，开发效率高，Python 在大数据分析领域上有非常好的优势。本文介绍 Pytho...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

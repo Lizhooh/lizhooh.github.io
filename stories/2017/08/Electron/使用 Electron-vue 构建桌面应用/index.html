@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/">
+    
+    
+    <title>使用 Electron-vue 构建桌面应用 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言对于 Electron 开发来说，它并没有提供类似 vue-cli 的搭手架工具，然而早在之前就有人开发了Electron-vue。Electron-vue该项目的目的是消除使用 vue 手动设置 Electron 应用程序的需要。Electron-vue 利用了 vue-cli 脚手架，webpack 与 vue-loader，electron-packager 或 electron-bui">
+<meta name="keywords" content="Nodejs,Electron">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Electron-vue 构建桌面应用">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言对于 Electron 开发来说，它并没有提供类似 vue-cli 的搭手架工具，然而早在之前就有人开发了Electron-vue。Electron-vue该项目的目的是消除使用 vue 手动设置 Electron 应用程序的需要。Electron-vue 利用了 vue-cli 脚手架，webpack 与 vue-loader，electron-packager 或 electron-bui">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/8/logo.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/8/20170808102950.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/8/20170808114333.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.814Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 Electron-vue 构建桌面应用">
+<meta name="twitter:description" content="前言对于 Electron 开发来说，它并没有提供类似 vue-cli 的搭手架工具，然而早在之前就有人开发了Electron-vue。Electron-vue该项目的目的是消除使用 vue 手动设置 Electron 应用程序的需要。Electron-vue 利用了 vue-cli 脚手架，webpack 与 vue-loader，electron-packager 或 electron-bui">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/8/logo.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用 Electron-vue 构建桌面应用</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">使用 Electron-vue 构建桌面应用</h1>
+
+        <div class="meta-rest">
+            <h1>使用 Electron-vue 构建桌面应用</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-08-10T02:37:10.000Z" itemprop="datePublished" class="page-time">
+    2017-08-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Electron/">Electron</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#electron-vue"><span class="post-toc-number">2.</span> <span class="post-toc-text">electron-vue</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#npm-scripts"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">npm scripts</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Vue-全家桶"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">Vue 全家桶</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-CSS-框架"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">使用 CSS 框架</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用静态资源"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">使用静态资源</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#读取-static-资源文件"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">读取 static 资源文件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#文件读写"><span class="post-toc-number">3.</span> <span class="post-toc-text">文件读写</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用-Nodejs-第三方模块"><span class="post-toc-number">4.</span> <span class="post-toc-text">使用 Nodejs 第三方模块</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#打包应用"><span class="post-toc-number">5.</span> <span class="post-toc-text">打包应用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#移民指南（版本迁移）"><span class="post-toc-number">6.</span> <span class="post-toc-text">移民指南（版本迁移）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Electron/使用 Electron-vue 构建桌面应用"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用 Electron-vue 构建桌面应用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 08 月 10 日 10:37" datetime="2017-08-10T02:37:10.000Z"  itemprop="datePublished">
+    2017-08-10
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Electron/">Electron</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1866</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对于 Electron 开发来说，它并没有提供类似 vue-cli 的搭手架工具，然而早在之前就有人开发了<code>Electron-vue</code>。<br><code>Electron-vue</code>该项目的目的是消除使用 vue 手动设置 Electron 应用程序的需要。Electron-vue 利用了 vue-cli 脚手架，webpack 与 vue-loader，electron-packager 或 electron-builder，包括最常用的插件 vue-router，vuex。</p>
+<p>本文记录了 <code>electron-vue</code> 与 <code>electron-packager</code> 的使用，一个是构建工具，一个是打包发布工具。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/8/logo.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="electron-vue"><a href="#electron-vue" class="headerlink" title="electron-vue"></a>electron-vue</h2><p>要安装 electron-vue 非常简单，因为它并不是一个独立的命令行工具，只是一个模版，所以只需要使用 vue-cli 安装就可以了。</p>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vue init simulatedgreg/electron-vue my-project</span><br></pre></td></tr></table></figure>
+<p>之后再安装 node_module，但是发现使用 npm install 会出错（被墙了），所以要使用 cnpm 来安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cnpm install</span><br></pre></td></tr></table></figure>
+<p>安装完成后，直接跑起：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run dev</span><br></pre></td></tr></table></figure>
+<p>如果成功了，会看到这个画面（完结撒花）：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/8/20170808102950.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="npm-scripts"><a href="#npm-scripts" class="headerlink" title="npm scripts"></a>npm scripts</h3><p>为了帮助消除开发过程中的冗余任务，electron-vue 已经帮你配置好一些有用的 npm scripts。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">npm run dev     <span class="comment"># 在开发中运行应用程序</span></span><br><span class="line">npm run build   <span class="comment"># 构建您的应用程序进行生产和打包</span></span><br><span class="line">npm run lint    <span class="comment"># 检查所有 src/ 的和 test/ 的 JS 和 Vue 的组件文件</span></span><br><span class="line">npm run unit    <span class="comment"># 单元测试</span></span><br><span class="line">npm run e2e     <span class="comment"># 使用 Spectron + Mocha 进行端到端测试</span></span><br><span class="line">npm <span class="built_in">test</span>        <span class="comment"># 同时运行 npm run unit 和 npm run e2e</span></span><br></pre></td></tr></table></figure>
+<h3 id="Vue-全家桶"><a href="#Vue-全家桶" class="headerlink" title="Vue 全家桶"></a>Vue 全家桶</h3><p>electron-vue 帮你配置好 vue 全家桶，包括了 <code>vue, vuex, vue-router, axios, es6, 7</code> 等。</p>
+<p>但是没有配置 less/sass，如果需要的话，可以参考下面的配置：</p>
+<blockquote>
+<p>使用 less</p>
+</blockquote>
+<p>使用 less 只需要安装 less-loader</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev less-loader</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用 sass</p>
+</blockquote>
+<p>使用 sass 需要安装 sass-loader, node-sass</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cnpm install --save-dev sass-loader node-sass <span class="comment"># node-sass 被墙了，使用 cnpm</span></span><br></pre></td></tr></table></figure>
+<p>在 vue style 指明使用 sass：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">lang</span>=<span class="string">"scss"</span>&gt;</span></span><br><span class="line">    body &#123;</span><br><span class="line"><span class="css">        <span class="comment">/* SCSS */</span></span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用 Sass 全局变量</p>
+</blockquote>
+<p>编辑 .electron-vue/webpack.renderer.config.js 中的 vue-loader 配置 （58 行处）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">loaders: &#123;</span><br><span class="line">    sass: <span class="string">'vue-style-loader!css-loader!sass-loader?indentedSyntax=1&amp;data=@import "./src/renderer/globals/index.scss"'</span>,</span><br><span class="line">    scss: <span class="string">'vue-style-loader!css-loader!sass-loader?data=@import "./src/renderer/globals/index.scss";'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 <code>src/renderer/globals/index.scss</code> 添加全局变量：</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$brand-primary</span>: blue;</span><br><span class="line"><span class="variable">$brand-accent</span>: turquoise;</span><br></pre></td></tr></table></figure>
+<p>之后就可以在所有的组件里引用全局变量：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">lang</span>=<span class="string">"scss"</span>&gt;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">body</span> &#123; <span class="attribute">color</span>: $brand-primary; &#125;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="使用-CSS-框架"><a href="#使用-CSS-框架" class="headerlink" title="使用 CSS 框架"></a>使用 CSS 框架</h3><p>假设您想为您的应用程序使用 <a href="https://github.com/bootstrap-vue/bootstrap-vue" target="_blank" rel="noopener">bootstrap-vue</a>，首先你需要安装它，之后在 src/renderer/main.js 里引入。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save bootstrap@4 bootstrap-vue</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/renderer/main.js</span></span><br><span class="line"><span class="keyword">import</span> BootstrapVue <span class="keyword">from</span> <span class="string">'bootstrap-vue'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'bootstrap/dist/css/bootstrap.css'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'bootstrap-vue/dist/bootstrap-vue.css'</span>;</span><br><span class="line"></span><br><span class="line">Vue.use(BootstrapVue);</span><br></pre></td></tr></table></figure>
+<h3 id="使用静态资源"><a href="#使用静态资源" class="headerlink" title="使用静态资源"></a>使用静态资源</h3><p>应当把所有的静态资源放置在 static 目录下，但你想要引用静态资源时，可以直接使用<code>static/</code>来引入。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data () &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123; <span class="attr">imageUrl</span>: <span class="string">'static/imgs/unsplash.png'</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同时也可以把静态资源放置在<code>renderer/assets</code>里，使用的时候：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data () &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123; <span class="attr">imageUrl</span>: <span class="string">'~@/assets/unsplash.png'</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="读取-static-资源文件"><a href="#读取-static-资源文件" class="headerlink" title="读取 static 资源文件"></a>读取 static 资源文件</h3><p>假设我存储了一些 JSON 文件，我需要去 static 读取，这样的话可能是使用相对路径来，寻找文件，但并不好。<br>electron-vue 提供了一个名为的全局变量 <code>__static</code>，它是 static/ 目录的路径。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> fs <span class="keyword">from</span> <span class="string">'fs'</span></span><br><span class="line"><span class="keyword">import</span> path <span class="keyword">from</span> <span class="string">'path'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取 static/someFile 文件</span></span><br><span class="line">fs.readFileSync(path.join(__static, <span class="string">'/someFile.txt'</span>), <span class="string">'utf8'</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>在生产中，所有文件都 asar 默认打包，因为它是强烈推荐的。因为这样，static/ 文件夹中的资源只能被访问，不能进行写入操作。</p>
+<h2 id="文件读写"><a href="#文件读写" class="headerlink" title="文件读写"></a>文件读写</h2><p>使用 electron 的一个很大的好处是能够访问用户的文件系统。<br>这使您可以读取和写入本地系统上的文件。<br>为了避免 Chromium 限制并写入应用程序的内部文件，请确保使用 electronAPI，特别是 app.getPath(name) 功能。这个帮助方法可以获得文件路径到系统目录，如用户的桌面，系统临时文件等。</p>
+<p>如果想要进行数据的本地储存，除了可以使用  HTML5 的 <code>Local Storage</code> 外，还可以使用一些 JSON 数据库，<br>例如：<a href="https://github.com/louischatriot/nedb" target="_blank" rel="noopener">nedb</a></p>
+<p>下面，让一个 nedb 储存在 userData 目录，也就是<code>C:\Users\Administrator\AppData\Roaming\Electron</code>目录下。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Datastore <span class="keyword">from</span> <span class="string">'nedb'</span></span><br><span class="line"><span class="keyword">import</span> path <span class="keyword">from</span> <span class="string">'path'</span></span><br><span class="line"><span class="keyword">import</span> &#123; remote &#125; <span class="keyword">from</span> <span class="string">'electron'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">new</span> Datastore(&#123;</span><br><span class="line">    autoload: <span class="literal">true</span>,</span><br><span class="line">    filename: path.join(remote.app.getPath(<span class="string">'userData'</span>), <span class="string">'/data.db'</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>为了方便使用，把它添加到 vue 里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> db <span class="keyword">from</span> <span class="string">'./datastore'</span>;</span><br><span class="line">Vue.prototype.$db = db;</span><br></pre></td></tr></table></figure>
+<h2 id="使用-Nodejs-第三方模块"><a href="#使用-Nodejs-第三方模块" class="headerlink" title="使用 Nodejs 第三方模块"></a>使用 Nodejs 第三方模块</h2><p>在 electron 里，集成了 chrome 与 nodejs，你可以使用 Web API 和 Nodejs API。<br>如果想要使用 Nodejs 第三方模块，安装模块后直接使用即可。</p>
+<p>下面是使用 node-fetch 来下载图片。</p>
+<p><strong>安装：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save node-fetch</span><br></pre></td></tr></table></figure>
+<p><strong>使用：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> fetch <span class="keyword">from</span> <span class="string">'node-fetch'</span>;</span><br><span class="line"><span class="keyword">import</span> fs <span class="keyword">from</span> <span class="string">'fs'</span>;</span><br><span class="line"></span><br><span class="line">fetch(<span class="string">'http://pic1.win4000.com/wallpaper/4/570dba07bcc5e.jpg'</span>)</span><br><span class="line">    .then(<span class="function"><span class="params">res</span> =&gt;</span> res.buffer())</span><br><span class="line">    .then(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">        fs.writeFile(<span class="string">'./a.jpg'</span>, data, <span class="string">'binary'</span>, (err) =&gt; &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(err ? err : <span class="string">'ok'</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>除此之外，你还可以使用 cheerio，mongoose，express，koa 等框架。</p>
+<h2 id="打包应用"><a href="#打包应用" class="headerlink" title="打包应用"></a>打包应用</h2><p>在使用 vue-cli 创建项目时，会出现选择<code>electron-packager</code>还是<code>electron-builder</code>：</p>
+<ul>
+<li>electron-packager: 如果您是新手制作 electron 应用程序，或者只需要创建简单的可执行文件，那么 electron-packager 就可以满足您的需求。</li>
+<li>electron-builder: 如果您正在寻找完整的安装程序，自动更新支持，使用 Travis CI 和 AppVeyor 的 CI 构建，或重建本机节点模块的自动化，那么 electron-builder 您将需要什么。</li>
+</ul>
+<p>关于 electron-packager 的打包命令：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">electron-packager &lt;sourcedir&gt; &lt;appname&gt; --platform=&lt;platform&gt; --arch=&lt;arch&gt; [optional flags...]</span><br></pre></td></tr></table></figure>
+<p>类似的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">electron-packager ./ --all --out ~<span class="regexp">/Desktop/</span>app --platform=win32 --version <span class="number">1.4</span><span class="number">.0</span> --overwrite --icon=./img/test.ico</span><br></pre></td></tr></table></figure>
+<p>在 electron-vue 打包应用非常简单，基本别人帮你做好了准备。</p>
+<p>根据对应平台，运行一下命令即可，例如打包 win32 平台：<code>npm run build:win32</code></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">"build": "node .electron-vue/build.js",</span><br><span class="line">"build:darwin": "cross-env BUILD_TARGET=darwin node .electron-vue/build.js",</span><br><span class="line">"build:linux": "cross-env BUILD_TARGET=linux node .electron-vue/build.js",</span><br><span class="line">"build:mas": "cross-env BUILD_TARGET=mas node .electron-vue/build.js",</span><br><span class="line">"build:win32": "cross-env BUILD_TARGET=win32 node .electron-vue/build.js",</span><br><span class="line">"build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",</span><br><span class="line">"build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>打包很吃 CPU 和内存。</p>
+<p>打包完成后可以在 build 下找到对应平台的应用程序，比如 windows 的 exe 文件。</p>
+<p>最后应用运行起来是这样的：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/8/20170808114333.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>可以在 .electron-vue/build.config.js 根据这里 electron-packager 找到的选项进一步定制。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="comment">// cpu 架构 x64, x86 等</span></span><br><span class="line">    arch: <span class="string">'x64'</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用 asar 压缩</span></span><br><span class="line">    asar: <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 应用程序目录，不用修改</span></span><br><span class="line">    dir: path.join(__dirname, <span class="string">'../'</span>),</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 应用图标</span></span><br><span class="line">    <span class="comment">// https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#icon</span></span><br><span class="line">    icon: path.join(__dirname, <span class="string">'../build/icons/icon'</span>),</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打包忽略的文件</span></span><br><span class="line">    ignore: <span class="regexp">/(^\/(src|test|\.[a-z]+|README|yarn|static|dist\/web))|\.gitkeep/</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 编译输出的文件位置</span></span><br><span class="line">    out: path.join(__dirname, <span class="string">'../build'</span>),</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 覆盖现有的版本</span></span><br><span class="line">    overwrite: <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置平台的环境变量</span></span><br><span class="line">    platform: process.env.BUILD_TARGET || <span class="string">'all'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="移民指南（版本迁移）"><a href="#移民指南（版本迁移）" class="headerlink" title="移民指南（版本迁移）"></a>移民指南（版本迁移）</h2><p>参考以下的建议，来迁移你的版本，但不一定会成功：</p>
+<ul>
+<li>创建最新的版本 vue init simulatedgreg/electron-vue my-project</li>
+<li>将当前项目 src 文件复制到新项目的 src 目录中</li>
+<li>将 package.json 当前项目的依赖关系复制到新的项目 package.json</li>
+<li>使用 yarn 或 npm 安装依赖关系 npm install （国内请使用 cnpm install）</li>
+<li>在开发模式下运行项目（yarn run dev 或 npm run dev）</li>
+<li>观察控制台以修复错误</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/SimulatedGREG/electron-vue" target="_blank" rel="noopener">https://github.com/SimulatedGREG/electron-vue</a></li>
+<li><a href="https://github.com/electron-userland/electron-packager" target="_blank" rel="noopener">https://github.com/electron-userland/electron-packager</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.814Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/08/Electron/使用 Electron-vue 构建桌面应用/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Electron/">Electron</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/08/Nodejs/Nodejs 验证码解决方案/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Nodejs 验证码解决方案</h4>
+        <h4 class="summary">使用 Nodejs 开发验证码部分是非常麻烦的，这是因为 Nodejs 没有图形相关的 API，这就要使用 C++ 来编...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/08/React Native/React Native 目录结构最佳实践/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native 目录结构最佳实践</h4>
+        <h4 class="summary">经过无数次研究与挖掘，终于探索出比较好的 React Native 开发目录结构。一个好的目录结构，是一个好的开始，它可...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

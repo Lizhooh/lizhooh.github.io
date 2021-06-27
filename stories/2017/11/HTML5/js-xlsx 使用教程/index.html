@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/11/HTML5/js-xlsx 使用教程/">
+    
+    
+    <title>js-xlsx 使用教程 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="js-xlsxjs-xlsx 是一个纯 JavaScript 实现的，能够运行在所有 JavaScript 环境（包括浏览器，Nodejs，React Native，Electron 等）的 Excel 库，能够读取和写入 Excel 表格文件，能够支持最新版本的 XLSX 文件，使用方法也很简单。  示例： https://github.com/Lizhooh/js-xlsx-demo">
+<meta name="keywords" content="后端,Javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="js-xlsx 使用教程">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/11/HTML5/js-xlsx 使用教程/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="js-xlsxjs-xlsx 是一个纯 JavaScript 实现的，能够运行在所有 JavaScript 环境（包括浏览器，Nodejs，React Native，Electron 等）的 Excel 库，能够读取和写入 Excel 表格文件，能够支持最新版本的 XLSX 文件，使用方法也很简单。  示例： https://github.com/Lizhooh/js-xlsx-demo">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171110170653.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171101220206.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171101201254.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171101212330.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171101212652.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171101214811.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171111114926.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171102203829.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/11/20171111160125.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.821Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="js-xlsx 使用教程">
+<meta name="twitter:description" content="js-xlsxjs-xlsx 是一个纯 JavaScript 实现的，能够运行在所有 JavaScript 环境（包括浏览器，Nodejs，React Native，Electron 等）的 Excel 库，能够读取和写入 Excel 表格文件，能够支持最新版本的 XLSX 文件，使用方法也很简单。  示例： https://github.com/Lizhooh/js-xlsx-demo">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/11/20171110170653.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">js-xlsx 使用教程</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">js-xlsx 使用教程</h1>
+
+        <div class="meta-rest">
+            <h1>js-xlsx 使用教程</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-11-01T11:39:24.000Z" itemprop="datePublished" class="page-time">
+    2017-11-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Javascript/">Javascript</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#js-xlsx"><span class="post-toc-number">1.</span> <span class="post-toc-text">js-xlsx</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#XLSX"><span class="post-toc-number">2.</span> <span class="post-toc-text">XLSX</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#读取-Excel-数据"><span class="post-toc-number">3.</span> <span class="post-toc-text">读取 Excel 数据</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#workbook"><span class="post-toc-number">4.</span> <span class="post-toc-text">workbook</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#单元格对象"><span class="post-toc-number">5.</span> <span class="post-toc-text">单元格对象</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#导出-Excel-表"><span class="post-toc-number">6.</span> <span class="post-toc-text">导出 Excel 表</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#工具函数"><span class="post-toc-number">7.</span> <span class="post-toc-text">工具函数</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#数据自定义"><span class="post-toc-number">8.</span> <span class="post-toc-text">数据自定义</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#阵列数组"><span class="post-toc-number">8.1.</span> <span class="post-toc-text">阵列数组</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象数组"><span class="post-toc-number">8.2.</span> <span class="post-toc-text">对象数组</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HTML-Table"><span class="post-toc-number">8.3.</span> <span class="post-toc-text">HTML Table</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#生成-xlsx-文件"><span class="post-toc-number">8.4.</span> <span class="post-toc-text">生成 xlsx 文件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#合并单元格"><span class="post-toc-number">9.</span> <span class="post-toc-text">合并单元格</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">10.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-HTML5/js-xlsx 使用教程"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">js-xlsx 使用教程</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 11 月 01 日 19:39" datetime="2017-11-01T11:39:24.000Z"  itemprop="datePublished">
+    2017-11-01
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Javascript/">Javascript</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2588</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  30  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="js-xlsx"><a href="#js-xlsx" class="headerlink" title="js-xlsx"></a>js-xlsx</h2><p><a href="https://github.com/SheetJS/js-xlsx" target="_blank" rel="noopener">js-xlsx</a> 是一个纯 JavaScript 实现的，能够运行在所有 JavaScript 环境（包括浏览器，Nodejs，React Native，Electron 等）的 Excel 库，能够读取和写入 Excel 表格文件，能够支持最新版本的 XLSX 文件，使用方法也很简单。</p>
+<blockquote>
+<p>示例： <a href="https://github.com/Lizhooh/js-xlsx-demo" target="_blank" rel="noopener">https://github.com/Lizhooh/js-xlsx-demo</a></p>
+</blockquote>
+<a id="more"></a>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171110170653.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>下面就开始介绍 js-xlsx 的简单使用方式。</p>
+<h2 id="XLSX"><a href="#XLSX" class="headerlink" title="XLSX"></a>XLSX</h2><p>使用之前，先安装它：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save xlsx</span><br></pre></td></tr></table></figure>
+<p>XLSX 是 js-xlsx 的根对象，主要有以下属性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> XLSX = <span class="built_in">require</span>(<span class="string">'xlsx'</span>);</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171101220206.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p><strong>其中：</strong></p>
+<ul>
+<li><code>SSF</code> 里定义了一些数据格式。</li>
+<li><code>parse*</code> 是解析相关。</li>
+<li><code>read*</code> 是用来读取 xlsx 文件的 API。</li>
+<li><code>write*</code> 是用来把数据写入并生成 xlsx 文件的 API。</li>
+<li><code>version</code> 指的是 js-xlsx 的版本。</li>
+</ul>
+<h2 id="读取-Excel-数据"><a href="#读取-Excel-数据" class="headerlink" title="读取 Excel 数据"></a>读取 Excel 数据</h2><p>为了解析，第一步是读取文件，这里有几个不同的地方：</p>
+<ul>
+<li>在 nodejs 上，通过文件 IO 获取数据。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> XLSX = <span class="built_in">require</span>(<span class="string">'xlsx'</span>);</span><br><span class="line"><span class="keyword">const</span> workbook = XLSX.readFile(<span class="string">'test.xlsx'</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>因为 Excel 数据表与 HTML Table 结构是相对应的，所以也可以从 Table 里获取数据。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> worksheet = XLSX.utils.table_to_book(<span class="built_in">document</span>.getElementById(<span class="string">'tableau'</span>));</span><br></pre></td></tr></table></figure>
+<ul>
+<li>通过 url（ajax）获取数据。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> url = <span class="string">"/formula_stress_test.xlsx"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> req = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">req.open(<span class="string">"GET"</span>, url, <span class="literal">true</span>);</span><br><span class="line">req.responseType = <span class="string">"arraybuffer"</span>;</span><br><span class="line"></span><br><span class="line">req.onload = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> data = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>(req.response);</span><br><span class="line">    <span class="keyword">let</span> workbook = XLSX.read(data, &#123;<span class="attr">type</span>:<span class="string">"array"</span>&#125;);</span><br><span class="line">&#125;</span><br><span class="line">req.send();</span><br></pre></td></tr></table></figure>
+<ul>
+<li>通过 HTML5 文件拖拽获取数据。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">'#drop'</span>).on(<span class="string">'drop'</span>, e =&gt; &#123;</span><br><span class="line">    e.stopPropagation();</span><br><span class="line">    e.preventDefault();</span><br><span class="line">    <span class="keyword">let</span> files = e.dataTransfer.files;</span><br><span class="line">    <span class="keyword">let</span> reader = <span class="keyword">new</span> FileReader();</span><br><span class="line">    reader.readAsArrayBuffer(files[<span class="number">0</span>]);</span><br><span class="line">    reader.onload = <span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">let</span> data = e.target.result;</span><br><span class="line">        <span class="keyword">let</span> wb = XLSX.read(data, &#123; <span class="attr">type</span>: <span class="string">'array'</span> &#125;);</span><br><span class="line">        <span class="comment">// 只取第一个 sheet</span></span><br><span class="line">        <span class="keyword">var</span> wsname = wb.SheetNames[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">var</span> ws = wb.Sheets[wsname];</span><br><span class="line">        <span class="comment">// 渲染</span></span><br><span class="line">        excelView.innerHTML = XLSX.utils.sheet_to_html(ws);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>通过 HTML5 FileReader API 获取数据。</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">'#file'</span>).on(<span class="string">'change'</span>, ev =&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> files = ev.target.files;</span><br><span class="line">    <span class="keyword">let</span> reader = <span class="keyword">new</span> FileReader();</span><br><span class="line">    reader.readAsBinaryString(files[<span class="number">0</span>]);</span><br><span class="line">    reader.onload = <span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">let</span> data = e.target.result;</span><br><span class="line">        <span class="keyword">let</span> ws = XLSX.read(data, &#123; <span class="attr">type</span>: <span class="string">'array'</span> &#125;);</span><br><span class="line">        <span class="comment">// 只取第一个 sheet</span></span><br><span class="line">        <span class="keyword">var</span> wsname = wb.SheetNames[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">var</span> ws = wb.Sheets[wsname];</span><br><span class="line">        <span class="comment">// 渲染</span></span><br><span class="line">        excelView.innerHTML = XLSX.utils.sheet_to_html(ws);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>js-xlsx 的解析数据 API：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">XLSX.read(data, read_opts)</td>
+<td style="text-align:left">尝试解析 data。</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.readFile(filename, read_opts)</td>
+<td style="text-align:left">根据文件路径名，继续解析。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="workbook"><a href="#workbook" class="headerlink" title="workbook"></a>workbook</h2><p><code>workbook</code> 就是读取 Excel 数据后的 json 对象，里面记录着 Excel 的数据信息，它有以下的属性。</p>
+<p><code>Custprops</code> 存储自定义属性，<code>Workbook</code> 存储工作簿级属性，<code>SSF</code> 定义了一些数据格式，<code>Directory</code> 是 Excel 文件的描述对象，<code>Props</code> 是 xlsx 文件的属性。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171101201254.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p><code>SheetNames</code> 里存储着每个 Sheet 的名字。而 <code>Sheets</code> 里储存的是每个 Sheet 的数据。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171101212330.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>每个 Sheet 对象里都根据坐标存储 Excel 的二维数据，其中 <code>!ref</code> 代表着这个表的范围。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171101212652.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>对应的是 Excel 表数据。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171101214811.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>Strings 是一个数组，它按照从左到右，从上到下的顺序来把<strong>二维</strong>的数据降到<strong>一维</strong>。</p>
+<p>可以参考下面的<strong>实现算法</strong>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr = [</span><br><span class="line">    [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">    [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>],</span><br><span class="line">    [<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>],</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cat = <span class="function">(<span class="params">...arg</span>) =&gt;</span> arg.reduce(<span class="function">(<span class="params">acc, cur</span>) =&gt;</span> [...acc, ...cur], []);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将二维降为一维</span></span><br><span class="line">cat(...arr); <span class="comment">// =&gt; [1, 2, 3, 4, 5, 6, 7, 8, 9]</span></span><br></pre></td></tr></table></figure>
+<h2 id="单元格对象"><a href="#单元格对象" class="headerlink" title="单元格对象"></a>单元格对象</h2><p>在下图中 <code>A1</code> 就是一个单元格对象，它代表着 Excel 二维表里的 A1 位置的单元格对象。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171111114926.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>单元格对象有以下描述属性：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">属性</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">v</td>
+<td style="text-align:left">原始值（请参阅数据类型部分了解更多信息）</td>
+</tr>
+<tr>
+<td style="text-align:left">w</td>
+<td style="text-align:left">格式化文本</td>
+</tr>
+<tr>
+<td style="text-align:left">t</td>
+<td style="text-align:left">单元格类型：b 布尔值，n 数字，e 错误，s 字符串，d 日期</td>
+</tr>
+<tr>
+<td style="text-align:left">f</td>
+<td style="text-align:left">单元格的公式，例如 <code>f: &#39;A1 + A2&#39;</code></td>
+</tr>
+<tr>
+<td style="text-align:left">F</td>
+<td style="text-align:left">如果公式是数组公式</td>
+</tr>
+<tr>
+<td style="text-align:left">r</td>
+<td style="text-align:left">富文本编码</td>
+</tr>
+<tr>
+<td style="text-align:left">h</td>
+<td style="text-align:left">富文本的 HTML 呈现</td>
+</tr>
+<tr>
+<td style="text-align:left">c</td>
+<td style="text-align:left">与单元格相关的注释</td>
+</tr>
+<tr>
+<td style="text-align:left">z</td>
+<td style="text-align:left">与单元格关联的数字格式字符串</td>
+</tr>
+<tr>
+<td style="text-align:left">l</td>
+<td style="text-align:left">单元格超链接对象（.Target 持有链接，.Tooltip 是工具提示）</td>
+</tr>
+<tr>
+<td style="text-align:left">s</td>
+<td style="text-align:left">单元格的样式/主题（可以设置字体颜色，加粗等）</td>
+</tr>
+</tbody>
+</table>
+<p>样式可以参考下面的设置：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> STYLE = &#123;</span><br><span class="line">    border: &#123;</span><br><span class="line">        right: &#123; <span class="attr">style</span>: <span class="string">'thick'</span>, <span class="attr">color</span>: &#123; <span class="attr">auto</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">        top: &#123; <span class="attr">style</span>: <span class="string">'thick'</span>, <span class="attr">color</span>: &#123; <span class="attr">auto</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">        bottom: &#123; <span class="attr">style</span>: <span class="string">'thick'</span>, <span class="attr">color</span>: &#123; <span class="attr">auto</span>: <span class="number">1</span> &#125; &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    fill: &#123; <span class="attr">fgColor</span>: &#123; <span class="attr">rgb</span>: <span class="string">"ff6600"</span> &#125; &#125;,</span><br><span class="line">    font: &#123; <span class="attr">name</span>: <span class="string">"Arial"</span>, <span class="attr">sz</span>: <span class="number">24</span> &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="导出-Excel-表"><a href="#导出-Excel-表" class="headerlink" title="导出 Excel 表"></a>导出 Excel 表</h2><p>对于写入，第一步是生成输出数据。对于生成输出数据也分为几种：</p>
+<ul>
+<li>在 nodejs 上</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> XLSX = <span class="built_in">require</span>(<span class="string">'xlsx'</span>);</span><br><span class="line">XLSX.writeFile(workbook, <span class="string">'out.xlsx'</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>因为 Excel 是一个表结构，因此可以轻易输出 HTML Table</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> worksheet = workbook.Sheets[workbook.SheetNames[<span class="number">0</span>]];</span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">'tableau'</span>);</span><br><span class="line">container.innerHTML = XLSX.utils.sheet_to_html(worksheet);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>浏览器保存</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 类型可以是任何的</span></span><br><span class="line"><span class="keyword">let</span> wopts = &#123; <span class="attr">bookType</span>: <span class="string">'xlsx'</span>, <span class="attr">bookSST</span>: <span class="literal">false</span>, <span class="attr">type</span>: <span class="string">'binary'</span> &#125;;</span><br><span class="line"><span class="keyword">let</span> wbout = XLSX.write(workbook, wopts);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">s2ab</span>(<span class="params">s</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> buf = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(s.length);</span><br><span class="line">    <span class="keyword">let</span> view = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>(buf);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i != s.length; ++i) &#123;</span><br><span class="line">        view[i] = s.charCodeAt(i) &amp; <span class="number">0xFF</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> buf;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保存 - https://github.com/eligrey/FileSaver.js</span></span><br><span class="line">saveAs(<span class="keyword">new</span> Blob([s2ab(wbout)], &#123; <span class="attr">type</span>: <span class="string">"application/octet-stream"</span> &#125;), <span class="string">"test.xlsx"</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>上传到服务器</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过 FormData 上传到服务器</span></span><br><span class="line"><span class="keyword">let</span> wopts = &#123; <span class="attr">bookType</span>: <span class="string">'xlsx'</span>, <span class="attr">bookSST</span>: <span class="literal">false</span>, <span class="attr">type</span>: <span class="string">'base64'</span> &#125;;</span><br><span class="line"><span class="keyword">let</span> wbout = XLSX.write(workbook, wopts);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> req = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">req.open(<span class="string">"POST"</span>, <span class="string">"/upload"</span>, <span class="literal">true</span>);</span><br><span class="line"><span class="keyword">let</span> formdata = <span class="keyword">new</span> FormData();</span><br><span class="line">formdata.append(<span class="string">'file'</span>, <span class="string">'test.xlsx'</span>);</span><br><span class="line">formdata.append(<span class="string">'data'</span>, wbout);</span><br><span class="line">req.send(formdata);</span><br></pre></td></tr></table></figure>
+<p><code>js-xlsx</code> 写入数据 API：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">XLSX.write(wb, write_opts)</td>
+<td style="text-align:left">写到 wb 里</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.writeFile(wb, filename, write_opts)</td>
+<td style="text-align:left">写入文件里</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.writeFileAsync(filename, wb, o, cb)</td>
+<td style="text-align:left">异步方式，写入文件里</td>
+</tr>
+</tbody>
+</table>
+<h2 id="工具函数"><a href="#工具函数" class="headerlink" title="工具函数"></a>工具函数</h2><p><code>XLSX.utils</code> 是一个工具 API，一些函数用于把数据导出各种格式。</p>
+<p><code>sheet_to_*</code>函数接受一个工作表和一个可选的选项对象。<br><code>*_to_sheet</code> 函数接受一个数据对象和一个可选选项对象。</p>
+<p>列出几个有用的属性/函数：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">属性/函数</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">XLSX.utils.sheet_to_csv</td>
+<td style="text-align:left">生成 CSV。</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.utils.sheet_to_html</td>
+<td style="text-align:left">生成 HTML。</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.utils.sheet_to_json</td>
+<td style="text-align:left">生成一个对象数组。</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.utils.sheet_to_formulae</td>
+<td style="text-align:left">生成公式列表。</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.utils.book_new()</td>
+<td style="text-align:left">创建一个<strong>默认</strong>的 Excel 文件描述对象。</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX.utils.book_append_sheet(wb, ws, “test”)</td>
+<td style="text-align:left">向 workbook 添加一个 ws，名称为 test。</td>
+</tr>
+<tr>
+<td style="text-align:left">aoa_to_sheet</td>
+<td style="text-align:left">将 js 数据的数组转换为工作表。</td>
+</tr>
+<tr>
+<td style="text-align:left">json_to_sheet</td>
+<td style="text-align:left">将 js 对象的数组转换为工作表。</td>
+</tr>
+<tr>
+<td style="text-align:left">table_to_sheet</td>
+<td style="text-align:left">将 DOM TABLE 元素转换为工作表。</td>
+</tr>
+<tr>
+<td style="text-align:left">sheet_to_json</td>
+<td style="text-align:left">将工作表对象转换为 JSON 对象数组。</td>
+</tr>
+<tr>
+<td style="text-align:left">sheet_to_csv</td>
+<td style="text-align:left">生成分隔符分隔值输出。</td>
+</tr>
+<tr>
+<td style="text-align:left">sheet_to_html</td>
+<td style="text-align:left">生成 HTML 输出。</td>
+</tr>
+<tr>
+<td style="text-align:left">sheet_to_formulae</td>
+<td style="text-align:left">生成公式列表（具有值回退）。</td>
+</tr>
+<tr>
+<td style="text-align:left">format_cell</td>
+<td style="text-align:left">生成单元格的文本值（使用数字格式）。</td>
+</tr>
+<tr>
+<td style="text-align:left">encode_row/decode_row</td>
+<td style="text-align:left">在 0 索引行和 1 索引行之间进行转换。</td>
+</tr>
+<tr>
+<td style="text-align:left">encode_col/decode_col</td>
+<td style="text-align:left">在 0 索引列和列名之间进行转换。</td>
+</tr>
+<tr>
+<td style="text-align:left">encode_cell/decode_cell</td>
+<td style="text-align:left">转换单元格地址。</td>
+</tr>
+<tr>
+<td style="text-align:left">encode_range/decode_range</td>
+<td style="text-align:left">转换单元格范围。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> XLSX = <span class="built_in">require</span>(<span class="string">'xlsx'</span>);</span><br><span class="line"><span class="keyword">const</span> workbook = XLSX.readFile(<span class="string">'data.xlsx'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> wsname = workbook.SheetNames[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">const</span> ws = workbook.Sheets[wsname];         <span class="comment">// 取第一个 sheet</span></span><br><span class="line"><span class="keyword">const</span> json = XLSX.utils.sheet_to_json(ws);</span><br><span class="line"></span><br><span class="line">fs.writeFileSync(<span class="string">'./data.json'</span>, <span class="built_in">JSON</span>.stringify(json, <span class="literal">null</span>, <span class="number">4</span>));</span><br></pre></td></tr></table></figure>
+<h2 id="数据自定义"><a href="#数据自定义" class="headerlink" title="数据自定义"></a>数据自定义</h2><p>上面都是介绍导入/导出 Excel 表数据，这里介绍如何通过代码来自定义 Excel 表内容。<br>有几种方式来定义数据对象：</p>
+<ul>
+<li>阵列数组</li>
+<li>对象数组</li>
+<li>HTML Table</li>
+</ul>
+<h3 id="阵列数组"><a href="#阵列数组" class="headerlink" title="阵列数组"></a>阵列数组</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构造一个二维表</span></span><br><span class="line"><span class="keyword">const</span> ws = XLSX.utils.aoa_to_sheet([</span><br><span class="line">    <span class="string">"今天吃饭了吗"</span>.split(<span class="string">""</span>),     <span class="comment">// 第一行</span></span><br><span class="line">]);</span><br><span class="line"></span><br><span class="line"><span class="comment">// &#123;</span></span><br><span class="line"><span class="comment">//    A1: &#123; v: '今', t: 's' &#125;,</span></span><br><span class="line"><span class="comment">//    B1: &#123; v: '天', t: 's' &#125;,</span></span><br><span class="line"><span class="comment">//    C1: &#123; v: '吃', t: 's' &#125;,</span></span><br><span class="line"><span class="comment">//    D1: &#123; v: '饭', t: 's' &#125;,</span></span><br><span class="line"><span class="comment">//    E1: &#123; v: '了', t: 's' &#125;,</span></span><br><span class="line"><span class="comment">//    F1: &#123; v: '吗', t: 's' &#125;,</span></span><br><span class="line"><span class="comment">//    '!ref': 'A1:F1'</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="对象数组"><a href="#对象数组" class="headerlink" title="对象数组"></a>对象数组</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> ws = XLSX.utils.json_to_sheet(</span><br><span class="line">    [</span><br><span class="line">        &#123; <span class="attr">S</span>: <span class="number">1</span>, <span class="attr">h</span>: <span class="number">2</span>, <span class="attr">e</span>: <span class="number">3</span>, <span class="attr">e_1</span>: <span class="number">4</span>, <span class="attr">t</span>: <span class="number">5</span>, <span class="attr">J</span>: <span class="number">6</span>, <span class="attr">S_1</span>: <span class="number">7</span> &#125;, <span class="comment">// 第一行</span></span><br><span class="line">        &#123; <span class="attr">S</span>: <span class="number">2</span>, <span class="attr">h</span>: <span class="number">3</span>, <span class="attr">e</span>: <span class="number">4</span>, <span class="attr">e_1</span>: <span class="number">5</span>, <span class="attr">t</span>: <span class="number">6</span>, <span class="attr">J</span>: <span class="number">7</span>, <span class="attr">S_1</span>: <span class="number">8</span> &#125;  <span class="comment">// 第二行</span></span><br><span class="line">    ], &#123;</span><br><span class="line">        header: [<span class="string">"S"</span>, <span class="string">"h"</span>, <span class="string">"e"</span>, <span class="string">"e_1"</span>, <span class="string">"t"</span>, <span class="string">"J"</span>, <span class="string">"S_1"</span>]   <span class="comment">// 表头</span></span><br><span class="line">    &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="HTML-Table"><a href="#HTML-Table" class="headerlink" title="HTML Table"></a>HTML Table</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">id</span>=<span class="string">"sheetjs"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>S<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>h<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>e<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>e<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>t<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>J<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>S<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>1<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>2<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>3<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>4<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>5<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>6<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>7<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>2<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>3<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>4<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>5<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>6<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>7<span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="tag">&lt;<span class="name">td</span>&gt;</span>8<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> tbl = <span class="built_in">document</span>.getElementById(<span class="string">'sheetjs'</span>);</span><br><span class="line"><span class="keyword">const</span> wb = XLSX.utils.table_to_book(tbl);</span><br></pre></td></tr></table></figure>
+<p>之后需要将新的 数据对象添加到 workbook 里：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> ws_name = <span class="string">"SheetJS"</span>;</span><br><span class="line"><span class="keyword">let</span> ws = XLSX.utils.aoa_to_sheet([</span><br><span class="line">    [<span class="string">"S"</span>, <span class="string">"h"</span>, <span class="string">"e"</span>, <span class="string">"e"</span>, <span class="string">"t"</span>, <span class="string">"J"</span>, <span class="string">"S"</span>],</span><br><span class="line">    [ <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>,  <span class="number">4</span>,  <span class="number">5</span>]</span><br><span class="line">]);</span><br><span class="line"></span><br><span class="line">wb.SheetNames.push(ws_name);</span><br><span class="line">wb.Sheets[ws_name] = ws;</span><br></pre></td></tr></table></figure>
+<h3 id="生成-xlsx-文件"><a href="#生成-xlsx-文件" class="headerlink" title="生成 xlsx 文件"></a>生成 xlsx 文件</h3><p>之后，定义你的 workbook 对象， js-xlsx 提供一个默认的 workbook 对象（XLSX.utils.book_new）。</p>
+<p>此外还可以通过 IO 方式获取一个默认的 Excel 文件 workbook 对象。<br>在这里，我通过新建了一个空的 Excel 文件，读取它的 workbook 对象，把 workbook 对象保存到 json 文件里，作为默认配置来使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> XLSX = <span class="built_in">require</span>(<span class="string">'xlsx'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// default.xlsx 是一个空的 Excel 文件</span></span><br><span class="line"><span class="keyword">const</span> workbook = XLSX.readFile(<span class="string">'default.xlsx'</span>);</span><br><span class="line">fs.writeFileSync(<span class="string">'./default.json'</span>, <span class="built_in">JSON</span>.stringify(workbook, <span class="literal">null</span>, <span class="number">4</span>));</span><br></pre></td></tr></table></figure>
+<p>最后使用模版数据：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> XLSX = <span class="built_in">require</span>(<span class="string">'xlsx'</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取模版</span></span><br><span class="line"><span class="keyword">const</span> workbook = <span class="built_in">JSON</span>.parse(fs.readFileSync(<span class="string">'./default.json'</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> ws = XLSX.utils.aoa_to_sheet([</span><br><span class="line">    [<span class="string">'学校'</span>, <span class="string">'姓名'</span>, <span class="string">'学号'</span>],</span><br><span class="line"></span><br><span class="line">    [<span class="string">'电子神技大学'</span>, <span class="string">'张三'</span>, <span class="string">'A-201701010211'</span>],</span><br><span class="line">    [<span class="string">'电子神技大学'</span>, <span class="string">'黎明'</span>, <span class="string">'A-201701010212'</span>],</span><br><span class="line">]);</span><br><span class="line"></span><br><span class="line">workbook.SheetNames.unshift(<span class="string">'test'</span>);</span><br><span class="line">workbook.Sheets[<span class="string">'test'</span>] = ws;</span><br><span class="line">workbook.Props.Worksheets = workbook.Sheets.length;</span><br><span class="line">workbook.Props.SheetNames = workbook.SheetNames;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保存 json</span></span><br><span class="line">fs.writeFileSync(<span class="string">'./data.json'</span>, <span class="built_in">JSON</span>.stringify(workbook, <span class="literal">null</span>, <span class="number">4</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保存 xlsx 文件</span></span><br><span class="line">XLSX.writeFile(workbook, <span class="string">'output.xlsx'</span>);</span><br></pre></td></tr></table></figure>
+<p>在 <code>output.xlsx</code> 里可以看到：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171102203829.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="合并单元格"><a href="#合并单元格" class="headerlink" title="合并单元格"></a>合并单元格</h2><p>往往 Excel 表，很多时候都需要合并一些单元格来达到数据的统一与美观性。</p>
+<p>合并表格的数据在 Sheets Object 里的 <code>!merges</code> 属性里，它是一个<strong>数组</strong>，数组的顺序是按照二维表顺序（从左到右，从上到下）排列。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/11/20171111160125.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>比如在上图里，我们合并了 <code>B1-C1</code>、<code>A2-A4</code>，!merges 数组里记录的信息如下。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">    s: &#123; <span class="attr">c</span>: <span class="number">1</span>, <span class="attr">r</span>: <span class="number">0</span> &#125;  <span class="comment">// 第 0 行第 1 列开始，也就是 B1</span></span><br><span class="line">    e: &#123; <span class="attr">c</span>: <span class="number">2</span>, <span class="attr">r</span>: <span class="number">0</span> &#125;  <span class="comment">// 第 0 行第 2 列结束，也就是 C1</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">    s: &#123; <span class="attr">c</span>: <span class="number">0</span>, <span class="attr">r</span>: <span class="number">1</span> &#125;  <span class="comment">// 第 1 行第 0 列开始，也就是 A2</span></span><br><span class="line">    e: &#123; <span class="attr">c</span>: <span class="number">0</span>, <span class="attr">r</span>: <span class="number">3</span> &#125;  <span class="comment">// 第 1 行第 3 列结束，也就是 A4</span></span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+<p>其中 s 是 start 的简写，e 是 end 的简写，c 是 column 的简写，r 是 row 的简写（这种简写方式主要是为了<strong>节约内存</strong>，想想 Excel 表里可能有上万个单元格，如果用全称实在是太浪费内存）。</p>
+<p>因此，按照这种规律，在生成 Excel 文件时，设置 workbook sheet 里的 <code>!merges</code> 数组即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 合并第一行数据 [B1, C1, D1, E1]</span></span><br><span class="line">sheet[<span class="string">'!merges'</span>] = [&#123;</span><br><span class="line">    s: &#123; <span class="attr">c</span>: <span class="number">1</span>, <span class="attr">r</span>: <span class="number">0</span> &#125;,</span><br><span class="line">    e: &#123; <span class="attr">c</span>: <span class="number">4</span>, <span class="attr">r</span>: <span class="number">0</span> &#125;</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/SheetJS/js-xlsx" target="_blank" rel="noopener">https://github.com/SheetJS/js-xlsx</a></li>
+<li><a href="http://www.jianshu.com/p/5c131c27841c" target="_blank" rel="noopener">http://www.jianshu.com/p/5c131c27841c</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.821Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/11/HTML5/js-xlsx 使用教程/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/11/HTML5/js-xlsx 使用教程/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/11/Electron/Electron 主进程与渲染进程通信/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Electron 主进程与渲染进程通信</h4>
+        <h4 class="summary">主进程与渲染进程Electron 中，从 package.json 的 main 载入的 js 件就是主进程，由主进程加...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/10/网络安全/探讨 HTTP POST 慢攻击原理与实现/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">探讨 HTTP POST 慢攻击原理与实现</h4>
+        <h4 class="summary">HTTP POST 慢攻击基于 HTTP 的攻击大多数以高速海量的请求堆积，让服务器/数据库忙不过来，直接使其失去响应，...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

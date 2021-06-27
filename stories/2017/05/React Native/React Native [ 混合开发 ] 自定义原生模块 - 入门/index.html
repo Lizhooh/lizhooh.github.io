@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/05/React Native/React Native [ 混合开发 ] 自定义原生模块 - 入门/">
+    
+    
+    <title>React Native [ 混合开发 ] 自定义原生模块 - 入门 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="原生模块有时候 App 需要访问平台 API，但 React Native 可能还没有相应的模块包装；或者你需要复用一些 Java 代码，而不是用 Javascript 重新实现一遍；又或者你需要实现某些高性能的、多线程的代码，譬如图片处理、数据库、或者各种高级扩展等等。 这时候就需要自己去 自定义原生模块。">
+<meta name="keywords" content="Javascript,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native [ 混合开发 ] 自定义原生模块 - 入门">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/05/React Native/React Native [ 混合开发 ] 自定义原生模块 - 入门/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="原生模块有时候 App 需要访问平台 API，但 React Native 可能还没有相应的模块包装；或者你需要复用一些 Java 代码，而不是用 Javascript 重新实现一遍；又或者你需要实现某些高性能的、多线程的代码，譬如图片处理、数据库、或者各种高级扩展等等。 这时候就需要自己去 自定义原生模块。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/5/rn.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/4/20170430150717.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.860Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native [ 混合开发 ] 自定义原生模块 - 入门">
+<meta name="twitter:description" content="原生模块有时候 App 需要访问平台 API，但 React Native 可能还没有相应的模块包装；或者你需要复用一些 Java 代码，而不是用 Javascript 重新实现一遍；又或者你需要实现某些高性能的、多线程的代码，譬如图片处理、数据库、或者各种高级扩展等等。 这时候就需要自己去 自定义原生模块。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/5/rn.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native [ 混合开发 ] 自定义原生模块 - 入门</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native [ 混合开发 ] 自定义原生模块 - 入门</h1>
+
+        <div class="meta-rest">
+            <h1>React Native [ 混合开发 ] 自定义原生模块 - 入门</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-05-25T12:46:32.000Z" itemprop="datePublished" class="page-time">
+    2017-05-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原生模块"><span class="post-toc-number">1.</span> <span class="post-toc-text">原生模块</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Toast-模块"><span class="post-toc-number">2.</span> <span class="post-toc-text">Toast 模块</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建一个自定义的原生模块"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">创建一个自定义的原生模块</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建一个自定义的原生模块包"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">创建一个自定义的原生模块包</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#注册到-React-native-的-ReactPackage-里"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">注册到 React-native 的 ReactPackage 里</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#从-NativeModules-里导出使用"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">从 NativeModules 里导出使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#运行效果"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">运行效果</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">3.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/React Native [ 混合开发 ] 自定义原生模块 - 入门"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native [ 混合开发 ] 自定义原生模块 - 入门</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 05 月 25 日 20:46" datetime="2017-05-25T12:46:32.000Z"  itemprop="datePublished">
+    2017-05-25
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1120</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="原生模块"><a href="#原生模块" class="headerlink" title="原生模块"></a>原生模块</h2><p>有时候 App 需要访问平台 API，但 React Native 可能还没有相应的模块包装；或者你需要复用一些 Java 代码，而不是用 Javascript 重新实现一遍；又或者你需要实现某些高性能的、多线程的代码，譬如图片处理、数据库、或者各种高级扩展等等。</p>
+<p>这时候就需要自己去 <strong>自定义原生模块</strong>。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/5/rn.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>自定义原生模块分为两种：</p>
+<ul>
+<li>不带 UI 的模块。</li>
+<li>带 UI 的模块。</li>
+</ul>
+<p>这里讲述的是不带 UI 的模块，大致的流程如下：</p>
+<ol>
+<li>创建模块名。</li>
+<li>提供 js 层可用的常量。</li>
+<li>提供 js 层调用的方法。</li>
+<li>注册模块到 ReactPackage 里。</li>
+<li>提供事件相关接口（可选）。</li>
+<li>在 js 端导出调用的接口。</li>
+</ol>
+<h2 id="Toast-模块"><a href="#Toast-模块" class="headerlink" title="Toast 模块"></a>Toast 模块</h2><p>下面讲述的是，自定义一个<code>MyToastAndroid</code>原生的模块，功能与<code>ToastAndroid</code>一样。<br>主要是<code>React-Native</code>发送命令给<code>Android Java</code>，<code>Android Java</code>调用原生组件。</p>
+<p>自定义一个原生模块一般会经历几个步骤：</p>
+<ul>
+<li>创建一个自定义的原生模块</li>
+<li>创建一个自定义的原生模块包</li>
+<li>注册到 React-native 的 ReactPackage 里</li>
+<li>从 NativeModules 里导出使用</li>
+</ul>
+<p>项目的文件结构：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">com                             <span class="comment">// 在 app/src/main/java/com</span></span><br><span class="line">├── <span class="built_in">module</span>                      <span class="comment">// 自定义的原生模块</span></span><br><span class="line">│   ├── ToastModule.java</span><br><span class="line">│   └── ToastModulePackage.java</span><br><span class="line">└── testnat                     <span class="comment">// App activity</span></span><br><span class="line">    ├── MainActivity.java</span><br><span class="line">    └── MainApplication.java</span><br></pre></td></tr></table></figure>
+<h3 id="创建一个自定义的原生模块"><a href="#创建一个自定义的原生模块" class="headerlink" title="创建一个自定义的原生模块"></a>创建一个自定义的原生模块</h3><p>代码写在 <code>ToastModule.java</code> 里。<br>记住，这里有很多套路的写法：</p>
+<p><strong>引入一些包</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 所在的包</span></span><br><span class="line"><span class="keyword">package</span> com.<span class="keyword">module</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// react-native 相关的 [必须]</span></span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.NativeModule;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.ReactApplicationContext;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.ReactContext;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.ReactContextBaseJavaModule;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.ReactMethod;</span><br><span class="line"></span><br><span class="line"><span class="comment">// java, android 相关</span></span><br><span class="line"><span class="keyword">import</span> android.widget.Toast;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br></pre></td></tr></table></figure>
+<p><strong>编写 ToastModule 类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注意：需要继承至 ReactContextBaseJavaModule</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ToastModule</span> <span class="keyword">extends</span> <span class="title">ReactContextBaseJavaModule</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String DURATION_SHORT_KEY = <span class="string">"SHORT"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String DURATION_LONG_KEY  = <span class="string">"LONG"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ToastModule</span><span class="params">(ReactApplicationContext reactContext)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(reactContext);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * [必须]</span></span><br><span class="line"><span class="comment">     * 原生模块名称，用来在 React-native 里引用的</span></span><br><span class="line"><span class="comment">     * 通过 React-native.NativeModules.MyToastAndroid 来访问</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"MyToastAndroid"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 定义一些静态常量，产生一种映射关系</span></span><br><span class="line"><span class="comment">     * 例如 MyToastAndroid.LONG =&gt; Toast.LENGTH_LONG</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Map&lt;String, Object&gt; <span class="title">getConstants</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Map&lt;String, Object&gt; constants = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        constants.put(DURATION_SHORT_KEY, Toast.LENGTH_SHORT);</span><br><span class="line">        constants.put(DURATION_LONG_KEY,  Toast.LENGTH_LONG);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> constants;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 导出一个方法给JavaScript使用</span></span><br><span class="line"><span class="comment">     * 1. Java 方法需要使用注解 <span class="doctag">@ReactMethod</span>，这样才能在 react-native 中调用</span></span><br><span class="line"><span class="comment">     * 2. 方法的返回类型必须为 void，因为它是异步进行的</span></span><br><span class="line"><span class="comment">     * 3. 在 react-native 中调用方式： 模块名.方法名</span></span><br><span class="line"><span class="comment">     * 4. React Native 的跨语言访问是异步进行的，所以使用 回调函数 或者 发送事件消息</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@ReactMethod</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">(String message, <span class="keyword">int</span> duration)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 调用原生模块</span></span><br><span class="line">        Toast.makeText(</span><br><span class="line">            <span class="keyword">this</span>.getReactApplicationContext(),</span><br><span class="line">            <span class="string">"My: "</span> + message,   <span class="comment">// &lt;-- 添加一个 'My: ' 为了区别效果</span></span><br><span class="line">            duration</span><br><span class="line">        ).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面的参数类型在 <code>@ReactMethod</code> 注明的方法中，会被直接映射到它们对应的 JavaScript 类型。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">java</th>
+<th style="text-align:left">javascript</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">Bool</td>
+</tr>
+<tr>
+<td style="text-align:left">Integer</td>
+<td style="text-align:left">Number</td>
+</tr>
+<tr>
+<td style="text-align:left">Double</td>
+<td style="text-align:left">Number</td>
+</tr>
+<tr>
+<td style="text-align:left">Float</td>
+<td style="text-align:left">Number</td>
+</tr>
+<tr>
+<td style="text-align:left">String</td>
+<td style="text-align:left">String</td>
+</tr>
+<tr>
+<td style="text-align:left">Callback</td>
+<td style="text-align:left">function</td>
+</tr>
+<tr>
+<td style="text-align:left">ReadableMap</td>
+<td style="text-align:left">Object</td>
+</tr>
+<tr>
+<td style="text-align:left">ReadableArray</td>
+<td style="text-align:left">Array</td>
+</tr>
+</tbody>
+</table>
+<h3 id="创建一个自定义的原生模块包"><a href="#创建一个自定义的原生模块包" class="headerlink" title="创建一个自定义的原生模块包"></a>创建一个自定义的原生模块包</h3><p>代码写在 <code>ToastModulePackage.java</code> 里。<br>记住，这里有很多套路的写法：</p>
+<p><strong>引入一些包</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 所在的包</span></span><br><span class="line"><span class="keyword">package</span> com.<span class="keyword">module</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// react-native 相关的 [必须]</span></span><br><span class="line"><span class="keyword">import</span> com.facebook.react.ReactPackage;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.JavaScriptModule;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.NativeModule;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.bridge.ReactApplicationContext;</span><br><span class="line"><span class="keyword">import</span> com.facebook.react.uimanager.ViewManager;</span><br><span class="line"></span><br><span class="line"><span class="comment">// java, android 相关</span></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br></pre></td></tr></table></figure>
+<p><strong>编写 ToastModulePackage 类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注意：需要继承至 ReactPackage</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ToastModulePackage</span> <span class="keyword">implements</span> <span class="title">ReactPackage</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js 模块, ? 指的是： 类型未指定，但是继承至 JavaScriptModule</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;Class&lt;? extends JavaScriptModule&gt;&gt; createJSModules() &#123;</span><br><span class="line">        <span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 视图模块</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;ViewManager&gt; <span class="title">createViewManagers</span><span class="params">(ReactApplicationContext reactContext)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 原生模块 [必须]</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;NativeModule&gt; <span class="title">createNativeModules</span><span class="params">(ReactApplicationContext reactContext)</span> </span>&#123;</span><br><span class="line">        List&lt;NativeModule&gt; modules = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        modules.add(<span class="keyword">new</span> ToastModule(reactContext));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> modules;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="注册到-React-native-的-ReactPackage-里"><a href="#注册到-React-native-的-ReactPackage-里" class="headerlink" title="注册到 React-native 的 ReactPackage 里"></a>注册到 React-native 的 ReactPackage 里</h3><p>在 <code>MainApplication.java</code> 里</p>
+<p><strong>引入刚才的包</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义模块包</span></span><br><span class="line"><span class="keyword">import</span> com.<span class="keyword">module</span>.ToastModulePackage;</span><br></pre></td></tr></table></figure>
+<p><strong>注册</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> List&lt;ReactPackage&gt; <span class="title">getPackages</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Arrays.&lt;ReactPackage&gt;asList(</span><br><span class="line">        <span class="keyword">new</span> MainReactPackage(),</span><br><span class="line">        <span class="keyword">new</span> ToastModulePackage()    <span class="comment">// &lt;-- 添加到这里</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="从-NativeModules-里导出使用"><a href="#从-NativeModules-里导出使用" class="headerlink" title="从 NativeModules 里导出使用"></a>从 NativeModules 里导出使用</h3><p>到了这里，基本已经成功了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; NativeModules &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 导出自定义的模块</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> NativeModules.MyToastAndroid;   <span class="comment">// &lt;-- 刚才 getName 返回的名称</span></span><br></pre></td></tr></table></figure>
+<p>接着就可以这样使用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义的模块</span></span><br><span class="line"><span class="keyword">import</span> MyToastAndroid <span class="keyword">from</span> <span class="string">'./MyToastAndroid'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">testnat</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        MyToastAndroid.show(<span class="string">"啪啪啪"</span>, MyToastAndroid.LONG);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">View</span>&gt;</span><span class="tag">&lt;/<span class="name">View</span>&gt;</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="运行效果"><a href="#运行效果" class="headerlink" title="运行效果"></a>运行效果</h3><p><img src="/assets/image/2017/4/20170430150717.png" style="box-shadow: 1px 2px 15px #ccc"></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://facebook.github.io/react-native/docs/native-modules-android.html" target="_blank" rel="noopener">https://facebook.github.io/react-native/docs/native-modules-android.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.860Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/05/React Native/React Native [ 混合开发 ] 自定义原生模块 - 入门/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/05/React Native/React Native [ 混合开发 ] 自定义原生模块 - 入门/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/05/React Native/React Native 在 Android 上实现阴影效果/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 在 Android 上实现阴影效果</h4>
+        <h4 class="summary">ShadowShadow阴影效果，在 ios 上是完全支持的，但在 Android 上只有 5.0 以上的系统支持类似的...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/05/网络安全/Nodejs Web 攻击/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs Web 攻击</h4>
+        <h4 class="summary">最近看书发现了几个比较有趣的 Web 攻击技术，这里记录一下。相关的是应用层 Dos 拒绝服务攻击。
+应用层和网络层的 ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

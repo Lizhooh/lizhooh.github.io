@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/">
+    
+    
+    <title>GraphQL 结合 Koa 实践体验 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 GraphQL 与 Koa 结合起来实际一把，其中还掺杂着 Mongodb。 本文会先介绍 GraphQL，接着使用 Koa 搭建 http 服务，使用 Mongodb 存储数据，结合 GraphQL 搭建丰富的 Web API 服务。">
+<meta name="keywords" content="后端,Nodejs,Koa,GraphQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GraphQL 结合 Koa 实践体验">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 GraphQL 与 Koa 结合起来实际一把，其中还掺杂着 Mongodb。 本文会先介绍 GraphQL，接着使用 Koa 搭建 http 服务，使用 Mongodb 存储数据，结合 GraphQL 搭建丰富的 Web API 服务。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/koa+graqhl.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180112235816.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/1/20180113092111.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.820Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GraphQL 结合 Koa 实践体验">
+<meta name="twitter:description" content="前言前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 GraphQL 与 Koa 结合起来实际一把，其中还掺杂着 Mongodb。 本文会先介绍 GraphQL，接着使用 Koa 搭建 http 服务，使用 Mongodb 存储数据，结合 GraphQL 搭建丰富的 Web API 服务。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/1/koa+graqhl.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">GraphQL 结合 Koa 实践体验</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">GraphQL 结合 Koa 实践体验</h1>
+
+        <div class="meta-rest">
+            <h1>GraphQL 结合 Koa 实践体验</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-01-12T12:28:04.000Z" itemprop="datePublished" class="page-time">
+    2018-01-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/GraphQL/">GraphQL</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#GraphQL"><span class="post-toc-number">2.</span> <span class="post-toc-text">GraphQL</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#与-Koa-结合"><span class="post-toc-number">3.</span> <span class="post-toc-text">与 Koa 结合</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#GraphQL-模型"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">GraphQL 模型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#处理数据"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">处理数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#连接路由"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">连接路由</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#根据参数查询"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">根据参数查询</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结合-Mongoose"><span class="post-toc-number">4.</span> <span class="post-toc-text">结合 Mongoose</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">5.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-GraphQL/GraphQL 结合 Koa 实践体验"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">GraphQL 结合 Koa 实践体验</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 01 月 12 日 20:28" datetime="2018-01-12T12:28:04.000Z"  itemprop="datePublished">
+    2018-01-12
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/GraphQL/">GraphQL</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1322</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。今天有空把 <code>GraphQL</code> 与 <code>Koa</code> 结合起来实际一把，其中还掺杂着 <code>Mongodb</code>。</p>
+<p>本文会先介绍 GraphQL，接着使用 Koa 搭建 http 服务，使用 Mongodb 存储数据，结合 GraphQL 搭建丰富的 Web API 服务。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/koa+graqhl.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="GraphQL"><a href="#GraphQL" class="headerlink" title="GraphQL"></a>GraphQL</h2><p><a href="https://github.com/facebook/graphql" target="_blank" rel="noopener">GraphQL</a> 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时，由 Facebook 开源在 Github 上。<br>GraphQL 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何冗余，也让 API 更容易地随着时间推移而演进，还能用于构建强大的开发者工具。</p>
+<p>它有非常简单的描述方法，只需要描述你的数据：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type Project &#123;</span><br><span class="line">    name: <span class="built_in">String</span></span><br><span class="line">    tagline: <span class="built_in">String</span></span><br><span class="line">    contributors: [User]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着请求你的想要的数据：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    project(name: <span class="string">"GraphQL"</span>) &#123;</span><br><span class="line">        tagline</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么就可以得到可预测的结果：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"project"</span>: &#123;</span><br><span class="line">        <span class="string">"tagline"</span>: <span class="string">"A query language for APIs"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于 REST 来说，定义一个描述 url，数据的返回完全由后端决定。而 GraphQL 就不同，你可以在前端任意的决定数据的返回格式与数量，这样一来整个的控制权从后端向前端迁移。</p>
+<h2 id="与-Koa-结合"><a href="#与-Koa-结合" class="headerlink" title="与 Koa 结合"></a>与 Koa 结合</h2><p>使用 GraphQL 与 Nodejs 结合，首先第一步我们使用 Koa 编写一个简单的 Web 服务。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>);</span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">'koa-router'</span>);</span><br><span class="line"><span class="keyword">const</span> body = <span class="built_in">require</span>(<span class="string">'koa-body'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"></span><br><span class="line">router</span><br><span class="line">    .get(<span class="string">'/'</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">        ctx.body = &#123; <span class="attr">path</span>: <span class="string">'/'</span> &#125;;</span><br><span class="line">    &#125;)</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">app</span><br><span class="line">    .use(body())</span><br><span class="line">    .use(router.routes());</span><br><span class="line">    .listen(<span class="number">3000</span>);</span><br></pre></td></tr></table></figure>
+<p>这时候运行起来的时候，就可以看到页面响应了 <code>{ &quot;path&quot;: &quot;/&quot; }</code> 的 json 数据。</p>
+<p>接着我们把为 Koa 添加 GraphQL 的 IDE。</p>
+<blockquote>
+<p>先安装 graphql 和 graphql-server-koa 两个模块。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">const</span> &#123; graphqlKoa, graphiqlKoa &#125; = <span class="built_in">require</span>(<span class="string">'graphql-server-koa'</span>);</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">router</span><br><span class="line">    .get(<span class="string">'/graphiql'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">         <span class="comment">// 重定向到 graphiql 路由</span></span><br><span class="line">        <span class="keyword">await</span> graphiqlKoa(&#123; <span class="attr">endpointURL</span>: <span class="string">'/graphql'</span> &#125;)(ctx, next)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>这时，访问 <code>/graphiql</code> 时，会看到一个 GraphQL IDE，同时注意到了控制台报错：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST http://127.0.0.1:3000/graphql? 404 (Not Found)</span><br></pre></td></tr></table></figure>
+<p>好接下来解决这个 404 错误。</p>
+<h3 id="GraphQL-模型"><a href="#GraphQL-模型" class="headerlink" title="GraphQL 模型"></a>GraphQL 模型</h3><p>GraphQL 的第一步就是描述你的数据，那么模型是必不可少的一部分。</p>
+<p>下面就来定义一个 <code>文章</code> 数据模型。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123;</span><br><span class="line">    graphql,</span><br><span class="line">    GraphQLSchema,</span><br><span class="line">    GraphQLObjectType,</span><br><span class="line">    GraphQLString,</span><br><span class="line">    GraphQLID,</span><br><span class="line">    GraphQLList,</span><br><span class="line">    GraphQLNonNull,</span><br><span class="line">    isOutputType,</span><br><span class="line">&#125; = <span class="built_in">require</span>(<span class="string">'graphql'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> ArticleSchema = <span class="keyword">new</span> GraphQLObjectType(&#123;</span><br><span class="line">    name: <span class="string">'article'</span>,                    <span class="comment">// 模型名称</span></span><br><span class="line">    fields: &#123;                           <span class="comment">// 模型字段</span></span><br><span class="line">        title: &#123;</span><br><span class="line">            type: GraphQLString,        <span class="comment">// 字段类型</span></span><br><span class="line">        &#125;,</span><br><span class="line">        author: &#123;</span><br><span class="line">            type: GraphQLString,</span><br><span class="line">        &#125;,</span><br><span class="line">        body: &#123;</span><br><span class="line">            type: GraphQLString</span><br><span class="line">        &#125;,</span><br><span class="line">        comments: &#123;                     <span class="comment">// 数组字段</span></span><br><span class="line">            type: <span class="keyword">new</span> GraphQLList(<span class="keyword">new</span> GraphQLObjectType(&#123;</span><br><span class="line">                name: <span class="string">'comment'</span>,</span><br><span class="line">                fields: &#123;</span><br><span class="line">                    body: &#123;</span><br><span class="line">                        type: GraphQLString,</span><br><span class="line">                    &#125;,</span><br><span class="line">                    date: &#123;</span><br><span class="line">                        type: GraphQLString,</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>首先是引入了 <code>GraphQL</code> 的类型系统，接着定义了 <code>评论</code> 模型，<code>文章</code> 模型。</p>
+<h3 id="处理数据"><a href="#处理数据" class="headerlink" title="处理数据"></a>处理数据</h3><p>在定义完模型后，就要定义一个处理数据的对象。这个对象直接映射到查询的对象，这部分叫它为 <code>action</code>。</p>
+<p>在这个 article 里返回一段模拟数据，也就是 <code>resolve</code> 里的 <code>return</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> article = &#123;</span><br><span class="line">    type: ArticleSchema,</span><br><span class="line">    args: &#123;&#125;,       <span class="comment">// 查询的参数列表</span></span><br><span class="line">    resolve(root, params, options) &#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;    <span class="comment">// 模拟数据</span></span><br><span class="line">            title: <span class="string">"GraphQL 结合 Koa 实践体验"</span>,</span><br><span class="line">            author: <span class="string">"Lizhooh"</span>,</span><br><span class="line">            body:</span><br><span class="line">                <span class="string">"前段时间有空去看了一天的 GraphQL 文档，对 GraphQL 也有些理解了。"</span> +</span><br><span class="line">                <span class="string">"今天有空把 GraphQL 与 Koa 结合起来实际一把，其中还掺杂着 Mongodb。"</span>,</span><br><span class="line">            comments: [</span><br><span class="line">                &#123; <span class="attr">body</span>: <span class="string">"很好"</span>, <span class="attr">date</span>: <span class="string">"2018-01-12 22:46:12"</span> &#125;,</span><br><span class="line">                &#123; <span class="attr">body</span>: <span class="string">"不错"</span>, <span class="attr">date</span>: <span class="string">"2018-01-12 22:47:22"</span> &#125;,</span><br><span class="line">            ],</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="连接路由"><a href="#连接路由" class="headerlink" title="连接路由"></a>连接路由</h3><p>最后还需要定义一个<code>查询模型</code>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Schema = <span class="keyword">new</span> GraphQLSchema(&#123;</span><br><span class="line">    query: <span class="keyword">new</span> GraphQLObjectType(&#123;</span><br><span class="line">        name: <span class="string">'query'</span>,</span><br><span class="line">        fields: &#123;</span><br><span class="line">            article,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>接着在路由里添加路径：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">router</span><br><span class="line">    .post(<span class="string">'/graphql'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">        <span class="keyword">await</span> graphqlKoa(&#123; <span class="attr">schema</span>: Schema &#125;)(ctx, next)</span><br><span class="line">    &#125;)</span><br><span class="line">    .get(<span class="string">'/graphql'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">        <span class="keyword">await</span> graphqlKoa(&#123; <span class="attr">schema</span>: Schema &#125;)(ctx, next)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>好了，但你访问 <code>http://127.0.0.1:3000/graphiql</code> 时，在 IDE 里输入以下内容时，能够正确返回结果，那么就成功把 GraphQL 和 Koa 结合起来了。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180112235816.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="根据参数查询"><a href="#根据参数查询" class="headerlink" title="根据参数查询"></a>根据参数查询</h3><p>在上面定义了一个没有查询条件的 <code>action</code>，现在把它改为根据条件查询。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在 args 里修改一下</span></span><br><span class="line">args: &#123;</span><br><span class="line">    author: &#123;</span><br><span class="line">        type: <span class="keyword">new</span> GraphQLNonNull(GraphQLString)  <span class="comment">// 不能为空</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/1/20180113092111.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="结合-Mongoose"><a href="#结合-Mongoose" class="headerlink" title="结合 Mongoose"></a>结合 Mongoose</h2><p>GraphQL 里有模型，Mongoose 里也有模型，它们两个是不相关联的。唯一可以关联在一起的是 <code>resolve</code> 函数。</p>
+<p>所以，需要定义两分模型，一份是  GraphQL 的模型，另一份是 Mongoose 的模型。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> ArticleSchema2 = <span class="keyword">new</span> mongoose.Schema(&#123;</span><br><span class="line">    title: <span class="built_in">String</span>,</span><br><span class="line">    author: <span class="built_in">String</span>,</span><br><span class="line">    body: <span class="built_in">String</span>,</span><br><span class="line">    comments: [&#123;</span><br><span class="line">        body: <span class="built_in">String</span>,</span><br><span class="line">        date: <span class="built_in">String</span>,</span><br><span class="line">    &#125;],</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">mongoose.model(<span class="string">'article'</span>, ArticleSchema2, <span class="string">'article'</span>);</span><br></pre></td></tr></table></figure>
+<p>在 <code>action</code> 里</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Article = mongoose.model(<span class="string">'article'</span>);</span><br><span class="line"><span class="keyword">const</span> article = &#123;</span><br><span class="line">    type: ArticleSchema,</span><br><span class="line">    args: &#123;&#125;,</span><br><span class="line">    <span class="keyword">async</span> resolve(root, params, options) &#123;</span><br><span class="line">        <span class="comment">// 返回数据库的数据</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> Article.find(&#123;&#125;).limit(<span class="number">10</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><code>GraphQL</code> 的数据格式可以由前端进行描述，然后在 Nodejs 里 GraphQL 会根据描述来返回数据。<br>这样好是好，但是面临着几个<strong>问题</strong>。</p>
+<ul>
+<li>解析是需要时间的，在 REST 与 GraphQL 的响应时间是有差距的。</li>
+<li>GraphQL 需要定义模型，对于数据非常复杂的情况下，这可不是很少的代码量。</li>
+<li>GraphQL 的错误机制，目前还不清楚，感觉有点不可控，有时候返回一些莫名其妙的错误。</li>
+<li>GraphQL 调试非常困难（可能是我不会）。</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.820Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/01/GraphQL/GraphQL 结合 Koa 实践体验/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GraphQL/">GraphQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Koa/">Koa</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/01/Redux/精减 Redux 代码量/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">精减 Redux 代码量</h4>
+        <h4 class="summary">在 React 中使用 Redux 带来的不仅仅是数据状态的易维护性，还带来的是代码量的提升。事物总有好的一方面也有坏的...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/01/Go/小谈 Go 中闭包与回调/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">小谈 Go 中闭包与回调</h4>
+        <h4 class="summary">Javascript 里都有一个非常明显的特性，那就是闭包与回调。在 Go 里也有这种特性，它通过灵活的方式进行展示。
+...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

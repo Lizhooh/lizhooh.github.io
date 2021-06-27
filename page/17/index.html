@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/page/17/">
+    
+    
+    <title>Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lizhooh 的技术博客">
+<meta property="og:url" content="http://me.lizhooh.com/page/17/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="数据就像冰山一样，栩栩如生！">
+<meta property="og:locale" content="zh-Hans">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lizhooh 的技术博客">
+<meta name="twitter:description" content="数据就像冰山一样，栩栩如生！">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Lizhooh 的技术博客</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header index-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Lizhooh 的技术博客</h1>
+
+        <div class="meta-rest">
+            <h1></h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+<div class="container body-wrap index">
+
+    <ul class="post-list">
+    
+        <li class="post-list-item fade">
+            <article id="post-React Native/使用 Reactotron 来调试 React Native"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 04 月 06 日 8:45" datetime="2018-04-06T00:45:40.000Z"  itemprop="datePublished">
+    2018-04-06
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1196
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/04/React Native/使用 Reactotron 来调试 React Native/">使用 Reactotron 来调试 React Native</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>众所周知，在 React Native 里可以使用 Chrome Dev 工具来进行调试 React Native 应用。但是有一个问题是使用 Chrome 调试非常消耗内存，在 8G 内存的笔记本上调试系统经常显示内存不足（Android 模拟器 + Chrome 调试），并且还需要打开 JS Dev Mode 模式，让人觉得非常不方便。</p>
+<p><a href="https://github.com/infinitered/reactotron" target="_blank" rel="noopener">Reactotron</a> 正是为了解决这些麻烦的问题而出现的一个基于 socket.io 的 React 应用调试工具。</p>
+    
+
+        <a href="/stories/2018/04/React Native/使用 Reactotron 来调试 React Native/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/04/React Native/使用 Reactotron 来调试 React Native/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Redux/单一 reducer immutable 化"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 04 月 03 日 10:08" datetime="2018-04-03T02:08:35.000Z"  itemprop="datePublished">
+    2018-04-03
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1102
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 10 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/04/Redux/单一 reducer immutable 化/">单一 reducer immutable 化</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>往往在使用 <code>React + Redux</code> 开发大型单页面 Javascript 应用时，多多少少会使用 combindReducers 切分很多个 reducer，每一个 reducer 都独自处理着不同的 view。有些时候某个 view 需要很健壮的性能要求，而某些 view 对性能要求并不高，这时候应该考虑使用 <strong><em>“单一 reducer immutable 化 ”</em></strong> 的方案。</p>
+    
+
+        <a href="/stories/2018/04/Redux/单一 reducer immutable 化/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/04/Redux/单一 reducer immutable 化/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-前端/前后端分离，使用 Mock 提升效率"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 24 日 19:06" datetime="2018-03-24T11:06:44.000Z"  itemprop="datePublished">
+    2018-03-24
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/前端/">前端</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：810
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 7.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/前端/前后端分离，使用 Mock 提升效率/">前后端分离，使用 Mock 提升效率</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>往往在进行<strong>前后端分离</strong>的开发里，如果不使用 Mock 的话，估计前端需要等后端完成部分 API，才能工作。这样一来，就不利于并行的项目进度开发。</p>
+<p>Mock 服务是实现前后端分离和并行开发的核心内容。Mock 服务是针对于前后端分离模式下的工作任务不协调层面的问题，通过模拟数据解耦了前端逻辑的编写对后端接口的依赖，间接了提升了项目开发的效率。</p>
+    
+
+        <a href="/stories/2018/03/前端/前后端分离，使用 Mock 提升效率/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/前端/前后端分离，使用 Mock 提升效率/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Nginx/前端工程师的 Nginx 学习笔记"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 23 日 10:05" datetime="2018-03-23T02:05:32.000Z"  itemprop="datePublished">
+    2018-03-23
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nginx/">Nginx</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2529
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 25 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/Nginx/前端工程师的 Nginx 学习笔记/">前端工程师的 Nginx 学习笔记</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Nginx</code>（发音：engine X）是一款轻量级的 HTTP 服务器（相比于 Apache、Lighttpd 而言），同时是一个高性能的 HTTP 和反向代理服务器，负载均衡服务器。Nginx 主要以事件驱动的方式编写，自带事件循环与异步，在性能上能够直接碾压 Apache 这种多线程处理的方式。</p>
+    
+
+        <a href="/stories/2018/03/Nginx/前端工程师的 Nginx 学习笔记/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/Nginx/前端工程师的 Nginx 学习笔记/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Nodejs/HTTP2/HTTP2 综述"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 22 日 8:49" datetime="2018-03-22T00:49:43.000Z"  itemprop="datePublished">
+    2018-03-22
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/HTTP-2/">HTTP/2</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2015
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 17.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/">HTTP/2 综述</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对 TCP/IP 了解越深，往往会感叹其层次设计的巧妙。各种新出现的优化并不会破坏原有的体系结构，但是对 HTTP 的了解越深，越让人觉得它的过时。HTTP/2 是下一代的 HTTP 网络协议标准，在 2015 年正式发布。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180323085838.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <a href="/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTTP-2/">HTTP/2</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/Nodejs/HTTP2/HTTP2 综述/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Typescript/拥抱与使用 Typescript"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 16 日 14:39" datetime="2018-03-16T06:39:43.000Z"  itemprop="datePublished">
+    2018-03-16
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Typescript/">Typescript</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2257
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 22.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/Typescript/拥抱与使用 Typescript/">拥抱与使用 Typescript</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Typescript 是微软开源的一个 Javascript 的超集，提供更超前的语法（比 ES6 还超前）。</p>
+<h2 id="入门"><a href="#入门" class="headerlink" title="入门"></a>入门</h2><p>实际上从 ES6 转向 TS 只需要关注几个语法：<code>类型</code>、<code>接口</code>、<code>泛型</code>。其他语法基本和 ES6 差不多，甚至说是可以直接无视。</p>
+<p>typescript 配置和 vscode 一起使用非常合适，毕竟它们都是微软自家的产品。</p>
+    
+
+        <a href="/stories/2018/03/Typescript/拥抱与使用 Typescript/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Typescript/">Typescript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/Typescript/拥抱与使用 Typescript/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Docker/Docker 初识"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 07 日 10:34" datetime="2018-03-07T02:34:05.000Z"  itemprop="datePublished">
+    2018-03-07
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Docker/">Docker</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：2251
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 20 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/Docker/Docker 初识/">Docker 初识</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href>docker</a> 是一个开源的应用容器引擎，可以为我们提供安全、可移植、可重复的自动化部署的方式。docker采用虚拟化的技术来虚拟化出应用程序的运行环境。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180307105857.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <a href="/stories/2018/03/Docker/Docker 初识/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/Docker/Docker 初识/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-Nodejs/如何防止 Nodejs 进程崩溃？"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 04 日 20:17" datetime="2018-03-04T12:17:15.000Z"  itemprop="datePublished">
+    2018-03-04
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Nodejs/">Nodejs</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1364
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 12.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/Nodejs/如何防止 Nodejs 进程崩溃？/">如何防止 Nodejs 进程崩溃？</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 Nodejs 里的错误主要来自于事件错误，异步错误，同步错误，如果不适当处理，轻则控制台输出错误信息，重则直接导致整个进程退出。</p>
+<p>涉及的几个问题：</p>
+<ul>
+<li>如果没有在 Nodejs 中处理已经拒绝的 Promose 会发生什么？如何调试？</li>
+<li>如果不处理<code>流</code>中的错误事件，会发生什么情况？</li>
+<li>如果同步操作发生错误，Nodejs 进程会怎样？
+    
+
+        <a href="/stories/2018/03/Nodejs/如何防止 Nodejs 进程崩溃？/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/Nodejs/如何防止 Nodejs 进程崩溃？/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-MongoDB/Mongodb 聚合（aggregate）"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 02 日 17:36" datetime="2018-03-02T09:36:29.000Z"  itemprop="datePublished">
+    2018-03-02
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/MongoDB/">MongoDB</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：1720
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 17.5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/MongoDB/Mongodb 聚合（aggregate）/">Mongodb 聚合（aggregate）</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>MongoDB 中聚合（aggregate）主要用于处理数据（诸如统计平均值，求和等），并返回计算后的数据结果。<br>使用聚合框架 agregate 可以通过多个操作符对文档进行处理，将前一个操作符处理后的结果传给下一个操作符，最后一个操作符处理的结果就是聚合的最后的结果，中间处理就像管道一样。<br>聚合的应用场景更多的是用于数据的整理与统计。</p>
+    
+
+        <a href="/stories/2018/03/MongoDB/Mongodb 聚合（aggregate）/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MongoDB/">MongoDB</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NoSQL/">NoSQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/MongoDB/Mongodb 聚合（aggregate）/">阅读更多</a>            </div>
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-HTML5/实现小三角效果"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018 年 03 月 01 日 13:06" datetime="2018-03-01T05:06:17.000Z"  itemprop="datePublished">
+    2018-03-01
+</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/HTML5/">HTML5</a></li></ul>
+
+
+
+        <span style="color: dodgerblue">
+            字数：648
+        </span>
+        <span>
+            阅读预计<span style="color: orange;"> 5 </span> 分钟
+        </span>
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/stories/2018/03/HTML5/实现小三角效果/">实现小三角效果</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>小三角经常被用于一些 <code>Tooltip</code> 组件里作为位置指向性设置，如下图。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180301143231.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+
+        <a href="/stories/2018/03/HTML5/实现小三角效果/" class="post-more waves-effect waves-button">
+            
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTML5/">HTML5</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </div>
+    
+</article>
+
+
+            <div class="more">
+                <a href="/stories/2018/03/HTML5/实现小三角效果/">阅读更多</a>            </div>
+        </li>
+    
+    </ul>
+
+    
+<nav id="page-nav">
+    <div class="inner">
+    <a class="extend prev" rel="prev" href="/page/16/">上一页</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/18/">下一页</a>
+    </div>
+</nav>
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

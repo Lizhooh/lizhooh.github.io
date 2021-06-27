@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/07/React Native/React Native 实现悬浮的 Tabs/">
+    
+    
+    <title>React Native 实现悬浮的 Tabs | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言悬浮的 Tab 有两个部分组成，一个是 Tabs，一个是视觉差。视觉差需要使用一个 ScrollView， Tabs 里也会有一个 ScrollView，这样的嵌套在 React Native 里会造成滚动事件的冲突 ……">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native 实现悬浮的 Tabs">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/07/React Native/React Native 实现悬浮的 Tabs/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言悬浮的 Tab 有两个部分组成，一个是 Tabs，一个是视觉差。视觉差需要使用一个 ScrollView， Tabs 里也会有一个 ScrollView，这样的嵌套在 React Native 里会造成滚动事件的冲突 ……">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180719234419.gif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.862Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native 实现悬浮的 Tabs">
+<meta name="twitter:description" content="前言悬浮的 Tab 有两个部分组成，一个是 Tabs，一个是视觉差。视觉差需要使用一个 ScrollView， Tabs 里也会有一个 ScrollView，这样的嵌套在 React Native 里会造成滚动事件的冲突 ……">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/7/20180719234419.gif">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Native 实现悬浮的 Tabs</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Native 实现悬浮的 Tabs</h1>
+
+        <div class="meta-rest">
+            <h1>React Native 实现悬浮的 Tabs</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-07-21T15:45:17.000Z" itemprop="datePublished" class="page-time">
+    2017-07-21
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实现原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">实现原理</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/React Native 实现悬浮的 Tabs"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Native 实现悬浮的 Tabs</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 07 月 21 日 23:45" datetime="2017-07-21T15:45:17.000Z"  itemprop="datePublished">
+    2017-07-21
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 753</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  7.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>悬浮的 Tab 有两个部分组成，一个是 Tabs，一个是视觉差。视觉差需要使用一个 ScrollView， Tabs 里也会有一个 ScrollView，这样的嵌套在 React Native 里会造成滚动事件的冲突 ……</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180719234419.gif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><p>在 React Native 里有一个问题，就是多个 ScrollView 嵌套时会导致子 ScrollView 的滚动条无效，也就是无法滚动子 ScrollView。这时为了能够滚动子 ScrollView，只能把父 ScrollView 的 scrollEnabled 设置为 false，也就是禁用父 ScrollView 的滚动条。</p>
+<p>当父滚动条滚动到底部时，也就是已经走到可视窗的尽头时，禁用父 ScrollView 的滚动条，这时子 ScrollView 变成可滚动。</p>
+<p>当子 ScrollView 滚动到顶部时，此时启用 ScrollView 的滚动条，这时切换为父 ScrollView 可滚动。</p>
+<blockquote>
+<p>关于视觉差使用的是 react-native-parallax-scroll 这个视觉库，具体看文档。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    StyleSheet,</span><br><span class="line">    Text, View,</span><br><span class="line">    Dimensions,</span><br><span class="line">    Image,</span><br><span class="line">    ScrollView,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">import</span> ParallaxScroll <span class="keyword">from</span> <span class="string">'react-native-parallax-scroll'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; TabView, TabBar, SceneMap &#125; <span class="keyword">from</span> <span class="string">'react-native-tab-view'</span>;</span><br><span class="line"><span class="keyword">import</span> rot <span class="keyword">from</span> <span class="string">'reactotron-react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="built_in">window</span> = Dimensions.get(<span class="string">'window'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    image = <span class="string">'http://img.mp.itc.cn/upload/20170511/f408e12148724b56b8980282df2f45f2_th.jpg'</span>;</span><br><span class="line">    state = &#123;</span><br><span class="line">        index: <span class="number">0</span>,</span><br><span class="line">        routes: [</span><br><span class="line">            &#123; <span class="attr">key</span>: <span class="string">'first'</span>, <span class="attr">title</span>: <span class="string">'我的音乐'</span> &#125;,</span><br><span class="line">            &#123; <span class="attr">key</span>: <span class="string">'second'</span>, <span class="attr">title</span>: <span class="string">'我的钱包'</span> &#125;,</span><br><span class="line">        ],</span><br><span class="line">        scrollEnabled: <span class="literal">true</span>,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    renderTab = <span class="function"><span class="params">()</span> =&gt;</span> (</span><br><span class="line">        &lt;ScrollView</span><br><span class="line">            contentContainerStyle=&#123;&#123; <span class="attr">backgroundColor</span>: <span class="string">'#f2f3f4'</span> &#125;&#125;</span><br><span class="line">            overScrollMode=<span class="string">'never'</span></span><br><span class="line">            scrollEventThrottle=&#123;<span class="number">2</span>&#125;</span><br><span class="line">            showsVerticalScrollIndicator=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">            style=&#123;&#123; <span class="attr">flex</span>: <span class="number">1</span> &#125;&#125;</span><br><span class="line">            onScrollBeginDrag=&#123;e =&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (e.nativeEvent.contentOffset.y === <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">this</span>.setState(&#123; <span class="attr">scrollEnabled</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;&#125;</span><br><span class="line">            onScroll=&#123;e =&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (e.nativeEvent.contentOffset.y &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">                    <span class="keyword">this</span>.setState(&#123; <span class="attr">scrollEnabled</span>: <span class="literal">true</span> &#125;); <span class="comment">// 父级可滚动</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;&#125;&gt;</span><br><span class="line">            &#123;[...new <span class="built_in">Array</span>(<span class="number">50</span>)].map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> (</span><br><span class="line">                &lt;Text key=&#123;index&#125; style=&#123;&#123; <span class="attr">padding</span>: <span class="number">12</span>, <span class="attr">textAlign</span>: <span class="string">'center'</span> &#125;&#125;&gt;</span><br><span class="line">                    &#123;index + <span class="number">1</span>&#125;</span><br><span class="line">                &lt;<span class="regexp">/Text&gt;</span></span><br><span class="line"><span class="regexp">            ))&#125;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>ScrollView&gt;</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;ParallaxScroll</span><br><span class="line">                ref=&#123;s =&gt; <span class="keyword">this</span>.scrollView = s&#125;</span><br><span class="line">                style=&#123;&#123; <span class="attr">flex</span>: <span class="number">1</span> &#125;&#125;</span><br><span class="line">                overScrollMode=<span class="string">'never'</span></span><br><span class="line">                scrollEnabled=&#123;<span class="keyword">this</span>.state.scrollEnabled&#125;</span><br><span class="line">                showsVerticalScrollIndicator=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">                showsHorizontalScrollIndicator=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">                <span class="comment">// 这里设置为手离开时才判断</span></span><br><span class="line">                onScrollEndDrag=&#123;e =&gt; &#123;</span><br><span class="line">                    <span class="keyword">const</span> offsetY = e.nativeEvent.contentOffset.y;</span><br><span class="line">                    <span class="keyword">const</span> contentSizeHeight = e.nativeEvent.contentSize.height;</span><br><span class="line">                    <span class="keyword">const</span> oriageScrollHeight = e.nativeEvent.layoutMeasurement.height;</span><br><span class="line">                    <span class="keyword">if</span> (offsetY + oriageScrollHeight &gt;= contentSizeHeight) &#123;</span><br><span class="line">                        <span class="keyword">this</span>.setState(&#123; <span class="attr">scrollEnabled</span>: <span class="literal">false</span> &#125;); <span class="comment">// 父级不可滚动</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;&#125;</span><br><span class="line">                <span class="comment">// 上面是 scrollview 的 props</span></span><br><span class="line"></span><br><span class="line">                <span class="comment">// 头高度</span></span><br><span class="line">                headerHeight=&#123;<span class="number">40</span>&#125;</span><br><span class="line">                <span class="comment">// 是否是悬浮</span></span><br><span class="line">                isHeaderFixed=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">                <span class="comment">// 视觉差高度</span></span><br><span class="line">                parallaxHeight=&#123;<span class="number">240</span>&#125;</span><br><span class="line">                <span class="comment">// 头部背景颜色</span></span><br><span class="line">                headerBackgroundColor=<span class="string">'transparent'</span></span><br><span class="line">                <span class="comment">// 头部浮动之后的背景颜色</span></span><br><span class="line">                headerFixedBackgroundColor=<span class="string">'transparent'</span></span><br><span class="line">                <span class="comment">// 视觉差背景内容</span></span><br><span class="line">                renderParallaxBackground=&#123;() =&gt; (</span><br><span class="line">                    &lt;Image</span><br><span class="line">                        source=&#123;&#123; <span class="attr">uri</span>: <span class="keyword">this</span>.image &#125;&#125;</span><br><span class="line">                        resizeMode=<span class="string">'cover'</span></span><br><span class="line">                        style=&#123;&#123; <span class="attr">width</span>: <span class="string">'100%'</span>, <span class="attr">height</span>: <span class="string">'100%'</span> &#125;&#125;</span><br><span class="line">                    /&gt;</span><br><span class="line">                )&#125;&gt;</span><br><span class="line">                &#123;<span class="comment">/* 这里是内容区 */</span>&#125;</span><br><span class="line">                &lt;TabView</span><br><span class="line">                    style=&#123;&#123; <span class="attr">height</span>: <span class="built_in">window</span>.height - <span class="number">24</span> &#125;&#125;</span><br><span class="line">                    navigationState=&#123;<span class="keyword">this</span>.state&#125;</span><br><span class="line">                    useNativeDriver=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">                    renderTabBar=&#123;props =&gt; (</span><br><span class="line">                        &lt;TabBar</span><br><span class="line">                            &#123;...props&#125;</span><br><span class="line">                            indicatorStyle=&#123;styles.indicatorStyle&#125;</span><br><span class="line">                            style=&#123;styles.tabStyle&#125;</span><br><span class="line">                            labelStyle=&#123;styles.labelStyle&#125;</span><br><span class="line">                        /&gt;</span><br><span class="line">                    )&#125;</span><br><span class="line">                    onIndexChange=&#123;index =&gt; <span class="keyword">this</span>.setState(&#123; index &#125;)&#125;</span><br><span class="line">                    renderScene=&#123;SceneMap(&#123;</span><br><span class="line">                        first: <span class="keyword">this</span>.renderTab,</span><br><span class="line">                        second: <span class="keyword">this</span>.renderTab,</span><br><span class="line">                    &#125;)&#125;</span><br><span class="line">                /&gt;</span><br><span class="line">            &lt;<span class="regexp">/ParallaxScroll&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">const styles = StyleSheet.create(&#123;</span></span><br><span class="line"><span class="regexp">    container: &#123;</span></span><br><span class="line"><span class="regexp">        flex: 1,</span></span><br><span class="line"><span class="regexp">        justifyContent: 'center',</span></span><br><span class="line"><span class="regexp">        alignItems: 'center',</span></span><br><span class="line"><span class="regexp">        backgroundColor: '#fff',</span></span><br><span class="line"><span class="regexp">    &#125;,</span></span><br><span class="line"><span class="regexp">    indicatorStyle: &#123;</span></span><br><span class="line"><span class="regexp">        backgroundColor: '#39f',</span></span><br><span class="line"><span class="regexp">        width: 30,</span></span><br><span class="line"><span class="regexp">        left: window.width /</span> <span class="number">4</span> - <span class="number">30</span> / <span class="number">2</span></span><br><span class="line">    &#125;,</span><br><span class="line">    tabStyle: &#123;</span><br><span class="line">        backgroundColor: <span class="string">'#fff'</span>,</span><br><span class="line">        height: <span class="number">45</span>,</span><br><span class="line">        padding: <span class="number">0</span>,</span><br><span class="line">        elevation: <span class="number">0.2</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    labelStyle: &#123;</span><br><span class="line">        color: <span class="string">'#333'</span>,</span><br><span class="line">        margin: <span class="number">0</span>,</span><br><span class="line">        marginTop: <span class="number">5</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>对于其他类似的效果，也是如此。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.862Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/07/React Native/React Native 实现悬浮的 Tabs/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/07/React Native/React Native 实现悬浮的 Tabs/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/07/后端/今天来学习：RestFul API 设计/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">今天来学习：RestFul API 设计</h4>
+        <h4 class="summary">RestFulRestFul API 是目前比较成熟的一套互联网应用程序的 API 设计理论。REST 指的是一组架构约...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/React/React/React 中的 DIFF 算法/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React 中的 DIFF 算法</h4>
+        <h4 class="summary">React Diff 算法React 最精髓的地方，那就是它的虚拟 Dom Diff 算法。传统的 Diff 算法复杂高...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

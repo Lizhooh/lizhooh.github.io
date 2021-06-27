@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/07/React/Style/Styled-Components 最佳使用方式/">
+    
+    
+    <title>💅 Styled-Components 最佳使用方式 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言现在基本都是使用 Sass 来编写 React 组件的样式。使用的结构是类名作用域控制的方式，比如有一个 model 组件。那么就使用 .model-component 类名来作为作用域。这时需要一个 div 最为容器，并写上作用域类名。 123&amp;lt;div className=&quot;model-component&quot;&amp;gt;    &amp;lt;p className=&quot;title&quot;&amp;gt;&amp;lt;/">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="💅 Styled-Components 最佳使用方式">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/07/React/Style/Styled-Components 最佳使用方式/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言现在基本都是使用 Sass 来编写 React 组件的样式。使用的结构是类名作用域控制的方式，比如有一个 model 组件。那么就使用 .model-component 类名来作为作用域。这时需要一个 div 最为容器，并写上作用域类名。 123&amp;lt;div className=&quot;model-component&quot;&amp;gt;    &amp;lt;p className=&quot;title&quot;&amp;gt;&amp;lt;/">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/7/20170711122305.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.885Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="💅 Styled-Components 最佳使用方式">
+<meta name="twitter:description" content="前言现在基本都是使用 Sass 来编写 React 组件的样式。使用的结构是类名作用域控制的方式，比如有一个 model 组件。那么就使用 .model-component 类名来作为作用域。这时需要一个 div 最为容器，并写上作用域类名。 123&amp;lt;div className=&quot;model-component&quot;&amp;gt;    &amp;lt;p className=&quot;title&quot;&amp;gt;&amp;lt;/">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/7/20170711122305.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">💅 Styled-Components 最佳使用方式</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">💅 Styled-Components 最佳使用方式</h1>
+
+        <div class="meta-rest">
+            <h1>💅 Styled-Components 最佳使用方式</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-07-13T01:41:20.000Z" itemprop="datePublished" class="page-time">
+    2017-07-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#styled-components"><span class="post-toc-number">2.</span> <span class="post-toc-text">styled-components</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#基本使用"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">基本使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-props"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">使用 props</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义扩展"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">自定义扩展</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#样式继承（extends）"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">样式继承（extends）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#混合（mixin）"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">混合（mixin）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#属性（attrs）"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">属性（attrs）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#动画（Animations）"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">动画（Animations）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#主题（Theming）"><span class="post-toc-number">2.8.</span> <span class="post-toc-text">主题（Theming）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#引用（refs）"><span class="post-toc-number">2.9.</span> <span class="post-toc-text">引用（refs）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#媒体查询（Media）"><span class="post-toc-number">2.10.</span> <span class="post-toc-text">媒体查询（Media）</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#全局样式（injectGlobal）"><span class="post-toc-number">3.</span> <span class="post-toc-text">全局样式（injectGlobal）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#支持的-CSS"><span class="post-toc-number">4.</span> <span class="post-toc-text">支持的 CSS</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#React-Native-中使用"><span class="post-toc-number">5.</span> <span class="post-toc-text">React Native 中使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#服务端渲染"><span class="post-toc-number">6.</span> <span class="post-toc-text">服务端渲染</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Style/Styled-Components 最佳使用方式"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">💅 Styled-Components 最佳使用方式</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 07 月 13 日 9:41" datetime="2017-07-13T01:41:20.000Z"  itemprop="datePublished">
+    2017-07-13
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2778</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  30  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在基本都是使用 Sass 来编写 React 组件的样式。使用的结构是类名作用域控制的方式，比如有一个 model 组件。那么就使用 <code>.model-component</code> 类名来作为作用域。这时需要一个 <code>div</code> 最为容器，并写上作用域类名。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">className</span>=<span class="string">"model-component"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">className</span>=<span class="string">"title"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>同理，如果是布局组件、视图组件，那么对应的类名作用域是 <code>model-layout</code>，<code>model-view</code>。</p>
+<p>但是这样有几个问题：</p>
+<ul>
+<li>类名可能会出现过长的情况，组件内样式需要写嵌套类结构，Sass 编译后的 CSS 文件可能会大一点。</li>
+<li>每个组件都需要携带一个 <code>.scss</code> 文件，这样有点繁琐，随着项目的增大会有一大堆文件。</li>
+</ul>
+<p>为了解决这些问题，将使用 <code>styled-components</code> 来管理组件的样式。styled-components 不但能在 React 里使用，同时也适用于 React Native。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/7/20170711122305.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="styled-components"><a href="#styled-components" class="headerlink" title="styled-components"></a>styled-components</h2><p><code>Styled-Components</code>是由 Max Stoiber 和 Glen Maddern 创建的一种新的 CSS 工具，可帮助您在<code>React</code>项目中组织 CSS，它也适用于<code>React Native</code>。</p>
+<p>首先，我们来谈谈 Styles-Components 的主要用途，以及从使用中会获得什么的优势/好处？</p>
+<ul>
+<li><p><b>摆脱样式和组件之间的映射：</b>大多数情况下，愚蠢的组件总是有自己的小 style.css 文件相关。因此，每次要创建愚蠢的组件时都需要创建两个文件。这似乎在一开始就很好，但是当你的项目越来越大，你会得到一大堆文件。Styled-Components 允许直接在组件中编写 CSS，从而完全解决了这个问题。</p>
+</li>
+<li><p><b>构建小型和可重复使用的组件：</b>小型组件易于重新使用和测试。通过使用 Styled-Components，您可以轻松构建一个小组件并扩展其功能 props。</p>
+</li>
+<li><p><b>降低特异性冲突的风险：</b>每个人都可能遇到特异性冲突问题。例如，您只是想为特定段落添加 margin，但会无意中影响其他段落。您可以通过仅应用一次 CSS 类来轻松解决此问题。Styled-Components 实际上会这样做，它会自动生成一个唯一的类名，并将其传递给我们的组件。</p>
+</li>
+</ul>
+<p><strong>安装：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save styled-components</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>vscode 高亮插件：vscode-styled-components</p>
+</blockquote>
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>在使用 Styled-Components 时，如果想为基本的 HTML 元素添加样式，就有使用<code>styled.h1</code>这种方式。<br>也可以通过<code>styled(&#39;h1&#39;)</code>这种方式，这只是别名的区别。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> styled, &#123; css &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建一个 title 组件，它渲染至 h1</span></span><br><span class="line"><span class="keyword">const</span> Title = styled.h1<span class="string">`</span></span><br><span class="line"><span class="string">    font-size: 1.5em;</span></span><br><span class="line"><span class="string">    text-align: center;</span></span><br><span class="line"><span class="string">    color: palevioletred;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Wrapper = styled.section<span class="string">`</span></span><br><span class="line"><span class="string">    padding: 4em;</span></span><br><span class="line"><span class="string">    background: papayawhip;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;Wrapper&gt;</span><br><span class="line">        &lt;Title&gt;</span><br><span class="line">            Hello World</span><br><span class="line">        &lt;<span class="regexp">/Title&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>Wrapper&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>Styled-Components 会自动生成一个唯一的类名，并将其传递给我们的组件。最后会输出类似的<code>&lt;h1 class=&quot;4fKfRK&quot;&gt;Hello World&lt;/h1&gt;</code><br>这些样式是在开发模式时动态生成的，而在生产模式时，会打包到一个 css 文件里。</p>
+<h3 id="使用-props"><a href="#使用-props" class="headerlink" title="使用 props"></a>使用 props</h3><p>可以从组件里接收 props 来动态的生成样式。它接收一个回调函数，返回新的样式值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Button = styled.button<span class="string">`</span></span><br><span class="line"><span class="string">    background: <span class="subst">$&#123;props =&gt; props.primary ? <span class="string">'palevioletred'</span> : <span class="string">'white'</span>&#125;</span>;</span></span><br><span class="line"><span class="string">    color: <span class="subst">$&#123;props =&gt; props.primary ? <span class="string">'white'</span> : <span class="string">'palevioletred'</span>&#125;</span>;</span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;props =&gt; props.size &amp;&amp; <span class="string">'font-size: 1em;'</span>&#125;</span></span></span><br><span class="line"><span class="string">    margin: 1em;</span></span><br><span class="line"><span class="string">    padding: 0.25em 1em;</span></span><br><span class="line"><span class="string">    border: 2px solid palevioletred;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;Button&gt;Normal&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Button primary&gt;Primary&lt;/</span>Button&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="自定义扩展"><a href="#自定义扩展" class="headerlink" title="自定义扩展"></a>自定义扩展</h3><p>Styled-Components 除了使用基本的 HTML 元素外，还可以自定义的扩展。<br>比如说：想使用，<code>styled.mylink</code>，而 mylink 是指定的元素。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自己定义的组件元素</span></span><br><span class="line"><span class="keyword">const</span> Link = <span class="function">(<span class="params">&#123; className, children &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;a className=&#123;className&#125;&gt;</span><br><span class="line">        &#123;children&#125;</span><br><span class="line">    &lt;<span class="regexp">/a&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 类似的 styled.div</span></span><br><span class="line"><span class="regexp">const StyledLink = styled(Link)`</span></span><br><span class="line"><span class="regexp">    color: palevioletred;</span></span><br><span class="line"><span class="regexp">    font-weight: bold;</span></span><br><span class="line"><span class="regexp">`;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">render(</span></span><br><span class="line"><span class="regexp">    &lt;div&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Link&gt;Unstyled, boring Link&lt;/</span>Link&gt;</span><br><span class="line">        &lt;br /&gt;</span><br><span class="line">        &lt;StyledLink&gt;Styled, exciting Link&lt;<span class="regexp">/StyledLink&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="样式继承（extends）"><a href="#样式继承（extends）" class="headerlink" title="样式继承（extends）"></a>样式继承（extends）</h3><p>Styled-Components 提供了样式继承的方式，让组件尽量可复用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 基础组件样式</span></span><br><span class="line"><span class="keyword">const</span> Button = styled.button<span class="string">`</span></span><br><span class="line"><span class="string">    color: palevioletred;</span></span><br><span class="line"><span class="string">    font-size: 1em;</span></span><br><span class="line"><span class="string">    margin: 1em;</span></span><br><span class="line"><span class="string">    padding: 0.25em 1em;</span></span><br><span class="line"><span class="string">    border: 2px solid palevioletred;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 继承的样式，相同的属性会被覆盖</span></span><br><span class="line"><span class="keyword">const</span> TomatoButton = Button.extend<span class="string">`</span></span><br><span class="line"><span class="string">    color: tomato;</span></span><br><span class="line"><span class="string">    border-color: tomato;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="混合（mixin）"><a href="#混合（mixin）" class="headerlink" title="混合（mixin）"></a>混合（mixin）</h3><p>提供类似 mixin 的玩法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> styled, &#123; css &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> complexMixin = css`</span><br><span class="line"><span class="css">    <span class="selector-tag">color</span>: </span><span class="subst">$&#123;props =&gt; props.whiteColor ? <span class="string">'red'</span>: <span class="string">'blue'</span>&#125;</span></span><br><span class="line"><span class="css">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> StyledComp = styled.div<span class="string">`</span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;complexMixin&#125;</span></span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;StyledComp whiteColor=&#123;<span class="literal">true</span>&#125;&gt;&lt;<span class="regexp">/StyledComp&gt;</span></span><br><span class="line"><span class="regexp">        &lt;StyledComp whiteColor=&#123;false&#125;&gt;&lt;/</span>StyledComp&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="属性（attrs）"><a href="#属性（attrs）" class="headerlink" title="属性（attrs）"></a>属性（attrs）</h3><p>可以为基本的元素/自定义组件，添加额外的 props，或者设置默认的 props，它使用起来就像下面的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置默认的 attr</span></span><br><span class="line"><span class="keyword">const</span> Input = styled.input.attrs(&#123;</span><br><span class="line">    <span class="comment">// 默认属性 type</span></span><br><span class="line">    type: <span class="string">'password'</span>,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 默认的 margin, padding</span></span><br><span class="line">    margin: <span class="function"><span class="params">props</span> =&gt;</span> props.size || <span class="string">'1em'</span>,</span><br><span class="line">    padding: <span class="function"><span class="params">props</span> =&gt;</span> props.size || <span class="string">'1em'</span></span><br><span class="line">&#125;)<span class="string">`</span></span><br><span class="line"><span class="string">    color: palevioletred;</span></span><br><span class="line"><span class="string">    font-size: 1em;</span></span><br><span class="line"><span class="string">    border: 2px solid palevioletred;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* here we use the dynamically computed props */</span></span><br><span class="line"><span class="string">    margin: <span class="subst">$&#123;props =&gt; props.margin&#125;</span>;</span></span><br><span class="line"><span class="string">    padding: <span class="subst">$&#123;props =&gt; props.padding&#125;</span>;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;Input placeholder=<span class="string">"A small text input"</span> /&gt;</span><br><span class="line">        &lt;br /&gt;</span><br><span class="line">        &lt;Input placeholder=<span class="string">"A bigger text input"</span> size=<span class="string">"2em"</span> /&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="动画（Animations）"><a href="#动画（Animations）" class="headerlink" title="动画（Animations）"></a>动画（Animations）</h3><p>CSS3 的关键帧是全局的，为了做到局限于单个组件，<strong>关键帧助手</strong>会为你生成一个<strong>唯一</strong>的名称，然后你可以在你的应用程序中使用这个唯一的名字。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> styled, &#123; css, keyframes &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义了一个关键帧，类似 @keyframes rotate360 &#123; from: &#123;&#125; to&#123;&#125; &#125;</span></span><br><span class="line"><span class="keyword">const</span> rotate360 = keyframes<span class="string">`</span></span><br><span class="line"><span class="string">    from &#123; transform: rotate(0deg); &#125;</span></span><br><span class="line"><span class="string">    to &#123; transform: rotate(360deg); &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果在两个文件里定义相同的 rotate360 变量。这样时没关系的。它会使用内部的唯一 id。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用关键帧</span></span><br><span class="line"><span class="keyword">const</span> Rotate = styled.div<span class="string">`</span></span><br><span class="line"><span class="string">    display: inline-block;</span></span><br><span class="line"><span class="string">    animation: <span class="subst">$&#123;rotate360&#125;</span> 2s linear infinite;</span></span><br><span class="line"><span class="string">    padding: 2rem 1rem;</span></span><br><span class="line"><span class="string">    font-size: 1.2rem;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;Rotate&gt;💅&lt;<span class="regexp">/Rotate&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="主题（Theming）"><a href="#主题（Theming）" class="headerlink" title="主题（Theming）"></a>主题（Theming）</h3><p>Styled-Components 支持主题的功能，类似实现夜间模式的主题切换功能。</p>
+<p>如果使用了 <code>ThemeProvider</code>，那么其子组件就会被注入 theme 属性，它就像 Redux 的 Provider 一样通过 Context 来获取上下文数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义主题名称</span></span><br><span class="line"><span class="keyword">const</span> theme = &#123;</span><br><span class="line">    primary: <span class="string">'#3af'</span>,    <span class="comment">// 蓝色</span></span><br><span class="line">    size: <span class="string">'16px'</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Button = styled.button<span class="string">`</span></span><br><span class="line"><span class="string">    font-size: <span class="subst">$&#123;props =&gt; props.theme.size&#125;</span>;</span></span><br><span class="line"><span class="string">    margin: 1em;</span></span><br><span class="line"><span class="string">    padding: 0.25em 1em;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string">    background-color: #fff;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* Color the border and text with theme.main */</span></span><br><span class="line"><span class="string">    color: <span class="subst">$&#123;props =&gt; props.theme.primary&#125;</span>;</span></span><br><span class="line"><span class="string">    border: 2px solid <span class="subst">$&#123;props =&gt; props.theme.primary&#125;</span>;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果被 ThemeProvider 包裹，则使用 ThemeProvider 的属性，否则使用默认的</span></span><br><span class="line">Button.defaultProps = &#123;</span><br><span class="line">    theme: &#123;</span><br><span class="line">        primary: <span class="string">'#f34'</span> <span class="comment">// 红色</span></span><br><span class="line">        size: <span class="string">'15px'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;Button&gt;红色&lt;<span class="regexp">/Button&gt;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">        &lt;ThemeProvider theme=&#123;theme&#125;&gt;</span></span><br><span class="line"><span class="regexp">            &lt;Button&gt;蓝色&lt;/</span>Button&gt;</span><br><span class="line">        &lt;<span class="regexp">/ThemeProvider&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>通常我们需要在 Sass 里定义一些全局变量，来方便定义主题颜色。<br>而 ThemeProvider 就像是 Sass 中定义的全局变量一样，只要被它包裹的组件都可以从 props.theme 获取数据。</p>
+<p>theme 对象不仅仅可以是字符串，也可以是函数。</p>
+<p>比如定义一个媒体查询函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    media: <span class="function">(<span class="params">content, width = <span class="number">480</span>, min = <span class="literal">false</span></span>) =&gt;</span> <span class="string">`</span></span><br><span class="line"><span class="string">        @media screen and (<span class="subst">$&#123;min ? <span class="string">'min'</span> : <span class="string">'max'</span>&#125;</span>-width: <span class="subst">$&#123;width&#125;</span>px) &#123;</span></span><br><span class="line"><span class="string">            <span class="subst">$&#123;content&#125;</span></span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    `</span>,</span><br><span class="line">    color: <span class="string">'rgba(69, 200, 62, 1)'</span>,  <span class="comment">// 主题颜色</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用的时候：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$&#123;p =&gt; p.theme.media(<span class="string">`</span></span><br><span class="line"><span class="string">    margin-top: 0;</span></span><br><span class="line"><span class="string">`</span>, <span class="number">720</span>)&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="引用（refs）"><a href="#引用（refs）" class="headerlink" title="引用（refs）"></a>引用（refs）</h3><p>如果你想获取组件的引用，那就不能使用 refs，而是使用<code>innerRef</code>来代替。<br>因为 React 规定：<code>key、ref</code> 等属性只能设置，不能从 this.props 里获取。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Input = styled.input<span class="string">`</span></span><br><span class="line"><span class="string">    padding: 0.5em;</span></span><br><span class="line"><span class="string">    margin: 0.5em;</span></span><br><span class="line"><span class="string">    color: palevioletred;</span></span><br><span class="line"><span class="string">    background: papayawhip;</span></span><br><span class="line"><span class="string">    border: none;</span></span><br><span class="line"><span class="string">    border-radius: 3px;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Form = <span class="function"><span class="params">()</span> =&gt;</span> (</span><br><span class="line">    &lt;Input</span><br><span class="line">        placeholder=<span class="string">"Hover here..."</span></span><br><span class="line">        <span class="comment">// 不可以使用 innerRef='aaa' 字符串的形式，只能用回调</span></span><br><span class="line">        innerRef=&#123;x =&gt; <span class="keyword">this</span>.input = x&#125;</span><br><span class="line">        onMouseEnter=&#123;() =&gt; <span class="keyword">this</span>.input.focus()&#125;</span><br><span class="line">    /&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="媒体查询（Media）"><a href="#媒体查询（Media）" class="headerlink" title="媒体查询（Media）"></a>媒体查询（Media）</h3><p>媒体查询是不可缺少的工具，在开发 Web 应用程序的里一般用来做响应开发。</p>
+<p>下面的例子，一旦屏幕宽度小于 700px 它就会改变颜色。<br>实际上你会发现，它支持嵌套写法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Content = styled.div<span class="string">`</span></span><br><span class="line"><span class="string">    background: papayawhip;</span></span><br><span class="line"><span class="string">    height: 3em;</span></span><br><span class="line"><span class="string">    width: 3em;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    @media (max-width: 700px) &#123;</span></span><br><span class="line"><span class="string">        background: palevioletred;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;Content /&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>媒体查询可以长期和反复运用在一个应用程序里，我们可以为它创建一个通用的模板。<br>由于 JavaScript 的功能性质，你可以很容易地定义自己的通用媒体查询模版，就像下面的例子一样。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> styled, &#123; css &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sizes = &#123;</span><br><span class="line">    desktop: <span class="number">992</span>,</span><br><span class="line">    tablet: <span class="number">768</span>,</span><br><span class="line">    phone: <span class="number">376</span></span><br><span class="line">&#125;;</span><br><span class="line">&lt;!--</span><br><span class="line"><span class="keyword">const</span> media = <span class="built_in">Object</span>.keys(sizes).reduce(<span class="function">(<span class="params">acc, label</span>) =&gt;</span> &#123;</span><br><span class="line">    acc[label] = <span class="function">(<span class="params">...args</span>) =&gt;</span> css`</span><br><span class="line"><span class="css">        <span class="keyword">@media</span> (<span class="attribute">max-width:</span> </span><span class="subst">$&#123;sizes[label] <span class="regexp">/ 16&#125;em) &#123;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">            $&#123;css(...args)&#125;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">        &#125;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    `</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    return acc;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">&#125;, &#123;&#125;);</span></span></span><br><span class="line"><span class="subst"><span class="regexp">--&gt;</span></span></span><br><span class="line"><span class="subst"><span class="regexp"></span></span></span><br><span class="line"><span class="subst"><span class="regexp">const Content = styled.div`</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    height: 3em;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    width: 3em;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    background: papayawhip;</span></span></span><br><span class="line"><span class="subst"><span class="regexp"></span></span></span><br><span class="line"><span class="subst"><span class="regexp">    $&#123;media.desktop`background: dodgerblue;`&#125;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    $&#123;media.tablet`background: mediumseagreen;`&#125;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    $&#123;media.phone`background: palevioletred;`&#125;</span></span></span><br><span class="line"><span class="subst"><span class="regexp">`;</span></span></span><br><span class="line"><span class="subst"><span class="regexp"></span></span></span><br><span class="line"><span class="subst"><span class="regexp">render(</span></span></span><br><span class="line"><span class="subst"><span class="regexp">    &lt;Content /</span>&gt;</span></span><br><span class="line"><span class="subst">);</span></span><br></pre></td></tr></table></figure>
+<h2 id="全局样式（injectGlobal）"><a href="#全局样式（injectGlobal）" class="headerlink" title="全局样式（injectGlobal）"></a>全局样式（injectGlobal）</h2><p>使用 injectGlobal 可以把样式注入到全局下，而不是单一的组件下。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> styled, &#123; css, injectGlobal &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line">injectGlobal<span class="string">`</span></span><br><span class="line"><span class="string">    body &#123;</span></span><br><span class="line"><span class="string">        padding: 20px;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="支持的-CSS"><a href="#支持的-CSS" class="headerlink" title="支持的 CSS"></a>支持的 CSS</h2><p>Styled-Components 支持所有 CSS，包括嵌套，内联，类似 Less/Sass 的用法（注释只能使用 <code>/* */</code>）。<br>这不就是专门为取代 Less/Sass 而准备的吗？</p>
+<p>styled-components 对 CSS 的支持是基于 <a href="https://github.com/thysultan/stylis.js" target="_blank" rel="noopener">stylis</a> 这个库的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> theme-color = <span class="string">'#fff'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Example = styled.div<span class="string">`</span></span><br><span class="line"><span class="string">    padding: 2em 1em;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 变量 */</span></span><br><span class="line"><span class="string">    color: <span class="subst">$&#123;theme-color&#125;</span>;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 与 less/sass 一样的嵌套 */</span></span><br><span class="line"><span class="string">    &amp;:hover &#123;</span></span><br><span class="line"><span class="string">        background: palevioletred;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 伪类 */</span></span><br><span class="line"><span class="string">    &amp;::after &#123;</span></span><br><span class="line"><span class="string">        content: '';</span></span><br><span class="line"><span class="string">        display: tabel;</span></span><br><span class="line"><span class="string">        clear: both;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 媒体查询 */</span></span><br><span class="line"><span class="string">    @media (max-width: 600px) &#123;</span></span><br><span class="line"><span class="string">        background: tomato;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        /* 媒体查询里也能使用 &amp; */</span></span><br><span class="line"><span class="string">        &amp;:hover &#123;</span></span><br><span class="line"><span class="string">            background: yellow;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 后代选择器 */</span></span><br><span class="line"><span class="string">    &gt; p &#123;</span></span><br><span class="line"><span class="string">        text-decoration: underline;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 上下文选择器 */</span></span><br><span class="line"><span class="string">    html.test &amp; &#123;</span></span><br><span class="line"><span class="string">        display: none;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    /* 动画 */</span></span><br><span class="line"><span class="string">    animation: start 2s ease-in-out infinite alternate;</span></span><br><span class="line"><span class="string">    animation-fill-mode: both;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    @keyframes start &#123;</span></span><br><span class="line"><span class="string">        0% &#123; background-color: #3af; &#125;</span></span><br><span class="line"><span class="string">        100% &#123; background-color: #3c5; &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line">render(</span><br><span class="line">    &lt;Example&gt;</span><br><span class="line">        &lt;p&gt;Hello World!&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>Example&gt;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h2 id="React-Native-中使用"><a href="#React-Native-中使用" class="headerlink" title="React Native 中使用"></a>React Native 中使用</h2><p>Styled-Components 也可以在 React Native 里使用，如果要使用，引入<code>native</code>即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> styled <span class="keyword">from</span> <span class="string">'styled-components/native'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">    View,</span><br><span class="line">    Text,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> StyledView = styled.View<span class="string">`</span></span><br><span class="line"><span class="string">    background-color: papayawhip;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> StyledText = styled.Text<span class="string">`</span></span><br><span class="line"><span class="string">    color: palevioletred;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyReactNativeComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;StyledView&gt;</span><br><span class="line">                &lt;StyledText&gt;Hello World!&lt;<span class="regexp">/StyledText&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>StyledView&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一些差异性是在 react-native style 里不支持的属性，写上去将会得到一个警告，并且没有效果。<br>并且，部分的写法有变化。下面 text-shadow-offset 不像 react-native 里的写法，峰驼式变成了连号式。<br>单位需要带上，而且不支持 injectGlobal，以及 CSS 嵌套的写法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> RotatedBox = styled.View<span class="string">`</span></span><br><span class="line"><span class="string">    transform: rotate(90deg);</span></span><br><span class="line"><span class="string">    text-shadow-offset: 10px 5px;</span></span><br><span class="line"><span class="string">    font-variant: small-caps;</span></span><br><span class="line"><span class="string">    margin: 5px 7px 2px;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="服务端渲染"><a href="#服务端渲染" class="headerlink" title="服务端渲染"></a>服务端渲染</h2><p>styled-components 支持 React 服务端渲染。像 React 一样，在服务端渲染里需要使用特定个的 api，使用的 api 是 <code>ServerStyleSheet</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; renderToString &#125; <span class="keyword">from</span> <span class="string">'react-dom/server'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; ServerStyleSheet &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sheet = <span class="keyword">new</span> ServerStyleSheet();</span><br><span class="line"><span class="keyword">const</span> body = renderToString(sheet.collectStyles(<span class="xml"><span class="tag">&lt;<span class="name">App</span> /&gt;</span></span>));</span><br><span class="line"><span class="keyword">const</span> styleTags = sheet.getStyleTags();  <span class="comment">// &lt;style&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> html = <span class="string">`</span></span><br><span class="line"><span class="string">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="string">&lt;html&gt;</span></span><br><span class="line"><span class="string">&lt;head&gt;</span></span><br><span class="line"><span class="string">    &lt;meta charset="UTF-8"&gt;</span></span><br><span class="line"><span class="string">    <span class="subst">$&#123;styleTags&#125;</span></span></span><br><span class="line"><span class="string">&lt;/head&gt;</span></span><br><span class="line"><span class="string">&lt;body&gt;</span></span><br><span class="line"><span class="string">    &lt;div&gt;</span></span><br><span class="line"><span class="string">        <span class="subst">$&#123;body&#125;</span></span></span><br><span class="line"><span class="string">    &lt;/div&gt;</span></span><br><span class="line"><span class="string">    &lt;script src="/static/build.da782dadjF.js" /&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+<p>或者在组件外面包一层：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; StyleSheetManager &#125; <span class="keyword">from</span> <span class="string">'styled-components'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 只改 body，其他不变</span></span><br><span class="line"><span class="keyword">const</span> body = renderToString(</span><br><span class="line">    &lt;StyleSheetManager sheet=&#123;sheet.instance&#125;&gt;</span><br><span class="line">        &lt;App /&gt;</span><br><span class="line">    &lt;<span class="regexp">/StyleSheetManager&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.styled-components.com/" target="_blank" rel="noopener">https://www.styled-components.com/</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.885Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/07/React/Style/Styled-Components 最佳使用方式/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/07/React/Style/Styled-Components 最佳使用方式/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/07/Mysql/图解 SQL JOIN/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">图解 SQL JOIN</h4>
+        <h4 class="summary">由于 SQL Join 似乎被默认为基础，同时利用文氏图表来解释它，乍一看似乎是很自然的选择。我喜欢这个概念，不过让我们...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/抓包&爬虫/基于 Nodejs 的爬虫/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">基于 Nodejs，Cheerio 的爬虫</h4>
+        <h4 class="summary">Cheerio在 Nodejs 里有个叫 cheerio 的模块，它的最小型的 JQuery 的实现，能够轻松的解析抓取...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

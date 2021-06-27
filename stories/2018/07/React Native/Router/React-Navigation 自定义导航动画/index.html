@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/">
+    
+    
+    <title>React-Navigation 自定义导航动画 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言React Navigation 源于 React Native 社区对一个可扩展且易于使用的导航解决方案的需求，它完全使用 JavaScript 编写。React Navigation 所有内容都是使用 JavaScript 在 React Native 的基础上编写的。动画使用 Animated API 及其 Native 驱动程序选项，以便在主线程上运行动画并生成平滑的 60 fps 切">
+<meta name="keywords" content="Javascript,学习笔记,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React-Navigation 自定义导航动画">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言React Navigation 源于 React Native 社区对一个可扩展且易于使用的导航解决方案的需求，它完全使用 JavaScript 编写。React Navigation 所有内容都是使用 JavaScript 在 React Native 的基础上编写的。动画使用 Animated API 及其 Native 驱动程序选项，以便在主线程上运行动画并生成平滑的 60 fps 切">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/7/20180709134641.gif">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2020/6/20200603174356.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React-Navigation 自定义导航动画">
+<meta name="twitter:description" content="前言React Navigation 源于 React Native 社区对一个可扩展且易于使用的导航解决方案的需求，它完全使用 JavaScript 编写。React Navigation 所有内容都是使用 JavaScript 在 React Native 的基础上编写的。动画使用 Animated API 及其 Native 驱动程序选项，以便在主线程上运行动画并生成平滑的 60 fps 切">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/7/20180709134641.gif">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React-Navigation 自定义导航动画</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React-Navigation 自定义导航动画</h1>
+
+        <div class="meta-rest">
+            <h1>React-Navigation 自定义导航动画</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-07-10T03:30:03.000Z" itemprop="datePublished" class="page-time">
+    2018-07-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#平滑动画效果"><span class="post-toc-number">2.</span> <span class="post-toc-text">平滑动画效果</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#阴影"><span class="post-toc-number">3.</span> <span class="post-toc-text">阴影</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#3-x-版本"><span class="post-toc-number">4.</span> <span class="post-toc-text">3.x 版本</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">5.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Router/React-Navigation 自定义导航动画"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React-Navigation 自定义导航动画</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 07 月 10 日 11:30" datetime="2018-07-10T03:30:03.000Z"  itemprop="datePublished">
+    2018-07-10
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1180</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  12.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>React Navigation 源于 React Native 社区对一个可扩展且易于使用的导航解决方案的需求，它完全使用 JavaScript 编写。React Navigation 所有内容都是使用 JavaScript 在 React Native 的基础上编写的。动画使用 Animated API 及其 Native 驱动程序选项，以便在主线程上运行动画并生成平滑的 60 fps 切换动效。</p>
+<p>在 React Navigation 里，默认的导航动画是 Android/IOS 上的原生效果，也就是在 Android 上是从底部到顶部的淡滑效果，在 IOS 上是从右到左的平滑效果。但是往往在开发应用的时候我们更倾向于同于使用从右到左的平滑效果。React Navigation 并没有提供这方面的动画效果，而是需要开发者自己去定义。</p>
+<a id="more"></a>
+<p>相关文章：<a href="stories/2017/08/React%20Native/React%20Native%20Navigator%20自定义动画/">React Native Navigator 自定义动画</a></p>
+<blockquote>
+<p>这篇文章写时，时 v2.x 版本的，现在 React Navigation 更新到 3.x 版本，在后面补上 3.x 版本的方式。</p>
+</blockquote>
+<h2 id="平滑动画效果"><a href="#平滑动画效果" class="headerlink" title="平滑动画效果"></a>平滑动画效果</h2><p>默认的 StackNavigator 导航动画效果是下面几个文件里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">react-navigation\src\navigators\createContainedStackNavigator.js      <span class="comment">// 容器</span></span><br><span class="line">react-navigation\src\navigators\createStackNavigator.js               <span class="comment">// 导航构建</span></span><br><span class="line">react-navigation\src\views\StackView\StackViewTransitionConfigs.js    <span class="comment">// 转换配置</span></span><br><span class="line">react-navigation\src\views\StackView\StackViewStyleInterpolator.js    <span class="comment">// 样式配置</span></span><br></pre></td></tr></table></figure>
+<p>在 StackNavigator 的配置项里有一个 transitionConfig 的属性是用于配置转换的动画效果的。</p>
+<p>transitionConfig 是一个回调函数，你需要返回一个配置项。这个配置项通常包括了两个方面：<code>transitionSpec</code> 和 <code>screenInterpolator</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> MainPage = StackNavigator(&#123;</span><br><span class="line">  Login: &#123; <span class="attr">screen</span>: Login &#125;,</span><br><span class="line">  Register: &#123; <span class="attr">screen</span>: Register &#125;,</span><br><span class="line">&#125;, &#123;</span><br><span class="line">    transitionConfig: <span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">        transitionSpec: &#123;&#125;,               <span class="comment">// Animated 的配置</span></span><br><span class="line">        screenInterpolator: <span class="function"><span class="params">()</span> =&gt;</span> &#123;&#125;,     <span class="comment">// 转场插值</span></span><br><span class="line">    &#125;),</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>自定义动画主要是修改这两个方面的值。在 transitionSpec 里定义动画的效果，比如持续时间，缓冲函数等。在 screenInterpolator 里定义页面的进场与出场的效果，比如从右边平移到左边。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">transitionSpec: &#123;</span><br><span class="line">    duration: <span class="number">260</span>,                              <span class="comment">// 持续时间</span></span><br><span class="line">    easing: Easing.bezier(<span class="number">0.27</span>, <span class="number">0.58</span>, <span class="number">0.38</span>, <span class="number">1</span>), <span class="comment">// 缓动函数</span></span><br><span class="line">    timing: Animated.spring,                    <span class="comment">// 从时间范围映射到渐变的值</span></span><br><span class="line">    velocity: <span class="number">1.5</span>,                              <span class="comment">// 速度</span></span><br><span class="line">    tension: <span class="number">200</span>,                               <span class="comment">// 张力</span></span><br><span class="line">    friction: <span class="number">26</span>,                               <span class="comment">// 摩擦力</span></span><br><span class="line">    useNativeDriver: <span class="literal">true</span>, <span class="comment">// RN 0.43           // 是否使用原生实现</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">screenInterpolator: <span class="function">(<span class="params">sceneProps</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; layout, position, scene &#125; = sceneProps;</span><br><span class="line">    <span class="keyword">const</span> &#123; index &#125; = scene;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> height = layout.initHeight;</span><br><span class="line">    <span class="keyword">const</span> width = layout.initWidth;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输入的值是 index - 1，index，index - 1 （x, y, z）</span></span><br><span class="line">    <span class="comment">// 输出的值是 width, 0, 0 （x, y, x）</span></span><br><span class="line">    <span class="keyword">const</span> translateX = position.interpolate(&#123;</span><br><span class="line">        inputRange: [index - <span class="number">1</span>, index, index + <span class="number">1</span>],</span><br><span class="line">        outputRange: [width, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123; <span class="attr">transform</span>: [&#123; translateX &#125;] &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 interpolate 里有两个属性 inputRange 和 outputRange，这两个属性分别是输入值与输出值。</p>
+<p>看到的效果是这样的。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/7/20180709134641.gif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>还可以为其添加透明度变化和放缩值，旋转等。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">screenInterpolator: <span class="function">(<span class="params">sceneProps</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; position, scene, layout &#125; = sceneProps;</span><br><span class="line">    <span class="keyword">const</span> &#123; index &#125; = scene;</span><br><span class="line">    <span class="keyword">const</span> &#123; initWidth &#125; = layout;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 透明度</span></span><br><span class="line">    <span class="keyword">const</span> opacity = position.interpolate(&#123;</span><br><span class="line">        inputRange: [index - <span class="number">1</span>, index, index + <span class="number">0.99</span>, index + <span class="number">1</span>],</span><br><span class="line">        outputRange: [<span class="number">1</span>, <span class="number">1</span>, <span class="number">0.4</span>, <span class="number">0</span>],</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 放缩</span></span><br><span class="line">    <span class="keyword">const</span> scale = position.interpolate(&#123;</span><br><span class="line">        inputRange: [index - <span class="number">1</span>, index, index + <span class="number">1</span>],</span><br><span class="line">        outputRange: [<span class="number">1</span>, <span class="number">1</span>, <span class="number">0.95</span>],</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 平移</span></span><br><span class="line">    <span class="keyword">const</span> _width = <span class="built_in">Math</span>.round(initWidth * <span class="number">0.3</span>);</span><br><span class="line">    <span class="keyword">const</span> translateX = position.interpolate(&#123;</span><br><span class="line">        inputRange: [index - <span class="number">1</span>, index, index + <span class="number">1</span>],</span><br><span class="line">        outputRange: [initWidth, <span class="number">0</span>, -_width],</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        opacity,</span><br><span class="line">        transform: [</span><br><span class="line">            &#123; scale &#125;,</span><br><span class="line">            &#123; translateX &#125;,</span><br><span class="line">        ]</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>具体怎样的动画变化一切都按你的想法来。</p>
+<h2 id="阴影"><a href="#阴影" class="headerlink" title="阴影"></a>阴影</h2><p>可以看出导航的效果是没有一些阴影效果的。在 IOS 上提供了 shadowColor 等阴影效果值，在 Android 上却只提供了 elevation。但是在 v4+ 版本上 elevation 是无效的，那么可以使用 <a href="https://link.jianshu.com/?t=https://github.com/react-native-community/react-native-linear-gradient" target="_blank" rel="noopener">react-native-linear-gradient</a> 来实现这种效果。</p>
+<p>具体参考这篇文章：<a href="https://www.jianshu.com/p/7da2d6393a9f" target="_blank" rel="noopener">React Native 中如何给 Navigator 添加一条合格的阴影？</a></p>
+<h2 id="3-x-版本"><a href="#3-x-版本" class="headerlink" title="3.x 版本"></a>3.x 版本</h2><p>2020-06-03 日补充：</p>
+<p>3.x 版本 config 有些不同，是直接写在组件上的。</p>
+<p>在 3.x 版本，动画的配置在 transitionConfig 的  screenInterpolator 上（和之前的一样）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">transitionConfig: <span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">    screenInterpolator: (sceneProps) &#123;</span><br><span class="line">        <span class="comment">// ... 自己写</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+<p>然后在 <code>react-navigation-stack</code> 的源码里藏了一堆的导航切换动画的配置（就不能直接把这部分函数导出吗？）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> StackViewStyleInterpolator <span class="keyword">from</span> <span class="string">'react-navigation-stack/src/views/StackView/StackViewStyleInterpolator'</span>;</span><br></pre></td></tr></table></figure>
+<p>默认有这几个导出：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    <span class="comment">// 像 IOS 那种横向切换页面</span></span><br><span class="line">    forHorizontal,</span><br><span class="line">    <span class="comment">// 像 IOS 那种竖向切换页面</span></span><br><span class="line">    forVertical,</span><br><span class="line">    <span class="comment">// 像 Android 那种，从底部往上打开，有个渐变过程</span></span><br><span class="line">    forFadeFromBottomAndroid,</span><br><span class="line">    <span class="comment">// 像 Android 那种，从上往下打开，有个渐变过程</span></span><br><span class="line">    forFadeToBottomAndroid,</span><br><span class="line">    <span class="comment">// 渐变打开页面</span></span><br><span class="line">    forFade,</span><br><span class="line">    <span class="comment">// 没有动画</span></span><br><span class="line">    forNoAnimation,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>我后续会写个 npm，直接导出这部分代码，叫 react-navigation-animated-type 吧。</p>
+</blockquote>
+<p>怎么用呢？直接喂给 screenInterpolator 即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">transitionConfig: <span class="function"><span class="params">()</span> =&gt;</span> (&#123;</span><br><span class="line">    screenInterpolator: StackViewStyleInterpolator.forHorizontal,</span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+<p>后来看了看动画的 API，发现其实是有提供设置动画类型的，其实是我看走眼了。</p>
+<blockquote>
+<p><a href="https://reactnavigation.org/docs/stack-navigator/#animations" target="_blank" rel="noopener">https://reactnavigation.org/docs/stack-navigator/#animations</a></p>
+</blockquote>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2020/6/20200603174356.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/react-navigation/react-navigation/pull/1187#issuecomment-300112470" target="_blank" rel="noopener">Add support for custom transitionConfig</a></li>
+<li><a href="https://www.trustedhousesitters.com/engineering/code/react-native-navigation-custom-scene-screen-transitions-and-interpolations/" target="_blank" rel="noopener">react-native-navigation-custom-scene-screen-transitions-and-interpolations</a></li>
+<li><a href="http://www.php.cn/js-tutorial-383970.html" target="_blank" rel="noopener">http://www.php.cn/js-tutorial-383970.html</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.868Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/07/React Native/Router/React-Navigation 自定义导航动画/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/07/后端/利用 WebHooks 进行自动化构建/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">利用 WebHooks 进行自动化构建</h4>
+        <h4 class="summary">Webhooks 是一个 API 概念，在某件事情发生时，它都会进行消息的推送，在 Github、Gitlab 等代码管...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/07/Redux/基于 Redux 的框架设计/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">基于 Redux 的框架设计</h4>
+        <h4 class="summary">Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

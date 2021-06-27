@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/09/Nodejs/Koa/Koa2 源码阅读（一）/">
+    
+    
+    <title>Koa2 源码阅读（一） | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言提升对某个框架的认识度与理解度，最快的捷径就是阅读并深入研究其源码。也就只有阅读了源码后才知道其（Koa），从运行到结束到底做了什么。 Koa是一个非常简洁的 Web 框架，其源码也是少之又少，只有 1000+ 行代码，通过阅读其源码不到可以学习到 Koa 的运行流程还能，学习到很多的设计模式，优秀的编程方式。">
+<meta name="keywords" content="后端,Nodejs,学习笔记,Koa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Koa2 源码阅读（一）">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/09/Nodejs/Koa/Koa2 源码阅读（一）/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言提升对某个框架的认识度与理解度，最快的捷径就是阅读并深入研究其源码。也就只有阅读了源码后才知道其（Koa），从运行到结束到底做了什么。 Koa是一个非常简洁的 Web 框架，其源码也是少之又少，只有 1000+ 行代码，通过阅读其源码不到可以学习到 Koa 的运行流程还能，学习到很多的设计模式，优秀的编程方式。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/koa2.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/9/middleware.gif">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.835Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Koa2 源码阅读（一）">
+<meta name="twitter:description" content="前言提升对某个框架的认识度与理解度，最快的捷径就是阅读并深入研究其源码。也就只有阅读了源码后才知道其（Koa），从运行到结束到底做了什么。 Koa是一个非常简洁的 Web 框架，其源码也是少之又少，只有 1000+ 行代码，通过阅读其源码不到可以学习到 Koa 的运行流程还能，学习到很多的设计模式，优秀的编程方式。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/9/koa2.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Koa2 源码阅读（一）</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Koa2 源码阅读（一）</h1>
+
+        <div class="meta-rest">
+            <h1>Koa2 源码阅读（一）</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-09-02T02:34:26.000Z" itemprop="datePublished" class="page-time">
+    2017-09-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Koa/">Koa</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开始"><span class="post-toc-number">2.</span> <span class="post-toc-text">开始</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#文件结构"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">文件结构</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#入口文件"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">入口文件</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#application-js"><span class="post-toc-number">3.</span> <span class="post-toc-text">application.js</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#依赖模块"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">依赖模块</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Application-类"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">Application 类</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#listen"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">listen</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#callback"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">callback</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#createContext"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">createContext</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#use"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">use</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#respond"><span class="post-toc-number">3.7.</span> <span class="post-toc-text">respond</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#next"><span class="post-toc-number">4.</span> <span class="post-toc-text">next ?</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#总结"><span class="post-toc-number">5.</span> <span class="post-toc-text">总结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Nodejs/Koa/Koa2 源码阅读（一）"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Koa2 源码阅读（一）</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 09 月 02 日 10:34" datetime="2017-09-02T02:34:26.000Z"  itemprop="datePublished">
+    2017-09-02
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Koa/">Koa</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2620</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  27.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>提升对某个框架的认识度与理解度，最快的捷径就是阅读并深入研究其源码。也就只有阅读了源码后才知道其（Koa），从运行到结束到底做了什么。</p>
+<p><code>Koa</code>是一个非常简洁的 Web 框架，其源码也是少之又少，只有 1000+ 行代码，通过阅读其源码不到可以学习到 Koa 的运行流程还能，学习到很多的设计模式，优秀的编程方式。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/koa2.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>下面就开始，从零开始阅读 Koa 的源码。</p>
+<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><p>先从 Koa 的仓库里通过 git clone 到本地，目前的版本为 <code>v2.3</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/koajs/koa.git</span><br></pre></td></tr></table></figure>
+<h3 id="文件结构"><a href="#文件结构" class="headerlink" title="文件结构"></a>文件结构</h3><p>阅读源码的第一步是查询源文件，一般都放在<code>src</code>或着<code>lib</code>里面。</p>
+<p>Koa 的源码放在<code>lib</code>里，里面有四个文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">koa</span><br><span class="line">├── benchmarks              <span class="comment">// 基准测试</span></span><br><span class="line">├── docs                    <span class="comment">// 文档，有什么不明白，来这里查看。</span></span><br><span class="line">├── test                    <span class="comment">// 测试文件，可以学习如何进行单元测试</span></span><br><span class="line">├── lib                     <span class="comment">// 源码</span></span><br><span class="line">│    ├── application.js     <span class="comment">// 应用</span></span><br><span class="line">│    ├── context.js         <span class="comment">// 上下文</span></span><br><span class="line">│    ├── request.js         <span class="comment">// 请求</span></span><br><span class="line">│    └── response.js        <span class="comment">// 响应</span></span><br><span class="line">├── .editorconfig           <span class="comment">// 编辑器配置</span></span><br><span class="line">├── .eslintrc               <span class="comment">// eslint</span></span><br><span class="line">├── .gitignore</span><br><span class="line">├── .travis.yml</span><br><span class="line">├── AUTHORS                 <span class="comment">// 贡献者</span></span><br><span class="line">├── CODE_OF_CONDUCT.md</span><br><span class="line">├── History.md              <span class="comment">// 更新日志文件</span></span><br><span class="line">├── LICENSE                 <span class="comment">// 开源协议</span></span><br><span class="line">├── package.json</span><br><span class="line">└── Readme.md               <span class="comment">// 说明文件</span></span><br></pre></td></tr></table></figure>
+<p>一个成熟的开源项目，大概也就这些文件结构了。</p>
+<h3 id="入口文件"><a href="#入口文件" class="headerlink" title="入口文件"></a>入口文件</h3><p>koa 仅对 Nodejs 的 request, response 进行封装，其它更多都留给了中间件去处理，这样做是为了更好的灵活性。<br>先从那个文件开始，看呢？一般，先阅读入口文件，才去阅读其它文件。<br>可以从<code>package.json</code>里找到入口文件（<code>application.js</code>）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"name"</span>: <span class="string">"koa"</span>,</span><br><span class="line">    <span class="string">"version"</span>: <span class="string">"2.3.0"</span>,</span><br><span class="line">    <span class="string">"description"</span>: <span class="string">"Koa web app framework"</span>,</span><br><span class="line">    <span class="string">"main"</span>: <span class="string">"lib/application.js"</span>,</span><br><span class="line">    <span class="string">"scripts"</span>: &#123;</span><br><span class="line">        <span class="string">"test"</span>: <span class="string">"jest --forceExit"</span>,</span><br><span class="line">        <span class="string">"test-cov"</span>: <span class="string">"npm run test -- --coverage"</span>,</span><br><span class="line">        <span class="string">"lint"</span>: <span class="string">"eslint benchmarks lib test --fix"</span>,</span><br><span class="line">        <span class="string">"bench"</span>: <span class="string">"make -C benchmarks"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上 package 里可以知道有很多信息，记得千万不要忽视了 package.json 文件。</p>
+<h2 id="application-js"><a href="#application-js" class="headerlink" title="application.js"></a>application.js</h2><p>先来看看 <code>application</code> 里写的是什么。<br>打开后可以看到有很多依赖文件，下面就来分析一下依赖文件。</p>
+<h3 id="依赖模块"><a href="#依赖模块" class="headerlink" title="依赖模块"></a>依赖模块</h3><p>在 <code>application</code> 文件里，一共依赖了 18 个模块。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断是否是 generator 函数</span></span><br><span class="line"><span class="keyword">const</span> isGeneratorFunction = <span class="built_in">require</span>(<span class="string">'is-generator-function'</span>);</span><br><span class="line"><span class="keyword">const</span> debug = <span class="built_in">require</span>(<span class="string">'debug'</span>)(<span class="string">'koa:application'</span>); <span class="comment">// dubug 模式</span></span><br><span class="line"><span class="keyword">const</span> onFinished = <span class="built_in">require</span>(<span class="string">'on-finished'</span>);         <span class="comment">// 侦听器：当 HTTP 请求关闭，完成或错误时执行回调。</span></span><br><span class="line"><span class="keyword">const</span> response = <span class="built_in">require</span>(<span class="string">'./response'</span>);            <span class="comment">// 响应相关 [lib\response.js]</span></span><br><span class="line"><span class="keyword">const</span> compose = <span class="built_in">require</span>(<span class="string">'koa-compose'</span>);            <span class="comment">// 合并给定的中间件，并返回一个新的中间件</span></span><br><span class="line"><span class="keyword">const</span> isJSON = <span class="built_in">require</span>(<span class="string">'koa-is-json'</span>);             <span class="comment">// 检查 body 是否是 json</span></span><br><span class="line"><span class="keyword">const</span> context = <span class="built_in">require</span>(<span class="string">'./context'</span>);              <span class="comment">// 上下文相关 [lib\context.js]</span></span><br><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'./request'</span>);              <span class="comment">// 请求相关 [lib\request.js]</span></span><br><span class="line"><span class="keyword">const</span> statuses = <span class="built_in">require</span>(<span class="string">'statuses'</span>);              <span class="comment">// http 状态（status）工具</span></span><br><span class="line"><span class="keyword">const</span> Cookies = <span class="built_in">require</span>(<span class="string">'cookies'</span>);                <span class="comment">// 一个用于获取和设置 HTTP Cookie 的模块</span></span><br><span class="line"><span class="keyword">const</span> accepts = <span class="built_in">require</span>(<span class="string">'accepts'</span>);                <span class="comment">// 判断 http content accepts 内容</span></span><br><span class="line"><span class="keyword">const</span> Emitter = <span class="built_in">require</span>(<span class="string">'events'</span>);                 <span class="comment">// Nodejs 的事件模块</span></span><br><span class="line"><span class="keyword">const</span> assert = <span class="built_in">require</span>(<span class="string">'assert'</span>);                  <span class="comment">// Nodejs 的断言模块</span></span><br><span class="line"><span class="keyword">const</span> Stream = <span class="built_in">require</span>(<span class="string">'stream'</span>);                  <span class="comment">// Nodejs 的流模块</span></span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>);                      <span class="comment">// Nodejs 的 http 模块</span></span><br><span class="line"><span class="keyword">const</span> only = <span class="built_in">require</span>(<span class="string">'only'</span>);                      <span class="comment">// 返回对象的白名单属性</span></span><br><span class="line"><span class="keyword">const</span> convert = <span class="built_in">require</span>(<span class="string">'koa-convert'</span>);            <span class="comment">// 将 generator yield 转化为 async await</span></span><br><span class="line"><span class="keyword">const</span> deprecate = <span class="built_in">require</span>(<span class="string">'depd'</span>)(<span class="string">'koa'</span>);          <span class="comment">// 废弃的 Api</span></span><br></pre></td></tr></table></figure>
+<p>俗话说，要站在巨人的肩膀上。Koa 也不例外，在依赖里有很多都不知道的模块，真是没白看。<br>之前一直想隐蔽对象的某个属性，比如说：在 mongodb 取出的数据，有部分保密数据，并不希望返回给用户，那么就可以使用<code>only</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    name: <span class="string">'tobi'</span>,</span><br><span class="line">    last: <span class="string">'holowaychuk'</span>,</span><br><span class="line">    _id: <span class="string">'12345'</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> user = only(obj, <span class="string">'name last email'</span>);</span><br><span class="line"><span class="comment">// &#123; name: 'tobi', last: 'holowaychuk' &#125;</span></span><br></pre></td></tr></table></figure>
+<p>总的来说，用到的 Nodejs 模块，主要是 HTTP 与 Stream，其它很多都是工具类模块。</p>
+<h3 id="Application-类"><a href="#Application-类" class="headerlink" title="Application 类"></a>Application 类</h3><p>在 application 文件里只有一个类：<code>Application</code>，也就是 Koa 类。</p>
+<p>Koa 继承了 Emitter 类，这是许多框架都会选择继承的方式，其中主要原因是：Nodejs 是基于事件驱动的。</p>
+<p>先来看看构造函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.proxy = <span class="literal">false</span>;                                <span class="comment">// 代理</span></span><br><span class="line">    <span class="keyword">this</span>.middleware = [];                              <span class="comment">// 中间件队列</span></span><br><span class="line">    <span class="keyword">this</span>.subdomainOffset = <span class="number">2</span>;                          <span class="comment">// 表示忽略的子域名数量，默认为2</span></span><br><span class="line">    <span class="keyword">this</span>.env = process.env.NODE_ENV || <span class="string">'development'</span>;  <span class="comment">// 默认是 development 模式</span></span><br><span class="line">    <span class="keyword">this</span>.context = <span class="built_in">Object</span>.create(context);             <span class="comment">// Object.create: 使用指定的原型对象及其属性去创建一个新的对象</span></span><br><span class="line">    <span class="keyword">this</span>.request = <span class="built_in">Object</span>.create(request);</span><br><span class="line">    <span class="keyword">this</span>.response = <span class="built_in">Object</span>.create(response);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>构造函数非常简单，无非就是做了几个变量的初始化，下面再看看它的方法。</p>
+<p><strong>公有方法：</strong></p>
+<ul>
+<li>listen</li>
+<li>toJSON</li>
+<li>inspect</li>
+<li>use</li>
+<li>callback</li>
+</ul>
+<p><strong>私有方法：</strong></p>
+<ul>
+<li>createContext</li>
+<li>onerror</li>
+</ul>
+<h3 id="listen"><a href="#listen" class="headerlink" title="listen"></a>listen</h3><p>listen 函数，只是代理了 http 模块的 listen，把接收到的参数都传给了 http.listen。<br>可以看出创建的 http server 回调函数在 <code>this.callback</code> 里进行。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen(...args) &#123;</span><br><span class="line">    debug(<span class="string">'listen'</span>);</span><br><span class="line">    <span class="keyword">const</span> server = http.createServer(<span class="keyword">this</span>.callback());</span><br><span class="line">    <span class="keyword">return</span> server.listen(...args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="callback"><a href="#callback" class="headerlink" title="callback"></a>callback</h3><p>callback 是一个高阶函数，它返回了一个 http request 处理函数。</p>
+<p>callback 做了几件事情：</p>
+<ol>
+<li>合并所有中间件</li>
+<li>如果，listeners 有错误，就触发错误事件，listeners 是继承与 Emitter 的方法</li>
+<li>返回一个 http request 处理函数，设定 statusCode 默认是  404</li>
+<li>使用 this.createContext 创建上下文</li>
+<li>在 respond 里处理 response</li>
+<li>ctx 作为参数绑定在所有中间件里，发生错误时统一触发 onerror</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">callback() &#123;</span><br><span class="line">    <span class="keyword">const</span> fn = compose(<span class="keyword">this</span>.middleware);                      <span class="comment">// 1.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.listeners(<span class="string">'error'</span>).length) <span class="keyword">this</span>.on(<span class="string">'error'</span>, <span class="keyword">this</span>.onerror);  <span class="comment">// 2.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> handleRequest = <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">        res.statusCode = <span class="number">404</span>;                                 <span class="comment">// 3.</span></span><br><span class="line">        <span class="keyword">const</span> ctx = <span class="keyword">this</span>.createContext(req, res);             <span class="comment">// 4.</span></span><br><span class="line">        <span class="keyword">const</span> onerror = <span class="function"><span class="params">err</span> =&gt;</span> ctx.onerror(err);</span><br><span class="line">        <span class="keyword">const</span> handleResponse = <span class="function"><span class="params">()</span> =&gt;</span> respond(ctx);            <span class="comment">// 5.</span></span><br><span class="line">        onFinished(res, onerror);</span><br><span class="line">        <span class="keyword">return</span> fn(ctx).then(handleResponse).catch(onerror);   <span class="comment">// 6.</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> handleRequest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="createContext"><a href="#createContext" class="headerlink" title="createContext"></a>createContext</h3><p><code>createContext</code> 是一个私有方法，用来创建上下文。</p>
+<p>createContext 做的事情就是把 req, res 绑定到一个 ctx 对象里。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">createContext(req, res) &#123;</span><br><span class="line">    <span class="keyword">const</span> context = <span class="built_in">Object</span>.create(<span class="keyword">this</span>.context);</span><br><span class="line">    <span class="keyword">const</span> request = context.request = <span class="built_in">Object</span>.create(<span class="keyword">this</span>.request);</span><br><span class="line">    <span class="keyword">const</span> response = context.response = <span class="built_in">Object</span>.create(<span class="keyword">this</span>.response);</span><br><span class="line"></span><br><span class="line">    context.app = request.app = response.app = <span class="keyword">this</span>;       <span class="comment">// 在中间里，使用 ctx.app 来应用 this</span></span><br><span class="line">    context.req = request.req = response.req = req;        <span class="comment">// 绑定了 http request callback -&gt; req</span></span><br><span class="line">    context.res = request.res = response.res = res;        <span class="comment">// 绑定了 http request callback -&gt; res</span></span><br><span class="line">    request.ctx = response.ctx = context;</span><br><span class="line">    request.response = response;                           <span class="comment">// context.response = response; 引用特性</span></span><br><span class="line">    response.request = request;                            <span class="comment">// context.request = request;</span></span><br><span class="line">    context.originalUrl = request.originalUrl = req.url;</span><br><span class="line">    context.cookies = <span class="keyword">new</span> Cookies(req, res, &#123;              <span class="comment">// 创建 cookies</span></span><br><span class="line">        keys: <span class="keyword">this</span>.keys,</span><br><span class="line">        secure: request.secure</span><br><span class="line">    &#125;);</span><br><span class="line">    request.ip = request.ips[<span class="number">0</span>] || req.socket.remoteAddress || <span class="string">''</span>;</span><br><span class="line">    context.accept = request.accept = accepts(req);</span><br><span class="line">    context.state = &#123;&#125;;</span><br><span class="line">    <span class="keyword">return</span> context;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="use"><a href="#use" class="headerlink" title="use"></a>use</h3><p><code>use</code>是一个非常重要的方法，用来使用中间件。</p>
+<p><code>use</code>做了几件事情：</p>
+<ul>
+<li>判断参数不是 function，抛出错误</li>
+<li>判断参数是 generator 函数，抛出过时警告，并把它转换成 async 函数</li>
+<li>把参数，扔进中间件队列里</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">use(fn) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> fn !== <span class="string">'function'</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'middleware must be a function!'</span>);</span><br><span class="line">    <span class="keyword">if</span> (isGeneratorFunction(fn)) &#123;</span><br><span class="line">        deprecate(<span class="string">'Support for generators will be removed in v3. '</span> +</span><br><span class="line">            <span class="string">'See the documentation for examples of how to convert old middleware '</span> +</span><br><span class="line">            <span class="string">'https://github.com/koajs/koa/blob/master/docs/migration.md'</span>);</span><br><span class="line">        fn = convert(fn);</span><br><span class="line">    &#125;</span><br><span class="line">    debug(<span class="string">'use %s'</span>, fn._name || fn.name || <span class="string">'-'</span>);</span><br><span class="line">    <span class="keyword">this</span>.middleware.push(fn);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="respond"><a href="#respond" class="headerlink" title="respond"></a>respond</h3><p><code>respond</code>是用来处理 response 的。</p>
+<p><code>respond</code>做了几件事情：</p>
+<ul>
+<li>如果允许绕过 koa，则不处理</li>
+<li>如果不在写入，则不处理</li>
+<li>如果状态码为空，则 body 设置为空，并响应空值</li>
+<li>如果请求方法为：<code>HEAD</code>（只请求页面的首部），若响应头没有被设置时，设置其 length，并响应空值</li>
+<li>如果 body 为空，则设置 body 为 message 或 状态码，若响应头没有被设置时，设置 type，length</li>
+<li>如果 body 是 Buffer，就响应对应值</li>
+<li>如果 body 是 string，就响应对应值</li>
+<li>如果 body 是 stream 的一个示例，就接上管道（pipe）</li>
+<li>其余转为 json 对象，再响应</li>
+</ul>
+<p>其中：<code>res.headersSent</code>：返回一个布尔值（只读）。如果响应头已被发送则为 true，否则为 false。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">respond</span>(<span class="params">ctx</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// allow bypassing koa [允许绕过 koa]</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">false</span> === ctx.respond) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> reswritable = ctx.res;</span><br><span class="line">    <span class="keyword">if</span> (!ctx.writable) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> body = ctx.body;</span><br><span class="line">    <span class="keyword">const</span> code = ctx.status;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ignore body</span></span><br><span class="line">    <span class="keyword">if</span> (statuses.empty[code]) &#123;</span><br><span class="line">        <span class="comment">// strip headers</span></span><br><span class="line">        ctx.body = <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">return</span> res.end();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="string">'HEAD'</span> == ctx.method) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!res.headersSent &amp;&amp; isJSON(body)) &#123;</span><br><span class="line">            ctx.length = Buffer.byteLength(<span class="built_in">JSON</span>.stringify(body));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res.end();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// status body</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">null</span> == body) &#123; <span class="comment">// null == null, null == undefined</span></span><br><span class="line">        body = ctx.message || <span class="built_in">String</span>(code);</span><br><span class="line">        <span class="keyword">if</span> (!res.headersSent) &#123;</span><br><span class="line">            ctx.type = <span class="string">'text'</span>;</span><br><span class="line">            ctx.length = Buffer.byteLength(body);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res.end(body);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// responses</span></span><br><span class="line">    <span class="keyword">if</span> (Buffer.isBuffer(body)) <span class="keyword">return</span> res.end(body);</span><br><span class="line">    <span class="keyword">if</span> (<span class="string">'string'</span> == <span class="keyword">typeof</span> body) <span class="keyword">return</span> res.end(body);</span><br><span class="line">    <span class="keyword">if</span> (body <span class="keyword">instanceof</span> Stream) <span class="keyword">return</span> body.pipe(res);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// body: json</span></span><br><span class="line">    body = <span class="built_in">JSON</span>.stringify(body);</span><br><span class="line">    <span class="keyword">if</span> (!res.headersSent) &#123;</span><br><span class="line">        ctx.length = Buffer.byteLength(body);</span><br><span class="line">    &#125;</span><br><span class="line">    res.end(body);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="next"><a href="#next" class="headerlink" title="next ?"></a>next ?</h2><p>等等，看到这里怎么没看见 next ?，koa 的中间件是如何使用 next，从而跳到另一个中间件的？</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>很明显，next 隐藏在 <code>koa-compose</code> 这个模块里，koa-compose 也是 koa 作者写的，它主要是用来执行中间件。</p>
+<p><code>koa-compose</code>做了几件事情：</p>
+<ol>
+<li>判断参数是否是函数数组，否则抛出异常。</li>
+<li>返回一个高阶函数，高阶函数返回一个 dispatch 闭包函数</li>
+<li>如果一个中间件里有 2 个<code>await next()</code>，会报错：next() called multiple times</li>
+<li>用 index 标识，中间件执行位置</li>
+<li>在 next 里，调用下一个中间件：<code>dispatch(i + 1)</code></li>
+<li>把 fn 放到 Promise.resolve 里，就说明 <code>await next()</code> 执行的是 fn 代码，导致洋葱执行过程</li>
+<li>立即返回处于 resolve 状态 promise 实例，以便后续逻辑继续执行，此处形成一种递归的方式</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Compose `middleware` returning</span></span><br><span class="line"><span class="comment"> * a fully valid middleware comprised</span></span><br><span class="line"><span class="comment"> * of all those which are passed.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;Array&#125;</span> <span class="variable">middleware</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return <span class="type">&#123;Function&#125;</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@api <span class="variable">public</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compose</span>(<span class="params">middleware</span>) </span>&#123;</span><br><span class="line">                                                            <span class="comment">// 1.</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">Array</span>.isArray(middleware)) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'Middleware stack must be an array!'</span>)</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> fn <span class="keyword">of</span> middleware) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> fn !== <span class="string">'function'</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'Middleware must be composed of functions!'</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;Object&#125;</span> <span class="variable">context</span></span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return <span class="type">&#123;Promise&#125;</span></span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@api <span class="variable">public</span></span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">context, next</span>) </span>&#123;                       <span class="comment">// 2.</span></span><br><span class="line">        <span class="comment">// last called middleware #</span></span><br><span class="line">        <span class="keyword">let</span> index = <span class="number">-1</span></span><br><span class="line">        <span class="keyword">return</span> dispatch(<span class="number">0</span>)</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span>(<span class="params">i</span>) </span>&#123;                              <span class="comment">// 3.</span></span><br><span class="line">            <span class="keyword">if</span> (i &lt;= index) <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'next() called multiple times'</span>))</span><br><span class="line">            index = i                                       <span class="comment">// 4.</span></span><br><span class="line">            <span class="keyword">let</span> fn = middleware[i]</span><br><span class="line">            <span class="keyword">if</span> (i === middleware.length) fn = next</span><br><span class="line">            <span class="keyword">if</span> (!fn) <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve()               <span class="comment">// 7.</span></span><br><span class="line">            <span class="keyword">try</span> &#123;                                           <span class="comment">// 5.</span></span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(fn(context, <span class="function"><span class="keyword">function</span> <span class="title">next</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">return</span> dispatch(i + <span class="number">1</span>)                  <span class="comment">// 6.</span></span><br><span class="line">                &#125;))</span><br><span class="line">            &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>源码非常的简单，实现的功能就是将所有的中间件串联起来。koa-compose 把所有的中间件串联起来，让它能够按照<strong>洋葱模型</strong>去执行。</p>
+<p>关键的在于 Promise.resolve，其神奇之处在于造成一个<strong>洋葱模型的递归效果</strong>。</p>
+<p>注意：一个中间件只能有一个 next。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/9/middleware.gif" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>application.js 主要的工作是创建一个 Koa 类，并进行一些初始化工作，把 http server req, res 绑定到自己的属性上。<br>代码质量很好，每一个函数都通俗易懂，每一步都非常清晰。除了这些，还学习到了良好的编程规格，比如通过 <code>@param</code> 指定参数类型，<code>@return</code> 指定返回值。<br>这样做的好处，除了规范，还可以为编辑器提供智能提示的依据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Shorthand for:</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *    http.createServer(app.callback()).listen(...)</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;Mixed&#125;</span> </span>...</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return <span class="type">&#123;Server&#125;</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@api <span class="variable">public</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>下一节研究 <code>context.js</code>，<code>request.js</code>，<code>resource.js</code> 文件。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.835Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/09/Nodejs/Koa/Koa2 源码阅读（一）/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/09/Nodejs/Koa/Koa2 源码阅读（一）/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Koa/">Koa</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/09/Nodejs/Koa/Koa2 源码阅读（二）/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">Koa2 源码阅读（二）</h4>
+        <h4 class="summary">上节（Koa2 源码阅读（一））粗略了阅读了 Koa 的 lib\application.js 文件，收获很大。这节把剩...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/09/React/React/React 集成 highlight/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">React 集成 highlight</h4>
+        <h4 class="summary">highlight.js是一个很出名的代码高亮库，基本现在的代码高亮功能都可以使用 highlight 来制作（本博客的...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

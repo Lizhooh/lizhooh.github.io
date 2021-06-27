@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/08/抓包&爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/">
+    
+    
+    <title>爬虫：Nodejs 实现模拟登录的一次艰辛路程记录 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言 给自己定下写文章的目标后，就去找了几家博客平台来发布文章；作为一个懒人，不能所有博客文章都手动去各家平台发布，只好通过编写脚本来发布。但是除了Github提供了比较详细的 Api 外，其他国内的博客平台都没有提供对应的接口，但总有办法的。下面是我对某家博客平台模拟登录流程的记录（打死我都不会说这家平台是 segmentfault），个人觉得挺有意思的，也能从中学到不少产品安全设计的思路。">
+<meta name="keywords" content="后端,Nodejs,爬虫">
+<meta property="og:type" content="article">
+<meta property="og:title" content="爬虫：Nodejs 实现模拟登录的一次艰辛路程记录">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/08/抓包&爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言 给自己定下写文章的目标后，就去找了几家博客平台来发布文章；作为一个懒人，不能所有博客文章都手动去各家平台发布，只好通过编写脚本来发布。但是除了Github提供了比较详细的 Api 外，其他国内的博客平台都没有提供对应的接口，但总有办法的。下面是我对某家博客平台模拟登录流程的记录（打死我都不会说这家平台是 segmentfault），个人觉得挺有意思的，也能从中学到不少产品安全设计的思路。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/19258813-A943-425C-B787-AFF8FAFA1F82.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/90831BC0-2D76-4222-BEBD-E5DF90553E20.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/7E8B8C9E-EF58-4465-A3D7-9A513299FB56.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/4078DB22-1A16-407B-958B-10F531690166.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/7E8B8C9E-EF58-4465-A3D7-9A513299FB56.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/0CB90C02-E902-451D-B3CF-2CF81468979B.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/B14BECDB-A067-42D0-A8C8-C0AE0E866C79.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/E2E3E1A9-FD6F-48FA-9C53-3B7183C58373.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/A13D98C3-55D1-46D5-9399-4F7D25C203A4.png">
+<meta property="og:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/A1D2004B-E400-4C51-9A07-AF4D16FD43F1.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.918Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="爬虫：Nodejs 实现模拟登录的一次艰辛路程记录">
+<meta name="twitter:description" content="前言 给自己定下写文章的目标后，就去找了几家博客平台来发布文章；作为一个懒人，不能所有博客文章都手动去各家平台发布，只好通过编写脚本来发布。但是除了Github提供了比较详细的 Api 外，其他国内的博客平台都没有提供对应的接口，但总有办法的。下面是我对某家博客平台模拟登录流程的记录（打死我都不会说这家平台是 segmentfault），个人觉得挺有意思的，也能从中学到不少产品安全设计的思路。">
+<meta name="twitter:image" content="http://7xjbj4.com1.z0.glb.clouddn.com/19258813-A943-425C-B787-AFF8FAFA1F82.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">爬虫：Nodejs 实现模拟登录的一次艰辛路程记录</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">爬虫：Nodejs 实现模拟登录的一次艰辛路程记录</h1>
+
+        <div class="meta-rest">
+            <h1>爬虫：Nodejs 实现模拟登录的一次艰辛路程记录</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-08-01T05:14:36.000Z" itemprop="datePublished" class="page-time">
+    2017-08-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#装备"><span class="post-toc-number">2.</span> <span class="post-toc-text">装备</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开始分析"><span class="post-toc-number">3.</span> <span class="post-toc-text">开始分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#正确登录一次"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">正确登录一次</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#排除法去除无用的-Cookie"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">排除法去除无用的 Cookie</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#获取初始的-Cookie"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">获取初始的 Cookie</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#获取页面的-token"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">获取页面的 token</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#开始登录吧"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">开始登录吧</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#总结"><span class="post-toc-number">4.</span> <span class="post-toc-text">总结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-抓包&amp;爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">爬虫：Nodejs 实现模拟登录的一次艰辛路程记录</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 08 月 01 日 13:14" datetime="2017-08-01T05:14:36.000Z"  itemprop="datePublished">
+    2017-08-01
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/爬虫/">爬虫</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2149</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>给自己定下写文章的目标后，就去找了几家博客平台来发布文章；作为一个懒人，不能所有博客文章都手动去各家平台发布，只好通过编写脚本来发布。但是除了<code>Github</code>提供了比较详细的 Api 外，其他国内的博客平台都没有提供对应的接口，但总有办法的。<br>下面是我对某家博客平台模拟登录流程的记录（打死我都不会说这家平台是 segmentfault），个人觉得挺有意思的，也能从中学到不少产品安全设计的思路。</p>
+</blockquote>
+<a id="more"></a>
+<p>内容略修改，转载至：<a href="https://github.com/zwhu/blog/issues/7" target="_blank" rel="noopener">https://github.com/zwhu/blog/issues/7</a></p>
+<h2 id="装备"><a href="#装备" class="headerlink" title="装备"></a>装备</h2><p><strong>工具：</strong></p>
+<ul>
+<li>Babel （支持现代化 javascript 语法）</li>
+<li>Cheerio （html 解析器）</li>
+<li>SuperAgent （可换成 fetch, axios, request 这些）</li>
+<li>Chrome （浏览器）</li>
+</ul>
+<p>注：工具只是实现结果的一个手段，并不一定需要掌握这些工具，只要知道它们是干嘛的就行了。</p>
+<h2 id="开始分析"><a href="#开始分析" class="headerlink" title="开始分析"></a>开始分析</h2><p>先进入主页找到用户登录页，如下图所示：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/19258813-A943-425C-B787-AFF8FAFA1F82.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>标准的登录框，在这边需要把 Chrome 的控制台打开，进入 Network 页，把 Preserve log （页面跳转也能记录日志）的选项勾中， 如下图所示：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/90831BC0-2D76-4222-BEBD-E5DF90553E20.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="正确登录一次"><a href="#正确登录一次" class="headerlink" title="正确登录一次"></a>正确登录一次</h3><p>抓包分析请求，先从输入正确密码开始，输入正确密码，正确请求一次后：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/7E8B8C9E-EF58-4465-A3D7-9A513299FB56.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>我把暴露隐私的两个地方打码了（这两块也是我们接下来要着重要分析的点），可以从中看到请求头，我们先把这些请求头照抄下来（最好不要漏项）：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> base_headers = &#123;</span><br><span class="line">    Accept: <span class="string">'*/*'</span>,</span><br><span class="line">    <span class="string">'Accept-Encoding'</span>:<span class="string">'gzip, deflate'</span>,</span><br><span class="line">    <span class="string">'Accept-Language'</span>:<span class="string">'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2'</span>,</span><br><span class="line">    <span class="string">'Cache-Control'</span>:<span class="string">'no-cache'</span>,</span><br><span class="line">    Connection:<span class="string">'keep-alive'</span>,</span><br><span class="line">    DNT:<span class="number">1</span>,</span><br><span class="line">    Host:<span class="string">'segmentfault.com'</span>,</span><br><span class="line">    Origin: <span class="string">'http://segmentfault.com'</span>,</span><br><span class="line">    Pragma:<span class="string">'no-cache'</span>,</span><br><span class="line">    Referer: <span class="string">'http://segmentfault.com/'</span>,</span><br><span class="line">    <span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36'</span>,</span><br><span class="line">    <span class="string">'X-Requested-With'</span>: <span class="string">'XMLHttpRequest'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="排除法去除无用的-Cookie"><a href="#排除法去除无用的-Cookie" class="headerlink" title="排除法去除无用的 Cookie"></a>排除法去除无用的 Cookie</h3><p>我们可以看到在请求登录的时候 Header 就已经带有 Cookie 了，这在我平常的设计中没有做过，所以我就试着把 Cookie 删后再请求，看看有什么效果（其他域名的不用管）。删除 Cookie 的方法如下所示：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/4078DB22-1A16-407B-958B-10F531690166.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>利用排除法不停删除并继续试着登录，都能完成登录；直到删除 PHPSESSID 的时候发现删除之后再登陆是会报错的，所以这个 PHPSESSID 肯定是有用的（而且每次刷新都不同，应该用来防 crsf 的），因此我断定这个 Cookie 是在后端作为验证登录的一个字段；因此我可以通过在登录之前先下载首页并拿到 Cookie，放到请求头上做作为模拟 Header。</p>
+<h3 id="获取初始的-Cookie"><a href="#获取初始的-Cookie" class="headerlink" title="获取初始的 Cookie"></a>获取初始的 Cookie</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> request <span class="keyword">from</span> <span class="string">'superagent'</span>;</span><br><span class="line"><span class="keyword">let</span> cookie;</span><br><span class="line"></span><br><span class="line">req.get(urls.mainpage).end(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 从上图可以看到我们需要的cookie是PHPSESSID开头的</span></span><br><span class="line">    cookie = res.headers[<span class="string">'set-cookie'</span>].join(<span class="string">','</span>).match(<span class="regexp">/(PHPSESSID=.+?);/</span>)[<span class="number">1</span>];</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="获取页面的-token"><a href="#获取页面的-token" class="headerlink" title="获取页面的 token"></a>获取页面的 token</h3><p>本以为拿到 Cookie 之后就可以开开心心的做登录请求，然而这么简单的话这篇文章页也就没什么写的必要了。<br>继续分析请求 HTTP 包，可以发现在每次请求的时候，url 后面总是会带一个 queryString（图 2），我在这里耗费了不少时间，毫无头绪，只能追进源码里面摸索。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/7E8B8C9E-EF58-4465-A3D7-9A513299FB56.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>可以看到这个源码是被压缩过的，不要着急，chrome 提供了 formatt 功能，点击最下面的{}，可以对压缩的代码重排，至少是勉强可以阅读的代码了。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/0CB90C02-E902-451D-B3CF-2CF81468979B.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>接下来的事情就是怎么从这堆代码中抽丝剥茧找到对我们有用的信息，可是这么多的代码一步步看下来也会看到头晕脑胀，眼睛滴血。那么就试试看能不能使用查找的方式从源码中找到我需要的东西。使用快捷键 ctrl+F，键入 /login （/login是作为登录的链接的，感觉上可能会有很大概率能搜到相关代码）</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/B14BECDB-A067-42D0-A8C8-C0AE0E866C79.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>很巧的是，搜到了相关的代码。从中可以看到此网站使用了 JQuery 的 Ajax 发送相关 HTTP 请求，那么，url 便是 e.attr(“action”)，从下面的 DOM 结构能看到 action 是 api/user/login。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/E2E3E1A9-FD6F-48FA-9C53-3B7183C58373.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>还是没有找到 queryString, 那就换个关键词试试看，这次搜索 <code>_=</code>（看图 2，queryString 是由 <code>_=</code> 拼接起来的）</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/A13D98C3-55D1-46D5-9399-4F7D25C203A4.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>从上图可以看到有 7 个结果，而被黄色标注出来的那行才是我们想要的。JQ 的 ajaxSend 可以在 Ajax 发送之前做一些处理。从上图可以看出，请求的时候在 url 的后面增加一个 <code>n._</code> ，那就继续去找<code>n._</code>是什么？由于截图截少了，我就不再重新截图，从上图的第一行可以看到 <code>_</code> 是 window.SF.token，由此我们就摸到 token 的 G 点，整个流程明朗了许多。接下来全局搜索<code>window.SF.token</code>，没找到。我知道 window 是全局变量，为什么把 token 放到 window 上？可以想多的是 token 并没有在当前的 script 标签内。接下来去 index.html 内查找：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="http://7xjbj4.com1.z0.glb.clouddn.com/A1D2004B-E400-4C51-9A07-AF4D16FD43F1.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!Doctype <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">        (<span class="function"><span class="keyword">function</span> <span class="params">(w)</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">            w.SF.token = (<span class="function"><span class="keyword">function</span> <span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">                <span class="comment">// ....</span></span></span><br><span class="line"><span class="actionscript">                <span class="comment">// 生成token</span></span></span><br><span class="line"></span><br><span class="line"><span class="actionscript">                <span class="keyword">return</span> token;</span></span><br><span class="line">            &#125;)();;</span><br><span class="line"><span class="javascript">        &#125;)(<span class="built_in">window</span>);</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>找到了！可以看到 token 是被包裹在一个独立的 script 标签内，在后端生成 HTML 模板的时候就已经插入。<br>找到 token 之后就很简单了，拿到这个字符串表达式，运行，拿到 token。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cheerio <span class="keyword">from</span> <span class="string">'cheerio'</span>;</span><br><span class="line"><span class="keyword">import</span> request <span class="keyword">from</span> <span class="string">'superagent'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> cookie;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 为什么这样做</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getToken</span>(<span class="params">s</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> $ = cheerio.load(s),</span><br><span class="line">        text = $(<span class="string">'body script'</span>).eq(<span class="number">2</span>).text(),</span><br><span class="line">        fn = <span class="keyword">new</span> <span class="built_in">Function</span>(<span class="string">'window'</span>, text + <span class="string">';return window.SF.token'</span>),</span><br><span class="line">        token = fn(&#123;&#125;);</span><br><span class="line">    <span class="keyword">return</span> token;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">req.get(urls.mainpage).end(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> token = getToken(res.text)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从上图可以看到我们需要的cookie是PHPSESSID开头的</span></span><br><span class="line">    cookie = res.headers[<span class="string">'set-cookie'</span>].join(<span class="string">','</span>).match(<span class="regexp">/(PHPSESSID=.+?);/</span>)[<span class="number">1</span>]</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>上面为什么要这样做呢：</p>
+<p>在此处的情景中用 eval 也是挺不错的选择，但是某书上写着<code>eval 是魔鬼</code>那时我就被吓着呢，那我们就换成 new Function 来做。</p>
+<p>看下 new Function 的用法如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="built_in">Function</span> ([arg1[, arg2[, ...argN]],] functionBody)</span><br></pre></td></tr></table></figure>
+<p>new Function 会返回一个函数。例如 fn = new Function('a', 'b', 'return a + b') 会返回一个函数对象，等效于下面的语法：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fn = <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>so，我们可以使用 new Function 构造一个函数，用来执行获取到得表达式，并返回 token。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fn = <span class="keyword">new</span> <span class="built_in">Function</span>(<span class="string">'window'</span>, functionBody + <span class="string">';return window.token'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(fn(&#123;&#125;));</span><br></pre></td></tr></table></figure>
+<p>构造的这个函数有个 window 形参，作为函数体中立即执行表达式的实参传入最内层的函数中。所以在最后执行的时候 return window.token 便会获得 token 的内容。</p>
+<h3 id="开始登录吧"><a href="#开始登录吧" class="headerlink" title="开始登录吧"></a>开始登录吧</h3><p>拿到 token 和 Cookie ，抓包分析所需要的登录字段:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    mail: <span class="string">'xxxxx@xx.xx'</span>,    <span class="comment">// 邮箱</span></span><br><span class="line">    password: <span class="string">'xxxxxxx'</span>,    <span class="comment">// 密码</span></span><br><span class="line">    remember: <span class="string">'1'</span>           <span class="comment">// 是否记住登录</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>模拟登录：</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">req.get(urls.mainpage).end(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> token = getToken(res.text);</span><br><span class="line"></span><br><span class="line">    cookie = res.headers[<span class="string">'set-cookie'</span>].join(<span class="string">','</span>).match(<span class="regexp">/(PHPSESSID=.+?);/</span>)[<span class="number">1</span>];</span><br><span class="line">    req</span><br><span class="line">        .post(urls.login)</span><br><span class="line">        .query(&#123;<span class="string">'_'</span>: token&#125;)</span><br><span class="line">        .set(base_headers)</span><br><span class="line">        .set(<span class="string">'Cookie'</span>, cookie)</span><br><span class="line">        .type(<span class="string">'form'</span>)</span><br><span class="line">        .send(conf)</span><br><span class="line">        .redirects(<span class="number">0</span>)</span><br><span class="line">        .end(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(res)</span><br><span class="line">        &#125;)&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><blockquote>
+<p>世上无难事只怕有心人</p>
+</blockquote>
+<p>登录是最基础也最核心的功能，通过对登录流程的分析，基本弄清楚了此博客平台的验证机制，在分析的过程中斗智斗勇，利用自己掌握的知识一步一步破解谜题的本身就是一件很有意思的事情，以后也可以将此方法用到自己的登录流程设计中。<br>登录之后能施展的手段就很多了: 提问题，发表文章，创建标签等等，用到得知识都在上面说过了，按下不表。</p>
+<p><strong>补充：</strong><br>说一点，对于在浏览器上生成 token，一定要在函数里判断一下当前是否具有浏览器的环境特征才给予生成，比如 document 对象特征，这样上面的 getToken 就跑不了了。当然，可能有大神会说，我给你模拟一个浏览器环境，这个我就没招了。</p>
+<p>还有对于现在很多网站都有长期保存 cookie 来维持<strong>长久登录状态</strong>的，我们可以直接手动登录一次后，把<strong>认证后的 cookie 信息</strong>拿来用给爬虫用，这样就可以省去模拟登录的部分。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.918Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/08/抓包&amp;爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/08/抓包&amp;爬虫/爬虫：Nodejs 实现模拟登录的一次艰辛路程/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodejs/">Nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/08/React Native/IO/React Native 文件操作 - fetch-blob/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 文件操作 - fetch-blob</h4>
+        <h4 class="summary">文件操作之前使用react-native-fs来进行文件操作，发现它还是有点局限性，比如不支持文件流，API 支持有限等...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/Python/Python 在数据持久化方面的知识/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Python 在数据持久化方面的知识</h4>
+        <h4 class="summary">Redisredis 是一个 key-value 存储系统。它支持存储的 value 类型相对更多，包括 string、...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

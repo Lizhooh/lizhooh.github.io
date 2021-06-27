@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/06/React Native/Media/谈谈 React Native 音乐应用实现思路/">
+    
+    
+    <title>📱 谈谈 React Native 音乐应用实现思路 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前端React Native 可以做很多类型的应用，但是一般很少人用 React Native 做直播应用、视频应用、音乐应用。原因是 React Native 本身没有提供 Video/Audio 的组件，其次是第三方的组件支持力度不够。如果要开发这类型的应用很可能需要自己造轮子，这意味着要使用原生的代码写组件，并且要支持 Android 和 IOS，在开发时间上有点划不来。 下面的文章里介绍一">
+<meta name="keywords" content="Javascript,移动开发,React-Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="📱 谈谈 React Native 音乐应用实现思路">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/06/React Native/Media/谈谈 React Native 音乐应用实现思路/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前端React Native 可以做很多类型的应用，但是一般很少人用 React Native 做直播应用、视频应用、音乐应用。原因是 React Native 本身没有提供 Video/Audio 的组件，其次是第三方的组件支持力度不够。如果要开发这类型的应用很可能需要自己造轮子，这意味着要使用原生的代码写组件，并且要支持 Android 和 IOS，在开发时间上有点划不来。 下面的文章里介绍一">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180621233025.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180621225358.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/6/20180622000250.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.858Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="📱 谈谈 React Native 音乐应用实现思路">
+<meta name="twitter:description" content="前端React Native 可以做很多类型的应用，但是一般很少人用 React Native 做直播应用、视频应用、音乐应用。原因是 React Native 本身没有提供 Video/Audio 的组件，其次是第三方的组件支持力度不够。如果要开发这类型的应用很可能需要自己造轮子，这意味着要使用原生的代码写组件，并且要支持 Android 和 IOS，在开发时间上有点划不来。 下面的文章里介绍一">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/6/20180621233025.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">📱 谈谈 React Native 音乐应用实现思路</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">📱 谈谈 React Native 音乐应用实现思路</h1>
+
+        <div class="meta-rest">
+            <h1>📱 谈谈 React Native 音乐应用实现思路</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-06-23T14:21:08.000Z" itemprop="datePublished" class="page-time">
+    2018-06-23
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前端"><span class="post-toc-number">1.</span> <span class="post-toc-text">前端</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#技术实现"><span class="post-toc-number">2.</span> <span class="post-toc-text">技术实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#音乐播放"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">音乐播放</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#音乐进度控制"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">音乐进度控制</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#歌词滚动"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">歌词滚动</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">3.</span> <span class="post-toc-text">小结</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#补充"><span class="post-toc-number">4.</span> <span class="post-toc-text">补充</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React Native/Media/谈谈 React Native 音乐应用实现思路"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">📱 谈谈 React Native 音乐应用实现思路</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 06 月 23 日 22:21" datetime="2018-06-23T14:21:08.000Z"  itemprop="datePublished">
+    2018-06-23
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React-Native/">React Native</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1701</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  15  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前端"><a href="#前端" class="headerlink" title="前端"></a>前端</h2><p>React Native 可以做很多类型的应用，但是一般很少人用 React Native 做直播应用、视频应用、音乐应用。原因是 React Native 本身没有提供 Video/Audio 的组件，其次是第三方的组件支持力度不够。如果要开发这类型的应用很可能需要自己造轮子，这意味着要使用原生的代码写组件，并且要支持 Android 和 IOS，在开发时间上有点划不来。</p>
+<p>下面的文章里介绍一种轻量级的 React Native 音乐应用实现思路。</p>
+<a id="more"></a>
+<h2 id="技术实现"><a href="#技术实现" class="headerlink" title="技术实现"></a>技术实现</h2><p>在 React Native 里实现一个音乐播放界面，说是界面实际上是需要功能的实现。包括了：音乐播放、音乐暂停、音乐进度控制、音乐下一首、音乐上一首、音乐列表、歌词滚动式查看。</p>
+<p>对于音乐下一首、列表等实现比较简单。就是说一下比较难实现的：</p>
+<ul>
+<li>音乐播放</li>
+<li>音乐进度控制</li>
+<li>歌词滚动</li>
+</ul>
+<h3 id="音乐播放"><a href="#音乐播放" class="headerlink" title="音乐播放"></a>音乐播放</h3><p>对于<strong>音乐播放</strong>，开始想的是使用 React Native 的一个第三方 Video 组件：<code>react-native-video</code>。试了一下，现在连打包都编译失败，这个库仍有很多 BUG 还未修复（<a href="https://github.com/react-native-community/react-native-video/issues" target="_blank" rel="noopener">issues</a>），想想还是算了，不知会遇到多少神坑。</p>
+<p>后来想了一种比较稳的实现方式，就是使用 <code>WebView</code> 组件，在 HTML 里使用 Audio 实现音乐的播放/暂停等功能。具体的 UI 并不在 WebView 里实现，WebView 只负责把音乐解析并播放出声音就可以了。也就是，这个 WebView 完全可以设置为透明（不可见）状态。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180621233025.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>音乐播放是使用 HTML5 Audio 标签实现的，Audio 提供了几个有用的属性：</p>
+<ul>
+<li>src：音乐的 URL。</li>
+<li>autoplay：自动播放。</li>
+<li>loop：循环播放。</li>
+<li>preload： 在页面加载后，进行预加载。</li>
+<li>on('timeupdate')：播放时间改变时触发。</li>
+<li>on('ended')：播放结束。</li>
+<li>play()：开始播放。</li>
+<li>pause()：播放暂停。</li>
+<li>on('volumechange')：音乐声音大小改变时触发。</li>
+<li>fastSeek()：在音频播放器中指定播放时间。</li>
+<li>currentTime：设置或返回音频中的当前播放位置（以秒计）。</li>
+<li>duration：返回音频的长度（以秒计）。</li>
+</ul>
+<p>在了解这些属性与方法后，逻辑操作的反馈可以通过 WebView 与 React Native 的通信接口进行通信。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// webview</span></span><br><span class="line"><span class="keyword">const</span> html = <span class="function"><span class="params">data</span> =&gt;</span> <span class="string">`</span></span><br><span class="line"><span class="string">    &lt;audio src="<span class="subst">$&#123;data.src&#125;</span>" id="audio" /&gt;</span></span><br><span class="line"><span class="string">    &lt;script&gt;</span></span><br><span class="line"><span class="string">        // 推送</span></span><br><span class="line"><span class="string">        window.postMessage(JSON.string(&#123;</span></span><br><span class="line"><span class="string">            name: 'abc',</span></span><br><span class="line"><span class="string">        &#125;));</span></span><br><span class="line"><span class="string">        // 接收</span></span><br><span class="line"><span class="string">        document.addEventListener('message', e =&gt; &#123;</span></span><br><span class="line"><span class="string">            const msg = e.data;</span></span><br><span class="line"><span class="string">        &#125;);</span></span><br><span class="line"><span class="string">    &lt;/script&gt;</span></span><br><span class="line"><span class="string">`</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// react native</span></span><br><span class="line">&lt;WebView</span><br><span class="line">    style=&#123;&#123; <span class="attr">width</span>: <span class="number">0</span>, <span class="attr">height</span>: <span class="number">0</span> &#125;&#125;</span><br><span class="line">    javaScriptEnabled=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    source=&#123;&#123; html &#125;&#125;</span><br><span class="line">    startInLoadingState=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">    onMessage=&#123;e =&gt; &#123;</span><br><span class="line">        <span class="comment">// 接收</span></span><br><span class="line">        <span class="keyword">const</span> date = e.nativeEvent.data;</span><br><span class="line">    &#125;&#125;</span><br><span class="line">    ref=&#123;f =&gt; <span class="keyword">this</span>.webview = f&#125;</span><br><span class="line">    /&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 推送</span></span><br><span class="line"><span class="keyword">this</span>.webview.postMessage(<span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">    name: <span class="string">'123'</span>,</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+<p>就这样一推一接的，类似命令的方式实现 WebView 与 React Native 之间的通信。要实现音乐的播放、暂停等真心不难了。</p>
+<h3 id="音乐进度控制"><a href="#音乐进度控制" class="headerlink" title="音乐进度控制"></a>音乐进度控制</h3><p>对于<strong>音乐进度控制</strong>，一开始想是自己用基础组件和一些触摸事件造一个进度组件出来，后来想想实际上就是一个 <code>Slider</code> （滑块）的基础组件。只有设定 Slider 的范围为 <code>0 ~ 100</code>，就可以映射到 0% ~ 100% 的量。在拖动的时候，更加百分比动态计算音乐播放的位置即可。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180621225358.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>设定音乐的进度是一个时间量（毫秒）。那么显示的进度时间值为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> ft = <span class="function"><span class="params">n</span> =&gt;</span> n &lt; <span class="number">10</span> ? <span class="string">'0'</span> + n : n;</span><br><span class="line"><span class="keyword">const</span> t = currentTime;</span><br><span class="line"><span class="keyword">const</span> currentText = ft(t / <span class="number">60</span> % <span class="number">60</span>) + <span class="string">':'</span> + ft(t % <span class="number">60</span>);  <span class="comment">// =&gt; 03:02</span></span><br></pre></td></tr></table></figure>
+<p>currentTime 是一个动态的值，当拖动滑块时它应该是这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当前位置 = 百分比 * 音乐长度（持续时间）</span></span><br><span class="line">currentTime = progress * <span class="number">0.01</span> * duration;</span><br></pre></td></tr></table></figure>
+<p>最后，把进度值反馈给 Audio。</p>
+<h3 id="歌词滚动"><a href="#歌词滚动" class="headerlink" title="歌词滚动"></a>歌词滚动</h3><p>歌词的滚动，怎么说呢？说复杂也不复杂，说简单也不简单。装载歌词的容器需要是 ScrollView 或者 ListView。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/6/20180622000250.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>歌词的滚动通过缓慢的控制 ScrollView 的滚动条位置，就可以实现了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.scrollview.scrollTo(&#123; <span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="number">0</span>, <span class="attr">animated</span>: <span class="literal">true</span> &#125;);</span><br></pre></td></tr></table></figure>
+<p>具体的位置需要精确的计算。中间高亮突出的歌词效果也要精确计算，一般来说歌词不会有很多行，这里的渲染性能是可以保证的。</p>
+<p>那么怎么精确计算？</p>
+<p>假设拿到的歌词格式是这样，这里是一个数组（lyrics）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">00</span>:<span class="number">00.02</span>]李玉刚 - 刚好遇见你</span><br><span class="line">[<span class="number">00</span>:<span class="number">00.75</span>]词：高进</span><br><span class="line">[<span class="number">00</span>:<span class="number">00.85</span>]曲：高进</span><br><span class="line">[<span class="number">00</span>:<span class="number">00.94</span>]编曲：关天天</span><br><span class="line">[<span class="number">00</span>:<span class="number">13.13</span>]我们哭了</span><br><span class="line">[<span class="number">00</span>:<span class="number">15.79</span>]我们笑着</span><br><span class="line">[<span class="number">00</span>:<span class="number">18.83</span>]我们抬头望天空</span><br><span class="line">[<span class="number">00</span>:<span class="number">21.86</span>]星星还亮着几颗</span><br><span class="line">[<span class="number">00</span>:<span class="number">24.98</span>]我们唱着</span><br><span class="line">[<span class="number">00</span>:<span class="number">27.96</span>]时间的歌</span><br><span class="line">[<span class="number">00</span>:<span class="number">31.09</span>]才懂得相互拥抱</span><br><span class="line">[<span class="number">00</span>:<span class="number">33.98</span>]到底是为了什么</span><br><span class="line">[<span class="number">00</span>:<span class="number">37.30</span>]因为我刚好遇见你</span><br><span class="line">[<span class="number">00</span>:<span class="number">40.77</span>]留下足迹才美丽</span><br><span class="line">[<span class="number">00</span>:<span class="number">43.79</span>]风吹花落泪如雨</span><br><span class="line">[<span class="number">00</span>:<span class="number">46.80</span>]因为不想分离</span><br><span class="line">[<span class="number">00</span>:<span class="number">49.95</span>]因为刚好遇见你</span><br><span class="line">[<span class="number">00</span>:<span class="number">53.10</span>]留下十年的期许</span><br><span class="line">[<span class="number">00</span>:<span class="number">55.99</span>]如果再相遇</span><br><span class="line">[<span class="number">00</span>:<span class="number">59.21</span>]我想我会记得你</span><br><span class="line">[<span class="number">01</span>:<span class="number">14.32</span>]我们哭了</span><br><span class="line">[<span class="number">01</span>:<span class="number">17.23</span>]我们笑着</span><br></pre></td></tr></table></figure>
+<p>实现的步骤分为四步：</p>
+<ul>
+<li><p>第一步：先把时间转为以秒为单位的时间量。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [m, s] = item.replace(<span class="regexp">/\[(.*)\].*/</span>, <span class="string">'$1'</span>).split(<span class="string">':'</span>);</span><br><span class="line"><span class="keyword">const</span> t = m * <span class="number">60</span> + s * <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第二步：找出 currentTime 最接近，但未超过的时间点。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">activeLyric</span>(<span class="params">currentTime</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> index = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; lyrics.length; i++) &#123;</span><br><span class="line">        <span class="keyword">const</span> item = lyrics[i];</span><br><span class="line">        <span class="keyword">const</span> [m, s] = item.replace(<span class="regexp">/\[(.*)\].*/</span>, <span class="string">'$1'</span>).split(<span class="string">':'</span>);</span><br><span class="line">        <span class="keyword">const</span> t = m * <span class="number">60</span> + s * <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (t &lt;= currentTime)</span><br><span class="line">            index = i;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> index;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第三步：高亮此位置的文本。</p>
+  <figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;ScrollView&gt;</span><br><span class="line">    lyrics.map(<span class="function"><span class="params">i</span> =&gt;</span> i.replace(<span class="regexp">/\[.*\](.*)/</span>, <span class="string">'$1'</span>)).map(<span class="function">(<span class="params">text, index</span>) =&gt;</span> (</span><br><span class="line">        &lt;View key=&#123;index&#125;&gt;</span><br><span class="line">            index === activeLyric(currentTime) ?</span><br><span class="line">            &lt;Text style=&#123;&#123; <span class="attr">color</span>: <span class="string">'#f45'</span> &#125;&#125;&gt;&#123;text&#125;&lt;<span class="regexp">/Text&gt; :</span></span><br><span class="line"><span class="regexp">            &lt;Text&gt;&#123;text&#125;&lt;/</span>Text&gt;</span><br><span class="line">        &lt;<span class="regexp">/View&gt;</span></span><br><span class="line"><span class="regexp">    ))</span></span><br><span class="line"><span class="regexp">&lt;/</span>ScrollView&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第四步：歌词的自动滚动动画。大致的思路是，一开始插入半屏的空白区，每一个时间点就移动一次。移动的距离为每一项的高度，默认认为不会出现换行的情况，那就是每次移动的距离都是一样的。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.d += <span class="number">20</span>;</span><br><span class="line"><span class="keyword">this</span>.scrollview.scrollTo(&#123; <span class="attr">x</span>: <span class="number">0</span>, <span class="attr">y</span>: <span class="keyword">this</span>.d, <span class="attr">animated</span>: <span class="literal">true</span> &#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>对于一个音乐应用最核心的就是音乐播放，在 React Native 里实现音乐应用的思路也就是如此了。</p>
+<p>上面的思路是凭空想出来的，在没有编写一行代码的情况下，写出来的，可以说是一个无实验性的理论值吧。最近比较忙，等有空的时候，写一个  Dome，验证一下效果，并补上 Dome Github 地址。</p>
+<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><p>笔者发现一个在 React Native 上的音频库：<a href="https://github.com/zmxv/react-native-sound" target="_blank" rel="noopener">react-native-sound</a>，可以替代 HTML5 的方案。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.858Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/06/React Native/Media/谈谈 React Native 音乐应用实现思路/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/06/React Native/Media/谈谈 React Native 音乐应用实现思路/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React-Native/">React-Native</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/移动开发/">移动开发</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/07/Redux/基于 Redux 的框架设计/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">基于 Redux 的框架设计</h4>
+        <h4 class="summary">Redux 是一个数据流管理框架，现在被大量使用在 React 应用开发里。在 Redux 里有非常复杂的概念，当你使用...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/06/测试/单元测试/Nodejs HTTP 测试/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs HTTP 接口测试</h4>
+        <h4 class="summary">HTTP 接口测试是非常重要的一部分，当编写完成后端接口，很多时候需要手动的去使用 REST 客户端去测试，但是这样是很...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

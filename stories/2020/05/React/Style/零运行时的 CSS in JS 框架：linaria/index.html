@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2020/05/React/Style/零运行时的 CSS in JS 框架：linaria/">
+    
+    
+    <title>💅 零运行时的 CSS in JS 框架：linaria | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言之前接触的两个 CSS in JS 框架：styled-components 和 emotion 都是采用 js 驱动，有运行时的框架。今天来介绍，一个完全无运行时的 CSS in JS 框架，那就是 linaria。 与 styled-components 和 emotion 相比，linaria 最大的特点就是 无运行时，它会在 Webpack/Parcel 编译是对你写的 CSS in">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="💅 零运行时的 CSS in JS 框架：linaria">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2020/05/React/Style/零运行时的 CSS in JS 框架：linaria/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言之前接触的两个 CSS in JS 框架：styled-components 和 emotion 都是采用 js 驱动，有运行时的框架。今天来介绍，一个完全无运行时的 CSS in JS 框架，那就是 linaria。 与 styled-components 和 emotion 相比，linaria 最大的特点就是 无运行时，它会在 Webpack/Parcel 编译是对你写的 CSS in">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.886Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="💅 零运行时的 CSS in JS 框架：linaria">
+<meta name="twitter:description" content="前言之前接触的两个 CSS in JS 框架：styled-components 和 emotion 都是采用 js 驱动，有运行时的框架。今天来介绍，一个完全无运行时的 CSS in JS 框架，那就是 linaria。 与 styled-components 和 emotion 相比，linaria 最大的特点就是 无运行时，它会在 Webpack/Parcel 编译是对你写的 CSS in">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">💅 零运行时的 CSS in JS 框架：linaria</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">💅 零运行时的 CSS in JS 框架：linaria</h1>
+
+        <div class="meta-rest">
+            <h1>💅 零运行时的 CSS in JS 框架：linaria</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2020-05-26T07:07:23.000Z" itemprop="datePublished" class="page-time">
+    2020-05-26
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#styled-模式"><span class="post-toc-number">2.</span> <span class="post-toc-text">styled 模式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#css-模式"><span class="post-toc-number">3.</span> <span class="post-toc-text">css 模式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#静态变量"><span class="post-toc-number">4.</span> <span class="post-toc-text">静态变量</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Data-属性"><span class="post-toc-number">5.</span> <span class="post-toc-text">Data 属性</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#在-Create-React-App-的项目上使用"><span class="post-toc-number">6.</span> <span class="post-toc-text">在 Create React App 的项目上使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">7.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/Style/零运行时的 CSS in JS 框架：linaria"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">💅 零运行时的 CSS in JS 框架：linaria</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020 年 05 月 26 日 15:07" datetime="2020-05-26T07:07:23.000Z"  itemprop="datePublished">
+    2020-05-26
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 530</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前接触的两个 CSS in JS 框架：styled-components 和 emotion 都是采用 js 驱动，有运行时的框架。今天来介绍，一个完全无运行时的 CSS in JS 框架，那就是 <a href="https://github.com/callstack/linaria" target="_blank" rel="noopener">linaria</a>。</p>
+<p>与 styled-components 和 emotion 相比，linaria 最大的特点就是 <strong>无运行时</strong>，它会在 Webpack/Parcel 编译是对你写的 CSS in JS 进行抽离，生成独立的 css 文件，脱离的 js 的动态生成样式的方式，其性能更加的好和轻量级，并且使用方式与 styled-compoents 类似，提供 styled 风格和 css 风格的两种模式。</p>
+<a id="more"></a>
+<h2 id="styled-模式"><a href="#styled-模式" class="headerlink" title="styled 模式"></a>styled 模式</h2><p>styled 模式就是一个样式就是一个组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; styled &#125; <span class="keyword">from</span> <span class="string">'linaria/react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;Title&gt;Hello&lt;<span class="regexp">/Title&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Title = styled.div<span class="string">`</span></span><br><span class="line"><span class="string">    font-size: 20px;</span></span><br><span class="line"><span class="string">    color: #39f;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="css-模式"><a href="#css-模式" class="headerlink" title="css 模式"></a>css 模式</h2><p>css 模式就是通过 class 来实现的样式，个人更加喜欢这种方式。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; css &#125; <span class="keyword">from</span> <span class="string">'linaria'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;div className=&#123;styles.text&#125;&gt; Hello&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> styles = &#123;</span><br><span class="line">    text: css`</span><br><span class="line"><span class="css">        <span class="selector-tag">font-size</span>: 25<span class="selector-tag">px</span>;</span></span><br><span class="line"><span class="css">        <span class="selector-tag">color</span>: <span class="selector-id">#f34</span>;</span></span><br><span class="line"><span class="css">    `</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="静态变量"><a href="#静态变量" class="headerlink" title="静态变量"></a>静态变量</h2><p>linaria 支持静态的变量赋值，但是不支持动态的变量赋值，例如不支持主题功能，不支持将 state 注入到样式里。</p>
+<p>以下方式是支持的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> color = <span class="string">'#f34'</span>;</span><br><span class="line"><span class="keyword">const</span> text = css`</span><br><span class="line"><span class="css">    <span class="selector-tag">font-size</span>: 25<span class="selector-tag">px</span>;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">color</span>: </span><span class="subst">$&#123;color&#125;</span><span class="css">;</span></span><br><span class="line"><span class="css">`</span>,</span><br></pre></td></tr></table></figure>
+<p>如果你要想做主题功能，请使用 css 变量的方式。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> a = css`</span><br><span class="line"><span class="css">    <span class="selector-tag">--color-primary</span>: <span class="selector-id">#6200ee</span>;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">--color-accent</span>: <span class="selector-id">#03dac4</span>;</span></span><br><span class="line"><span class="css">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> b = css`</span><br><span class="line"><span class="css">    <span class="selector-tag">--color-primary</span>: <span class="selector-id">#03a9f4</span>;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">--color-accent</span>: <span class="selector-id">#e91e63</span>;</span></span><br><span class="line"><span class="css">`</span>;</span><br><span class="line"></span><br><span class="line">&lt;Container className=&#123;a&#125; /&gt;;</span><br></pre></td></tr></table></figure>
+<h2 id="Data-属性"><a href="#Data-属性" class="headerlink" title="Data 属性"></a>Data 属性</h2><p>可以定义在元素上的 data attr，来指定样式。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; css &#125; <span class="keyword">from</span> <span class="string">'linaria'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> box = css`</span><br><span class="line"><span class="css">    &amp;<span class="selector-attr">[data-valid]</span> &#123;</span></span><br><span class="line"><span class="css">        <span class="selector-tag">color</span>: <span class="selector-tag">yellow</span>;</span></span><br><span class="line"><span class="css">    &#125;</span></span><br><span class="line"><span class="css">    &amp;<span class="selector-attr">[data-valid=<span class="string">"invalid"</span>]</span> &#123;</span></span><br><span class="line"><span class="css">        <span class="selector-tag">color</span>: <span class="selector-tag">red</span>;</span></span><br><span class="line"><span class="css">    &#125;</span></span><br><span class="line"><span class="css">    &amp;<span class="selector-attr">[data-valid=<span class="string">"valid"</span>]</span> &#123;</span></span><br><span class="line"><span class="css">        <span class="selector-tag">color</span>: <span class="selector-tag">green</span>;</span></span><br><span class="line"><span class="css">    &#125;</span></span><br><span class="line"><span class="css">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">Box</span>(<span class="params">&#123; color, valid &#125;</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div</span><br><span class="line">            className=&#123;box&#125;</span><br><span class="line">            data-valid=&#123;valid ? <span class="string">'valid'</span> : <span class="string">'invalid'</span>&#125;</span><br><span class="line">        /&gt;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="在-Create-React-App-的项目上使用"><a href="#在-Create-React-App-的项目上使用" class="headerlink" title="在 Create React App 的项目上使用"></a>在 Create React App 的项目上使用</h2><p>安装 <a href="https://www.npmjs.com/package/craco" target="_blank" rel="noopener">craco</a> 和 <a href="https://www.npmjs.com/package/craco-linaria" target="_blank" rel="noopener">craco-linaria</a>，更改 npm script 为 craco 操作，接着添加 <code>craco.config.js</code> 文件在项目根目录上。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> CracoLinariaPlugin = <span class="built_in">require</span>(<span class="string">'craco-linaria'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    plugins: [&#123;</span><br><span class="line">        plugin: CracoLinariaPlugin,</span><br><span class="line">        options: &#123;</span><br><span class="line">            <span class="comment">// Linaria options</span></span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/callstack/linaria" target="_blank" rel="noopener">https://github.com/callstack/linaria</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.886Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2020/05/React/Style/零运行时的 CSS in JS 框架：linaria/" target="_blank" rel="external">http://me.lizhooh.com/stories/2020/05/React/Style/零运行时的 CSS in JS 框架：linaria/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2020/05/小程序/小程序页面数据回传的解决方案/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">小程序页面数据回传的解决方案</h4>
+        <h4 class="summary">小程序比较坑爹的是很多东西不能动态的生成，例如官方提供的 Tabs 不能动态生成。还有其他的坑，比如页面之间传值通过 u...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2020/05/React/Hooks/react-hook-form：一个表单终结者 hook 库/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">react-hook-form：一个表单终结者 hook 库</h4>
+        <h4 class="summary">React-Hook-Form 是一个基于 hooks 的表单处理库，它的特点就是使用简单，高性能，其核心原理就是使用 ...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

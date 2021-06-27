@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/menu/share.html">
+    
+    
+    <title>干货分享 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="ul {         margin-right: 5px;     }   轻学习表 devhints.io - 快速学习的宝地  JSConf China 2017 前端工程中的编译时优化 - 尤雨溪（Vue.js 作者） Upgrading to Progressive Web Apps - 黄玄（前端外刊评论成员） 无服务器架构与 API - 朴灵（阿里巴巴 Node.js 布">
+<meta property="og:type" content="website">
+<meta property="og:title" content="干货分享">
+<meta property="og:url" content="http://me.lizhooh.com/menu/share.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="ul {         margin-right: 5px;     }   轻学习表 devhints.io - 快速学习的宝地  JSConf China 2017 前端工程中的编译时优化 - 尤雨溪（Vue.js 作者） Upgrading to Progressive Web Apps - 黄玄（前端外刊评论成员） 无服务器架构与 API - 朴灵（阿里巴巴 Node.js 布">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:53.404Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="干货分享">
+<meta name="twitter:description" content="ul {         margin-right: 5px;     }   轻学习表 devhints.io - 快速学习的宝地  JSConf China 2017 前端工程中的编译时优化 - 尤雨溪（Vue.js 作者） Upgrading to Progressive Web Apps - 黄玄（前端外刊评论成员） 无服务器架构与 API - 朴灵（阿里巴巴 Node.js 布">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">干货分享</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header page-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">干货分享</h1>
+
+        <div class="meta-rest">
+            <h1>干货分享</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    <article class="page-article fade" itemprop="blogPage">
+        <div class="post-content page-content" id="page-content" itemprop="pageContent">
+            <style>
+    ul {
+        margin-right: 5px;
+    }
+</style>
+
+<h2 id="轻学习表"><a href="#轻学习表" class="headerlink" title="轻学习表"></a>轻学习表</h2><ul>
+<li><a href="https://devhints.io/" target="_blank" rel="noopener">devhints.io</a> - 快速学习的宝地</li>
+</ul>
+<h2 id="JSConf-China-2017"><a href="#JSConf-China-2017" class="headerlink" title="JSConf China 2017"></a>JSConf China 2017</h2><ul>
+<li><a href="/stories/2016/01/干货/JSConf/2017/前端工程中的编译时优化 - 尤雨溪/" target="_blank">前端工程中的编译时优化</a> - 尤雨溪（Vue.js 作者）<!--- <a href='/stories/2016/01/干货/JSConf/2017/学习 React Native 的历程 - 有关 React Native 你需要知道的一切/' target='_blank'>学习 React Native 的历程，有关 React Native 你需要知道的一切</a> - Neo Nie--></li>
+<li><a href="/stories/2016/01/干货/JSConf/2017/Upgrading to Progressive Web Apps - 黄玄/" target="_blank">Upgrading to Progressive Web Apps</a> - 黄玄（前端外刊评论成员）</li>
+<li><a href="/stories/2016/01/干货/JSConf/2017/无服务器架构与 API - 朴灵（阿里巴巴 Node.js 布道者）/" target="_blank">无服务器架构与 API</a> - 朴灵（阿里巴巴 Node.js 布道者）</li>
+<li><a href="/stories/2016/01/干货/JSConf/2017/从 REST 到 GraphQL - Jonas Helfer/" target="_blank">从 REST 到 GraphQL</a> - Jonas Helfer</li>
+<li><a href="/stories/2016/01/干货/JSConf/2017/Node.js 开发物联网应用 - 张子发/" target="_blank">Node.js 开发物联网应用</a> - 张子发</li>
+<li><a href="/stories/2016/01/干货/JSConf/2017/如何利用 Ruff OS 物联网操作系统快速开发硬件产品 - 郑晔/" target="_blank">如何利用 Ruff OS 物联网操作系统快速开发硬件产品</a> - 郑晔（Moco 框架创始人）</li>
+</ul>
+<h2 id="前端圈"><a href="#前端圈" class="headerlink" title="前端圈"></a>前端圈</h2><ul>
+<li><a href="/stories/2016/01/干货/前端圈/如何用 JavaScript 做好一个大型应用？ - 孟红伦（钉钉前端负责人）/" target="_blank">如何用 JavaScript 做好一个大型应用？</a> - 孟红伦（钉钉前端负责人）</li>
+<li><a href="/stories/2016/01/干货/前端圈/谈项目中如何选择框架和库 - 张克军（豆瓣前端专家）/" target="_blank">谈项目中如何选择框架和库</a> - 张克军（豆瓣前端专家）</li>
+<li><a href="/stories/2016/01/干货/前端圈/从 Cycle.js 谈函数式与响应式编程 - 叶俊星（美团网资深前端工程师）/" target="_blank">从 Cycle.js 谈函数式与响应式编程</a> - 叶俊星（美团网资深前端工程师）</li>
+<li><a href="/stories/2016/01/干货/前端圈/链家前端工程化实践 - 杨永林（链家前端架构师）/" target="_blank">链家前端工程化实践</a> - 杨永林（链家前端架构师）</li>
+<li><a href="/stories/2016/01/干货/前端圈/基于 React Native 的跨三端技术实践 - 刘威（京东金融移动研发前端负责人）/" target="_blank">基于 React Native 的跨三端技术实践</a> - 刘威（京东金融移动研发前端负责人）</li>
+<li><a href="/stories/2016/01/干货/前端圈/WebAssembly 在白鹭引擎中的实践 - 王泽（白鹭引擎首席架构师）/" target="_blank">WebAssembly 在白鹭引擎中的实践</a>  - 王泽（白鹭引擎首席架构师）</li>
+</ul>
+<h2 id="D2-前端技术论坛"><a href="#D2-前端技术论坛" class="headerlink" title="D2 前端技术论坛"></a>D2 前端技术论坛</h2><ul>
+<li><a href="http://d2forum.alibaba-inc.com/#/index?_k=0ph3sx" target="_blank">2017 D2前端技术论坛</a></li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/微信小程序解决方案 - 黄荣奎（腾讯高级前端工程师）/" target="_blank">微信小程序解决方案</a> - 黄荣奎（腾讯高级前端工程师）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/Weex 在双十一会场的大规模应用 - 徐凯（淘宝高级前端工程师）/" target="_blank">Weex 在双十一会场的大规模应用</a> - 徐凯（淘宝高级前端工程师）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/Web3D & AR 在天猫双11互动中大规模应用 - 吴晓东 & 张津（天猫资深前端）/" target="_blank">Web3D &amp; AR 在天猫双 11 互动中大规模应用</a> - 吴晓东 &amp; 张津（天猫资深前端）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/基于云端真机的无线调试解决方案 - 谭海燕（淘宝高级前端工程师）/" target="_blank">基于云端真机的无线调试解决方案</a> - 谭海燕（淘宝高级前端工程师）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/前端服务化：通向零成本开发之路 - 吴多益（百度前端负责人）/" target="_blank">前端服务化：通向零成本开发之路</a> - 吴多益（百度前端负责人）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/XCore —蘑菇街移动端动态跨平台开发框架 - 王兴楠（蘑菇街技术专家）/" target="_blank">XCore — 蘑菇街移动端动态跨平台开发框架</a> - 王兴楠（蘑菇街技术专家）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/蚂蚁财富的 BFF 实践 - 汤尧（蚂蚁金服技术专家）/" target="_blank">蚂蚁财富的 BFF 实践</a> - 汤尧（蚂蚁金服技术专家）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/阿里小蜜 - 移动智能客服前端实践 - 韩盼盼（阿里巴巴资深前端）/" target="_blank">阿里小蜜 - 移动智能客服前端实践</a> - 韩盼盼（阿里巴巴资深前端）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/Node.js 在 YunOS 中的最佳实践 - 叶敬福（YunOS 技术专家）/" target="_blank">Node.js 在 YunOS 中的最佳实践</a> - 叶敬福（YunOS 技术专家）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/兴趣部落的架构演进与服务优化 - 郭碧青（腾讯前端高级工程师）/" target="_blank">QQ 兴趣部落的架构演进与服务优化</a> - 郭碧青（腾讯前端高级工程师）</li>
+<li><a href="/stories/2016/01/干货/D2 前端技术论坛/Fusion Design - 解构设计，抽象工程 - 周源（阿里巴巴前端专家）/" target="_blank">Fusion Design - 解构设计，抽象工程</a> - 周源（阿里巴巴 B2B 前端专家）</li>
+</ul>
+<h2 id="VueConf"><a href="#VueConf" class="headerlink" title="VueConf"></a>VueConf</h2><ul>
+<li><a href="/stories/2016/01/干货/VueConf/Vue.js 2017 现状与展望 Vue.js 作者尤雨溪/" target="_blank">Vue.js 2017 现状与展望</a> - 尤雨溪（Vue.js 作者）</li>
+<li><a href="/stories/2016/01/干货/VueConf/Vue SSR 和 API Proxy 层深度实践 - 桑世龙（去哪儿前端架构师）/" target="_blank">Vue SSR 和 API Proxy 层深度实践 </a> - 桑世龙（去哪儿前端架构师）</li>
+<li><a href="/stories/2016/01/干货/VueConf/掘金 Vue.js 2.0 后端渲染及重构实践 - 阴明（稀土掘金创始人）/" target="_blank">掘金 Vue.js 2.0 后端渲染及重构实践</a> - 阴明（稀土掘金创始人）</li>
+<li><a href="/stories/2016/01/干货/VueConf/Vue.js 在饿了么的应用 - 李清伟（饿了么前端工程师）/" target="_blank">Vue.js 在饿了么的应用</a> - 李清伟（饿了么前端工程师）</li>
+<li><a href="/stories/2016/01/干货/VueConf/当 Weex 遇上 Vue.js 2.0 - 马天翼（阿里巴巴 Weex 核心开发者）/" target="_blank">当 Weex 遇上 Vue.js 2.0</a> - 马天翼（阿里巴巴 Weex 核心开发者）</li>
+</ul>
+
+        </div>
+
+        
+        <div class="card page-about-me flex-row">
+            <a href="/" class="avatar waves-effect waves-circle waves-light"><img src="/img/my.png"></a>
+            <div class="content flex-col">
+                <p><strong>Lizhooh - 以后是全栈工程师</strong></p>
+                <p><span><div>来至未来的大全栈工程师自我修养日记。</div>深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</span></p>
+                <p>温故而知新，可以为师矣。</p>
+            </div>
+
+            
+
+
+        </div>
+        
+
+        
+
+
+        
+    </article>
+    
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

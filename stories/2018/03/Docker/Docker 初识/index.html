@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/03/Docker/Docker 初识/">
+    
+    
+    <title>Docker 初识 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言docker 是一个开源的应用容器引擎，可以为我们提供安全、可移植、可重复的自动化部署的方式。docker采用虚拟化的技术来虚拟化出应用程序的运行环境。">
+<meta name="keywords" content="后端,学习笔记,Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 初识">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/03/Docker/Docker 初识/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言docker 是一个开源的应用容器引擎，可以为我们提供安全、可移植、可重复的自动化部署的方式。docker采用虚拟化的技术来虚拟化出应用程序的运行环境。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180307105857.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180307133646.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180307133731.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/3/20180307133842.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.809Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker 初识">
+<meta name="twitter:description" content="前言docker 是一个开源的应用容器引擎，可以为我们提供安全、可移植、可重复的自动化部署的方式。docker采用虚拟化的技术来虚拟化出应用程序的运行环境。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/3/20180307105857.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Docker 初识</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Docker 初识</h1>
+
+        <div class="meta-rest">
+            <h1>Docker 初识</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-03-07T02:34:05.000Z" itemprop="datePublished" class="page-time">
+    2018-03-07
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Docker/">Docker</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#docker-用户组"><span class="post-toc-number">2.</span> <span class="post-toc-text">docker 用户组</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Hello-world"><span class="post-toc-number">3.</span> <span class="post-toc-text">Hello world!</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Nodejs"><span class="post-toc-number">4.</span> <span class="post-toc-text">Nodejs</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Mongodb"><span class="post-toc-number">5.</span> <span class="post-toc-text">Mongodb</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Dockerfile"><span class="post-toc-number">6.</span> <span class="post-toc-text">Dockerfile</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#FROM"><span class="post-toc-number">6.1.</span> <span class="post-toc-text">FROM</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MAINTAINER"><span class="post-toc-number">6.2.</span> <span class="post-toc-text">MAINTAINER</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ADD"><span class="post-toc-number">6.3.</span> <span class="post-toc-text">ADD</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WORKDIR"><span class="post-toc-number">6.4.</span> <span class="post-toc-text">WORKDIR</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#RUN"><span class="post-toc-number">6.5.</span> <span class="post-toc-text">RUN</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ENV"><span class="post-toc-number">6.6.</span> <span class="post-toc-text">ENV</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#EXPOSE"><span class="post-toc-number">6.7.</span> <span class="post-toc-text">EXPOSE</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CMD"><span class="post-toc-number">6.8.</span> <span class="post-toc-text">CMD</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#常用-docker-命令"><span class="post-toc-number">7.</span> <span class="post-toc-text">常用 docker 命令</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#切换国内源"><span class="post-toc-number">8.</span> <span class="post-toc-text">切换国内源</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">9.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-Docker/Docker 初识"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Docker 初识</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 03 月 07 日 10:34" datetime="2018-03-07T02:34:05.000Z"  itemprop="datePublished">
+    2018-03-07
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Docker/">Docker</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2251</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href>docker</a> 是一个开源的应用容器引擎，可以为我们提供安全、可移植、可重复的自动化部署的方式。docker采用虚拟化的技术来虚拟化出应用程序的运行环境。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180307105857.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<p>使用 docker 有以下的优势：</p>
+<ul>
+<li>每个部署的应用程序都是一个容器，彼此隔离，互不影响。</li>
+<li>服务器只需要安装 docker 即可运行构建好的应用程序镜像，不会涉及复杂的服务器环境配置，因为配置都在特定的应用程序所在的镜像中去配置即可。</li>
+<li>可以让开发环境与生产环境尽可能的保持一致。</li>
+<li>简化了自动化部署和运维的繁琐流程，只需将构建好的镜像加载到服务器的 docker 中即可运行我们的应用程序。</li>
+<li>可以充分利用服务器的系统资源，一台服务器上可以同时运行多个容器。</li>
+</ul>
+<blockquote>
+<p>笔者的 liunx 是 Debian，安装部分参考文档即可。<a href="http://www.dockerinfo.net/document" target="_blank" rel="noopener">Dockerinfo</a></p>
+</blockquote>
+<h2 id="docker-用户组"><a href="#docker-用户组" class="headerlink" title="docker 用户组"></a>docker 用户组</h2><p>每次运行 docker 时都需要高级权限，可以把当前用户添加到 docker 用户组里，这样就不用每次的 sudo 了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo usermod -aG docker lizhooh</span><br></pre></td></tr></table></figure>
+<p><code>lizhooh</code> 是用户名，添加用户组之后需要重启电脑。</p>
+<h2 id="Hello-world"><a href="#Hello-world" class="headerlink" title="Hello world!"></a>Hello world!</h2><p>现在，使用 docker 里运行一个 Hello world!。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run ubuntu:14.04 /bin/<span class="built_in">echo</span> <span class="string">'Hello world'</span></span><br></pre></td></tr></table></figure>
+<p>在这里指定了运行的环境是 <code>ubuntu</code>，指定版本是 14.04。使用 echo 输出 Hello world。执行命令后，docker 先会去下载镜像，之后就可以看到 Hello world 了。</p>
+<h2 id="Nodejs"><a href="#Nodejs" class="headerlink" title="Nodejs"></a>Nodejs</h2><p>在 docker 上运行 Nodejs 应用，比较好的方式是在 vscode 上安装 docker 插件。</p>
+<p>新建一个 Nodejs 应用，之后创建 <code>Dockerfile</code>：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180307133646.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>接着 <code>build</code>：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180307133731.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>build 之后 <code>run</code>：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/3/20180307133842.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<p>接着可以访问你的 Nodejs 应用了。</p>
+<p>使用 Dockerfile 的方式，每次都需要重新编译。</p>
+<h2 id="Mongodb"><a href="#Mongodb" class="headerlink" title="Mongodb"></a>Mongodb</h2><p>在上面使用 Dockerfile 的方式运行，这里直接从 dockerhub 里下载 Mongodb 的镜像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找镜像</span></span><br><span class="line">docker search mongo</span><br><span class="line">docker pull mongo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建文件</span></span><br><span class="line">mkdir -p mongo/db</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动实例</span></span><br><span class="line">docker run --name --rm mongo-test -d -p 27017:27017 -v <span class="variable">$PWD</span>/db:/data/db mongo</span><br></pre></td></tr></table></figure>
+<p><b>说明：</b></p>
+<ul>
+<li><code>--name</code> 指定 docker 实例名称。</li>
+<li><code>--rm</code> 在容器停止时，自动删除容器，而不是遗留。</li>
+<li><code>-d</code> 实例在后台运行。</li>
+<li><code>-p</code> 进行端口映射。</li>
+<li><code>-v</code> 数据卷映射。把当前（pwd）路径下的 mongo/db 目录映射到容器的 /data/db 目录，作为 Mongodb 数据存储目录。</li>
+<li><code>mongo</code> 是运行的镜像名称。</li>
+</ul>
+<p>之后可以使用 Mongodb Compass 连接，对于其他数据库如 redis，mysql 也是差不多这样。</p>
+<h2 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h2><p>Dockerfile 由一行行命令语句组成，并且支持以 <code>#</code> 开头的注释行。<br>一般的，Dockerfile 分为四部分：基础镜像信息、维护者信息、镜像操作指令和容器启动时执行指令。</p>
+<p>例如这个 Dockerfile：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定我们的基础镜像是 node，版本是 v9.0.0</span></span><br><span class="line">FROM node:9.0.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定制作我们的镜像的联系人信息（镜像创建者）</span></span><br><span class="line">MAINTAINER Lizhooh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将根目录下的文件都 copy 到 container（运行此镜像的容器）文件系统的 app 文件夹下</span></span><br><span class="line">ADD ./ /app/</span><br><span class="line"></span><br><span class="line"><span class="comment"># cd 到 app 文件夹下</span></span><br><span class="line">WORKDIR /app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装项目依赖包</span></span><br><span class="line">RUN npm install</span><br><span class="line">RUN npm rebuild node-sass --force</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置环境变量</span></span><br><span class="line">ENV HOST 0.0.0.0</span><br><span class="line">ENV PORT 8000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器对外暴露的端口号</span></span><br><span class="line">EXPOSE 8000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器启动时执行的命令，类似 npm run start</span></span><br><span class="line">CMD [<span class="string">"npm"</span>, <span class="string">"start"</span>]</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p><b>其中常用的命令有：</b></p>
+<h3 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h3><ul>
+<li><b>语法：</b><code>FROM &lt;image&gt;[:&lt;tag&gt;]</code></li>
+<li>解释：设置要制作的镜像基于哪个镜像，FROM 指令必须是整个 Dockerfile 的第一个指令。</li>
+</ul>
+<h3 id="MAINTAINER"><a href="#MAINTAINER" class="headerlink" title="MAINTAINER"></a>MAINTAINER</h3><ul>
+<li><b>语法：</b><code>MAINTAINER &lt;name&gt;</code></li>
+<li>解释：MAINTAINER 指令允许你给将要制作的镜像设置作者信息。</li>
+</ul>
+<h3 id="ADD"><a href="#ADD" class="headerlink" title="ADD"></a>ADD</h3><ul>
+<li><b>语法：</b><code>ADD &lt;src&gt; &lt;dest&gt;</code></li>
+<li>解释：ADD 指令用于从指定路径拷贝一个文件或目录到容器的指定路径中，<code>&lt;src&gt;</code> 是一个文件或目录的路径，也可以是一个 url，路径是相对于该 Dockerfile 文件所在位置的相对路径，<code>&lt;dest&gt;</code> 是目标容器的一个<strong>绝对路径</strong>。</li>
+</ul>
+<h3 id="WORKDIR"><a href="#WORKDIR" class="headerlink" title="WORKDIR"></a>WORKDIR</h3><ul>
+<li><b>语法：</b><code>WORKDIR /path/to/workdir</code></li>
+<li>解释：WORKDIR 指令用于设置 Dockerfile 中的 RUN、CMD 和 ENTRYPOINT 指令执行命令的工作目录（默认为根目录），该指令在 Dockerfile 文件中可以出现多次，如果使用相对路径则为相对于 WORKDIR 上一次的值，例如 WORKDIR /data，WORKDIR logs，RUN pwd 最终输出的当前目录是 /data/logs。</li>
+</ul>
+<h3 id="RUN"><a href="#RUN" class="headerlink" title="RUN"></a>RUN</h3><ul>
+<li><b>语法：</b><ol>
+<li><code>RUN &lt;command&gt;</code> 将会调用 <code>/bin/sh -c &lt;command&gt;</code>。</li>
+<li><code>RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code> 将会调用 exec 执行，以避免有些时候 shell 方式执行时的传递参数问题，而且有些基础镜像可能不包含 /bin/sh。</li>
+</ol>
+</li>
+<li>解释：RUN 指令会在一个新的容器中执行任何命令，然后把执行后的改变提交到当前镜像，提交后的镜像会被用于 Dockerfile 中定义的下一步操作，RUN 中定义的命令会按顺序执行并提交，这正是 Docker 廉价的提交和可以基于镜像的任何一个历史点创建容器的好处，就像版本控制工具一样。</li>
+</ul>
+<h3 id="ENV"><a href="#ENV" class="headerlink" title="ENV"></a>ENV</h3><ul>
+<li><b>语法：</b><code>ENV &lt;key&gt; &lt;value&gt;</code></li>
+<li>解释：ENV 指令用于设置环境变量，在 Dockerfile 中这些设置的环境变量也会影响到 RUN 指令，当运行生成的镜像时这些环境变量依然有效，如果需要在运行时更改这些环境变量可以在运行 docker run 时添加 –env <code>&lt;key&gt;=&lt;value&gt;</code>参数来修改。注意：最好不要定义那些可能和系统预定义的环境变量冲突的名字，否则可能会产生意想不到的结果。</li>
+</ul>
+<h3 id="EXPOSE"><a href="#EXPOSE" class="headerlink" title="EXPOSE"></a>EXPOSE</h3><ul>
+<li><b>语法：</b><code>EXPOSE &lt;port&gt; [ ...]</code></li>
+<li>解释：EXPOSE 指令用来告诉 Docker 这个容器在运行时会监听哪些端口，Docker 在连接不同的容器（使用 –link 参数）时使用这些信息。</li>
+</ul>
+<h3 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h3><ul>
+<li><b>语法：</b><ol>
+<li><code>CMD [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code> 将会调用 exec 执行，首选方式。</li>
+<li><code>CMD [&quot;param1&quot;, &quot;param2&quot;]</code> 当使用 ENTRYPOINT 指令时，为该指令传递默认参数。</li>
+<li><code>CMD &lt;command&gt; [ &lt;param1&gt;|&lt;param2&gt; ]</code> 将会调用 /bin/sh -c 执行。</li>
+</ol>
+</li>
+<li>解释：CMD 指令中指定的命令会在镜像运行时执行，在 Dockerfile 中只能存在一个，如果使用了多个 CMD 指令，则只有最后一个 CMD 指令有效。当出现 ENTRYPOINT 指令时，CMD 中定义的内容会作为ENTRYPOINT 指令的默认参数，也就是说可以使用 CMD 指令给 ENTRYPOINT 传递参数。</li>
+<li>注意：RUN 和 CMD 都是执行命令，他们的差异在于 RUN 中定义的命令会在执行 docker build 命令创建镜像时执行，而 CMD 中定义的命令会在执行 docker run 命令运行镜像时执行，另外使用第一种语法也就是调用 exec 执行时，命令必须为<strong>绝对路径</strong>。</li>
+</ul>
+<h2 id="常用-docker-命令"><a href="#常用-docker-命令" class="headerlink" title="常用 docker 命令"></a>常用 docker 命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">docker images            <span class="comment"># 查看本地的 docker 镜像</span></span><br><span class="line">docker rmi &lt;image id&gt;    <span class="comment"># 删除本地的 docker 镜像</span></span><br><span class="line">docker build -t app:1.0  <span class="comment"># 编译镜像，app 是镜像名称，1.0 是镜像版本</span></span><br><span class="line">docker ps                <span class="comment"># 查看运行的 docker，-a 表示全部</span></span><br><span class="line">docker stats             <span class="comment"># 查看 docker 示例</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># -d 是后台运行，-p 是把本地 3000 端口映射到 docker 容器里的 4000 端口， app:1.0 是指定运行的镜像</span></span><br><span class="line"><span class="comment"># --name 是指定这个 docker 实例的名称</span></span><br><span class="line">docker run --name app -d -p 3000:4000 app:1.0</span><br><span class="line"></span><br><span class="line">docker logs &lt;container id&gt;           <span class="comment"># 查看容器输出日志</span></span><br><span class="line">docker stop &lt;container id&gt;           <span class="comment"># 停止容器运行</span></span><br><span class="line">docker start &lt;container id&gt;          <span class="comment"># 启动容器运行</span></span><br><span class="line">docker restart &lt;container id&gt;        <span class="comment"># 重启容器运行</span></span><br><span class="line">docker rm &lt;container id&gt; -f          <span class="comment"># 强制删除容器</span></span><br><span class="line">docker commit &lt;container id&gt;         <span class="comment"># 将 container 编译为 image</span></span><br><span class="line">docker attach &lt;container id&gt;         <span class="comment"># 连接正在运行的 container 的系统</span></span><br><span class="line">docker <span class="built_in">exec</span> -it &lt;container id&gt; bash  <span class="comment"># 连接正在运行的 container 的系统（相当于 SSH 连接，ctrl + d 退出）</span></span><br><span class="line"></span><br><span class="line">docker search node              <span class="comment"># 搜索镜像</span></span><br><span class="line">docker pull node                <span class="comment"># 从 dockerhub 里下载镜像</span></span><br><span class="line">docker push lizhooh/node        <span class="comment"># 把自己的镜像推上去（需要注册 dockerhub，类似 npm 差不多）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 打包镜像</span></span><br><span class="line">docker save &lt;namespace&gt;/&lt;name:tag&gt; &gt; &lt;name&gt;.tar</span><br><span class="line"><span class="comment"># docker save lizhooh/app:1.0 &gt; app.tar</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载镜像</span></span><br><span class="line">docker load &lt; app.tar</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="http://www.runoob.com/docker/docker-command-manual.html" target="_blank" rel="noopener">Docker 命令大全</a></p>
+<h2 id="切换国内源"><a href="#切换国内源" class="headerlink" title="切换国内源"></a>切换国内源</h2><p>由于国内特殊的网络环境，往往我们从 Docker Hub 中拉取镜像并不能成功，而且速度特别慢。</p>
+<p>那么我们可以给 Docker 配置一个国内的 registry mirror，当我们需要的镜像在 mirror 中则直接返回，如果没有则从 Docker Hub 中拉取。是否使用 registry mirror 对 Docker 用户来说是透明的。</p>
+<p><b>配置方法：</b></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/default/docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在尾部追加信息</span></span><br><span class="line">DOCKER_OPTS=<span class="string">"--registry-mirror=http://aad0405c.m.daocloud.io"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启服务</span></span><br><span class="line">service docker restart</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://www.dockerinfo.net/document" target="_blank" rel="noopener">Docker 中文文档 Docker 概述</a></li>
+<li><a href="http://www.docker.org.cn/book/install/run-docker-without-sudo-30.html" target="_blank" rel="noopener">不使用 sudo 命令执行 docker</a></li>
+<li><a href="https://segmentfault.com/a/1190000010541792" target="_blank" rel="noopener">Docker 部署基于 Nodejs 的 Web 应用-实战篇</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.809Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/03/Docker/Docker 初识/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/03/Docker/Docker 初识/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/后端/">后端</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/03/Typescript/拥抱与使用 Typescript/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">拥抱与使用 Typescript</h4>
+        <h4 class="summary">Typescript 是微软开源的一个 Javascript 的超集，提供更超前的语法（比 ES6 还超前）。
+入门实际...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/03/Nodejs/如何防止 Nodejs 进程崩溃？/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">如何防止 Nodejs 进程崩溃？</h4>
+        <h4 class="summary">在 Nodejs 里的错误主要来自于事件错误，异步错误，同步错误，如果不适当处理，轻则控制台输出错误信息，重则直接导致整...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

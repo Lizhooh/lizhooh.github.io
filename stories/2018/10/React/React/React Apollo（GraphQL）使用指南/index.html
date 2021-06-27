@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/10/React/React/React Apollo（GraphQL）使用指南/">
+    
+    
+    <title>React Apollo（GraphQL）使用指南 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言React Apollo 是一个 Apollo 开源的一个 React + GraphQL 集成方案库，主要提供便利的 React 与 GraphQL 的封装函数使用。总的来说，以一种很方便以及简单的方式让 GraphQL 轻松的结合 React 来开发。 本文介绍 React Apollo 的使用指南，大部分内容以官方的文档翻译为主。">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Apollo（GraphQL）使用指南">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/10/React/React/React Apollo（GraphQL）使用指南/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言React Apollo 是一个 Apollo 开源的一个 React + GraphQL 集成方案库，主要提供便利的 React 与 GraphQL 的封装函数使用。总的来说，以一种很方便以及简单的方式让 GraphQL 轻松的结合 React 来开发。 本文介绍 React Apollo 的使用指南，大部分内容以官方的文档翻译为主。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2018/10/20181010214741.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.875Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Apollo（GraphQL）使用指南">
+<meta name="twitter:description" content="前言React Apollo 是一个 Apollo 开源的一个 React + GraphQL 集成方案库，主要提供便利的 React 与 GraphQL 的封装函数使用。总的来说，以一种很方便以及简单的方式让 GraphQL 轻松的结合 React 来开发。 本文介绍 React Apollo 的使用指南，大部分内容以官方的文档翻译为主。">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2018/10/20181010214741.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React Apollo（GraphQL）使用指南</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React Apollo（GraphQL）使用指南</h1>
+
+        <div class="meta-rest">
+            <h1>React Apollo（GraphQL）使用指南</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-10-11T13:38:36.000Z" itemprop="datePublished" class="page-time">
+    2018-10-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#React-Apollo"><span class="post-toc-number">2.</span> <span class="post-toc-text">React Apollo</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装依赖"><span class="post-toc-number">3.</span> <span class="post-toc-text">安装依赖</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本认识"><span class="post-toc-number">4.</span> <span class="post-toc-text">基本认识</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#查询（Query）"><span class="post-toc-number">5.</span> <span class="post-toc-text">查询（Query）</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Query-组件"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">Query 组件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#缓存数据"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">缓存数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#查询参数"><span class="post-toc-number">5.3.</span> <span class="post-toc-text">查询参数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#轮询查询"><span class="post-toc-number">5.4.</span> <span class="post-toc-text">轮询查询</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#重新查询"><span class="post-toc-number">5.5.</span> <span class="post-toc-text">重新查询</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加载状态"><span class="post-toc-number">5.6.</span> <span class="post-toc-text">加载状态</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#手动查询"><span class="post-toc-number">5.7.</span> <span class="post-toc-text">手动查询</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">6.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/React Apollo（GraphQL）使用指南"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React Apollo（GraphQL）使用指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 10 月 11 日 21:38" datetime="2018-10-11T13:38:36.000Z"  itemprop="datePublished">
+    2018-10-11
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 1940</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  20  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>React Apollo 是一个 Apollo 开源的一个 React + GraphQL 集成方案库，主要提供便利的 React 与 GraphQL 的封装函数使用。总的来说，以一种很方便以及简单的方式让 GraphQL 轻松的结合 React 来开发。</p>
+<p>本文介绍 React Apollo 的使用指南，大部分内容以官方的文档翻译为主。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2018/10/20181010214741.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<a id="more"></a>
+<h2 id="React-Apollo"><a href="#React-Apollo" class="headerlink" title="React Apollo"></a>React Apollo</h2><p>React Apollo 是什么？ React Apollo 就是被设计为使用 Apollo 和 React最简单的体验。</p>
+<p>那么怎么开始？按照官方的文档，主要有几个部分：</p>
+<ul>
+<li>安装依赖</li>
+<li>基本认识</li>
+<li>查询（Query）</li>
+<li>突变（Mutation）</li>
+<li>状态（State）</li>
+</ul>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><p>使用 create-react-app 创建一个 react 项目后，安装这些依赖。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn apollo-boost react-apollo graphql</span><br></pre></td></tr></table></figure>
+<ul>
+<li>apollo-boost - 是一个 Apollo Client 套件。</li>
+<li>react-apollo - graphql 集成库。</li>
+<li>graphql - 用于解析 graphql 语法。</li>
+</ul>
+<p>安装完这些依赖后就可以愉快的玩耍了。</p>
+<h2 id="基本认识"><a href="#基本认识" class="headerlink" title="基本认识"></a>基本认识</h2><p>在 React Apollo 里基本需要用到 Apollo-Client。Apollo-Client 是一个封装了 GraphQL 请求的网络库，看下面的使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ApolloClient <span class="keyword">from</span> <span class="string">'apollo-boost'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> client = <span class="keyword">new</span> ApolloClient(&#123;</span><br><span class="line">    uri: <span class="string">'https://w5xlvm3vzz.lp.gql.zone/graphql'</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.query(&#123;</span><br><span class="line">    query: gql<span class="string">`&#123;</span></span><br><span class="line"><span class="string">        rates(currency: "USD") &#123;</span></span><br><span class="line"><span class="string">            currency</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;`</span></span><br><span class="line">&#125;).then(<span class="function"><span class="params">result</span> =&gt;</span> <span class="built_in">console</span>.log(result));</span><br></pre></td></tr></table></figure>
+<p>ApolloClient 内部实际上是实现了 Ajax/fetch 等功能，我们只需要把 GraphQL 的字符串传递进去就可以查询了，非常方便。</p>
+<p>但是一般情况下，不直接使用 ApolloClient，而是把 ApolloClient 的上下文连接到 React 的上下文里，就好像 React-Redux 的 Provider 一样。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; render &#125; <span class="keyword">from</span> <span class="string">'react-dom'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123; ApolloProvider &#125; <span class="keyword">from</span> <span class="string">'react-apollo'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> App = <span class="function"><span class="params">()</span> =&gt;</span> (</span><br><span class="line">    &lt;ApolloProvider client=&#123;client&#125;&gt;</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;h2&gt;My first Apollo app 🚀&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>div&gt;</span><br><span class="line">    &lt;<span class="regexp">/ApolloProvider&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">render(&lt;App /</span>&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>));</span><br></pre></td></tr></table></figure>
+<p>连接之后有什么用呢，作用非常大，它可以自动的帮你调用 query 方法，从而实现一种响应式的方式。</p>
+<p>下面的组件，一共会发送 3 种状态变化，一开始是 loading，接着数据列表渲染了，如果网络层错误就会显示 Error。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Query &#125; <span class="keyword">from</span> <span class="string">'react-apollo'</span>;</span><br><span class="line"><span class="keyword">import</span> gql <span class="keyword">from</span> <span class="string">'graphql-tag'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> ExchangeRates = <span class="function"><span class="params">()</span> =&gt;</span> (</span><br><span class="line">  &lt;Query</span><br><span class="line">        query=&#123;gql<span class="string">`&#123;</span></span><br><span class="line"><span class="string">            rates(currency: "USD") &#123;</span></span><br><span class="line"><span class="string">                currency, rate</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">        &#125;`</span>&#125;&gt;</span><br><span class="line"></span><br><span class="line">        &#123;(&#123; loading, error, data &#125;) =&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (loading) <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">p</span>&gt;</span>Loading...<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span>;</span><br><span class="line">            <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">p</span>&gt;</span>Error :(<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> data.rates.map(<span class="function">(<span class="params">&#123; currency, rate &#125;</span>) =&gt;</span> (</span><br><span class="line">                &lt;div key=&#123;currency&#125;&gt;</span><br><span class="line">                    &lt;p&gt;&#123;<span class="string">`<span class="subst">$&#123;currency&#125;</span>: <span class="subst">$&#123;rate&#125;</span>`</span>&#125;&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;/</span>div&gt;</span><br><span class="line">            ));</span><br><span class="line">        &#125;&#125;</span><br><span class="line">    &lt;<span class="regexp">/Query&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<p><code>&lt;Query&gt;</code> 是一个响应式组件，它会自动的帮你处理相关的生命周期以及 API 的调用，相当于直接把 GraphQL 映射到组件上，非常方便有木有。</p>
+<h2 id="查询（Query）"><a href="#查询（Query）" class="headerlink" title="查询（Query）"></a>查询（Query）</h2><p>以简单，可预测的方式获取数据是 Apollo Client 的核心功能之一。Query 组件是用于获取 GraphQL 数据并将结果附加到 UI 上，并且很容易跟踪错误和加载状态。</p>
+<h3 id="Query-组件"><a href="#Query-组件" class="headerlink" title="Query 组件"></a>Query 组件</h3><p>该 Query 组件是 Apollo 应用程序最重要的构建块之一。要创建一个 Query 组件，只需传递一个包含该 gql 函数的 GraphQL 查询字符串：this.props.query，并在 this.props.children 里提供一个函数来  告诉 React 要呈现的内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> gql <span class="keyword">from</span> <span class="string">'graphql-tag'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Query &#125; <span class="keyword">from</span> <span class="string">'react-apollo'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> GET_DOGS = gql<span class="string">`&#123;</span></span><br><span class="line"><span class="string">    dogs &#123;</span></span><br><span class="line"><span class="string">        id, breed</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">&#125;`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Dogs = <span class="function">(<span class="params">&#123; onDogSelected &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;Query query=&#123;GET_DOGS&#125;&gt;</span><br><span class="line">        &#123;(&#123; loading, error, data &#125;) =&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (loading) <span class="keyword">return</span> <span class="string">'Loading...'</span>;</span><br><span class="line">            <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="string">`Error! <span class="subst">$&#123;error.message&#125;</span>`</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;select name=<span class="string">'dog'</span> onChange=&#123;onDogSelected&#125;&gt;</span><br><span class="line">                    &#123;data.dogs.map(<span class="function"><span class="params">dog</span> =&gt;</span> (</span><br><span class="line">                        &lt;option key=&#123;dog.id&#125; value=&#123;dog.breed&#125;&gt;</span><br><span class="line">                            &#123;dog.breed&#125;</span><br><span class="line">                        &lt;<span class="regexp">/option&gt;</span></span><br><span class="line"><span class="regexp">                    ))&#125;</span></span><br><span class="line"><span class="regexp">                &lt;/</span>select&gt;</span><br><span class="line">            );</span><br><span class="line">        &#125;&#125;</span><br><span class="line">    &lt;<span class="regexp">/Query&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="缓存数据"><a href="#缓存数据" class="headerlink" title="缓存数据"></a>缓存数据</h3><p>Query 组件是带有缓存功能的。</p>
+<ul>
+<li>当 Query 组件渲染时，Apollo Client 会为我们的查询创建一个 observable。Query 组件通过 Apollo Client 缓存订阅查询结果。</li>
+<li>首先，尝试从 Apollo 缓存中加载查询结果。如果没有缓存，将请求发送到服务器。</li>
+<li>数据恢复后，将其标准化并将其存储在 Apollo 缓存中。由于 Query 组件订阅了结果，因此它会自动更新数据。</li>
+</ul>
+<h3 id="查询参数"><a href="#查询参数" class="headerlink" title="查询参数"></a>查询参数</h3><p>当需要动态的查询参数时，可以指定一个属性：variables 用于注入查询参数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> GET_DOG_PHOTO = gql<span class="string">`</span></span><br><span class="line"><span class="string">    query Dog($breed: String!) &#123;</span></span><br><span class="line"><span class="string">        dog(breed: $breed) &#123;</span></span><br><span class="line"><span class="string">            id, displayImage</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> DogPhoto = <span class="function">(<span class="params">&#123; breed &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;Query query=&#123;GET_DOG_PHOTO&#125; variables=&#123;&#123; breed &#125;&#125;&gt;</span><br><span class="line">        ...</span><br><span class="line">    &lt;<span class="regexp">/Query&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="轮询查询"><a href="#轮询查询" class="headerlink" title="轮询查询"></a>轮询查询</h3><p>轮询可以通过使查询在指定的时间间隔内重新获取来帮助我们实现接近实时的数据。要使用轮询，简单的加个 pollInterval 属性即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> DogPhoto = <span class="function">(<span class="params">&#123; breed &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;Query</span><br><span class="line">        query=&#123;GET_DOG_PHOTO&#125;</span><br><span class="line">        variables=&#123;&#123; breed &#125;&#125;   <span class="comment">// 参数</span></span><br><span class="line">        pollInterval=&#123;<span class="number">500</span>&#125;      <span class="comment">// 如果是 &lt;= 0，则不会进行</span></span><br><span class="line">        skip=&#123;!breed&#125;           <span class="comment">// 跳过内容</span></span><br><span class="line">        &gt;</span><br><span class="line">        &#123;(&#123; loading, error, data, startPolling, stopPolling &#125;) =&gt; &#123;</span><br><span class="line">            <span class="comment">// ... startPolling 开始轮询</span></span><br><span class="line">            <span class="comment">// ... stopPolling 结束轮询</span></span><br><span class="line">        &#125;&#125;</span><br><span class="line">    &lt;<span class="regexp">/Query&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<p>轮询是实现近实时数据的绝佳方式，而无需设置 GraphQL 订阅的复杂性。</p>
+<h3 id="重新查询"><a href="#重新查询" class="headerlink" title="重新查询"></a>重新查询</h3><p>如果要重新加载查询以响应用户操作，该怎么办？那就是简单的使用 refetch 函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> DogPhoto = <span class="function">(<span class="params">&#123; breed &#125;</span>) =&gt;</span> (</span><br><span class="line">    &lt;Query</span><br><span class="line">        query=&#123;GET_DOG_PHOTO&#125;</span><br><span class="line">        variables=&#123;&#123; breed &#125;&#125;</span><br><span class="line">        skip=&#123;!breed&#125;&gt;</span><br><span class="line">        &#123;(&#123; loading, error, data, refetch &#125;) =&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (loading) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="string">`Error!: <span class="subst">$&#123;error&#125;</span>`</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;div&gt;</span><br><span class="line">                    &lt;img</span><br><span class="line">                        src=&#123;data.dog.displayImage&#125;</span><br><span class="line">                        style=&#123;&#123; <span class="attr">height</span>: <span class="number">100</span>, <span class="attr">width</span>: <span class="number">100</span> &#125;&#125;</span><br><span class="line">                    /&gt;</span><br><span class="line">                    &lt;button onClick=&#123;() =&gt; refetch()&#125;&gt;Refetch!&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">                &lt;/</span>div&gt;</span><br><span class="line">            );</span><br><span class="line">        &#125;&#125;</span><br><span class="line">    &lt;<span class="regexp">/Query&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<h3 id="加载状态"><a href="#加载状态" class="headerlink" title="加载状态"></a>加载状态</h3><p>如果点击刷新时，让用户看到正在刷新的情况，那么改怎么实现。有一个 networkStatus 可以让你细粒度的知道网络的变化。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(&#123; loading, error, data, refetch, networkStatus &#125;) =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (networkStatus === <span class="number">4</span>) <span class="keyword">return</span> <span class="string">'Refetching!'</span>;</span><br><span class="line">    <span class="keyword">if</span> (loading) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="string">`Error!: <span class="subst">$&#123;error&#125;</span>`</span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>networkStatus 属性是一个枚举，其数字值为 1-8，表示不同的加载状态。</p>
+<ol>
+<li><code>loading</code>：以前从未运行过查询，请求现在处于暂挂状态。即使从缓存返回结果，查询仍将具有此网络状态，但无论如何都会调度查询。</li>
+<li><code>setVariables</code>：如果查询的变量发生更改并且网络请求被触发，则网络状态将 setVariables 一直持续到该查询的结果返回。当 options.variables 他们的查询发生变化时，react 用户会看到这一点。</li>
+<li><code>fetchMore</code>：表示 fetchMore 已在此查询上调用，并且创建的网络请求当前正在进行中。</li>
+<li><code>refetch</code>：这意味着 refetch 调用了一个查询，并且重新获取请求当前正在进行中。</li>
+<li>Unused</li>
+<li><code>poll</code>：表示轮询查询当前正在进行中。因此，例如，如果您每 10 秒轮询一次查询，则 poll 每当发送轮询请求但未解决时，网络状态将切换为每 10 秒。</li>
+<li><code>ready</code>：此查询没有请求正在进行中，并且没有发生错误，一切都好。</li>
+<li><code>error</code>：此查询没有正在进行的请求，但检测到一个或多个错误。</li>
+</ol>
+<h3 id="手动查询"><a href="#手动查询" class="headerlink" title="手动查询"></a>手动查询</h3><p>在默认情况下 Query 组件的查询是自动触发的，但是有时候并不想在渲染之后就触发，而是在特定的时机触发。</p>
+<p>这时候就不能继续使用 Query 组件了，而是使用 ApolloConsumer 组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; ApolloConsumer &#125; <span class="keyword">from</span> <span class="string">'react-apollo'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DelayedQuery</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    state = &#123; <span class="attr">dog</span>: <span class="literal">null</span> &#125;;</span><br><span class="line">    onDogFetched = <span class="function"><span class="params">dog</span> =&gt;</span> <span class="keyword">this</span>.setState(<span class="function"><span class="params">()</span> =&gt;</span> (&#123; dog &#125;));</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; dog &#125; = <span class="keyword">this</span>.state;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;ApolloConsumer&gt;</span><br><span class="line">                &#123;client =&gt; (</span><br><span class="line">                    &lt;div&gt;</span><br><span class="line">                        &#123;dog &amp;&amp; <span class="xml"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#123;dog.displayImage&#125;</span> /&gt;</span></span>&#125;</span><br><span class="line">                        &lt;button</span><br><span class="line">                            onClick=&#123;<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">                                <span class="keyword">const</span> &#123; data &#125; = <span class="keyword">await</span> client.query(&#123;</span><br><span class="line">                                    query: GET_DOG_PHOTO,</span><br><span class="line">                                    variables: &#123; <span class="attr">breed</span>: <span class="string">'bulldog'</span> &#125;</span><br><span class="line">                                &#125;);</span><br><span class="line">                                <span class="keyword">this</span>.onDogFetched(data.dog);</span><br><span class="line">                            &#125;&#125;</span><br><span class="line">                            &gt;</span><br><span class="line">                            Click me!</span><br><span class="line">                        &lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;/</span>div&gt;</span><br><span class="line">                )&#125;</span><br><span class="line">            &lt;<span class="regexp">/ApolloConsumer&gt;</span></span><br><span class="line"><span class="regexp">        );</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>以这种方式获取是非常冗长的，因此我们建议尽可能使用 Query 组件！</p>
+<!-- ### API 概述 -->
+<!-- ## 突变（Mutation）
+如果 Query 是 CURD 中的 R，那么 Mutation 就是 CUD。Mutation 是用来操作创建，更新，删除等需要发送数据到服务端的接口。 -->
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><blockquote>
+<p><a href="https://www.apollographql.com/docs/react/" target="_blank" rel="noopener">https://www.apollographql.com/docs/react/</a></p>
+</blockquote>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.875Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/10/React/React/React Apollo（GraphQL）使用指南/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/10/React/React/React Apollo（GraphQL）使用指南/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/10/React Native/React Native 生成分享图片文案/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 生成分享图片文案</h4>
+        <h4 class="summary">在 React Native 里如何实现类似知乎哪样的图片分享文案呢？ 前言在 React Native 里如何实现类似...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/10/前端/从零开发属于自己的 Hexo 主题/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">从零开发属于自己的 Hexo 主题</h4>
+        <h4 class="summary">什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

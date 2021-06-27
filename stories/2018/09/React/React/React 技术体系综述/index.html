@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/09/React/React/React 技术体系综述/">
+    
+    
+    <title>React 技术体系综述 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言近年来，移动互联网应用有着爆发式的增长，同质化 App 层出不穷，人们对于产品体验的要求越来越高，渲染迟缓、交互卡顿的单体 Web App 已经无法满足现有用户苛刻的使用标准；与此同时，井喷式的业务需求迫使 iOS、Android 两个移动平台不断提升迭代开发速度，缩短版本发布周期；如何既能利用 Web 门槛低、轻量级、跨平台开发的优势，又能尽可能最大化屏蔽其现存缺点成了大前端融合领域攻克的重">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 技术体系综述">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/09/React/React/React 技术体系综述/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言近年来，移动互联网应用有着爆发式的增长，同质化 App 层出不穷，人们对于产品体验的要求越来越高，渲染迟缓、交互卡顿的单体 Web App 已经无法满足现有用户苛刻的使用标准；与此同时，井喷式的业务需求迫使 iOS、Android 两个移动平台不断提升迭代开发速度，缩短版本发布周期；如何既能利用 Web 门槛低、轻量级、跨平台开发的优势，又能尽可能最大化屏蔽其现存缺点成了大前端融合领域攻克的重">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/3/20190322155908.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/3/20190322160119.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/3/20190322160346.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/3/20190322154928.jpg">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2019/3/20190322153021.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.878Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React 技术体系综述">
+<meta name="twitter:description" content="前言近年来，移动互联网应用有着爆发式的增长，同质化 App 层出不穷，人们对于产品体验的要求越来越高，渲染迟缓、交互卡顿的单体 Web App 已经无法满足现有用户苛刻的使用标准；与此同时，井喷式的业务需求迫使 iOS、Android 两个移动平台不断提升迭代开发速度，缩短版本发布周期；如何既能利用 Web 门槛低、轻量级、跨平台开发的优势，又能尽可能最大化屏蔽其现存缺点成了大前端融合领域攻克的重">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2019/3/20190322155908.jpg">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">React 技术体系综述</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">React 技术体系综述</h1>
+
+        <div class="meta-rest">
+            <h1>React 技术体系综述</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-09-23T13:28:53.000Z" itemprop="datePublished" class="page-time">
+    2018-09-23
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#名词介绍"><span class="post-toc-number">2.</span> <span class="post-toc-text">名词介绍</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#语言基础"><span class="post-toc-number">3.</span> <span class="post-toc-text">语言基础</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#单页面应用"><span class="post-toc-number">4.</span> <span class="post-toc-text">单页面应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#移动-Web-应用"><span class="post-toc-number">5.</span> <span class="post-toc-text">移动 Web 应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#PWA-渐进式应用"><span class="post-toc-number">6.</span> <span class="post-toc-text">PWA 渐进式应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Javascript-同构应用"><span class="post-toc-number">7.</span> <span class="post-toc-text">Javascript 同构应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#跨平台移动应用"><span class="post-toc-number">8.</span> <span class="post-toc-text">跨平台移动应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小程序应用"><span class="post-toc-number">9.</span> <span class="post-toc-text">小程序应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#跨平台桌面应用"><span class="post-toc-number">10.</span> <span class="post-toc-text">跨平台桌面应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#WebVR"><span class="post-toc-number">11.</span> <span class="post-toc-text">WebVR</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#小结"><span class="post-toc-number">12.</span> <span class="post-toc-text">小结</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/React 技术体系综述"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">React 技术体系综述</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 09 月 23 日 21:28" datetime="2018-09-23T13:28:53.000Z"  itemprop="datePublished">
+    2018-09-23
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2174</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  17.5  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>近年来，移动互联网应用有着爆发式的增长，同质化 App 层出不穷，人们对于产品体验的要求越来越高，渲染迟缓、交互卡顿的单体 Web App 已经无法满足现有用户苛刻的使用标准；与此同时，井喷式的业务需求迫使 iOS、Android 两个移动平台不断提升迭代开发速度，缩短版本发布周期；如何既能利用 Web 门槛低、轻量级、跨平台开发的优势，又能尽可能最大化屏蔽其现存缺点成了大前端融合领域攻克的重点，也是整个大前端化的一个核心的体现。</p>
+<p><code>React</code> 是一个前端开发框架，在经过了多年的发展，现在已经形成了一个很庞大的生态圈技术体系。其中就包括了：Web 应用开发、移动应用开发、桌面应用开发、小程序应用、WebVR 等都可以使用 React 的技术栈来开发。正如 React Native 官方所说的 <strong>“Learn once, write everywhere（学一次，到处写）”</strong> 的理念。</p>
+<p>本文以笔者的开发经验，来介绍一下 React 的技术体系。</p>
+<a id="more"></a>
+<h2 id="名词介绍"><a href="#名词介绍" class="headerlink" title="名词介绍"></a>名词介绍</h2><ul>
+<li><strong>ES6+</strong>：面向未来的 Javascript 语言规范。</li>
+<li><strong>React</strong>：现代的 Javascript 开发框架。</li>
+<li><strong>Redux</strong>：一个 JavaScript 数据状态容器，提供可预测化的状态管理。</li>
+<li><strong>Styled-Components</strong>：一个基于 React 的 CSS in JS 框架，拥有出色的渲染性能和编写方式。</li>
+<li><strong>PReact</strong>：更加轻量级的 Virtual DOM 实现，类似 React。</li>
+<li><strong>Electron</strong>：可以让你使用前端技术开发跨平台的桌面应用框架。</li>
+<li><strong>Taro</strong>：京东开源的 React 多端统一开发框架。</li>
+<li><strong>Less/Sass</strong>：更加高级的 CSS 预处理语言。</li>
+<li><strong>React-Native</strong>：FaceBoook 开源的一个跨平台混合式移动应用开发框架。</li>
+<li><strong>React-Router</strong>：基于 React 的前端路由框架。</li>
+<li><strong>Ant-Design</strong>：蚂蚁金服开源的 React 企业级前端组件库。</li>
+</ul>
+<h2 id="语言基础"><a href="#语言基础" class="headerlink" title="语言基础"></a>语言基础</h2><p>对于开发的语言基础，需要 <code>ES6+</code> 的基础，这必须是 ES6+，否则无法体现现代化的组件化编程过程。其次是对于有一定能力的团队，可以升级使用 <code>Typescript</code>。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>Typescript</a>，<a href>异步编程</a>。</p>
+<h2 id="单页面应用"><a href="#单页面应用" class="headerlink" title="单页面应用"></a>单页面应用</h2><p>单页面应用也叫：<code>SPA</code>，是一种新起的单页面应用开发模式，其特点就是基于 Javascript 的前后端分离式开发，在 SPA 里前端需要管理自己的视图以及数据，与后端的交互只需要通过 JSON 即可。另外还有一个名词：<code>MPA</code>（多页面应用）。</p>
+<p>React 本身就是一个 SPA 应用开发框架，因此使用 React + React-Router + Redux 来开发一个单页面应用非常方便。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>React</a>，<a href>React-Router</a>，<a href>Redux</a>，<a href>Less/Sass</a>，<a href>Ant-Design</a>，<a href>Styled-Components</a>。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/3/20190322155908.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="移动-Web-应用"><a href="#移动-Web-应用" class="headerlink" title="移动 Web 应用"></a>移动 Web 应用</h2><p>移动 Web 应用与 PC 端的应用不同，移动端在 Javascript 引擎上有着天生的能力缺陷，这意味着不能太过于按照 PC 端的开发方式。</p>
+<p>对于 Web 移动端的项目，它有几个特点：</p>
+<ul>
+<li>不出色的 Javascript 引擎，与 PC 端相比，移动端有着不出色的渲染引擎，这意味加载相同的 JS 代码，在移动端上需要更多的时间（有 5 ~ 10 倍的差距）。</li>
+<li>3G/4G 网络因素影响，在 PC 端上几乎是秒开，在移动端上受不稳定的网络因素影响，经常会出现长时间的白屏。</li>
+<li>脆弱的动画，任何动画效果都需要 GPU 的支持，在 PC 端上这方面几乎没什么压力，在移动端上 GPU 比较脆弱。</li>
+</ul>
+<p>为了克服这些缺陷，在移动 Web 应用开发里，我们把 <code>React</code> 改为使用 <code>PReact</code>，其他基本不变。PReact 在压缩下只有 <code>4k</code> 左右的大小，以及更快的 Javascript 运行加载时间。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>PReact</a>，<a href>Redux</a>，<a href>Less/Sass</a>。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/3/20190322160119.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="PWA-渐进式应用"><a href="#PWA-渐进式应用" class="headerlink" title="PWA 渐进式应用"></a>PWA 渐进式应用</h2><p>PWA（全称：Progressive Web App）即渐进式 Web 应用，是 Google 公司于2015 年提出的，在 2018 成为了前端领域里的一个爆发点。PWA 与普通的 Web 应用不同的是，它能够借助浏览器提供的功能，渐进式的提升整个应用的功能，甚至是达到与 Native 端相媲美的程度。</p>
+<p>PWA 最大的特点是：<code>强交互，离线缓存，主屏幕化，消息推送，App 外观化</code>。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>PReact</a>，<a href>Redux</a>，<a href>Less/Sass</a>。</p>
+<h2 id="Javascript-同构应用"><a href="#Javascript-同构应用" class="headerlink" title="Javascript 同构应用"></a>Javascript 同构应用</h2><p><strong>同构即未来</strong>，还记得 Javascript 在服务端有 Nodejs 这个强大的支持吗？同构应用就是在有了 Nodejs 之后才诞生的一个新的概念以及开发模式。同构应用只能适用于 Javascript，因为只有 Javascript 才能做到使用同一种语言开发前后端。</p>
+<p>同构应用通常也叫为 <code>SSR</code> 架构（服务端渲染架构）。在同构应用开发框架里与 React 相关的最出名的是：<a href="https://nextjs.org/" target="_blank" rel="noopener">Next.js</a>。Next.js 提供了开箱即用的开发方式，基本需要 SPA 应用特性又需要 SEO，此时升级为 SSR 应用是不错的选择。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>React</a>，<a href>Redux</a>，<a href>Next</a>，<a href>Nodejs</a>。</p>
+<h2 id="跨平台移动应用"><a href="#跨平台移动应用" class="headerlink" title="跨平台移动应用"></a>跨平台移动应用</h2><p>在移动应用领域里，很多人都会想到 Java，ObjC 等开发语言。但是在现在一种全新的开发模式牵起，FaceBoook 为我们提供了 React Native 这个跨平台的原生移动应用开发框架。在传统的使用 Java 开发应用需要 2 个月的时间，在 React Native 可能只需要 3 个星期就可以完全，并且有着更好维护方式，更好的开发体验。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>React</a>，<a href>React-Native</a>，<a href>Redux</a>，<a href>Styled-Components</a>。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/3/20190322160346.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="小程序应用"><a href="#小程序应用" class="headerlink" title="小程序应用"></a>小程序应用</h2><p>无论是微信小程序还是支付宝小程序甚至是百度小程序，它们都有一个共同的特点就是使用类似 Vue 的 Template 的编写语法（支付宝、百度参考了微信的设计，导致大家都是这种风格）。对于 Template 来说，其特点就是简单，但是也牺牲了一定的灵活性。为此一些不习惯或不喜欢使用 Template 语法的开发者开始吐槽并且创造。</p>
+<p>其代表作就是京东的凹凸前端团队打造的可以使用 React 的技术栈开发小程序应用的框架：<a href="https://taro.js.org/" target="_blank" rel="noopener">Taro</a>。</p>
+<p>Taro 能够让你仅此的使用 React 相关技术栈来开发小程序应用，这是一个非常强大的优势，基本熟悉 React 技术栈就可以无压力的上手基于 Taro 的小程序应用开发。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>Taro</a>，<a href>React</a>，<a href>Redux</a>，<a href>Less/Sass</a>。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/3/20190322154928.jpg" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="跨平台桌面应用"><a href="#跨平台桌面应用" class="headerlink" title="跨平台桌面应用"></a>跨平台桌面应用</h2><p>为了使用 Javascript 就能开发桌面应用？这完全得意于 Chrommun 与 Nodejs 这两个都基于 V8 引擎的框架。因此我们可以使用前端的技术来做桌面应用的 UI 层，使用 Nodejs 来做桌面应用的网络层和系统层，这样就可以像前端开发一个 Web 应用一样来开发一个跨平台的桌面应用，其最成功的代表框架是：<a href="http://electronjs.org/" target="_blank" rel="noopener">Electron</a>，基于 Electron 开发出来的明星产品是 <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">Vscode</a>。</p>
+<blockquote>
+<p>下图是笔者，在做毕业设计时，使用 React + Redux + Electron 开发的云音乐桌面应用，取得的惊人的用户体验表现。</p>
+</blockquote>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2019/3/20190322153021.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<blockquote>
+<p>笔者配置的一个 Electron + React + WebPack 搭手架：<a href="https://github.com/Lizhooh/electron-react" target="_blank" rel="noopener">https://github.com/Lizhooh/electron-react</a></p>
+</blockquote>
+<p><strong>关键字：</strong> <a href>Electron</a>，<a href>Nodejs</a>，<a href>React</a>，<a href>React-Router</a>，<a href>Redux</a>，<a href>Styled-Components</a>。</p>
+<h2 id="WebVR"><a href="#WebVR" class="headerlink" title="WebVR"></a>WebVR</h2><p><a href="https://facebook.github.io/react-360/" target="_blank" rel="noopener">ReactVR</a>（目前已经改名为 React360） 同样是 FaceBoook 开源的一个专注于 WebVR 的框架，在技术层面上类似 React Native，通过封装的底层的接口，使用声明式 JSX 来构建 VR 应用。开发方式与 React，React Native 保持一致，可以零成本的学习与入门 WebVR 开发，并且这里有一篇文件介绍 ReactVR：<a href="https://segmentfault.com/a/1190000009774029" target="_blank" rel="noopener">React VR 快速入门完全教程</a>。</p>
+<p><strong>关键字：</strong> <a href>ES6+</a>，<a href>React</a>，<a href>Redux</a>，<a href>ReactVR</a>。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>基本在上述的所有应用开发里关键字都会出现 React 和 Redux。因为 Redux 本身是一个数据层的框架，因此可以在各大平台上使用，不会与环境产生多大的关系。React 负责视图层，Redux 负责数据层，它们两个之间形成了一个很好的配置。</p>
+<p>React 的生态圈技术非常广泛，学习 React 有效的减少技术债的问题，以最小的学习成本，创造最大的价值。在学习了 React 相关的技术，你还可以把这些开发的理念灌切到其他的开发领域里，<strong>所谓的一通百通，举一反三</strong>。</p>
+<p>除了这样之外，与 React 相关还有很多丰富的框架和库：<a href="https://dvajs.com/" target="_blank" rel="noopener">Dva</a>、<a href="http://rax.taobaofed.org/" target="_blank" rel="noopener">Rax</a>、<a href="https://www.gatsbyjs.org/" target="_blank" rel="noopener">Gatsby</a> 等。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.878Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/09/React/React/React 技术体系综述/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/09/React/React/React 技术体系综述/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/10/React Native/React Native 配置 Typescript 编译/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">React Native 配置 Typescript 编译</h4>
+        <h4 class="summary">TypeScript 作为 JavaScript 的一个富类型扩展语言，深受代码风格严谨的前端开发者欢迎。本篇文章将详细...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2018/09/Typescript/谈谈 Typescript 中的 Interface/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">谈谈 Typescript 中的 Interface</h4>
+        <h4 class="summary">Typescript 里的 Interface 的作用非常广泛，但我觉得最大的好处了有助于对参数的约束，还有另外一个好处...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

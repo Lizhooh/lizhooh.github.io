@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/">
+    
+    
+    <title>Gatsby：静态 Web 应用框架 | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Gatsby 是一个静态 Web 应用框架，允许你使用 React 来开发静态 Web 应用。Gatsby.js 与 Next.js 很像，只不过它们的出发点不同。😋">
+<meta name="keywords" content="Javascript,前端,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gatsby：静态 Web 应用框架">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Gatsby 是一个静态 Web 应用框架，允许你使用 React 来开发静态 Web 应用。Gatsby.js 与 Next.js 很像，只不过它们的出发点不同。😋">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.875Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Gatsby：静态 Web 应用框架">
+<meta name="twitter:description" content="前言Gatsby 是一个静态 Web 应用框架，允许你使用 React 来开发静态 Web 应用。Gatsby.js 与 Next.js 很像，只不过它们的出发点不同。😋">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Gatsby：静态 Web 应用框架</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">Gatsby：静态 Web 应用框架</h1>
+
+        <div class="meta-rest">
+            <h1>Gatsby：静态 Web 应用框架</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2018-01-01T12:30:09.000Z" itemprop="datePublished" class="page-time">
+    2018-01-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结构"><span class="post-toc-number">3.</span> <span class="post-toc-text">结构</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#样式"><span class="post-toc-number">4.</span> <span class="post-toc-text">样式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-styled"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">使用 styled</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#路由"><span class="post-toc-number">5.</span> <span class="post-toc-text">路由</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#布局"><span class="post-toc-number">6.</span> <span class="post-toc-text">布局</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#配置项与环境变量"><span class="post-toc-number">7.</span> <span class="post-toc-text">配置项与环境变量</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义-html-js"><span class="post-toc-number">7.1.</span> <span class="post-toc-text">自定义 html.js</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#环境变量"><span class="post-toc-number">7.2.</span> <span class="post-toc-text">环境变量</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-React/React/Gatsby：静态 Web 应用框架"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Gatsby：静态 Web 应用框架</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018 年 01 月 01 日 20:30" datetime="2018-01-01T12:30:09.000Z"  itemprop="datePublished">
+    2018-01-01
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/React/">React</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 911</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  10  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="https://www.gatsbyjs.org" target="_blank" rel="noopener">Gatsby</a> 是一个静态 Web 应用框架，允许你使用 React 来开发静态 Web 应用。<br>Gatsby.js 与 Next.js 很像，只不过它们的出发点不同。😋</p>
+<a id="more"></a>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>如何使用？当然是安装 cli，然后各种搞。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install -g gatsby-cli</span><br><span class="line">gatsby new myproject</span><br></pre></td></tr></table></figure>
+<p>创建之后有几个命令可用：</p>
+<ul>
+<li><code>gatsby develop</code> 热生成一个开发环境。</li>
+<li><code>gatsby build</code> 编译，生成静态文件。</li>
+<li><code>gatsby serve</code> 启动一个本地的服务器。</li>
+</ul>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>创建完成项目后，会看到 <code>src/pages</code>，<code>src/layouts</code> 等。</p>
+<blockquote>
+<p>Gatsby 的页面结构基本与 Next.js 差不多。</p>
+</blockquote>
+<p>它们分别代表着是：页面文件与布局文件，页面文件与路由相对应。</p>
+<p><b>比如：</b></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pages/user/index -&gt; http:<span class="comment">//127.0.0.1:3000/user/index.html</span></span><br><span class="line">pages/home/about -&gt; http:<span class="comment">//127.0.0.1:3000/home/about.html</span></span><br></pre></td></tr></table></figure>
+<p>在根目录下有几个比较重要的文件：</p>
+<ul>
+<li><code>gatsby-browser.js</code>，浏览器运行相关，发生在浏览器运行的时候。</li>
+<li><code>gatsby-node.js</code>，运行相关，发生在 Gatsby 启动的时候。</li>
+<li><code>gatsby-ssr.js</code>，服务端渲染相关。</li>
+<li><code>gatsby-config.js</code>，配置相关。</li>
+</ul>
+<h2 id="样式"><a href="#样式" class="headerlink" title="样式"></a>样式</h2><p>css 有两种用法，一种是带 module，另一种是不带 module 的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">'./app.css'</span>;</span><br><span class="line"><span class="keyword">import</span> style <span class="keyword">from</span> <span class="string">'./app.module.css'</span>;</span><br></pre></td></tr></table></figure>
+<p>它们的区别就是不带 module 的作为 css 文件来处理，带 module 的作为 <code>css 模块</code> 来处理。</p>
+<h3 id="使用-styled"><a href="#使用-styled" class="headerlink" title="使用 styled"></a>使用 styled</h3><p>无论如何 styled-components 还是非常好的 css-in-js 框架。<br>在  Gatsby 里 styled-components 需要安装一下插件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev gatsby-plugin-styled-components styled-components</span><br></pre></td></tr></table></figure>
+<p>在 <code>/gatsby-config.js</code> 里添加：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    plugins: [</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="string">`gatsby-plugin-styled-components`</span>,</span><br><span class="line">    ],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之后，爱怎么玩就怎么玩。</p>
+<h2 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h2><p>Gatsby 自带路由系统，使用起来与 <code>react-router</code> 类似。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> Link <span class="keyword">from</span> <span class="string">'gatsby-link'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;h1&gt;Hi people&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Link to="/</span>page<span class="number">-2</span>/<span class="string">"&gt;Go to page 2&lt;/Link&gt;</span></span><br><span class="line"><span class="string">    &lt;/div&gt;</span></span><br><span class="line"><span class="string">);</span></span><br></pre></td></tr></table></figure>
+<h2 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h2><p>默认情况下，所有的页面将使用在找到的布局 <code>/layouts/index.js</code>，然后把 pages 里的页面放进布局文件里（通过 children 方式）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">"react"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> (&#123; children &#125;) =&gt; (</span><br><span class="line">    &lt;div</span><br><span class="line">        style=&#123;&#123;</span><br><span class="line">            margin: <span class="string">'0 auto'</span>,</span><br><span class="line">            maxWidth: <span class="number">650</span>,</span><br><span class="line">            padding: <span class="string">'0 1rem'</span></span><br><span class="line">        &#125;&#125;</span><br><span class="line">        &gt;</span><br><span class="line">        &#123;children()&#125;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<p>如果想指定布局文件，需要编写以下代码（在 <code>/gatsby-node.js</code> 里）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">exports.onCreatePage = <span class="keyword">async</span> (&#123; page, boundActionCreators &#125;) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; createPage &#125; = boundActionCreators;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 匹配路径</span></span><br><span class="line">        <span class="keyword">if</span> (page.path.match(<span class="regexp">/^\/landing-page/</span>)) &#123;</span><br><span class="line">            <span class="comment">// 使用其他布局文件：layouts/landingPage.js</span></span><br><span class="line">            page.layout = <span class="string">"landingPage"</span>;</span><br><span class="line">            createPage(page);</span><br><span class="line">        &#125;</span><br><span class="line">        resolve();</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="配置项与环境变量"><a href="#配置项与环境变量" class="headerlink" title="配置项与环境变量"></a>配置项与环境变量</h2><p>配置项都是在 <code>/gatsby-config.js</code> 下编写。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    siteMetadata: &#123;</span><br><span class="line">        title: <span class="string">`hello`</span>,  <span class="comment">// html &gt; title</span></span><br><span class="line">    &#125;,</span><br><span class="line">    pathPrefix: <span class="string">`/blog`</span>, <span class="comment">// 所有路由的前缀</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>如果想自定义 html, head 需要使用指定的方式。</p>
+<p>先安装插件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plugins: [<span class="string">'gatsby-plugin-react-helmet'</span>]</span><br></pre></td></tr></table></figure>
+<p>接着在布局文件里使用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Helmet <span class="keyword">from</span> <span class="string">'react-helmet'</span>;</span><br><span class="line"></span><br><span class="line">&lt;Helmet</span><br><span class="line">    title=<span class="string">"Gatsby Default Starter"</span></span><br><span class="line">    meta=&#123;[</span><br><span class="line">        &#123; <span class="attr">name</span>: <span class="string">'description'</span>, <span class="attr">content</span>: <span class="string">'Sample'</span> &#125;,</span><br><span class="line">        &#123; <span class="attr">name</span>: <span class="string">'keywords'</span>, <span class="attr">content</span>: <span class="string">'sample, something'</span> &#125;,</span><br><span class="line">    ]&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="自定义-html-js"><a href="#自定义-html-js" class="headerlink" title="自定义 html.js"></a>自定义 html.js</h3><p>默认是没有 html 文件给你的，因为这些都是动态编译生成的。<br>如果想，自定义 html 也可以，不过只能是 html.js。</p>
+<p>先把默认的复过来，改改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp .cache/default-html.js src/html.js</span><br></pre></td></tr></table></figure>
+<p>需要注意的是 <code>html.js</code> 的内容是不会动态改变的，也就是不能通过 this.setState 去更改。</p>
+<h3 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h3><p>除了 <code>.env.*</code> 文件之外，环境中的任何变量 GATSBY_ 都会在浏览器 JavaScript 中提供。</p>
+<p>要添加它们只需要在 跟目录下添加两个文件 .env.development，.env.production。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// .env.production</span></span><br><span class="line">GATSBY_ASSETS_URL = http:<span class="comment">//s3.amazonaws.com/bucketname</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// user.js</span></span><br><span class="line">&lt;img src=&#123;<span class="string">`<span class="subst">$&#123;process.env.GATSBY_ASSETS_URL&#125;</span>/logo.png`</span>&#125; alt=<span class="string">"Logo"</span> /&gt;</span><br></pre></td></tr></table></figure>
+<p>其他的环境变量，请使用 <code>dotenv</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Example .env.development file</span></span><br><span class="line">API_URL=https://dev.example.com/api</span><br><span class="line"></span><br><span class="line"><span class="comment"># Example .env.production file</span></span><br><span class="line">API_URL=https://example.com/api</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.875Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/" target="_blank" rel="external">http://me.lizhooh.com/stories/2018/01/React/React/Gatsby：静态 Web 应用框架/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2018/01/Go/小谈 Go 中的包与模块/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">小谈 Go 中的包与模块</h4>
+        <h4 class="summary">任何包系统设计的目的都是为了简化大型程序的设计和维护工作，通过将一组相关的特性放进一个独立的单元以便于理解和更新，在每个...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/12/Nodejs/Nodejs 多核工作进程『池』架构设计/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">Nodejs 多核工作进程『池』架构设计</h4>
+        <h4 class="summary">引出场景，还是关于 CPU 密集计算的问题，假设现在有很多计算任务，笔者我可能会选择使用 Child_Process 模...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>

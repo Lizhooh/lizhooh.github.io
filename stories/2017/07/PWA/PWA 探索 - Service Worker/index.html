@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+    <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="referrer" content="never">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="lizhooh">
+    <meta name="google" content="notranslate">
+    <meta name="url" content="http://me.lizhooh.com">
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+    <link rel="canonical" href="http://me.lizhooh.com/stories/2017/07/PWA/PWA 探索 - Service Worker/">
+    
+    
+    <title>PWA 探索 - Service Worker | Lizhooh 的技术博客 | 来至未来的大全栈工程师自我修养日记。深耕于：数据中台、智能运营、智能推荐、用户数据分析、用户数据治理等大数据领域。</title>
+    
+    <meta name="keywords" content="Lizhooh 的博客，我的博客，我来作主 &lt;br /&gt; 专注于研究：大前端开发领域，Nodejs 后端开发，混合式移动应用开发，Javascript 全栈式开发，数据挖掘与可视化 等技术。">
+    <meta name="description" content="前言Service Worker是 PWA 里是必不可少的一部分，学会使用 Service Worker 是构建 PWA 的第一步。 Service Worker：服务工作线程Service Worker是浏览器在后台独立于网页运行的脚本，它打开了通向不需要网页或用户交互的功能的大门。现在，它的用途包括如：推送通知，后台同步，大数据科学计算，机器学习，图像处理，背景后台同步， geofencing">
+<meta name="keywords" content="Javascript,前端,PWA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PWA 探索 - Service Worker">
+<meta property="og:url" content="http://me.lizhooh.com/stories/2017/07/PWA/PWA 探索 - Service Worker/index.html">
+<meta property="og:site_name" content="Lizhooh 的技术博客">
+<meta property="og:description" content="前言Service Worker是 PWA 里是必不可少的一部分，学会使用 Service Worker 是构建 PWA 的第一步。 Service Worker：服务工作线程Service Worker是浏览器在后台独立于网页运行的脚本，它打开了通向不需要网页或用户交互的功能的大门。现在，它的用途包括如：推送通知，后台同步，大数据科学计算，机器学习，图像处理，背景后台同步， geofencing">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/6/sw-lifecycle.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/6/20170630223342.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/6/sw-events.png">
+<meta property="og:image" content="http://me.lizhooh.com/assets/image/2017/6/20170630231016.png">
+<meta property="og:updated_time" content="2021-06-15T06:10:52.848Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PWA 探索 - Service Worker">
+<meta name="twitter:description" content="前言Service Worker是 PWA 里是必不可少的一部分，学会使用 Service Worker 是构建 PWA 的第一步。 Service Worker：服务工作线程Service Worker是浏览器在后台独立于网页运行的脚本，它打开了通向不需要网页或用户交互的功能的大门。现在，它的用途包括如：推送通知，后台同步，大数据科学计算，机器学习，图像处理，背景后台同步， geofencing">
+<meta name="twitter:image" content="http://me.lizhooh.com/assets/image/2017/6/sw-lifecycle.png">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link href="//lib.baomitu.com/tippy.js/3.0.2/themes/light.css" rel="stylesheet">
+
+    <!--<script src="/js/vconsole.min.js"></script> -->
+    <script>
+        window.lazyScripts=[];
+    </script>
+
+    <script>
+    function IEVersion(){var e=navigator.userAgent;var b=e.indexOf("compatible")>-1&&e.indexOf("MSIE")>-1;var d=e.indexOf("Edge")>-1&&!b;var f=e.indexOf("Trident")>-1&&e.indexOf("rv:11.0")>-1;if(b){var a=new RegExp("MSIE (\\d+\\.\\d+);");a.test(e);var c=parseFloat(RegExp["$1"]);return c>=7&&c<=10?c:6}else{return -1}}if(IEVersion()!==-1){var text="检测到你使用的是 IE "+IEVersion()+" 内核浏览器，本博客使用了最新的前端技术，为了获得最佳的体验，请使用 Chrome、Opera、Firefox 等现代浏览器打开。";alert(text)};
+    </script>
+</head>
+
+
+<body>
+    <script>
+        + function () {
+            var S = window.localStorage;
+
+            var theme = S.getItem('theme');
+            var body = document.querySelector('body');
+            if (body === null) {
+                console.log('找不到 body 节点');
+                return;
+            }
+            if (theme === 'night') {
+                body.classList.add('night-mode');
+            }
+
+            function setTheme() {
+                var theme = S.getItem('theme');
+                var body = document.querySelector('body');
+                if (body === null) {
+                    console.log('找不到 body 节点');
+                    return;
+                }
+                if (theme !== 'night') {
+                    body.classList.add('night-mode');
+                    S.setItem('theme', 'night');
+                }
+                else {
+                    body.classList.remove('night-mode');
+                    S.setItem('theme', 'not-night');
+                }
+            }
+
+            function load() {
+                var path = window.location.pathname;
+                var theme = document.querySelector('#theme-toggle');
+                theme.onclick = setTheme;
+
+                if (document.body.clientWidth < 960) {
+                    return;
+                }
+
+                // if (!/\/\d{2,4}/.test(window.location.pathname)) {
+                //     return;
+                // }
+
+                if (!(path === '/' || /\/page\//.test(path))) {
+                    return;
+                }
+            }
+            window.onload = load;
+        } ();
+    </script>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/my.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname" style="font-weight: bold">Lizhooh</h5>
+          <span>
+            <a href="mailto:lizhoohs@foxmail.com" title="lizhoohs@foxmail.com" class="mail">lizhoohs@foxmail.com</a>
+          </span>
+
+          <div style="margin-top: 5px; font-size: 92%"><b>337 篇文章，共 387.4k 字</b></div>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-home"></i>
+                </span>
+                <span class="text-view">
+                    主页
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags/ES6-ES2015/"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-tags"></i>
+                </span>
+                <span class="text-view">
+                    标签
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories/ES6"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-th-list"></i>
+                </span>
+                <span class="text-view">
+                    分类
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/about.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-user"></i>
+                </span>
+                <span class="text-view">
+                    关于
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/book.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-book"></i>
+                </span>
+                <span class="text-view">
+                    创作
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/menu/npm.html"  >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-google"></i>
+                </span>
+                <span class="text-view">
+                    Npm
+                </span>
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/Lizhooh" target="_blank" >
+                <span class="icon-view">
+                    <i class="icon icon-lg icon-github"></i>
+                </span>
+                <span class="text-view">
+                    Github
+                </span>
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <!-- 正文 -->
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">PWA 探索 - Service Worker</div>
+
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search" title="搜索">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="theme-toggle" title="夜间模式">
+          <i class="icon icon-lg icon-moon-o" style="font-weight: bold"></i>
+        </a>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on">
+            <i class="icon icon-lg icon-share-alt" style="font-weight: bold"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header" style="">
+
+    <!--<div class="container fade-scale">-->
+    <div class="container" id="container-header">
+        <h1 class="title">PWA 探索 - Service Worker</h1>
+
+        <div class="meta-rest">
+            <h1>PWA 探索 - Service Worker</h1>
+            <section>
+                <img src="/img/my.png" class="avatar" />
+                <div sty>
+                    <span class="name">Lizhooh</span>
+                    <span class="summary">前端开发者</span>
+                    <span class="summary">温故而知新，可以为师矣。</span>
+                </div>
+            </section>
+        </div>
+
+        <h3 class="subtitle">
+            
+                <time datetime="2017-07-03T01:00:07.000Z" itemprop="datePublished" class="page-time">
+    2017-07-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/PWA/">PWA</a></li></ul>
+
+
+            
+        </h3>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Service-Worker：服务工作线程"><span class="post-toc-number">2.</span> <span class="post-toc-text">Service Worker：服务工作线程</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Service-Worker-生命周期"><span class="post-toc-number">3.</span> <span class="post-toc-text">Service Worker 生命周期</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#注册与安装"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">注册与安装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#怎样缓存和返回请求"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">怎样缓存和返回请求</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#更新-Service-Worker"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">更新 Service Worker</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#注销注册"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">注销注册</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#问题排错"><span class="post-toc-number">4.</span> <span class="post-toc-text">问题排错</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Service-Worker-实践"><span class="post-toc-number">5.</span> <span class="post-toc-text">Service Worker 实践</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#事件"><span class="post-toc-number">6.</span> <span class="post-toc-text">事件</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#兼容性"><span class="post-toc-number">7.</span> <span class="post-toc-text">兼容性</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考资料"><span class="post-toc-number">8.</span> <span class="post-toc-text">参考资料</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<article id="post-PWA/PWA 探索 - Service Worker"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">PWA 探索 - Service Worker</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017 年 07 月 03 日 9:00" datetime="2017-07-03T01:00:07.000Z"  itemprop="datePublished">
+    2017-07-03
+</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/PWA/">PWA</a></li></ul>
+
+
+
+            <span style="color: dodgerblue">
+                字数：<span style="font-size: 14px;"> 2584</span>
+            </span>
+            <span>
+                阅读预计<span style="font-size: 14px; color: orange;">  25  </span> 分钟
+            </span>
+        </div>
+
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Service Worker</code>是 PWA 里是必不可少的一部分，学会使用 Service Worker 是构建 PWA 的第一步。</p>
+<h2 id="Service-Worker：服务工作线程"><a href="#Service-Worker：服务工作线程" class="headerlink" title="Service Worker：服务工作线程"></a>Service Worker：服务工作线程</h2><p><code>Service Worker</code>是浏览器在后台独立于网页运行的脚本，它打开了通向不需要网页或用户交互的功能的大门。<br>现在，它的用途包括如：推送通知，后台同步，大数据科学计算，机器学习，图像处理，背景后台同步， geofencing（地理围栏定位），拦截和处理网络请求的能力，包括以编程方式来管理被缓存的响应。</p>
+<a id="more"></a>
+<p><code>Service Worker</code>相关注意事项：</p>
+<ul>
+<li>它是一种 JavaScript 工作线程，无法直接访问 DOM。Service Worker 通过响应 postMessage 接口发送的消息来与其控制的页面通信，页面可在必须时对 DOM 执行操作。</li>
+<li>Service Worker 是一种可编程网络代理，让您能够控制页面所发送网络请求的处理方式。</li>
+<li>Service Worker 在不使用时将被终止，并会在需要的时候<strong><em>重新启动</em></strong>，因此你不能把<code>onfetch</code>和<code>onmessage</code>事件来作为<strong><em>全局依赖</em></strong>处理程序。如果你需要持久话一些信息并在重新启动Service Worker 后使用它，可以使用 IndexedDB API/Local Storage。</li>
+<li>出于安全原因，Service Worker 要求要在必须在<code>HTTPS</code>下才能运行。Github Pages 是个用来测试的好地方，因为它就支持 HTTPS。为了便于本地开发，localhost 也被浏览器认为是安全源。</li>
+</ul>
+<h2 id="Service-Worker-生命周期"><a href="#Service-Worker-生命周期" class="headerlink" title="Service Worker 生命周期"></a>Service Worker 生命周期</h2><p><code>Service worker</code>有一个独立于你的 Web 页面的生命周期。<br>如果你需要在网站上安装 Serice Worker，你需要通过页面中的 JavaScript 注册它，注册后浏览器会在后台安装 Service Worker。</p>
+<p>当我们安装后，会开始激活步骤。Service Worker 升级的这个过程也是一个很好的机会来处理老的缓存。</p>
+<p>激活步骤后，Service Worker 将控制所有的页面，纳入它的范围，不过第一次在页面注册 Service Worker 时不会控制页面，直到它再次加载。<br>一旦 Service Worker 在生效，它会处于两种状态之一里：要么 Service Worker 终止来节省内存，要么当页面发起网络请求后，它将处理请求获取和消息事件。</p>
+<div style="text-align: center"><br>    <img src="/assets/image/2017/6/sw-lifecycle.png" style="width: 70%;"><br></div>
+
+<h3 id="注册与安装"><a href="#注册与安装" class="headerlink" title="注册与安装"></a>注册与安装</h3><p>下面，我们来看看 Javascript 是如何注册与安装 Service Worker 的：</p>
+<ul>
+<li>下面的代码会告诉浏览器你的 Service Worker 脚本在哪里</li>
+<li>如果这个 Service Worker 已经被注册过，浏览器会自动忽略上面的代码</li>
+<li>使用 register 来注册，register 第一个参数的 url 是相对于 origin，第二个参数是配置对象（scope指定控制的内容的子目录）</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 兼容性判断</span></span><br><span class="line"><span class="keyword">if</span> (<span class="string">'serviceWorker'</span> <span class="keyword">in</span> navigator) &#123;</span><br><span class="line">    <span class="comment">// sw.js 是 Service Worker 代码</span></span><br><span class="line">    navigator.serviceWorker.register(<span class="string">'/sw.js'</span>,  &#123; <span class="attr">scope</span>: <span class="string">'/test/'</span> &#125;).then(<span class="function"><span class="params">registration</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 注册成功，输出注册范围</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'ServiceWorker registration successful with scope: '</span>, registration.scope);</span><br><span class="line">    &#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 注册失败</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'ServiceWorker registration failed: '</span>, err);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面是 sw.js 的代码，做了几样事情：</p>
+<ul>
+<li>开启一个缓存</li>
+<li>缓存文件</li>
+<li>确定所有的资源是否要被缓存</li>
+<li>通过 caches.open 打开指定被 cache 的位置</li>
+<li>调用 cache.addAll ，将文件数组传入</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// key</span></span><br><span class="line"><span class="keyword">const</span> CACHE_NAME = <span class="string">'my-site-cache-v1'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存的文件</span></span><br><span class="line"><span class="keyword">const</span> urlsToCache = [</span><br><span class="line">    <span class="string">'/'</span>,</span><br><span class="line">    <span class="string">'/styles/main.css'</span>,</span><br><span class="line">    <span class="string">'/script/main.js'</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line">self.addEventListener(<span class="string">'install'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 缓存成功</span></span><br><span class="line">    event.waitUntil(caches.open(CACHE_NAME).then(<span class="function"><span class="params">cache</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'Opened cache'</span>);</span><br><span class="line">        <span class="keyword">return</span> cache.addAll(urlsToCache);</span><br><span class="line">    &#125;));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果所有的文件都缓存成功，Service Worker 就安装成功了。<br>如果任何一个文件下载失败，那么安装步骤就会失败。这个方式依赖于你自己指定的资源，但这意味着，你需要非常仔细地确定哪些文件需要被缓存。指定了太多文件的话，会增加失败率。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/6/20170630223342.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h3 id="怎样缓存和返回请求"><a href="#怎样缓存和返回请求" class="headerlink" title="怎样缓存和返回请求"></a>怎样缓存和返回请求</h3><p>当 Service Worker 安装成功，并且用户浏览了另一个页面或刷新当前页面后，Service Worker 开始接收 fetch 事件。<br>Service Worker 会使用所有 install 步骤时被缓存的资源。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">self.addEventListener(<span class="string">'fetch'</span>, event =&gt; &#123;</span><br><span class="line">    event.respondWith(caches.match(event.request).then(<span class="function"><span class="params">response</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 缓存命中 - 返回响应</span></span><br><span class="line">        <span class="keyword">if</span> (response) &#123;</span><br><span class="line">            <span class="keyword">return</span> response;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 没有缓存，重新发起请求</span></span><br><span class="line">        <span class="keyword">return</span> fetch(event.request);</span><br><span class="line">    &#125;));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>caches.match()</code>会由内而外对触发抓取事件的网络请求进行评估，并检查以确认它是否位于缓存内。<br>它随即使用已缓存版本作出响应，或者利用 fetch 从网络获取一个副本。response 通过 e.respondWith() 传回至网页。</p>
+<p>如果我们想在缓存中添加新的请求缓存，可以通过处理 fetch 请求的 response，将其添加到缓存中即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">self.addEventListener(<span class="string">'fetch'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    event.respondWith(caches.match(event.request).then(<span class="function"><span class="params">response</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 缓存命中 - 返回响应</span></span><br><span class="line">        <span class="keyword">if</span> (response) &#123;</span><br><span class="line">            <span class="keyword">return</span> response;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 复制一个请求体</span></span><br><span class="line">        <span class="keyword">const</span> fetchRequest = event.request.clone();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 没有缓存</span></span><br><span class="line">        <span class="keyword">return</span> fetch(fetchRequest).then(<span class="function"><span class="params">response</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="comment">// 检查是否收到有效的响应</span></span><br><span class="line">            <span class="keyword">if</span> (!response || response.status !== <span class="number">200</span> || response.type !== <span class="string">'basic'</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> response;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 复制请求体</span></span><br><span class="line">            <span class="keyword">var</span> responseToCache = response.clone();</span><br><span class="line"></span><br><span class="line">            caches.open(CACHE_NAME)</span><br><span class="line">                .then(<span class="function"><span class="params">cache</span> =&gt;</span> &#123;</span><br><span class="line">                    <span class="comment">// 放进缓存里</span></span><br><span class="line">                    cache.put(event.request, responseToCache);</span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> response;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>代码里做了以下事情：</p>
+<ul>
+<li>一旦我们获得一个 response，我们进行如下的检查：<ul>
+<li><strong>确保</strong> response 有效</li>
+<li><strong>检查</strong> response 的状态是 200</li>
+<li><strong>确保</strong> response 的类型是 basic 类型的，这说明请求是同源的，这意味着第三方的请求不能被缓存</li>
+</ul>
+</li>
+<li>如果检查通过，会 clone 这个请求。这么做的原因是：<br>  如果 response 是一个 Stream，那么它的 body 只能被使用一次。所以为了让浏览器跟缓存都使用这个 body，我们必须克隆这个 body，一份到浏览器，一份到缓存中缓存</li>
+</ul>
+<h3 id="更新-Service-Worker"><a href="#更新-Service-Worker" class="headerlink" title="更新 Service Worker"></a>更新 Service Worker</h3><p>Service Worker 总会有要更新的时候。在那时，你需要按照以下步骤来更新：</p>
+<ul>
+<li>更新你 Service Worker 的 JavaScript 文件（也就是 sw.js）<ul>
+<li>当用户浏览你的网站时，浏览器尝试在后台重新下载 Service Worker 的脚本文件。经过对比，只要服务器上的文件和本地文件有一个字节<b>不同（diff）</b>，这个文件就认为是新的</li>
+</ul>
+</li>
+<li>之后更新后的 Service Worker 启动并触发 install 事件</li>
+<li>此时，当前页面生效的依然是老版本的 Service Worker，新的 Service Worker 会进入 <b>“waiting” 状态</b></li>
+<li>当页面关闭之后，旧的 Service Worker 会被干掉，新的 Service Worker 接管页面（重启生效）</li>
+<li>一旦新的 Service Worker 生效后会触发 activate 事件</li>
+<li>之后你需要做一些清理老的 cache 和重新设置新的 cache</li>
+</ul>
+<p>通常来讲，需要在<code>activate</code>的回调函数中进行 cache 管理，来<b>清理</b>老的 cache。<br>在 activate 进行清理的原因是：如果我们在 install 的时候进行清理，那么老的 Service Worker 仍然在控制页面，他们依赖的缓存就失效了，因此就会突然被停止。</p>
+<p>下面的代码会遍历所有的缓存，并删除掉不在 cacheWhitelist 数组（我们定义的缓存白名单）中的缓存：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">self.addEventListener(<span class="string">'activate'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> cacheWhitelist = [<span class="string">'pages-cache-v1'</span>, <span class="string">'blog-posts-cache-v1'</span>];</span><br><span class="line"></span><br><span class="line">    event.waitUntil(caches.keys().then(<span class="function"><span class="params">cacheNames</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.all(cacheNames.map(<span class="function"><span class="params">cacheName</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (cacheWhitelist.indexOf(cacheName) === <span class="number">-1</span>) &#123;</span><br><span class="line">                <span class="comment">// 删除缓存</span></span><br><span class="line">                <span class="keyword">return</span> caches.delete(cacheName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>使用 caches.delete(cacheName) 会把整个缓存的 request 都删除，可以使用 cache.delete 进行单个删除：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">caches.open(<span class="string">'v1'</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">cache</span>) </span>&#123;</span><br><span class="line">    cache.delete(<span class="string">'/images/image.png'</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(res); <span class="comment">// true</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>下面是尝试获取当前 cache 里的所有请求，并删除：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">caches.open(<span class="string">'v1'</span>)</span><br><span class="line">    .then(<span class="function"><span class="keyword">function</span>(<span class="params">cache</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> cache.matchAll();</span><br><span class="line">    &#125;)</span><br><span class="line">    .then(<span class="function"><span class="params">responses</span> =&gt;</span> &#123;</span><br><span class="line">        responses.map(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">            cache.delete(res.url).then(<span class="function"><span class="keyword">function</span>(<span class="params">status</span>) </span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(status); <span class="comment">// true</span></span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="注销注册"><a href="#注销注册" class="headerlink" title="注销注册"></a>注销注册</h3><p>当不想使用 Service Worker 时，可以注销注册。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="string">'serviceWorker'</span> <span class="keyword">in</span> navigator) &#123;</span><br><span class="line">    navigator.serviceWorker.ready.then(<span class="function"><span class="params">registration</span> =&gt;</span> &#123;</span><br><span class="line">        registration.unregister();</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="问题排错"><a href="#问题排错" class="headerlink" title="问题排错"></a>问题排错</h2><ul>
+<li><p><strong>fetch() 的默认值：</strong><br>  当你使用 fetch ，默认请求不会带上 cookies 等身份信息，若需要带上身份信息，请这样调用：</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fetch(url, &#123;</span><br><span class="line">    credentials: <span class="string">'include'</span>      <span class="comment">// 让它带上 cookies</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Non-CORS默认情况下会失败：</strong><br>  默认情况下，从第三方 URL 跨域获取资源将会失败，除非对方支持 CORS。<br>  你可以通过在 Request 中添加 non-CORS 配置来避免失败。<br>  代价是如果这么做，会返回一个“未知”的 response ，你无法获取这个请求是成功还是失败。</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cache.addAll(urlsToPrefetch.map(<span class="function"><span class="params">urlToPrefetch</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Request(urlToPrefetch, &#123; <span class="attr">mode</span>: <span class="string">'no-cors'</span> &#125;);</span><br><span class="line">&#125;)).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'All resources have been fetched and cached.'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Service-Worker-实践"><a href="#Service-Worker-实践" class="headerlink" title="Service Worker 实践"></a>Service Worker 实践</h2><p>Service Worker 的基本操作就是：注册，安装，缓存。当然也可以在 SW 里做一些大量科学数据计算。</p>
+<p>也就主要分为几步：</p>
+<ul>
+<li>注册你的 Worker</li>
+<li>安装和激活：填充你的缓存</li>
+<li>自定义请求的响应与恢复失败的请求</li>
+<li>根据策略更新你的 Service Worker</li>
+</ul>
+<p>下面是一个自定义的缓存策略：</p>
+<ul>
+<li>定义一个缓存文件列表</li>
+<li>定义一个白名单</li>
+<li>当 sw.js 更新时，会删除白名单以外的缓存文件，重新再添加到缓存里</li>
+<li>当 cacheName 更新时，删除旧的 cacheName 缓存</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 缓存文件列表</span></span><br><span class="line"><span class="keyword">var</span> filesToCache = [</span><br><span class="line">    <span class="string">'/'</span>,</span><br><span class="line">    <span class="string">'/index.html'</span>,</span><br><span class="line">    <span class="string">'/favicon.ico'</span>,</span><br><span class="line">    <span class="string">'/js/main.min.js?v=1.4.7'</span>,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 白名单</span></span><br><span class="line"><span class="keyword">var</span> whiteToCache = [</span><br><span class="line">    <span class="string">'/favicon.ico'</span>,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 安装</span></span><br><span class="line">self.addEventListener(<span class="string">'install'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'[ServiceWorker] Install'</span>);</span><br><span class="line"></span><br><span class="line">    event.waitUntil(</span><br><span class="line">        caches.open(cacheName).then(<span class="function"><span class="keyword">function</span> (<span class="params">cache</span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'[ServiceWorker] Caching app shell'</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> cache.matchAll().then(<span class="function"><span class="keyword">function</span> (<span class="params">responses</span>) </span>&#123;</span><br><span class="line">                responses.map(<span class="function"><span class="keyword">function</span> (<span class="params">res, index, list</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">var</span> flag = <span class="literal">false</span>;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">var</span> i <span class="keyword">in</span> whiteToCache) &#123;</span><br><span class="line">                        <span class="keyword">var</span> rfc = whiteToCache[i];</span><br><span class="line">                        <span class="keyword">if</span> (res.url.indexOf(rfc) !== <span class="number">-1</span>) &#123;</span><br><span class="line">                            flag = <span class="literal">true</span>;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 不在白名单，删除旧缓存</span></span><br><span class="line">                    <span class="keyword">if</span> (!flag) &#123;</span><br><span class="line">                        cache.delete(res.url).then(<span class="function"><span class="keyword">function</span> (<span class="params">status</span>) </span>&#123;</span><br><span class="line">                            <span class="keyword">if</span> (status === <span class="literal">true</span>) &#123;</span><br><span class="line">                                <span class="built_in">console</span>.log(<span class="string">'delete cache:'</span>, status, res.url);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">return</span> cache.addAll(filesToCache);</span><br><span class="line">            &#125;)</span><br><span class="line"></span><br><span class="line">        &#125;).catch(<span class="function"><span class="keyword">function</span> (<span class="params">err</span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.error(<span class="string">'[ServiceWorker] install error: '</span>, err);</span><br><span class="line">        &#125;)</span><br><span class="line">    );</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 重新激活</span></span><br><span class="line">self.addEventListener(<span class="string">'activate'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.info(<span class="string">'[ServiceWorker] Activate'</span>);</span><br><span class="line"></span><br><span class="line">    event.waitUntil(caches.keys().then(<span class="function"><span class="params">cacheNames</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.all(cacheNames.map(<span class="function"><span class="params">cn</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (cn !== cacheName) &#123;         <span class="comment">// cacheName 更新后，删除旧的 key</span></span><br><span class="line">                <span class="keyword">return</span> caches.delete(cn);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> self.clients.claim();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h2><p>下图展示了 Service Worker 所有支持的事件：</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/6/sw-events.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="兼容性"><a href="#兼容性" class="headerlink" title="兼容性"></a>兼容性</h2><p>在兼容性方面，不太乐观：Chrome 能够很好的支持， IE 死都不支持，Safari 也是。</p>
+
+        <figure class="image-bubble">
+            <div class="img-lightbox">
+                <div class="overlay"></div>
+                <img src="/assets/image/2017/6/20170630231016.png" alt title>
+            </div>
+            <div class="image-caption"></div>
+        </figure>
+    
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Cache/match" target="_blank" rel="noopener">https://developer.mozilla.org/zh-CN/docs/Web/API/Cache/match</a></li>
+<li><a href="https://developers.google.cn/web/fundamentals/getting-started/primers/service-workers" target="_blank" rel="noopener">https://developers.google.cn/web/fundamentals/getting-started/primers/service-workers</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Service_Workers" target="_blank" rel="noopener">https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Service_Workers</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-06-15T06:10:52.848Z" itemprop="dateUpdated">2021年6月15日 14:10</time>
+</span><br>
+
+
+        <br /><b style="color:#f66">版权声明</b> - Lizhooh，未经允许禁止转载！！！经允许的请声明：<div style='height:8px'></div><b>作者</b>：Lizhooh 未来是全栈工程师<br /><b>原文</b>：<a href="/stories/2017/07/PWA/PWA 探索 - Service Worker/" target="_blank" rel="external">http://me.lizhooh.com/stories/2017/07/PWA/PWA 探索 - Service Worker/</a>
+    </div>
+    <footer>
+        <a href="http://me.lizhooh.com">
+            <img src="/img/my.png" alt="Lizhooh">
+            Lizhooh
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Javascript/">Javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PWA/">PWA</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/stories/2017/07/PWA/PWA 探索 - Notifications/" id="post-prev" class="post-nav-link">
+        <!-- <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> 上一篇</div> -->
+        <h4 class="title">PWA 探索 - Notifications</h4>
+        <h4 class="summary">Notifications：通知推送Notifications API 允许网页或应用程序在系统级别发送在页面外部显示的...</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/stories/2017/07/PWA/PWA 探索 - 认识/" id="post-next" class="post-nav-link">
+        <!-- <div class="tips">下一篇 <i class="icon icon-angle-right icon-lg icon-pl"></i></div> -->
+        <h4 class="title">PWA 探索 - 认识</h4>
+        <h4 class="summary">什么是 PWA ？Google Progressive Web App（渐进式应用）是一种跨平台的应用，它希望将 Web...</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        <p>
+            <span><i class="icon icon-lg icon-rss"></i></span>
+            <span>博客内容属于原创创作，未授权转载者必追究其法律责任。</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>
+                对酒当歌，人生几何！
+                <i class="icon icon-heart-o" style="font-weight: bold;"></i>
+                Lizhooh 的技术博客 &copy; 
+                2016 - 2021
+
+                <!--Power by <a href="http://hexo.io/" target="_blank">Hexo</a>-->
+             </span>
+        </p>
+
+
+    </div>
+</footer>
+
+    </main>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <!--<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>-->
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+</script>
+
+<script src="//lib.baomitu.com/tippy.js/3.0.2/tippy.all.min.js"></script>
+<script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/waves.min.js"></script>
+<script src="/js/rest.js"></script>
+<script src="/js/main.min.js?v=2.2.0"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script async src="/js/search.min.js?v=2.2.0"></script>
+
+
+
+
+
+    <div class="music" id="music"></div>
+</body>
+</html>
